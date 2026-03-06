@@ -1,0 +1,83 @@
+{
+    "name": "The Nar Shaddaa Job",
+    "era": "galactic_civil_war",
+    "character_id": "keth_varso",
+    "total_acts": 4,
+    "throughline_question": "Can a man who has only ever looked out for himself become someone worth following?",
+    "acts": [
+        {
+            "number": 1,
+            "name": "The Approach",
+            "tension": "rising",
+            "opening_situation": "Keth has just dropped out of hyperspace above Nar Shaddaa. His contact Doss has gone dark. A sealed cargo container sits in his hold. An unknown voice on the comm has warned him off the original drop coordinates.",
+            "opening_location": "Aboard Mira's Luck, approaching Nar Shaddaa orbit",
+            "galactic_context": "Imperial customs interdiction has tightened across the Y'Toub system following a Rebel supply intercept at Nal Hutta. Hutt Council territorial disputes between Vossk's faction and the Besadii clan have made landing clearances unpredictable — bribes that worked last month now go to the wrong people. An unrelated freighter explosion at Dock 14 yesterday has every security team on the Promenade running nervous.",
+            "anchor": "arrival_with_hot_cargo",
+            "next_anchor": "contact_discovered",
+            "open_threads": [
+                "Who is the mysterious comm voice?",
+                "What happened to Doss?",
+                "What is actually in the cargo?"
+            ]
+        },
+        {
+            "number": 2,
+            "name": "The Complication",
+            "tension": "critical",
+            "opening_location": "Nar Shaddaa, mid-level Promenade district",
+            "galactic_context": "A Rebel cell has been broken on the Smuggler's Moon — ISB is running sweeps through the mid-levels. Vossk's patience with late deliveries has become a topic of discussion among his intermediaries, and discussions among Hutts have consequences.",
+            "anchor": "contact_discovered",
+            "next_anchor": "obligation_triggered",
+            "open_threads": []
+        },
+        {
+            "number": 3,
+            "name": "The Squeeze",
+            "tension": "climax",
+            "opening_location": "Nar Shaddaa, lower levels near Vossk's territory",
+            "galactic_context": "The Besadii clan has moved on one of Vossk's subsidiary operations in the lower levels, pulling his enforcers away from the Promenade. For a narrow window, Vossk's grip on this district is weaker than it has been in years.",
+            "anchor": "obligation_triggered",
+            "next_anchor": "resolution_approach",
+            "open_threads": []
+        },
+        {
+            "number": 4,
+            "name": "The Resolution",
+            "tension": "falling",
+            "opening_location": "Nar Shaddaa, docking ring and departure corridors",
+            "galactic_context": "Imperial customs has announced a 48-hour lockdown of all non-essential departures from Nar Shaddaa. Officially, it is a security sweep. Unofficially, someone important lost something valuable, and nobody leaves until it is found.",
+            "anchor": "resolution_approach",
+            "next_anchor": "campaign_end",
+            "open_threads": []
+        }
+    ],
+    "npc_roster": [
+        {
+            "name": "Vossk the Patient",
+            "role": "Hutt crime lord — Keth's creditor",
+            "disposition_start": 0.45,
+            "motivation": "Profit and reputation, in that order.",
+            "voice_notes": "Always through intermediaries. Formal. Indirect. Never threatens directly — observes possibilities.",
+            "behavioral_envelope": [
+                "Never appears in person during this campaign",
+                "Never makes direct threats — always frames consequences as observations"
+            ],
+            "knows_at_start": ["Keth owes him", "The job exists", "It is late"],
+            "doesnt_know_at_start": ["What is actually in the cargo", "That Doss has gone dark"]
+        },
+        {
+            "name": "Doss",
+            "role": "Keth's contact — status unknown at campaign start",
+            "disposition_start": 0.65,
+            "motivation": "Survival — Doss is in over his head and knows it.",
+            "voice_notes": "Half-sentences and nervous deflections. Talks fast when scared. Loyal in his way but self-preservation wins when it has to.",
+            "behavioral_envelope": [
+                "Never confronts anyone directly — always deflects or runs"
+            ],
+            "knows_at_start": ["The drop coordinates", "Keth's ship signature"],
+            "doesnt_know_at_start": [],
+            "resolution": "randomly_determined",
+            "options": ["arrested_by_isb", "sold_keth_out", "in_hiding"]
+        }
+    ]
+}

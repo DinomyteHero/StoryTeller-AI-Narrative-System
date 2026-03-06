@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Storyteller V3</title>
+<style>
+/* ── Reset & Base ──────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:          #0d0f14;
+  --surface:     #161a23;
+  --surface-alt: #1c2130;
+  --border:      #2a3040;
+  --text:        #d8dce6;
+  --text-dim:    #8890a0;
+  --accent:      #c8a84e;
+  --accent-dim:  #a0883e;
+  --danger:      #c44;
+  --success:     #4a4;
+
+  /* FFG dice colors */
+  --die-yellow:  #edd400;
+  --die-green:   #4e9a06;
+  --die-red:     #cc0000;
+  --die-purple:  #75507b;
+  --die-blue:    #3465a4;
+  --die-black:   #2e3436;
+  --die-white:   #eeeeec;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: Georgia, 'Times New Roman', serif;
+  line-height: 1.7;
+  min-height: 100vh;
+}
+
+/* ── Layout ────────────────────────────────────────────────────── */
+.container {
+  max-width: 650px;
+  margin: 0 auto;
+  padding: 1rem;
+}
+
+/* ── Header ────────────────────────────────────────────────────── */
+header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 1.5rem;
+}
+
+.campaign-name {
+  font-size: 1.1rem;
+  font-weight: bold;
+  color: var(--accent);
+  letter-spacing: 0.04em;
+}
+
+.session-info {
+  font-size: 0.8rem;
+  color: var(--text-dim);
+  font-family: monospace;
+}
+
+/* ── Local narration warning ───────────────────────────────────── */
+.local-warning {
+  display: none;
+  background: #2a2010;
+  border: 1px solid var(--accent-dim);
+  color: var(--accent);
+  padding: 0.5rem 0.75rem;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  margin-bottom: 1rem;
+  font-family: sans-serif;
+}
+
+.local-warning.visible { display: block; }
+
+/* ── Prose passage ─────────────────────────────────────────────── */
+.passage {
+  background: var(--surface);
+  border-radius: 6px;
+  padding: 1.5rem;
+  margin-bottom: 1rem;
+  min-height: 200px;
+  white-space: pre-wrap;
+  font-size: 1.05rem;
+}
+
+.passage p { margin-bottom: 0.8em; }
+.passage p:last-child { margin-bottom: 0; }
+
+/* ── Dice panel ────────────────────────────────────────────────── */
+.dice-panel {
+  display: none;
+  margin-bottom: 1rem;
+}
+
+.dice-panel.visible { display: block; }
+
+.dice-toggle {
+  background: var(--surface-alt);
+  border: 1px solid var(--border);
+  color: var(--accent);
+  padding: 0.5rem 0.75rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-family: sans-serif;
+  width: 100%;
+  text-align: left;
+}
+
+.dice-toggle:hover { background: var(--surface); }
+
+.dice-details {
+  display: none;
+  background: var(--surface-alt);
+  border: 1px solid var(--border);
+  border-top: none;
+  border-radius: 0 0 4px 4px;
+  padding: 1rem;
+  font-family: monospace;
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
+
+.dice-details.expanded { display: block; }
+
+.dice-pool-display {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-bottom: 0.75rem;
+}
+
+.die-chip {
+  display: inline-block;
+  padding: 0.2rem 0.5rem;
+  border-radius: 3px;
+  font-weight: bold;
+  font-size: 0.8rem;
+  color: #000;
+}
+
+.die-chip.yellow  { background: var(--die-yellow); }
+.die-chip.green   { background: var(--die-green); color: #fff; }
+.die-chip.red     { background: var(--die-red); color: #fff; }
+.die-chip.purple  { background: var(--die-purple); color: #fff; }
+.die-chip.blue    { background: var(--die-blue); color: #fff; }
+.die-chip.black   { background: var(--die-black); color: #fff; }
+.die-chip.white   { background: var(--die-white); color: #000; }
+
+.roll-summary {
+  color: var(--text);
+  font-weight: bold;
+  margin-top: 0.5rem;
+}
+
+/* ── Choices ───────────────────────────────────────────────────── */
+.choices {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  margin-bottom: 2rem;
+}
+
+.choice-btn {
+  background: var(--surface-alt);
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 0.75rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 0.95rem;
+  text-align: left;
+  min-height: 44px;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.choice-btn:hover:not(:disabled) {
+  background: var(--surface);
+  border-color: var(--accent-dim);
+}
+
+.choice-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.choice-btn.selected {
+  border-color: var(--accent);
+  background: #1a1f2e;
+}
+
+/* ── Loading / Status ──────────────────────────────────────────── */
+.loading {
+  display: none;
+  text-align: center;
+  padding: 2rem;
+  color: var(--text-dim);
+  font-style: italic;
+}
+
+.loading.visible { display: block; }
+
+.spinner {
+  display: inline-block;
+  width: 1.5rem;
+  height: 1.5rem;
+  border: 2px solid var(--border);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin-bottom: 0.5rem;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── Start screen ──────────────────────────────────────────────── */
+.start-screen {
+  text-align: center;
+  padding: 3rem 1rem;
+}
+
+.start-screen h1 {
+  font-size: 1.8rem;
+  color: var(--accent);
+  margin-bottom: 0.5rem;
+}
+
+.start-screen p {
+  color: var(--text-dim);
+  margin-bottom: 2rem;
+}
+
+.start-btn {
+  background: var(--accent-dim);
+  color: #000;
+  border: none;
+  padding: 0.75rem 2rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 1.1rem;
+  font-weight: bold;
+  font-family: sans-serif;
+  transition: background 0.15s;
+}
+
+.start-btn:hover { background: var(--accent); }
+.start-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* ── Status bar ────────────────────────────────────────────────── */
+.status-bar {
+  display: none;
+  justify-content: space-between;
+  font-family: monospace;
+  font-size: 0.75rem;
+  color: var(--text-dim);
+  border-top: 1px solid var(--border);
+  padding-top: 0.5rem;
+  margin-top: 1rem;
+}
+
+.status-bar.visible { display: flex; }
+
+/* ── Error ─────────────────────────────────────────────────────── */
+.error-msg {
+  display: none;
+  background: #2a1010;
+  border: 1px solid var(--danger);
+  color: #f88;
+  padding: 0.75rem 1rem;
+  border-radius: 4px;
+  font-family: sans-serif;
+  font-size: 0.85rem;
+  margin-bottom: 1rem;
+}
+
+.error-msg.visible { display: block; }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- ── Start Screen ──────────────────────────────────────────── -->
+  <div id="start-screen" class="start-screen">
+    <h1>Storyteller V3</h1>
+    <p>A Star Wars Narrative RPG</p>
+    <button class="start-btn" id="start-btn" onclick="startSession()">
+      Begin The Nar Shaddaa Job
+    </button>
+  </div>
+
+  <!-- ── Game Screen ───────────────────────────────────────────── -->
+  <div id="game-screen" style="display:none">
+    <header>
+      <span class="campaign-name" id="campaign-name"></span>
+      <span class="session-info" id="session-info"></span>
+    </header>
+
+    <div class="local-warning" id="local-warning">
+      Local narration — loop test only
+    </div>
+
+    <div class="error-msg" id="error-msg"></div>
+
+    <div class="passage" id="passage"></div>
+
+    <div class="dice-panel" id="dice-panel">
+      <button class="dice-toggle" id="dice-toggle" onclick="toggleDice()">
+        Show dice result
+      </button>
+      <div class="dice-details" id="dice-details"></div>
+    </div>
+
+    <div class="loading" id="loading">
+      <div class="spinner"></div>
+      <div>The story unfolds...</div>
+    </div>
+
+    <div class="choices" id="choices"></div>
+
+    <div class="status-bar" id="status-bar">
+      <span id="status-turn">Turn 0</span>
+      <span id="status-wounds"></span>
+      <span id="status-strain"></span>
+    </div>
+  </div>
+
+</div>
+
+<script>
+/* ── State ─────────────────────────────────────────────────────── */
+const API = '';  // same origin
+let sessionId = null;
+let currentChoices = [];
+
+/* ── Start session ─────────────────────────────────────────────── */
+async function startSession() {
+  const btn = document.getElementById('start-btn');
+  btn.disabled = true;
+  btn.textContent = 'Starting...';
+  clearError();
+
+  try {
+    const res = await fetch(API + '/session', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        campaign_name: 'nar_shaddaa_job',
+        character_id: 'keth_varso',
+      }),
+    });
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ detail: res.statusText }));
+      throw new Error(err.detail || 'Failed to create session');
+    }
+
+    const data = await res.json();
+    sessionId = data.session_id;
+
+    // Switch to game screen
+    document.getElementById('start-screen').style.display = 'none';
+    document.getElementById('game-screen').style.display = 'block';
+    document.getElementById('campaign-name').textContent = 'The Nar Shaddaa Job';
+    updateSessionInfo(0);
+
+    renderPassage(data.opening_narration);
+    renderChoices(data.choices);
+    showStatus(0, 0, 0);
+  } catch (e) {
+    btn.disabled = false;
+    btn.textContent = 'Begin The Nar Shaddaa Job';
+    showError(e.message);
+  }
+}
+
+/* ── Take a turn ───────────────────────────────────────────────── */
+async function takeTurn(choiceIndex) {
+  disableChoices();
+  highlightChoice(choiceIndex);
+  showLoading(true);
+  clearError();
+  hideDicePanel();
+
+  try {
+    const res = await fetch(API + '/session/' + sessionId + '/turn', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ choice_index: choiceIndex }),
+    });
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ detail: res.statusText }));
+      throw new Error(err.detail || 'Turn failed');
+    }
+
+    const data = await res.json();
+
+    renderPassage(data.narration);
+    renderChoices(data.choices);
+
+    // Dice panel
+    if (data.dice_result) {
+      renderDicePanel(data.dice_result, data.roll_summary);
+    }
+
+    // Local narration warning
+    const warn = document.getElementById('local-warning');
+    if (data.used_local_narration) {
+      warn.classList.add('visible');
+    } else {
+      warn.classList.remove('visible');
+    }
+
+    // Status bar
+    if (data.session_state) {
+      showStatus(
+        data.session_state.turn_number,
+        data.session_state.wounds,
+        data.session_state.strain
+      );
+    }
+  } catch (e) {
+    showError(e.message);
+    enableChoices();
+  } finally {
+    showLoading(false);
+  }
+}
+
+/* ── Render prose ──────────────────────────────────────────────── */
+function renderPassage(text) {
+  const el = document.getElementById('passage');
+  // Split into paragraphs on double newlines
+  const paragraphs = text.split(/\n\n+/).filter(p => p.trim());
+  el.innerHTML = paragraphs.map(p => '<p>' + escapeHtml(p.trim()) + '</p>').join('');
+  // Scroll to top of passage
+  el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+/* ── Render choices ────────────────────────────────────────────── */
+function renderChoices(choices) {
+  const el = document.getElementById('choices');
+  currentChoices = choices;
+  el.innerHTML = '';
+
+  choices.forEach((text, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'choice-btn';
+    btn.textContent = text;
+    btn.onclick = () => takeTurn(i);
+    el.appendChild(btn);
+  });
+}
+
+function disableChoices() {
+  document.querySelectorAll('.choice-btn').forEach(b => { b.disabled = true; });
+}
+
+function enableChoices() {
+  document.querySelectorAll('.choice-btn').forEach(b => { b.disabled = false; });
+}
+
+function highlightChoice(index) {
+  const btns = document.querySelectorAll('.choice-btn');
+  if (btns[index]) btns[index].classList.add('selected');
+}
+
+/* ── Dice panel ────────────────────────────────────────────────── */
+function renderDicePanel(diceResult, rollSummary) {
+  const panel = document.getElementById('dice-panel');
+  const details = document.getElementById('dice-details');
+  panel.classList.add('visible');
+
+  // Build dice chips
+  let html = '<div class="dice-pool-display">';
+  if (diceResult.dice) {
+    diceResult.dice.forEach(d => {
+      for (let i = 0; i < d.count; i++) {
+        html += '<span class="die-chip ' + d.color + '">'
+          + d.type.charAt(0).toUpperCase() + '</span>';
+      }
+    });
+  }
+  html += '</div>';
+
+  // Pool description
+  html += '<div style="color:var(--text-dim);margin-bottom:0.5rem">'
+    + escapeHtml(diceResult.description) + '</div>';
+
+  // Roll summary
+  if (rollSummary) {
+    html += '<div class="roll-summary">' + escapeHtml(rollSummary) + '</div>';
+  }
+
+  details.innerHTML = html;
+}
+
+function toggleDice() {
+  const details = document.getElementById('dice-details');
+  const toggle = document.getElementById('dice-toggle');
+  const expanded = details.classList.toggle('expanded');
+  toggle.textContent = expanded ? 'Hide dice result' : 'Show dice result';
+}
+
+function hideDicePanel() {
+  document.getElementById('dice-panel').classList.remove('visible');
+  document.getElementById('dice-details').classList.remove('expanded');
+  document.getElementById('dice-toggle').textContent = 'Show dice result';
+}
+
+/* ── Status bar ────────────────────────────────────────────────── */
+function showStatus(turn, wounds, strain) {
+  const bar = document.getElementById('status-bar');
+  bar.classList.add('visible');
+  document.getElementById('status-turn').textContent = 'Turn ' + turn;
+  document.getElementById('status-wounds').textContent = 'Wounds: ' + wounds;
+  document.getElementById('status-strain').textContent = 'Strain: ' + strain;
+}
+
+function updateSessionInfo(turn) {
+  document.getElementById('session-info').textContent =
+    sessionId ? sessionId.slice(0, 8) : '';
+}
+
+/* ── Loading ───────────────────────────────────────────────────── */
+function showLoading(show) {
+  const el = document.getElementById('loading');
+  if (show) el.classList.add('visible');
+  else el.classList.remove('visible');
+}
+
+/* ── Error ─────────────────────────────────────────────────────── */
+function showError(msg) {
+  const el = document.getElementById('error-msg');
+  el.textContent = msg;
+  el.classList.add('visible');
+}
+
+function clearError() {
+  const el = document.getElementById('error-msg');
+  el.textContent = '';
+  el.classList.remove('visible');
+}
+
+/* ── Utilities ─────────────────────────────────────────────────── */
+function escapeHtml(text) {
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
+}
+
+/* ── Session resume (check URL or localStorage) ────────────────── */
+(function init() {
+  const params = new URLSearchParams(window.location.search);
+  const sid = params.get('session');
+  if (sid) {
+    resumeSession(sid);
+  }
+})();
+
+async function resumeSession(sid) {
+  clearError();
+  try {
+    const res = await fetch(API + '/session/' + sid);
+    if (!res.ok) return; // no session, show start screen
+
+    const data = await res.json();
+    sessionId = data.session_id;
+
+    document.getElementById('start-screen').style.display = 'none';
+    document.getElementById('game-screen').style.display = 'block';
+    document.getElementById('campaign-name').textContent =
+      data.campaign_name || 'Campaign';
+    updateSessionInfo(data.turn_count);
+
+    if (data.last_turn) {
+      renderPassage(data.last_turn.narration);
+      renderChoices(data.last_turn.choices);
+
+      if (data.last_turn.roll_result) {
+        // Minimal dice display from session restore
+        const panel = document.getElementById('dice-panel');
+        const details = document.getElementById('dice-details');
+        panel.classList.add('visible');
+        const label = data.last_turn.roll_result.narrative_label ||
+          data.last_turn.check_skill || '';
+        details.innerHTML = '<div class="roll-summary">'
+          + escapeHtml(label) + '</div>';
+      }
+    }
+
+    if (data.session_state) {
+      showStatus(
+        data.turn_count,
+        data.session_state.wounds,
+        data.session_state.strain
+      );
+    }
+  } catch (e) {
+    // silently fall back to start screen
+  }
+}
+</script>
+</body>
+</html>
