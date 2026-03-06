@@ -9,12 +9,17 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+from pathlib import Path
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
 from api.game_routes import router as game_router
 from state.db import init_db
+
+WEB_DIR = Path(__file__).resolve().parent.parent / "web"
 
 app = FastAPI(
     title="Storyteller V3",
@@ -44,6 +49,12 @@ def startup():
 @app.get("/health")
 async def health():
     return {"status": "ok"}
+
+
+@app.get("/")
+async def root():
+    """Serve the single-file frontend."""
+    return FileResponse(WEB_DIR / "index.html")
 
 
 if __name__ == "__main__":
