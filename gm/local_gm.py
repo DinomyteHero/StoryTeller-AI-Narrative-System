@@ -122,7 +122,7 @@ def decide_check(
                 f"{OLLAMA_URL}/api/generate",
                 json={
                     "model":  LOCAL_MODEL,
-                    "prompt": prompt,
+                    "prompt": f"/no_think\n{prompt}",
                     "stream": False,
                     "format": CHECK_DECISION_SCHEMA,
                     "options": {"temperature": 0.1, "num_predict": 200},

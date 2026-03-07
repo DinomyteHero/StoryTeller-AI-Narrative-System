@@ -399,7 +399,8 @@ def _narrate_with_backend(
     last_error    = None
 
     for attempt in range(max_retries + 1):
-        messages = [{"role": "user", "content": prompt}]
+        msg_content = f"/no_think\n{prompt}" if used_local else prompt
+        messages = [{"role": "user", "content": msg_content}]
         if attempt > 0 and last_error:
             messages.append({
                 "role": "user",
@@ -438,7 +439,7 @@ def _narrate_with_local_fallback(ctx: ContextPackage) -> NarrationResult:
     """
     import httpx
     simplified_prompt = (
-        f"You are the narrator for a Star Wars RPG. Write in second person "
+        f"/no_think\nYou are the narrator for a Star Wars RPG. Write in second person "
         f"present tense, 250-400 words.\n\n"
         f"SITUATION: {ctx.situation}\n"
         f"LOCATION: {ctx.location}\n"
@@ -454,7 +455,7 @@ def _narrate_with_local_fallback(ctx: ContextPackage) -> NarrationResult:
             "stream": False,
             "options": {"temperature": 0.7, "num_predict": 1200},
         },
-        timeout=30.0,
+        timeout=60.0,
     )
     response.raise_for_status()
     raw = response.json()["response"].strip()

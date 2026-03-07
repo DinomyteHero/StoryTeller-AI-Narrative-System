@@ -1,7 +1,7 @@
 # Storyteller V3 — Project State Matrix
 
-**Version:** 1.1  
-**Date:** March 6, 2026  
+**Version:** 1.2
+**Date:** March 7, 2026  
 **Purpose:** Single-page view of every major capability's status.
 Prevents the most common review error: mistaking a designed-but-not-
 built item for a missing design, or mistaking a deferred item for an
@@ -26,16 +26,16 @@ Logic Analysis v1.0.
 
 | Capability | Vision | Designed | V1 | Build Phase |
 |------------|--------|----------|-----|-------------|
-| Prose narration (cloud GM) | §3, §7 | ✓ | ✓ Active | Phase 3 |
-| FFG dice engine (all 7 die types) | §6 | ✓ | ✓ Active | Phase 1 |
-| Check decision (local model) | §6 | ✓ | ✓ Active | Phase 2 |
-| Scene type classification | §3 | ✓ | ✓ Active | Phase 2 |
-| Context package assembly | §3 | ✓ | ✓ Active | Phase 3 |
-| Cloud failure fallback (local narration) | — | ✓ | ✓ Active | Phase 3 |
-| Turn persistence (SQLite + WAL) | §15 | ✓ | ✓ Active | Phase 4 |
-| Memory compression (act summaries) | §15 | ✓ | ✓ Active | Phase 4 |
-| API routes (session, turn, stream) | — | ✓ | ✓ Active | Phase 5 |
-| Prose reader frontend | §2, §14 | ✓ | ✓ Active | Phase 6 |
+| Prose narration (cloud GM) | §3, §7 | ✓ | ✓ Verified | Phase 3 |
+| FFG dice engine (all 7 die types) | §6 | ✓ | ✓ Verified | Phase 1 |
+| Check decision (local model) | §6 | ✓ | ✓ Verified | Phase 2 |
+| Scene type classification | §3 | ✓ | ✓ Verified | Phase 2 |
+| Context package assembly | §3 | ✓ | ✓ Verified | Phase 3 |
+| Cloud failure fallback (local narration) | — | ✓ | ✓ Verified | Phase 3 |
+| Turn persistence (SQLite + WAL) | §15 | ✓ | ✓ Verified | Phase 4 |
+| Memory compression (act summaries) | §15 | ✓ | ✓ Verified | Phase 4 |
+| API routes (session, turn, stream) | — | ✓ | ✓ Verified | Phase 5 |
+| Prose reader frontend | §2, §14 | ✓ | ✓ Verified | Phase 6 |
 
 ---
 
@@ -43,16 +43,16 @@ Logic Analysis v1.0.
 
 | Capability | Vision | Designed | V1 | Build Phase |
 |------------|--------|----------|-----|-------------|
-| Second-person present tense | §3 | ✓ | ✓ Active | Phase 3 |
-| Anti-AI-slop prohibition (banned phrases) | §3 | ✓ | ✓ Active | Phase 3 |
-| Anti-positivity-bias (NPC friction) | §11 | ✓ | ✓ Active | Phase 3 |
-| Turn-level consequence reflection | §7 | ✓ | ✓ Active | Phase 3 |
-| Forward-echoing instruction | §1 | ✓ | ✓ Active | Phase 3 |
-| Consequence-at-scale instruction | §4 | ✓ | ✓ Active | Phase 3 |
-| Risk signaling in choice text | §7 | ✓ | ✓ Active | Phase 3 |
-| Scene pacing guidance | §3 | ✓ | ✓ Active | Phase 3 |
-| Introspection choice guidance | §7 | ✓ | ✓ Active | Phase 3 |
-| Style exemplars / prompt rotation | §3 | ✓ | ✓ Active | Phase 3 |
+| Second-person present tense | §3 | ✓ | ✓ Verified | Phase 3 |
+| Anti-AI-slop prohibition (banned phrases) | §3 | ✓ | ✓ Verified | Phase 3 |
+| Anti-positivity-bias (NPC friction) | §11 | ✓ | ✓ Verified | Phase 3 |
+| Turn-level consequence reflection | §7 | ✓ | ✓ Verified | Phase 3 |
+| Forward-echoing instruction | §1 | ✓ | ✓ Verified | Phase 3 |
+| Consequence-at-scale instruction | §4 | ✓ | ✓ Verified | Phase 3 |
+| Risk signaling in choice text | §7 | ✓ | ✓ Verified | Phase 3 |
+| Scene pacing guidance | §3 | ✓ | ✓ Verified | Phase 3 |
+| Introspection choice guidance | §7 | ✓ | ✓ Verified | Phase 3 |
+| Style exemplars / prompt rotation | §3 | ✓ | ✓ Verified | Phase 3 |
 | Scene-type-aware context routing | §3 | ✓ | Reserved | Late V1 / Phase 7 |
 | Prose diagnostic signal | §3 | ✓ | Reserved | Post-V1 |
 | Narration distillation (QLoRA) | — | ✓ | Reserved (data instrumentation) | Post-Milestone 1 |
@@ -63,9 +63,9 @@ Logic Analysis v1.0.
 
 | Capability | Vision | Designed | V1 | Build Phase |
 |------------|--------|----------|-----|-------------|
-| 2–4 choices per turn | §7 | ✓ | ✓ Active | Phase 3 |
-| Skill-tagged choices (invisible to player) | §6, §7 | ✓ | ✓ Active | Phase 3 |
-| Character-specific choice design (prompt) | §7 | ✓ | ✓ Active (prompt instruction) | Phase 3 |
+| 2–4 choices per turn | §7 | ✓ | ✓ Verified | Phase 3 |
+| Skill-tagged choices (invisible to player) | §6, §7 | ✓ | ✓ Verified | Phase 3 |
+| Character-specific choice design (prompt) | §7 | ✓ | ✓ Verified (prompt instruction) | Phase 3 |
 | Conditional choice availability (behavioral) | §7 | ✓ | Not in V1 | Phase 13 |
 | Semantic memory / choice annotation | §16 | ✓ | Reserved (`choice_implications`) | Phase 13 |
 | Choice quality validation + repair loop | §7 | **Spec complete** | Not in V1 | Late Phase 3 / Phase 7 |
@@ -76,9 +76,9 @@ Logic Analysis v1.0.
 
 | Capability | Vision | Designed | V1 | Build Phase |
 |------------|--------|----------|-----|-------------|
-| NPC state cards (knowledge, disposition, motivation) | §11 | ✓ | ✓ Active | Phase 3 |
-| NPC voice notes and behavioral envelope | §11 | ✓ | ✓ Active | Phase 3 |
-| NPC knowledge update (background task) | §11 | ✓ | ✓ Active (minimal) | Phase 4 |
+| NPC state cards (knowledge, disposition, motivation) | §11 | ✓ | ✓ Verified | Phase 3 |
+| NPC voice notes and behavioral envelope | §11 | ✓ | ✓ Verified | Phase 3 |
+| NPC knowledge update (background task) | §11 | ✓ | ✓ Verified (minimal) | Phase 4 |
 | NPC emotional state | §11 | ✓ | Reserved | Phase 7 |
 | NPC relationship triangles (inter-NPC disposition) | §11 | ✓ | Not in V1 | Post-Milestone 1 |
 | NPC information propagation (social graph) | §11 | ✓ | Not in V1 | Post-Milestone 1 |
@@ -92,9 +92,9 @@ Logic Analysis v1.0.
 
 | Capability | Vision | Designed | V1 | Build Phase |
 |------------|--------|----------|-----|-------------|
-| Multi-act campaign spine | §13 | ✓ | ✓ Active (4-act test spine) | Phase 3 |
-| Galactic context layer (per act) | §4 | ✓ | ✓ Active | Phase 3 |
-| Static act tension field | §13 | ✓ | ✓ Active | Phase 3 |
+| Multi-act campaign spine | §13 | ✓ | ✓ Verified (4-act test spine) | Phase 3 |
+| Galactic context layer (per act) | §4 | ✓ | ✓ Verified | Phase 3 |
+| Static act tension field | §13 | ✓ | ✓ Verified | Phase 3 |
 | Post-turn reconciliation (full system) | §13 | ✓ | Not in V1 (minimal NPC update only) | Phase 7 |
 | Act boundary detection + transition | §13 | ✓ | Not in V1 | Phase 7 |
 | Within-act pacing arc (hook → turn → cliffhanger) | §13 | ✓ | Not in V1 | Phase 7 |
@@ -107,7 +107,7 @@ Logic Analysis v1.0.
 
 | Capability | Vision | Designed | V1 | Build Phase |
 |------------|--------|----------|-----|-------------|
-| Pre-built character (Keth Varso) | §16 | ✓ | ✓ Active | Phase 1 |
+| Pre-built character (Keth Varso) | §16 | ✓ | ✓ Verified | Phase 1 |
 | Character funnel (Timeline → Allegiance → Variant) | §8 | ✓ | Not in V1 | Phase 18 |
 | Psychometric prologue (3–5 scenes, 4 axes) | §8 | ✓ | Not in V1 | Phase 18 |
 | Motivation tracks (Obligation, Duty, Morality) | §10 | ✓ | Reserved (fields exist, no triggers) | Phase 8 |
@@ -116,8 +116,8 @@ Logic Analysis v1.0.
 | Character advancement (XP, skill ranks) | §14 | ✓ | Not in V1 | Phase 10 |
 | Milestone reflections (talents, specializations) | §14 | ✓ | Not in V1 | Phase 12 |
 | Aspiration echoes (latent Force, growth direction) | §14 | ✓ | Not in V1 | Phase 12 |
-| Character voice notes (evolved through play) | §8 | ✓ | ✓ Active (static, from spine) | Phase 3 |
-| Throughline question | §8 | ✓ | ✓ Active (static, from spine) | Phase 3 |
+| Character voice notes (evolved through play) | §8 | ✓ | ✓ Verified (static, from spine) | Phase 3 |
+| Throughline question | §8 | ✓ | ✓ Verified (static, from spine) | Phase 3 |
 
 ---
 
@@ -135,7 +135,7 @@ Logic Analysis v1.0.
 | Force powers (narrative-tagged choices) | §9 | ✓ | Not in V1 | Phase 15 |
 | Equipment/loadout system | §11 | ✓ | Not in V1 | Phase 9 |
 | Vehicle/starship encounters | §12 | ✓ | Not in V1 | Phase 16 |
-| Failure recovery calibration | §6 | ✓ | ✓ Active | Phase 2 |
+| Failure recovery calibration | §6 | ✓ | ✓ Verified | Phase 2 |
 
 ---
 
@@ -184,10 +184,10 @@ Logic Analysis v1.0.
 
 | Capability | Vision | Designed | V1 | Build Phase |
 |------------|--------|----------|-----|-------------|
-| Narration word count enforcement (250–600) | §3 | ✓ | ✓ Active (retry loop) | Phase 3 |
-| Minimum 2 choices enforcement | §7 | ✓ | ✓ Active (retry loop) | Phase 3 |
-| JSON schema enforcement (local model) | — | ✓ | ✓ Active | Phase 2 |
-| Context package pre-submission validation | — | ✓ | ✓ Active | Phase 3 |
+| Narration word count enforcement (250–600) | §3 | ✓ | ✓ Verified (retry loop) | Phase 3 |
+| Minimum 2 choices enforcement | §7 | ✓ | ✓ Verified (retry loop) | Phase 3 |
+| JSON schema enforcement (local model) | — | ✓ | ✓ Verified | Phase 2 |
+| Context package pre-submission validation | — | ✓ | ✓ Verified | Phase 3 |
 | 5-category compliance test protocol | — | ✓ | Not in V1 (pre-deploy test) | Phase 1 deployment |
 | Behavioral envelope enforcement | §11 | ✓ | Not in V1 | Post-Milestone 1 |
 | Sustained 5-turn play quality test | — | ✓ | Not in V1 | Phase 1 deployment |
@@ -226,5 +226,5 @@ explained by intentional deferral or architecture reservation.
 
 ---
 
-*Storyteller V3 — Project State Matrix v1.1*  
+*Storyteller V3 — Project State Matrix v1.2*  
 *What's promised. What's designed. What's built. What's next.*

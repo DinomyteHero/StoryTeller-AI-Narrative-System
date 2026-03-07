@@ -110,7 +110,7 @@ authoritative.
 
 ---
 
-## Current Project State (March 6, 2026)
+## Current Project State (March 7, 2026)
 
 **Design completeness:** Every item within the current planning horizon
 has been fully designed. Zero items with status NEEDS DESIGN,
@@ -118,8 +118,23 @@ PARTIALLY DESIGNED, CONCEPT ONLY, CONSIDER, or FILED remain. Only
 Phase 5 long-term aspirations (5.1–5.6) and open research questions
 (R.1–R.7) are without design, by explicit choice.
 
-**Implementation completeness:** No code has been written. Phase 1
-(pure Python dice engine) is the next action.
+**Implementation completeness:** V1 (Phases 1–6) is implemented and
+verified. All 12 V1 success criteria pass. The game loop runs: session
+creation, narration, choice selection, local check decision, dice
+rolling, cloud narration honoring dice, session persistence across
+restart, and local-only mode. Next action: Milestone 1 (Phases 7–13)
+per the Build Roadmap.
+
+**V1 verified with:** Cloud LLM: OpenAI gpt-4.1. Local LLM: Ollama
+with Qwen 3.5:9b. Platform: Windows 11, Python 3.14.
+
+**Known V1 limitations:**
+
+| Item | Notes |
+|------|-------|
+| Local narration (NARRATIVE_BACKEND=local) does not produce skill tags | Qwen 3.5:9b generates personality tags like `(Investigative/Cold Calm)` instead of `[Deception]`. Dice checks will not trigger on local-narrated turns. Functional but degraded. |
+| Cloud GM delimiter compliance | Models sometimes produce `CHOICES:` or `--- CHOICES---` instead of `---CHOICES---`. Parser normalizes variants but occasional retries occur. |
+| Cloud GM word count | Models occasionally exceed the 600-word target. Validation limit relaxed to 800 to prevent retry loops. |
 
 **Known open items:**
 
