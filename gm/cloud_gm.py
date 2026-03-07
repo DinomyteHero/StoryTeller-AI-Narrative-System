@@ -262,6 +262,7 @@ def _build_prompt(ctx: ContextPackage) -> str:
         story_summary=full_summary,
         open_threads=ctx.build_open_threads_block(),
         pacing_block=ctx.build_pacing_block(),
+        motivation_block=ctx.build_motivation_block(),
         npc_states=ctx.build_npc_block(),
         location=ctx.location,
         situation=ctx.situation,

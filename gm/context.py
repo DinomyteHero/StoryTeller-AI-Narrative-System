@@ -84,6 +84,12 @@ class ArcState:
     turns_this_act:       int = 0            # v2.5: incremented each turn, reset at act boundary (§26)
     anchor_proximity:     str = "distant"    # v2.5: distant/approaching/imminent/reached (§26.3)
     anchor_description:   str = ""           # v2.5: narrative description of the anchor beat (§26.4)
+    # Phase 8: Motivation track (§9)
+    obligation_active:    bool = False
+    obligation_type:      str = ""           # e.g. "Debt", "Family"
+    duty_active:          bool = False
+    duty_type:            str = ""
+    morality_label:       str = ""           # "Light side dominant" / "Grey" / "Dark side dominant"
 
 
 @dataclass
@@ -183,6 +189,29 @@ class ContextPackage:
             )
 
         return "\n".join(lines)
+
+    def build_motivation_block(self) -> str:
+        """Assemble the MOTIVATION block for the narration prompt (§9)."""
+        lines = []
+        if self.arc.obligation_active and self.arc.obligation_type:
+            lines.append(
+                f"OBLIGATION ACTIVE — {self.arc.obligation_type}\n"
+                f"The character's Obligation ({self.arc.obligation_type}) is active this "
+                f"act. Weave pressure related to {self.arc.obligation_type} into the "
+                f"narrative — not as a direct confrontation, but as environmental "
+                f"tightening. The character feels it before they understand its source."
+            )
+        if self.arc.duty_active and self.arc.duty_type:
+            lines.append(
+                f"DUTY ACTIVE — {self.arc.duty_type}\n"
+                f"The character's Duty ({self.arc.duty_type}) is active. Present an "
+                f"opportunity aligned with {self.arc.duty_type} that competes with the "
+                f"character's current objective. The opportunity is real and meaningful "
+                f"— but pursuing it costs something."
+            )
+        if self.arc.morality_label:
+            lines.append(f"MORALITY: {self.arc.morality_label}")
+        return "\n\n".join(lines)
 
     def build_open_threads_block(self) -> str:
         if not self.arc.open_threads:

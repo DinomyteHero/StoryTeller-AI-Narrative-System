@@ -50,6 +50,8 @@ from engine.reconciliation import (
     detect_act_boundary,
     build_anchor_instruction,
     run_between_act_pipeline,
+    roll_obligation_duty,
+    morality_label,
 )
 from gm.local_gm import decide_check
 from state.db import get_connection
@@ -216,6 +218,9 @@ async def create_session_route(
     character = load_character(req.character_id)
     act_1 = spine["acts"][0]
 
+    # ── Roll motivation track for Act 1 (§9) ─────────────────────────
+    motivation_flags = roll_obligation_duty(character)
+
     # ── Initialize arc state ──────────────────────────────────────────
     arc_state = {
         "current_act": 1,
@@ -226,6 +231,7 @@ async def create_session_route(
         "current_location": act_1.get("opening_location", ""),
         "turns_this_act": 0,
         "anchor_proximity": "distant",
+        **motivation_flags,
     }
 
     # ── Create session in database ────────────────────────────────────
@@ -272,6 +278,11 @@ async def create_session_route(
             ],
             closed_threads=[],
             anchor_description=act_1.get("anchor_description", ""),
+            obligation_active=arc_state.get("obligation_active", False),
+            obligation_type=arc_state.get("obligation_type", ""),
+            duty_active=arc_state.get("duty_active", False),
+            duty_type=arc_state.get("duty_type", ""),
+            morality_label=arc_state.get("morality_label", ""),
         ),
         story_summary="",
         recent_turns=[],
@@ -333,6 +344,15 @@ async def handle_turn(
     spine = load_campaign_spine(session["campaign_name"])
     current_act = spine["acts"][arc_state["current_act"] - 1]
 
+    # Phase 8: Obligation reduces strain threshold by 2 when active (§9)
+    effective_strain_threshold = character.strain_threshold
+    if arc_state.get("obligation_active"):
+        effective_strain_threshold = max(1, character.strain_threshold - 2)
+    # Duty increases wound threshold by 1 when active (§9)
+    effective_wound_threshold = character.wound_threshold
+    if arc_state.get("duty_active"):
+        effective_wound_threshold = character.wound_threshold + 1
+
     # ── Step 1: Resolve the player's choice ───────────────────────────
     last_turn = get_most_recent_turn(session_id)
     previous_choices = json.loads(last_turn["choices_json"])
@@ -383,7 +403,7 @@ async def handle_turn(
             if abs(roll_result.net_advantages) >= 2:
                 character.current_strain = min(
                     character.current_strain + 1,
-                    character.strain_threshold,
+                    effective_strain_threshold,
                 )
 
     # ── Step 5: Assemble context package ──────────────────────────────
@@ -421,6 +441,11 @@ async def handle_turn(
             turns_this_act=arc_state.get("turns_this_act", 0),
             anchor_proximity=arc_state.get("anchor_proximity", "distant"),
             anchor_description=current_act.get("anchor_description", ""),
+            obligation_active=arc_state.get("obligation_active", False),
+            obligation_type=arc_state.get("obligation_type", ""),
+            duty_active=arc_state.get("duty_active", False),
+            duty_type=arc_state.get("duty_type", ""),
+            morality_label=arc_state.get("morality_label", ""),
         ),
         story_summary=story_summary,
         recent_turns=recent_turns,
@@ -615,6 +640,15 @@ async def handle_turn_stream(
     spine = load_campaign_spine(session["campaign_name"])
     current_act = spine["acts"][arc_state["current_act"] - 1]
 
+    # Phase 8: Obligation reduces strain threshold by 2 when active (§9)
+    effective_strain_threshold = character.strain_threshold
+    if arc_state.get("obligation_active"):
+        effective_strain_threshold = max(1, character.strain_threshold - 2)
+    # Duty increases wound threshold by 1 when active (§9)
+    effective_wound_threshold = character.wound_threshold
+    if arc_state.get("duty_active"):
+        effective_wound_threshold = character.wound_threshold + 1
+
     # ── Step 1: Resolve the player's choice ───────────────────────────
     last_turn = get_most_recent_turn(session_id)
     previous_choices = json.loads(last_turn["choices_json"])
@@ -664,7 +698,7 @@ async def handle_turn_stream(
             if abs(roll_result.net_advantages) >= 2:
                 character.current_strain = min(
                     character.current_strain + 1,
-                    character.strain_threshold,
+                    effective_strain_threshold,
                 )
 
     # ── Step 5: Assemble context package ──────────────────────────────
@@ -702,6 +736,11 @@ async def handle_turn_stream(
             turns_this_act=arc_state.get("turns_this_act", 0),
             anchor_proximity=arc_state.get("anchor_proximity", "distant"),
             anchor_description=current_act.get("anchor_description", ""),
+            obligation_active=arc_state.get("obligation_active", False),
+            obligation_type=arc_state.get("obligation_type", ""),
+            duty_active=arc_state.get("duty_active", False),
+            duty_type=arc_state.get("duty_type", ""),
+            morality_label=arc_state.get("morality_label", ""),
         ),
         story_summary=story_summary,
         recent_turns=recent_turns,

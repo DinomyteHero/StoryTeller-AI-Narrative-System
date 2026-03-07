@@ -11,6 +11,7 @@ The between-act pipeline runs when an act boundary is detected.
 import json
 import logging
 import os
+import random
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Optional
@@ -85,7 +86,107 @@ class BetweenActResult:
     strain_recovered: int = 0
     wounds_recovered: int = 0
     next_act_loaded: bool = False
+    obligation_result: dict = field(default_factory=dict)   # Phase 8: activation roll output
+    morality_result: dict = field(default_factory=dict)     # Phase 8: morality resolution output
     steps_completed: list[str] = field(default_factory=list)
+
+
+def morality_label(morality: int) -> str:
+    """Return the GM prompt label for the current Morality value (§9)."""
+    if morality >= 71:
+        return ("Light side dominant — moments of calm, instinctive compassion, "
+                "the Force responds gently")
+    elif morality >= 41:
+        return ("Grey — conflicted, the Force is present but uncertain, "
+                "both impulses are real")
+    else:
+        return ("Dark side dominant — anger is efficient, the Force responds "
+                "to demand, compassion feels like weakness")
+
+
+def roll_obligation_duty(character) -> dict:
+    """
+    Roll d100 for Obligation/Duty activation at an act boundary (§9).
+    Returns dict with activation flags to merge into arc_state.
+    """
+    result = {}
+    motivation = character.motivation
+
+    # Obligation (Edge of the Empire)
+    if motivation.obligation_type and motivation.obligation_value > 0:
+        roll = random.randint(1, 100)
+        activated = roll <= motivation.obligation_value
+        result["obligation_active"] = activated
+        result["obligation_type"] = motivation.obligation_type
+        logging.info(
+            f"Obligation roll: {roll} vs {motivation.obligation_value} "
+            f"({motivation.obligation_type}) — {'ACTIVATED' if activated else 'inactive'}"
+        )
+
+    # Duty (Age of Rebellion)
+    if motivation.duty_type and motivation.duty_value > 0:
+        roll = random.randint(1, 100)
+        activated = roll <= motivation.duty_value
+        result["duty_active"] = activated
+        result["duty_type"] = motivation.duty_type
+        logging.info(
+            f"Duty roll: {roll} vs {motivation.duty_value} "
+            f"({motivation.duty_type}) — {'ACTIVATED' if activated else 'inactive'}"
+        )
+
+    # Morality label (always present if morality is tracked)
+    result["morality_label"] = morality_label(motivation.morality)
+
+    return result
+
+
+def resolve_morality(session_id: str, character, completed_act_number: int) -> dict:
+    """
+    End-of-act Morality resolution (§9).
+    Sums moral_weight across the act's turns as Conflict, rolls 1d10,
+    adjusts Morality on the character. Returns summary dict.
+    """
+    from state.db import get_connection
+
+    # Sum moral_weight for turns in this act
+    with get_connection() as conn:
+        row = conn.execute(
+            "SELECT COALESCE(SUM(moral_weight), 0) FROM turns "
+            "WHERE session_id = ? AND moral_weight > 0",
+            (session_id,),
+        ).fetchone()
+        conflict_earned = row[0] if row else 0
+
+    # Add any existing conflict on the character
+    total_conflict = conflict_earned + character.motivation.conflict
+
+    # Roll 1d10
+    roll = random.randint(1, 10)
+
+    old_morality = character.motivation.morality
+    if total_conflict > roll:
+        character.motivation.morality = max(0, old_morality - (total_conflict - roll))
+    else:
+        character.motivation.morality = min(100, old_morality + (roll - total_conflict))
+
+    # Reset conflict accumulator
+    character.motivation.conflict = 0
+
+    new_label = morality_label(character.motivation.morality)
+
+    logging.info(
+        f"Morality resolution: conflict={total_conflict}, roll={roll}, "
+        f"morality {old_morality} -> {character.motivation.morality} ({new_label})"
+    )
+
+    return {
+        "conflict_earned": conflict_earned,
+        "total_conflict": total_conflict,
+        "roll": roll,
+        "old_morality": old_morality,
+        "new_morality": character.motivation.morality,
+        "label": new_label,
+    }
 
 
 def reconcile_turn(
@@ -357,8 +458,16 @@ def run_between_act_pipeline(
     # ── Step 7: Milestone check (Phase 8+) ───────────────────────────
     result.steps_completed.append("milestone_check_stub")
 
-    # ── Step 8: Obligation/Duty activation roll (Phase 8) ────────────
-    result.steps_completed.append("obligation_duty_stub")
+    # ── Step 8: Obligation/Duty activation roll for NEXT act (§9) ────
+    try:
+        motivation_flags = roll_obligation_duty(character)
+        result.obligation_result = motivation_flags
+        result.steps_completed.append("obligation_duty_roll")
+        logging.info(f"Between-act step 8: motivation roll — {motivation_flags}")
+    except Exception as e:
+        logging.error(f"Between-act step 8 failed: {e}")
+        result.obligation_result = {}
+        result.steps_completed.append("obligation_duty_roll_failed")
 
     # ── Step 9: Strain and wound recovery ────────────────────────────
     strain_before = character.current_strain
@@ -371,8 +480,16 @@ def run_between_act_pipeline(
     result.steps_completed.append("strain_wound_recovery")
     logging.info(f"Between-act step 9: recovered {result.strain_recovered} strain, {result.wounds_recovered} wounds")
 
-    # ── Step 10: Morality resolution (Phase 8+) ──────────────────────
-    result.steps_completed.append("morality_resolution_stub")
+    # ── Step 10: Morality resolution for COMPLETED act (§9) ──────────
+    try:
+        morality_result = resolve_morality(session_id, character, completed_act_number)
+        result.morality_result = morality_result
+        result.steps_completed.append("morality_resolution")
+        logging.info(f"Between-act step 10: morality resolution — {morality_result}")
+    except Exception as e:
+        logging.error(f"Between-act step 10 failed: {e}")
+        result.morality_result = {}
+        result.steps_completed.append("morality_resolution_failed")
 
     # ── Step 11: NPC relationship drift ──────────────────────────────
     # Minor disposition adjustments for NPCs not seen during the act
@@ -416,6 +533,9 @@ def run_between_act_pipeline(
                 )
                 # Carry forward dynamic threads that weren't resolved
                 # (closed_threads and dynamic_threads persist as-is)
+
+                # Phase 8: Write motivation flags for next act
+                arc_state.update(result.obligation_result)
 
                 from datetime import datetime, timezone
                 now = datetime.now(timezone.utc).isoformat()
