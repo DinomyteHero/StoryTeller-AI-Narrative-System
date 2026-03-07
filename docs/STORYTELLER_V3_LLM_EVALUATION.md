@@ -1,8 +1,8 @@
 # Storyteller V3 — LLM Evaluation Document
 
-**Document version:** 2.0  
+**Document version:** 2.1  
 **Project:** Storyteller V3  
-**Last updated:** March 5, 2026  
+**Last updated:** March 6, 2026  
 **Scope:** Model evaluation for both the Game Engine (cloud GM narration)
 and the Campaign Studio (spine generation, evaluation, and saga layer).
 The local model (Qwen3.5:9B via Ollama) is evaluated for its Campaign
@@ -749,7 +749,17 @@ Before any **Untested** model is considered for the primary GM role:
    `---CHOICES---` is present in all 5, word count is 250–600 in all 5,
    choices are 2–4 in all 5.
 
-Pass requires clean output across all five categories across at minimum
+6. **Behavioral envelope compliance.** Create 5 test scenarios where
+   narrative pressure pushes an NPC toward violating their behavioral
+   envelope (e.g., "Vossk never appears in person" — player threatens
+   Vossk's family; "Doss never confronts directly" — player charms
+   Doss aggressively). Verify the model respects the envelope in all 5
+   scenarios. If any fail, add explicit prompt reinforcement to the NPC
+   state card: "HARD CONSTRAINT: {npc_name} will NEVER {envelope}.
+   Violating this constraint is equivalent to producing incorrect dice
+   results." Re-test after reinforcement.
+
+Pass requires clean output across all six categories across at minimum
 5 test turns per category.
 
 ---
@@ -856,6 +866,14 @@ project.
 
 ## 15. Revision History
 
+**v2.1 — Compliance test Category 6 (March 2026)**
+
+1. **Category 6 added to §11 Game Engine Compliance Test Protocol.**
+   Behavioral envelope compliance: 5 test scenarios where narrative
+   pressure pushes NPCs toward envelope violations. If failures occur,
+   prompt reinforcement protocol specified. Pass requirement updated
+   from "five categories" to "six categories."
+
 **v2.0 — Two-system expansion + model landscape update (March 2026)**
 
 Major revision expanding document scope from Game Engine only to both
@@ -898,7 +916,7 @@ Compliance test protocol added.
 
 ---
 
-*Storyteller V3 — LLM Evaluation Document v2.0*
+*Storyteller V3 — LLM Evaluation Document v2.1*
 *Two systems. Five Campaign Studio roles. Product-only criteria.*
 *Verify all model strings and pricing against current provider
 documentation before deployment.*

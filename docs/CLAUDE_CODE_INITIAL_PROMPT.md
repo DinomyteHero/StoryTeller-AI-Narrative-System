@@ -65,12 +65,14 @@ mkdir docs
 #   STORYTELLER_V3_LLM_EVALUATION.md
 #   STORYTELLER_V3_RESEARCH_CATALOGUE.md
 #   STORYTELLER_V3_DEFERRED_DESIGN_AND_LOGIC_ANALYSIS.md
+#   STORYTELLER_V3_DESIGN_GAP_ANALYSIS.md
+#   STORYTELLER_V3_DESIGN_GAP_ANALYSIS_V2.md
 ```
 
 4. Create the directory structure:
 ```bash
-mkdir -p engine gm/prompts state api web studio data/characters data/campaigns data/talent_trees data/force_powers data/canon_profiles tests
-touch engine/__init__.py gm/__init__.py state/__init__.py api/__init__.py studio/__init__.py
+mkdir -p engine gm/prompts state api web studio/saga data/characters data/campaigns data/personas data/evaluation_pairs data/talent_trees data/force_powers data/canon_profiles tests
+touch engine/__init__.py gm/__init__.py state/__init__.py api/__init__.py studio/__init__.py studio/saga/__init__.py
 ```
 
 5. Set up pyproject.toml (spec is in Implementation doc Section 11):
@@ -119,7 +121,11 @@ order of frequency of reference:
    for spine schema (studio/schema.py)
 5. docs/STORYTELLER_V3_DEFERRED_DESIGN_AND_LOGIC_ANALYSIS.md — system
    logic walkthrough, data flow verification, integration point analysis
-6. Everything else in docs/ — background reference as needed
+6. docs/STORYTELLER_V3_DESIGN_GAP_ANALYSIS_V2.md — design specs for all
+   items not fully specified in the Game Mechanics or Implementation
+   docs (turn counter, entity persistence, seeding, difficulty
+   calibration, ratings, trained evaluator, ensemble, persona pool)
+7. Everything else in docs/ — background reference as needed
 
 ## Phase-Specific Notes
 

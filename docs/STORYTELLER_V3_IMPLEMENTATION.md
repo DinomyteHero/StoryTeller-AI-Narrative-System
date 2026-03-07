@@ -3090,23 +3090,14 @@ structure defined during the design phase:
   progression (§20), large-scale NPC management (§21), canon character
   profiles (§22)
 
-**Game Engine post-V1 items (not yet designed):**
+**Game Engine post-V1 items (not yet designed — implementation
+unspecified):**
 
 - Character creation / prologue psychometric system (design exists in
   Game Mechanics §5; implementation unspecified — Campaign Studio
   Phase 4 concern)
-- Faction state tracking (wider-than-NPC faction dispositions,
-  territorial control, resource states)
-- Multiple save slots / campaign management UI
-- Settings / API key management UI
-- RulesSystem abstraction for non-FFG settings
-- **Narration distillation pipeline** — QLoRA fine-tune of the local model
-  using cloud-generated context→narration pairs collected during V1 play.
-  Goal: improve local prose quality enough to handle lower-stakes scene types
-  (exploration, transitions, routine checks) without cloud calls. Depends on
-  the `distillation_pairs` view being populated during normal V1 sessions.
-  Estimated minimum dataset: 500–1000 curated pairs. See LLM Evaluation
-  Document Section 8.4 for strategic rationale.
+- RulesSystem abstraction for non-FFG settings (Phase 5 long-term
+  aspiration, no design expected)
 
 **Game Engine post-V1 items (designed, ready for implementation):**
 
@@ -3115,6 +3106,52 @@ structure defined during the design phase:
 - Morality drift tracking — GM §9, §26 (between-act pipeline step 10)
 - Semantic memory / meaningful choice extraction — GM §24
 - Destiny Point spending mechanics — GM §23
+- Faction state tracking — Gap Analysis v1.1 (FactionState model,
+  reconciliation integration, galactic context injection)
+- Character-centric campaign management — Gap Analysis v1.1
+  (character as primary entity, `characters` and `character_campaigns`
+  tables, character screen UI)
+- Settings / API key management UI — Gap Analysis v1.1
+  (`state/settings.py`, encrypted key storage, test connection)
+- NPC relationship triangles — Gap Analysis v1.1 (`npc_dispositions`
+  on NPCState, campaign spine `npc_relationships`)
+- NPC information propagation — Gap Analysis v1.1
+  (`social_connections` graph, one-hop act-boundary propagation)
+- Distillation evaluation failure taxonomy — Gap Analysis v1.1
+  (five binary categories, 50+ narration test set)
+- **Turn counter for spine advancement** — Gap Analysis v2.0.
+  `PacingSignal` model with deterministic pacing zone (early,
+  on_pace, late, overdue) computed from `turns_this_act` and
+  `expected_turns`. Removes arithmetic from local model. Zone injected
+  into reconciliation and narration prompts with delta modifier
+  guidance. New file: `engine/pacing.py`. Extend:
+  `engine/reconciliation.py`, `gm/prompts/reconciliation.txt`,
+  `gm/context.py`.
+- **Narration distillation pipeline** — LLM Eval §8.4, Backlog 2.14.
+  QLoRA fine-tune of the local model using cloud-generated
+  context→narration pairs collected during V1 play. Goal: handle
+  lower-stakes scene types (exploration, transitions) locally, reserve
+  cloud for climactic beats. Depends on the `distillation_pairs` view
+  being populated during normal V1 sessions. Minimum dataset: 500–1000
+  curated pairs. Curation dual-filter spec designed (Backlog 2.15).
+- **Generative entity persistence** — Gap Analysis v2.0. Reconciliation
+  prompt extension for entity detection (low/medium/high significance).
+  Entity card generation prompt per type. SQLite `emergent_entities`
+  table with per-act cap (max 3). Tier promotion logic (3→2→1 based on
+  reference count). Reintroduction injection formats for NPCs,
+  locations, and facts. New files: `engine/entities.py`,
+  `gm/prompts/entity_card_gen.txt`. Extend: `state/db.py`,
+  `gm/prompts/reconciliation.txt`, `gm/context.py`,
+  `engine/reconciliation.py`. Evaluate need after Milestone 1
+  playtesting.
+- **Campaign rating and feedback system (Game Engine side)** — Gap
+  Analysis v2.0. Post-completion rating collection (1–5 overall,
+  optional 3-dimension breakdown, optional free-text). SQLite
+  `campaign_ratings` table. Rating card UI at campaign completion.
+  New file: `state/ratings.py`. Extend: `state/db.py`,
+  `web/index.html`, `api/game_routes.py`. Campaign Studio side
+  (exemplar selection, generation prompt integration) specified
+  separately in CS Implementation.
 
 **Items migrated to Campaign Studio Implementation Document:**
 
@@ -3189,13 +3226,32 @@ If all 12 criteria are met, V1 is done. Everything else is V2.
 
 ---
 
-*Document version: 2.4*
+*Document version: 2.5*
 *Project: Storyteller V3 — Game Engine*
 *Do not modify the build order.*
 
 ---
 
 ## 16. Revision History
+
+**v2.5 — Design gap analysis v2.0 backlog integration (March 2026)**
+
+1. **§14 backlog reorganized.** "Not yet designed" section reduced to
+   two items (prologue system implementation unspecified, RulesSystem
+   abstraction deferred). Narration distillation pipeline (2.14) and
+   generative entity persistence (2.28) moved to "designed" section —
+   both now have full specs.
+
+2. **Three new items added to designed backlog.** Turn counter for
+   spine advancement (2.19 — `PacingSignal` model, `engine/pacing.py`),
+   generative entity persistence (2.28 — reconciliation prompt
+   extension, `emergent_entities` table, tier promotion), campaign
+   rating system Game Engine side (3.28 — `campaign_ratings` table,
+   `state/ratings.py`, rating card UI).
+
+3. **Gap Analysis references updated.** All references to Design Gap
+   Analysis §Tier N updated to reference "Gap Analysis v1.1" or "Gap
+   Analysis v2.0" explicitly, matching the current document structure.
 
 **v2.4 — Evaluation risk mitigations (March 2026)**
 

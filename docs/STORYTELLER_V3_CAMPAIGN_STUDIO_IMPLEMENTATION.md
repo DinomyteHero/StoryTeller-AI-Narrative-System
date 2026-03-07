@@ -1,6 +1,6 @@
 # Storyteller V3 — Campaign Studio Implementation Document
 
-**Document version:** 1.2  
+**Document version:** 1.3  
 **Project:** Storyteller V3  
 **Last updated:** March 5, 2026  
 **Build priority:** Post-V1. Do not begin until the Game Engine vertical
@@ -99,18 +99,23 @@ storyteller-v3/
 │   ├── critique.py              # Debate/critique agent
 │   ├── evaluate.py              # Pairwise spine evaluator
 │   ├── import_interface.py      # Cross-era character import
+│   ├── seeding.py               # Deterministic seed derivation + GenerationMetadata
+│   ├── difficulty.py            # Spine difficulty calibration (Gate 4 integration)
 │   ├── saga/                    # Saga layer pipeline
 │   │   ├── __init__.py
 │   │   ├── pipeline.py          # Five-stage orchestrator
-│   │   ├── personas.py          # Persona pool management
+│   │   ├── personas.py          # Persona pool management + subset selection
 │   │   ├── diverge.py           # Stage 2 — divergent generation
 │   │   ├── search.py            # Stage 3 — branching search
 │   │   ├── converge.py          # Stage 4 — debate and coherence
-│   │   └── select.py            # Stage 5 — pairwise evaluation
+│   │   ├── select.py            # Stage 5 — pairwise evaluation
+│   │   ├── ensemble.py          # Multi-model writer assignment + parallel execution
+│   │   └── evaluator.py         # Trained local evaluator (QLoRA) + calibration
 │   └── prompts/
 │       ├── mode3_assist.txt     # Mode 3 collaborative assistance prompt
 │       ├── mode2_generate.txt   # Mode 2 thematic generation prompt
 │       ├── mode1_generate.txt   # Mode 1 full blind generation prompt
+│       ├── npc_voice_gen.txt    # NPC voice note generation prompt
 │       ├── critique.txt         # Critique agent prompt template
 │       ├── evaluate.txt         # Pairwise evaluator prompt template
 │       ├── diverge.txt          # Saga Stage 2 divergent generation prompt
@@ -120,7 +125,8 @@ storyteller-v3/
 │   ├── characters/              # Shared — character data files
 │   ├── campaigns/               # Shared — campaign spine files
 │   ├── personas/
-│   │   └── pool.json            # Persona pool for Writer's Room
+│   │   └── writer_room_personas.json  # 55 personas across 11 clusters
+│   ├── evaluation_pairs/        # Logged pairwise comparisons for evaluator training
 │   └── saga/
 │       └── test_pipeline/       # Saga layer test artifacts
 │
@@ -156,10 +162,14 @@ model integration for assistance tasks (galactic context drafting, NPC
 voice note generation, gap identification).
 
 **Deliverables:** `studio/generate.py` (Mode 3 path),
-`studio/prompts/mode3_assist.txt`, Studio API routes, minimal UI.
+`studio/prompts/mode3_assist.txt`, `studio/prompts/npc_voice_gen.txt`,
+`studio/seeding.py` (deterministic seed derivation for partial
+regeneration), `studio/difficulty.py` (spine difficulty calibration
+integrated with Gate 4), Studio API routes, minimal UI.
 **Success criteria:** An author can create a new campaign spine through
 the Mode 3 workflow, with AI assistance at each step, and produce a
-spine that passes all validation gates.
+spine that passes all validation gates. Partial regeneration via
+seeding produces similar-but-varied output for held-constant stages.
 
 ### Phase CS-3: Mode 2 — Thematic Steering + Cross-Era Import
 
@@ -179,14 +189,25 @@ The full Writer's Room pipeline for sequel spine generation, plus Mode 1
 autonomous generation. This is the most complex phase and depends on
 Phases CS-1 through CS-3.
 
-**Deliverables:** All `studio/saga/*.py` files, persona pool,
-`studio/generate.py` (Mode 1 path), `studio/prompts/mode1_generate.txt`,
-saga test artifacts.
+**Deliverables:** All `studio/saga/*.py` files (including
+`ensemble.py` for multi-model writer assignment and `evaluator.py` for
+local evaluator integration), `data/personas/writer_room_personas.json`
+(55 personas across 11 clusters — pool drafted in Gap Analysis v2.0),
+`data/saga/test_pipeline/` (saga test artifact from template in Gap
+Analysis v2.0), `studio/generate.py` (Mode 1 path),
+`studio/prompts/mode1_generate.txt`.
 **Success criteria:** The saga pipeline generates a sequel spine from a
 completed campaign that passes all validation gates, and the sequel is
 structurally distinct from the original campaign when run multiple times
 with different persona assignments. Mode 1 produces playable spines
-from minimal input.
+from minimal input. Persona pool passes the five-subset diversity
+validation (≥3 of 5 subsets produce distinct sequel directions).
+
+**Post-CS-4 optimization (not blocking):** Train the local evaluator
+(QLoRA) on 600+ pairwise comparison pairs from Stage 5 runs and player
+ratings. Deploy as drop-in replacement for cloud evaluator in Stage 5
+when calibration threshold (80% agreement) is met. See Gap Analysis
+v2.0, item 4.9.
 
 ---
 
@@ -594,6 +615,31 @@ class SagaMetadata(BaseModel):
     default_state_for_new_characters: dict = {}
 
 
+# ── Faction tracking (Gap Analysis v1.1, item 2.11) ──────────────────
+
+
+class FactionSpec(BaseModel):
+    """Per-campaign faction definition with authored drift."""
+    faction_id: str
+    display_name: str
+    disposition_start: float = Field(ge=0.0, le=1.0, default=0.5)
+    influence_start: float = Field(ge=0.0, le=1.0, default=0.5)
+    awareness_start: float = Field(ge=0.0, le=1.0, default=0.0)
+    per_act_drift: dict[str, dict[str, float]] = {}  # act_num → field → delta
+
+
+# ── Generation metadata (Gap Analysis v2.0, item 3.26) ───────────────
+
+
+class GenerationMetadata(BaseModel):
+    """Records generation parameters for reproducibility."""
+    master_seed: int
+    stage_seeds: dict[str, int] = {}     # stage_name → derived seed
+    model_used: str = ""
+    generation_mode: str = ""            # "mode1" | "mode2" | "mode3_assist"
+    timestamp: str = ""
+
+
 # ── Top-level spine ───────────────────────────────────────────────────
 
 
@@ -619,6 +665,9 @@ class CampaignSpine(BaseModel):
     force_discovery_window: Optional[tuple[int, int]] = None
     force_discovery_trigger: Optional[str] = None
     import_interface: Optional[ImportInterface] = None
+    # ── New fields (Gap Analysis v1.1 / v2.0) ──
+    factions: list[FactionSpec] = []           # item 2.11
+    generation_metadata: Optional[GenerationMetadata] = None  # item 3.26
 
     @field_validator("acts")
     @classmethod
@@ -648,7 +697,10 @@ within `total_acts`, vignette `npc_focus` references resolve to roster
 entries, `xp_base` is positive on all acts, canon NPC entries
 (`canon: true`) have `canon_voice` and `behavioral_envelope` populated,
 vehicle `ship_id` values are unique, `import_interface.target_xp_range`
-minimum ≤ maximum.
+minimum ≤ maximum. New checks for Gap Analysis fields: faction
+`faction_id` values are unique, `per_act_drift` keys are valid act
+numbers, NPC `social_connections` entries reference NPCs that exist in
+the roster.
 
 **Gate 2 — NPC coherence validation.** Per-NPC disposition trajectory
 analysis. Flags disposition shifts > 0.3 between consecutive acts
@@ -664,7 +716,13 @@ arithmetic otherwise.
 narrative coherence (contradictions, dropped threads), mechanical
 balance (difficulty curves, scene variety), and prose variety potential
 (setting/mood diversity). Optional when running without cloud access
-(Gates 1–3 are mandatory; Gate 4 is recommended).
+(Gates 1–3 are mandatory; Gate 4 is recommended). **Difficulty
+calibration** (Gap Analysis v2.0, item 3.27) runs as part of Gate 4:
+four-signal per-act scoring (anchor intensity, NPC opposition,
+mechanical pressure, pacing pressure) producing a `SpineDifficultyCurve`
+with composite score, curve shape classification, and calibration
+warnings. The difficulty calibration is pure Python (no LLM calls) and
+runs even when Gate 4 LLM checks are skipped.
 
 ---
 
@@ -730,6 +788,28 @@ class EvaluatedSpine(BaseModel):
     spine: CampaignSpine
     evaluation: EvaluationResult
     validation_report: dict
+```
+
+### Saga Layer Configuration (Gap Analysis v2.0)
+
+```python
+class SagaConfig(BaseModel):
+    """Runtime configuration for the saga pipeline."""
+    evaluator: str = "cloud"       # "cloud" | "local" | "ensemble"
+    writer_count: int = Field(ge=1, default=7)
+    ensemble_enabled: bool = False  # multi-model writers (item 4.10)
+    model_pool: list[dict] = []    # available models for ensemble
+    assignment_strategy: str = "round_robin"  # or "weighted" | "random"
+    search_depth: int = Field(ge=1, default=3)   # Stage 3 branching
+    debate_rounds: int = Field(ge=1, default=2)  # Stage 4 iterations
+
+class RunDiversityMetrics(BaseModel):
+    """Per-run diversity metrics for Bitter Lesson monitoring."""
+    models_used: list[str]
+    unique_conflict_types: int
+    unique_thematic_elements: int
+    pairwise_diversity_mean: float  # from Stage 5
+    run_timestamp: str
 ```
 
 ---
@@ -840,6 +920,33 @@ CREATE TABLE IF NOT EXISTS spine_evaluations (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (saga_run_id) REFERENCES saga_runs(id)
 );
+
+-- Gap Analysis v2.0: Pairwise comparison training data for local evaluator (item 4.9)
+CREATE TABLE IF NOT EXISTS evaluation_pairs (
+    pair_id TEXT PRIMARY KEY,
+    spine_a_id TEXT NOT NULL,
+    spine_b_id TEXT NOT NULL,
+    spine_a_summary TEXT NOT NULL,
+    spine_b_summary TEXT NOT NULL,
+    axis TEXT NOT NULL,                -- 'structural' | 'novelty' | 'diversity'
+    winner TEXT NOT NULL,              -- 'a' | 'b' | 'tie'
+    confidence FLOAT,
+    reasoning TEXT,
+    source TEXT NOT NULL,              -- 'cloud_stage5' | 'player_rating'
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Gap Analysis v2.0: Per-run diversity metrics for Bitter Lesson monitoring (item 4.10)
+CREATE TABLE IF NOT EXISTS saga_diversity_log (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    saga_run_id TEXT NOT NULL,
+    models_used TEXT NOT NULL,          -- JSON array of model strings
+    unique_conflict_types INTEGER,
+    unique_thematic_elements INTEGER,
+    pairwise_diversity_mean FLOAT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (saga_run_id) REFERENCES saga_runs(id)
+);
 ```
 
 ---
@@ -853,9 +960,13 @@ SAGA_DIRECTIONS_PER_WRITER=2
 SAGA_SEARCH_DEPTH=3
 SAGA_DEBATE_ROUNDS=2
 SAGA_TOP_K=3
-PERSONA_POOL_PATH=data/personas/pool.json
-EVALUATOR_BACKEND=cloud
-EVALUATOR_MODEL=
+PERSONA_POOL_PATH=data/personas/writer_room_personas.json
+EVALUATOR_BACKEND=cloud                 # cloud | local | ensemble (item 4.9)
+EVALUATOR_MODEL=                        # local model for trained evaluator
+# Multi-model ensemble (item 4.10) — optional, default single-model
+ENSEMBLE_ENABLED=false
+ENSEMBLE_ASSIGNMENT=round_robin         # round_robin | weighted | random
+# Model pool configured in studio/saga/ensemble.py DEFAULT_MODEL_POOL
 ```
 
 ---
@@ -932,6 +1043,58 @@ Pydantic validation. It does not re-run the Studio's validation suite.
 ---
 
 ## 12. Revision History
+
+**v1.3 — Design gap analysis v2.0 integration (March 2026)**
+
+Schema, deliverable, and infrastructure updates from Gap Analysis v1.1
+and v2.0. Key changes:
+
+1. **Two new Pydantic models added.** `FactionSpec` (item 2.11 —
+   faction_id, disposition/influence/awareness starts, per_act_drift)
+   and `GenerationMetadata` (item 3.26 — master_seed, stage_seeds,
+   model_used, generation_mode, timestamp).
+
+2. **`CampaignSpine` extended.** New fields: `factions: list[FactionSpec]`
+   (default empty), `generation_metadata: Optional[GenerationMetadata]`
+   (default None).
+
+3. **Saga layer configuration models added.** `SagaConfig` (evaluator
+   backend, writer count, ensemble settings, search depth, debate
+   rounds) and `RunDiversityMetrics` (models used, conflict types,
+   thematic elements, pairwise diversity mean) added to §5.
+
+4. **Gate 1 validation expanded.** New checks: faction_id uniqueness,
+   per_act_drift key validity, social_connections NPC reference
+   resolution.
+
+5. **Gate 4 extended.** Difficulty calibration (item 3.27) integrated
+   as a pure-Python component of Gate 4: four-signal per-act scoring,
+   SpineDifficultyCurve, curve shape classification, calibration
+   warnings. Runs even when Gate 4 LLM checks are skipped.
+
+6. **Repository structure updated.** New files: `studio/seeding.py`,
+   `studio/difficulty.py`, `studio/saga/ensemble.py`,
+   `studio/saga/evaluator.py`, `studio/prompts/npc_voice_gen.txt`.
+   `data/personas/pool.json` renamed to
+   `data/personas/writer_room_personas.json`. Added
+   `data/evaluation_pairs/`.
+
+7. **CS-2 deliverables expanded.** Added `studio/seeding.py`,
+   `studio/difficulty.py`, `studio/prompts/npc_voice_gen.txt`.
+   Success criteria updated for seeding partial regeneration.
+
+8. **CS-4 deliverables expanded.** Added `studio/saga/ensemble.py`,
+   `studio/saga/evaluator.py`. Persona pool filename and count
+   specified (55 across 11 clusters). Saga test artifact template
+   referenced. Post-CS-4 local evaluator training documented.
+
+9. **Database additions.** Two new tables: `evaluation_pairs` (pairwise
+   comparison training data for local evaluator, item 4.9) and
+   `saga_diversity_log` (per-run metrics for ensemble monitoring,
+   item 4.10).
+
+10. **Configuration updated.** Persona pool path corrected. Ensemble
+    settings added (ENSEMBLE_ENABLED, ENSEMBLE_ASSIGNMENT).
 
 **v1.2 — Game Mechanics v1.5 spine schema expansion (March 2026)**
 
@@ -1020,5 +1183,5 @@ with the Game Engine.
 
 ---
 
-*Storyteller V3 — Campaign Studio Implementation Document v1.2*
+*Storyteller V3 — Campaign Studio Implementation Document v1.3*
 *The system that creates the stories the Engine tells.*

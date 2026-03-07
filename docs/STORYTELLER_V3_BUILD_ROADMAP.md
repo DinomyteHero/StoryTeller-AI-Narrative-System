@@ -1,6 +1,6 @@
 # Storyteller V3 — Build Roadmap
 
-**Document version:** 1.0
+**Document version:** 1.1
 **Purpose:** Phased build plan from V1 completion to a playable multi-
 era saga. Each milestone produces a testable system. Each phase within
 a milestone has files, a goal, dependencies, and success criteria.
@@ -10,10 +10,12 @@ its success criteria. This is the same constraint as V1's build phases,
 extended across the full project.
 
 **Reference documents:**
-- Implementation Document (v1.8) — V1 build phases and code specs
-- Game Mechanics Document (v1.5) — design for all post-V1 systems
-- Campaign Studio Implementation (v1.2) — spine schema and Studio build
+- Implementation Document (v2.5) — V1 build phases and code specs
+- Game Mechanics Document (v1.8) — design for all post-V1 systems
+- Campaign Studio Implementation (v1.3) — spine schema and Studio build
 - LLM Evaluation Document (v2.0) — model selection for all roles
+- Design Gap Analysis (v2.0) — design specs for all items not covered
+  by the Game Mechanics or Implementation documents
 
 ---
 
@@ -740,5 +742,22 @@ were built. And the story was theirs.
 
 ---
 
-*Storyteller V3 — Build Roadmap v1.0*
+## Revision History
+
+**v1.1 — Document reference updates (March 2026)**
+
+1. **Reference document versions updated.** Implementation Document
+   v1.8 → v2.5, Game Mechanics v1.5 → v1.8, Campaign Studio
+   Implementation v1.2 → v1.3. Design Gap Analysis v2.0 added to
+   reference list.
+
+2. **Phase content unchanged.** All milestone definitions, phase
+   ordering, success criteria, and dependencies remain as specified
+   in v1.0. The design gap analysis work produced new design specs
+   for items already within these phases — it did not create new
+   phases or change the build sequence.
+
+---
+
+*Storyteller V3 — Build Roadmap v1.1*
 *The path from first dice roll to the saga.*

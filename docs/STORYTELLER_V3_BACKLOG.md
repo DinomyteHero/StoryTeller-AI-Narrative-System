@@ -1,7 +1,7 @@
 # Storyteller V3 — Comprehensive Project Backlog
 
-**Document version:** 2.4  
-**Last updated:** March 5, 2026  
+**Document version:** 3.0  
+**Last updated:** March 6, 2026  
 **Purpose:** Single source of truth for every planned, in-progress,
 deferred, and tracked item across the entire project. Nothing should
 exist as a "we talked about that" item — it lives here or it doesn't
@@ -36,7 +36,7 @@ Items that needed resolution before implementation could begin.
 | 0.1 | LLM Evaluation revision — expand to cover Campaign Studio model requirements, update model landscape to March 2026 | **DONE** (LLM Eval v2.0) | LLM Evaluation | Added Campaign Studio job descriptions (five roles), evaluation criteria, model assessment, compliance test protocol, and model landscape update. |
 | 0.2 | Implementation doc scope statement — add explicit "this covers Game Engine only" to Section 0 | **DONE** (Impl v1.7) | Implementation | Scope statement added. Title changed from "Full Implementation Document" to "Game Engine Implementation Document." |
 | 0.3 | Decision: two standalone implementation docs vs master + children | **RESOLVED** | — | Decision: two standalone documents. Game Engine Implementation (v1.7) and Campaign Studio Implementation (v1.0) now exist as separate companion documents. |
-| 0.4 | Retire superseded research docs — remove RESEARCH_SCOPING.md and SAGA_RESEARCH_FINDINGS.md from project files | **READY** | Research Catalogue replaces both | Catalogue v1.0 absorbs all content. These files should be removed from the project when the next project file cleanup happens. |
+| 0.4 | Retire superseded research docs — remove RESEARCH_SCOPING.md and SAGA_RESEARCH_FINDINGS.md from project files | **DONE** | Research Catalogue replaces both | Catalogue v1.0 absorbs all content. Files removed from project. |
 | 0.5 | First campaign spine authoring — "The Nar Shaddaa Job" full spine in Campaign Studio JSON format | **IN PROGRESS** | Impl §12, CS Design §4 | A V1-scope test spine exists in Implementation §12. It uses a simplified format (no `character_variants`, `prologue_scenes`, `variation_points`, `expected_turns`, `disposition_trajectory`). This is correct for V1 since those features aren't built. A full Campaign Studio-format spine is a Phase 3 deliverable (3.0c). |
 | 0.6 | Campaign Studio Design Document — version header alignment | **RESOLVED** | CS Design | Resolved by funnel pivot: CS Design is now v1.2, CS Implementation is v1.1. Both aligned. |
 | 0.7 | Campaign Studio Implementation Document — initial creation | **DONE** (CS Impl v1.0) | CS Implementation | Four build phases, Pydantic schema models, validation suite, Mode 3/2/1 paths, cross-era import, saga layer pipeline, database additions, and interaction contract specified. |
@@ -149,6 +149,7 @@ All 12 must pass:
 | 1.42 | Sustained play quality test (5-turn) | **NOT STARTED** | Beyond §11 structural compliance. 5-turn continuous play evaluating: prose quality degradation turn-over-turn, NPC voice consistency (does Doss still sound like Doss?), choice template repetition (do choice structures start repeating?), thread continuity (are planted seeds remembered?), negative disposition narration (are hostile NPCs written as hostile?). |
 | 1.43 | 13th success criterion — prose quality | **NOT STARTED** | Per independent evaluation: the 12 success criteria are necessary but not sufficient. Criterion 13: "Does the prose make you want to read the next passage?" Evaluated subjectively during first 5-turn playtest. If no, the problem is the cloud model, not the system — swap via provider-agnostic design. |
 | 1.44 | Reconciliation error budget test (Phase 7) | **NOT STARTED** | Test 9B local model on 20 representative narration excerpts for reconciliation accuracy: NPC knowledge inference, disposition shift calibration, anchor proximity judgment. Establish baseline error rate. If >20%, activate selective cloud routing (Impl §9.1 design note). |
+| 1.45 | Choice quality validation | **DESIGNED** | Five-dimension rubric (genericity, character expression, risk spread, tactical differentiation, contextual grounding). Local model evaluator with binary yes/no questions. Two-of-five failure threshold. Shares existing retry budget. Activation contingent on calibration results from initial playtesting — if cloud model consistently produces good choices, defers to Phase 7. See `CHOICE_QUALITY_VALIDATION_SPEC.md` v1.0. |
 
 ---
 
@@ -161,7 +162,7 @@ or implementation can begin. Ordered by estimated dependency chain.
 
 | # | Item | Design Status | Design Doc | Dependencies | Detail |
 |---|------|--------------|-----------|-------------|--------|
-| 2.1 | Psychometric prologue system | **DESIGNED** | GM §5, CS §2.5–2.6 | Requires Campaign Studio character variants and prologue scene library (Phase 3) | Three-layer inference: behavioral archetype (algorithmic), mechanical profile (hand-authored mapping table scoped by career type), narrative identity (single cloud call). 3–5 adaptive scenes. Prologue scenes drawn from career- and allegiance-scoped library. V1 uses pre-built Keth. |
+| 2.1 | Psychometric prologue system | **DESIGNED** | GM §5, CS §2.5–2.6, Prologue Inference Spec v1.0 | Requires Campaign Studio character variants and prologue scene library (Phase 3) | Three-layer inference: behavioral archetype (algorithmic), mechanical profile (hand-authored mapping table scoped by career type), narrative identity (single cloud call). 3–5 adaptive scenes. Prologue scenes drawn from career- and allegiance-scoped library. V1 uses pre-built Keth. Robustness requirements (contradiction handling, confidence scoring, anti-gaming, fallback behavior, scene library diversity) specified in Prologue Inference Spec. |
 | 2.2 | Character funnel and allegiance system | **DESIGNED** | Vision §8, CS §2.5, §2.8 | Requires Campaign Studio allegiance authoring (Phase 3), frontend funnel UI (Phase 2) | Three-step funnel: Timeline → Allegiance → Variant. Campaigns define 2–4 allegiances with 2–4 variants each. Protagonist integration layer connects each variant to the fixed thematic spine. Campaign spine JSON uses `allegiances` array instead of flat `character_variants`. Frontend presents funnel as guided identity selection. |
 | 2.3 | Obligation trigger system | **DESIGNED** | GM §9 (mechanic), §26 (between-act pipeline step 8) | Phase 7 (act boundary detection) | d100 roll at act start. If ≤ Obligation value: strain threshold reduced by 2, GM receives narrative pressure instruction. Decrease via in-story actions (1–5 points). Fires as step 8 of the between-act pipeline. |
 | 2.4 | Duty trigger system | **DESIGNED** | GM §9 (mechanic), §26 (between-act pipeline step 8) | Phase 7 (act boundary detection) | Same d100 mechanism. Activation increases wound threshold by 1. GM presents competing opportunity aligned with Duty type. Increase when fulfilled. Fires as step 8 of the between-act pipeline. |
@@ -171,7 +172,7 @@ or implementation can begin. Ordered by estimated dependency chain.
 | 2.8 | Talent trees | **DESIGNED** | GM §15 (v1.5) | Depends on 2.7 | Five-type talent taxonomy (passive, conditional, substitution, narrative enabler, intervention). Pool modification pipeline. Pre-narration intervention step. Branch-based tree navigation through milestone reflections. Talent library with shared definitions. Phased data entry: Smuggler specs first, then by game line. |
 | 2.9 | Vehicle and starship encounters | **DESIGNED** | GM §17 (v1.5) | Parallel to combat abstraction (GM §3) | Ship state cards. Three-tier damage model (operational/stressed/critical). Encounter-level resolution. Role-determines-skill mapping. Battle context layer for large-scale engagements. Simplified vehicle critical hit table. |
 | 2.10 | Equipment and inventory | **DESIGNED** | GM §18 (v1.5) | — | Loadout model replacing item-by-item inventory. Four categories: weapons, armor, tools, special items. Acquisition/loss through narrative. Equipment effects on check decisions and narration. Lightsaber special treatment. |
-| 2.11 | Faction state tracking | **NEEDS DESIGN** | — | — | Wider-than-NPC tracking of faction dispositions, territorial control, resource states. Connects to galactic context layer. |
+| 2.11 | Faction state tracking | **DESIGNED** | Gap Analysis §Tier 3 | Phase 7 (reconciliation detects faction-relevant actions) | FactionState model: faction_id, display_name, disposition_to_player (0-1), influence (0-1), awareness_of_player (0-1), status_notes. Campaign spine gains `factions` array with per_act_drift for authored baseline changes. Reconciliation step updates faction state from narration. At act boundaries, drift applied. 1-2 sentence summary per faction injected into galactic context block. Faction states included in cross-campaign import package. Summary layer, not simulation — 3 numbers per faction plus status note. Token budget: ~90-150 tokens for 3-5 factions. |
 
 ### Prose & Narration Enhancements
 
@@ -181,28 +182,29 @@ or implementation can begin. Ordered by estimated dependency chain.
 | 2.13 | Scene-type-aware context assembly | **DESIGNED** | GM §10 (expanded) | Scene type classification working | Prompt assembly routing by scene type. Kinetic scenes foreground mechanical state; reflective scenes foreground motivational/relational context and reduce mechanical noise. Research-backed (Pan et al., IJHCI 2025): structured state helps action narration, hurts introspective narration. No changes to ContextPackage class. |
 | 2.14 | Narration distillation pipeline (QLoRA) | **DESIGNED** | LLM Eval §8.4, Impl backlog | 500–1000 curated pairs from V1 play | QLoRA fine-tune of Qwen3.5:9B on cloud context→narration pairs. Goal: handle lower-stakes scenes (exploration, transitions) locally, reserve cloud for climactic beats. Could reduce cloud costs 50–70% per session. Scene type classification provides the routing signal. |
 | 2.15 | Distillation curation dual-filter spec | **DESIGNED** | LLM Eval §8.4, Research Cat. Source 2 | Depends on 2.12 (prose diagnostic) | Filter 1: automated staleness check via prose diagnostic — excludes monotone/repetitive passages. Filter 2: mechanical fidelity — dice result honored, NPC voice consistent, word count valid, choices with delimiter. Both must pass. |
-| 2.16 | Distillation evaluation failure taxonomy | **NEEDS DESIGN** | Research Cat. (filed) | Post-V1 model comparison | Five binary failure types: reference confusion, dice softening, choice genericization, continuity break, format violation. For comparing finetuned model candidates. |
+| 2.16 | Distillation evaluation failure taxonomy | **DESIGNED** | Gap Analysis §Tier 3 | Post-V1 model comparison | Five binary failure categories: (1) reference confusion — narration hallucinates entities not in context, (2) dice softening — failed checks narrated as partial successes, (3) choice genericization — choices lack scene-specific proper nouns, (4) continuity break — narration contradicts established state, (5) format violation — missing delimiters/word count/skill tags. Categories 1,2,5 fully automatable; 3,4 partially. Candidate viable if aggregate pass rate within 10% of cloud reference, dice softening ≤5%. Test set: 50+ context packages. |
 | 2.17 | Session resume "Previously..." passage | **DESIGNED** | GM §6 | — | 80–150 word cloud-generated summary from compressed memory and recent turns. Written in second-person present-tense game voice. Ends at the player's current decision point. Cached in session table. Generation is Phase 3 addition to `cloud_gm.py`; display is Phase 6 UI. |
 | 2.18 | First-check teaching moment (dice panel tooltip) | **DESIGNED** | GM §7 | — | First time a skill check occurs in a session, dice panel auto-expands with one-time tooltip explaining hidden dice. Dismissible, never appears again. Phase 6 frontend feature. |
-| 2.19 | Turn counter for spine advancement | **FILED** | Research Cat. (filed) | Late-V1 or post-V1 | Track turn count vs. expected_turns per act to help the system pace anchor beat advancement. Low priority. |
+| 2.19 | Turn counter for spine advancement | **DESIGNED** | Gap Analysis v2.0, GM §26.3 | Late-V1 or Phase 7 | PacingSignal model with deterministic pacing zone (early, on_pace, late, overdue) computed from turns_this_act and expected_turns. Removes arithmetic from local model. Zone injected into reconciliation and narration prompts with delta modifier guidance. |
 
 ### NPC System Expansions (Vision §11)
 
 | # | Item | Design Status | Design Doc | Dependencies | Detail |
 |---|------|--------------|-----------|-------------|--------|
-| 2.20 | NPC relationship triangles (NPC-NPC dispositions) | **CONCEPT ONLY** | Vision §11 | — | NPCs have dispositions toward each other, not just the player. Creates social dynamics the player must read and navigate. Richer scenes than hub-and-spoke NPC model. |
+| 2.20 | NPC relationship triangles (NPC-NPC dispositions) | **DESIGNED** | Gap Analysis §Tier 5, Vision §11 | — | NPCState gains `npc_dispositions: dict[str, float]`. Campaign spine NPC entries gain `npc_relationships` with NPC-name → disposition mappings. Initialize from spine, update via reconciliation step when NPCs interact. Tier 1 NPC state cards include relationships to other Tier 1/2 NPCs. Token cost: ~10-20 tokens per NPC, negligible. Scope: player-visible social signals, not hidden simulation. |
 | 2.21 | NPC emotional state (transient in-scene mood) | **DESIGNED** | GM §25 (v1.6) | — | Nine-mood vocabulary (calm, angry, afraid, grieving, suspicious, grateful, desperate, amused, conflicted) with intensity and decay. Set by dice results, spine triggers, and GM-inferred cues. Injected into NPC prompt blocks. Sustained emotions nudge disposition. |
-| 2.22 | NPC behavioral envelopes (enforcement) | **PARTIALLY IMPLEMENTED** | Vision §11 | `behavioral_envelope` field exists in V1 NPCState | Field exists and is passed to GM prompt. Need to validate that the GM actually respects hard constraints under narrative pressure. May need explicit prompt reinforcement. |
-| 2.23 | NPC information propagation (offscreen knowledge transfer) | **CONCEPT ONLY** | Vision §11 | Reputation log exists in V1 | Information travels between NPCs offscreen through social networks. Connects to reputation echo system. Makes the world feel like actions have reach beyond the scene where they occurred. |
+| 2.22 | NPC behavioral envelopes (enforcement) | **DESIGNED** | Gap Analysis §Tier 5, Vision §11 | `behavioral_envelope` field exists in V1 NPCState | Field exists and is passed to GM prompt. Compliance test Category 6 added: 5 test scenarios where narrative pressure pushes NPC toward envelope violation. Pass criterion: GM respects envelope in all 5. If any fail, add prompt reinforcement: "HARD CONSTRAINT: {npc_name} will NEVER {envelope}. Violating this is equivalent to producing incorrect dice results." Test-then-fix item. |
+| 2.23 | NPC information propagation (offscreen knowledge transfer) | **DESIGNED** | Gap Analysis §Tier 5, Vision §11 | Reputation log exists in V1, Phase 7 (reconciliation) | NPCState gains `social_connections: list[str]`. Campaign spine NPC entries gain `social_connections` listing NPCs they communicate with. At act boundaries, reputation events propagate one-hop through social connections: if NPC A witnessed event and NPC B is in A's connections and appears in next act, B gains knowledge_add entry. One-hop only, act-boundary only. Lightweight social graph, not simulation. |
 
 ### Infrastructure
 
 | # | Item | Design Status | Design Doc | Dependencies | Detail |
 |---|------|--------------|-----------|-------------|--------|
 | 2.24 | Semantic memory / meaningful choice extraction | **DESIGNED** | GM §24 (v1.6) | — | Per-turn choice annotation via local model extracting behavioral meaning: intent, sacrifice, priority revealed, NPC impact, throughline relevance. Feeds enriched data to behavioral inference, character drift, aspiration echoes, and cross-campaign identity. Graceful degradation to skill-tag-only on annotation failure. |
-| 2.25 | Multiple save slots / campaign management UI | **NEEDS DESIGN** | Impl backlog | — | Player can have multiple active sessions/campaigns. UI for starting, resuming, and managing saves. |
-| 2.26 | Settings / API key management UI | **NEEDS DESIGN** | Impl backlog | — | User-facing configuration for cloud provider, model selection, API keys. |
-| 2.27 | Multi-arc campaign structure | **DESIGNED** | GM §§19-20 (v1.5) | — | Time skip mechanics with vignette system for intra-campaign gaps (§19). Cross-era character progression with import packages, specialization continuity/dormancy/evolution, era transition processing (§20). Large-scale NPC management with three-tier relevance routing (§21). Canon character voice fidelity profiles (§22). |
+| 2.25 | Character-centric campaign management | **DESIGNED** | Gap Analysis §Tier 2 | — | Character is the primary entity, campaigns are chapters in a character's story (aligns with Vision §8). Data model: `characters` table (character_id, display_name, variant_pitch, allegiance, era), `character_campaigns` table (character_id → campaign_spine, campaign_order, status, session_id). UI: character screen as app entry point showing character cards with name, variant pitch, current campaign, act progress, last played. Actions: Continue (active), Begin Next Chapter (completed → import flow), Create a Character (→ funnel). One active campaign per character. Character history shows ordered chapter list. |
+| 2.26 | Settings / API key management UI | **DESIGNED** | Gap Analysis §Tier 2 | — | Settings panel on campaign management screen: cloud LLM provider selection, model string, API key entry (encrypted at rest via Fernet, masked to last 4 chars in UI), local model config (Ollama endpoint, model name), narrative backend toggle. Settings persist in `settings` SQLite table, overridden by env vars. Changes take effect on next session start. "Test Connection" button for provider verification. New files: `state/settings.py`. Extend: `web/index.html`, `api/game_routes.py`. |
+| 2.27 | Multi-arc campaign structure | **DESIGNED** | GM §§19-20 (v1.5), Import Package Quality Spec v1.0 | — | Time skip mechanics with vignette system for intra-campaign gaps (§19). Cross-era character progression with import packages, specialization continuity/dormancy/evolution, era transition processing (§20). Large-scale NPC management with three-tier relevance routing (§21). Canon character voice fidelity profiles (§22). Narrative compression quality standards for import packages (relationship summaries, throughline history, voice notes, memory shards) specified in Import Package Quality Spec. |
+| 2.28 | Generative entity persistence | **DESIGNED** | Gap Analysis v2.0, Vision §6/§11/§12, GM §26 | Phase 7 (reconciliation), Phase 20 (NPC tiering) | Reconciliation prompt extension for entity detection (low/medium/high significance). Entity card generation prompt per type. SQLite `emergent_entities` table with per-act cap (max 3). Tier promotion logic (3→2→1 based on reference count). Reintroduction injection formats for NPCs, locations, and facts. Cross-campaign persistence for entities with reference_count ≥ 3 or tier ≤ 2. Enrichment layer — authored spine carries full load without it. Evaluate need after Milestone 1 playtesting. |
 
 ---
 
@@ -253,7 +255,7 @@ vertical slice (12 success criteria) is met.
 | # | Item | Design Status | Design Doc | Dependencies | Detail |
 |---|------|--------------|-----------|-------------|--------|
 | 3.16 | Mode 2 generation pipeline | **DESIGNED** | CS Design §3 (Mode 2) | Mode 3 working | Author provides thematic brief (era, location, tone, throughline, concept). AI generates complete spine draft. Author reviews and edits. |
-| 3.17 | NPC voice generation (cloud model) | **CONCEPT ONLY** | CS Design §8 (deferred) | — | Cloud model generates NPC voice notes from brief character descriptions. Useful for Modes 1 and 2 where author doesn't hand-write every NPC's speech patterns. |
+| 3.17 | NPC voice generation (cloud model) | **DESIGNED** | Gap Analysis §Tier 3, CS Design §8 | — | Cloud model generates NPC voice notes from NPC name, motivation, role_in_act, and behavioral_envelope. Prompt template (`studio/prompts/npc_voice_gen.txt`) requests 2-4 sentences covering vocabulary/register, verbal tics, emotional default, one distinguishing trait. Quality gate: flag notes containing zero speech-action verbs (hedges, deflects, clips, drawls, etc.) for regeneration. Integration: runs after NPC roster generation, before Gate 2 (NPC coherence). Mode 3: optional assist; Modes 2/1: automatic. |
 | 3.18 | Campaign import interface (`studio/import_interface.py`) | **DESIGNED** | CS Design §6.1, CS Impl §6 | Spine format finalized | Maps completed character state onto new campaign: motivation tracks, NPC relationship dispositions, world state variables. Game Engine receives a character dict indistinguishable from fresh start. |
 | 3.19 | Canon as environmental constraint system | **DESIGNED** | CS Design §6.2 | — | Canon events as galactic-scale environmental anchors. Player agency at personal scale. Relationship to canon characters shaped by play history. |
 | 3.20 | World state variable tracking (butterfly effect) | **DESIGNED** | CS Design §6.3 | — | Player actions create ripples at personal/social/local scale that compound across eras. Not rewriting galactic timeline — a Corellian senator remembers your name because you helped in Act 2. |
@@ -277,9 +279,9 @@ vertical slice (12 success criteria) is met.
 
 | # | Item | Design Status | Design Doc | Detail |
 |---|------|--------------|-----------|--------|
-| 3.26 | Deterministic seeding for reproducible generation | **CONSIDER** | CS Design §8 | Enables partial re-generation ("like the world, want different NPCs"). Value depends on Studio UX decisions. |
-| 3.27 | Spine difficulty calibration | **CONCEPT ONLY** | CS Design §8 | Estimate difficulty curve before runtime from anchor beats, expected check difficulties, NPC opposition patterns. |
-| 3.28 | Campaign rating and feedback system | **CONCEPT ONLY** | CS Design §8 | Player ratings inform Mode 1/2 generation. Requires player base. |
+| 3.26 | Deterministic seeding for reproducible generation | **DESIGNED** | Gap Analysis v2.0, CS Design §8 | Per-stage seed derivation from master seed via SHA-256. GenerationMetadata model stored alongside spines. Partial regeneration UX: "regenerate NPCs," "regenerate structure," "full regenerate." Seed parameter passed via OpenAI-compatible and Ollama APIs. Effectiveness caveat documented (seed is "best effort" across providers). |
+| 3.27 | Spine difficulty calibration | **DESIGNED** | Gap Analysis v2.0, CS Design §8 | Four-signal per-act difficulty scoring: anchor intensity (30%), NPC opposition (25%), mechanical pressure (25%), pacing pressure (20%). SpineDifficultyCurve with composite score 1.0–5.0, curve shape classification (flat/rising/spiked/valley), and calibration warnings. Runs during Gate 4 in `studio/validate.py`. Pure Python, no LLM calls. |
+| 3.28 | Campaign rating and feedback system | **DESIGNED** | Gap Analysis v2.0, CS Design §8 | Post-completion rating collection (1-5 overall, optional 3-dimension breakdown: story/characters/pacing, optional free-text). `campaign_ratings` SQLite table. Exemplar selection for Mode 1/2 generation prompts from highly-rated spines. Failure pattern detection across low-rated campaigns. Non-intrusive UI integration at campaign completion. |
 
 ### Character Funnel Items (Vision §8, CS §2.5, §2.8)
 
@@ -288,9 +290,9 @@ vertical slice (12 success criteria) is met.
 | 3.29 | Protagonist integration layer authoring workflow | **DESIGNED** | CS Design §2.8 | Mode 3 working | Authoring fixed thematic spine and per-allegiance integration layers: entry points, personal stakes, NPC relationship overrides, anchor beat adaptations. Anchors must be abstract enough to survive all integration variants. |
 | 3.30 | Prologue scene library system | **DESIGNED** | CS Design §2.6, GM §5 | Schema finalized | Career- and allegiance-scoped scene library. `career_type` and `allegiance` tags. `library_reusable` flag. Recommended: 3 library scenes per career-allegiance combo + 2 campaign-specific per variant. Reduces authoring overhead as funnel combinatorial space grows. |
 | 3.31 | Career-type mapping table library | **DESIGNED** | GM §5 | Schema finalized | Layer 2 behavioral-cluster-to-mechanical-profile mapping tables scoped by career type. Reusable across campaigns. One table per FFG career covers all variants of that career regardless of allegiance or campaign. |
-| 3.32 | Character funnel frontend UI | **NEEDS DESIGN** | Vision §8 | Phase 2 frontend foundation | Three-step guided selection: Timeline → Allegiance → Variant. Each step presents narrative-quality descriptions, not mechanical labels. Must feel like entering a story, not configuring a character sheet. |
-| 3.33 | Integration layer validation | **NEEDS DESIGN** | CS Design §2.8 | Gate 1 extended | Validate that every allegiance has at least one fully authored integration layer. Verify NPC overrides reference valid roster entries. Verify anchor adaptations cover all required anchors. |
-| 3.34 | Allegiance diversity validation | **NEEDS DESIGN** | CS Design §2.5 | Gate 3 extended | Validate cross-allegiance diversity: different allegiances must produce structurally different protagonist experiences, not cosmetic reskins. Flag allegiances with >80% NPC disposition overlap or identical anchor adaptations. |
+| 3.32 | Character funnel frontend UI | **DESIGNED** | Gap Analysis §Tier 2, Vision §8 | Phase 2 frontend foundation | Three-step full-screen panel flow: Step 1 Timeline (campaign selection, skip if only one spine), Step 2 Allegiance (2-4 cards with narrative descriptions, no mechanical info), Step 3 Variant (2-4 cards with narrative pitches, career/species NOT shown — player chooses story, not build). Back navigation at each step. On variant selection, transitions to prologue (same UI as main game loop). Endpoint: `GET /api/funnel/{campaign_id}`. Design constraint from Vision §8: "Must feel like entering a story, not configuring a character sheet." |
+| 3.33 | Integration layer validation | **DESIGNED** | Gap Analysis §Tier 2, CS Design §2.8 | Gate 1 extended | Five checks added to Gate 1 in `studio/validate.py`: (1) integration layer completeness — entry_point, personal_stakes non-empty, anchor_adaptations has ≥1 entry per anchor, (2) NPC override reference validity — all overridden NPCs exist in roster, (3) anchor adaptation coverage — warn on missing adaptations, (4) entry point distinctness — flag identical entry points within same allegiance, (5) personal stakes non-generic — flag <20 chars or generic phrases. Pure Python, no LLM calls. |
+| 3.34 | Allegiance diversity validation | **DESIGNED** | Gap Analysis §Tier 2, CS Design §2.5 | Gate 3 extended | Three checks added to Gate 3 in `studio/validate.py`: (1) NPC disposition overlap — flag allegiance pairs with >80% near-identical disposition modifiers, (2) anchor adaptation similarity — flag pairs with >60% identical adaptation strings, (3) entry point structural difference — flag if all allegiances enter through same NPC and location. Jaccard similarity on word sets, no NLP libraries needed. |
 
 ---
 
@@ -304,10 +306,10 @@ Depends on Campaign Studio being operational (Phase 3).
 
 | # | Item | Status | Detail |
 |---|------|--------|--------|
-| 4.0a | Saga layer test artifacts | **NOT STARTED** | Worked example of full pipeline with a completed campaign and generated sequel. |
+| 4.0a | Saga layer test artifacts | **DESIGNED** (template) | Gap Analysis v2.0. Full markdown template specified with concrete sections for every pipeline stage (character export package → import summary → persona assignment → 7 SequelDirections → SpineSketch expansion → critique/debate → pairwise evaluation → validated spine). Partial artifact path using hypothetical Keth Varso completion data allows pipeline logic validation pre-Milestone 1. Full artifact with real play data requires Milestone 1 completion. |
 | 4.0b | `saga_metadata` schema fields | **DESIGNED** | CS Impl §4.1. `SagaMetadata` model: prior_campaign_id, throughline_evolution, imported_npc_mappings, required_import_fields, default_state_for_new_characters. |
 | 4.0c | Writer's Room intermediate schemas | **DESIGNED** | CS Impl §5. `SequelDirection` (Stage 2), `SpineSketch` with `ActOutline`/`NPCOutline` (Stage 3), draft `CampaignSpine` (Stage 4), `EvaluatedSpine` with `EvaluationResult` (Stage 5). |
-| 4.0d | Persona pool curation and validation (50+ personas) | **NOT STARTED** | CS Design §8 (deferred). Ordinary, heterogeneous personas. Must NOT be Star Wars-specific or narrative archetypes. Empirically validate that different subsets produce different sequel directions. |
+| 4.0d | Persona pool curation and validation (50+ personas) | **DESIGNED** (pool drafted) | Gap Analysis v2.0. 55 personas across 11 thematic clusters drafted with full text. Tag distribution verified across age decades, risk tolerance, introversion/extroversion, care/justice/utilitarian ethics. Subset selection algorithm with cluster and age diversity constraints. Five-subset validation protocol specified (target: ≥3 of 5 subsets produce distinct sequel directions). Stored in `data/personas/writer_room_personas.json`. Validation execution requires working Stage 2 code. |
 
 ### Saga Layer Pipeline
 
@@ -326,8 +328,8 @@ Depends on Campaign Studio being operational (Phase 3).
 
 | # | Item | Design Status | Design Doc | Dependencies | Detail |
 |---|------|--------------|-----------|-------------|--------|
-| 4.9 | Trained local evaluator for spine quality | **CONCEPT ONLY** | CS Design §8, Research Cat. Source 5 | Corpus of generated spines with quality annotations | CrEval shows trained 7B evaluator outperforms frontier models at creativity judgment. Requires data from actual saga runs. Architecture supports evaluator swap via config. |
-| 4.10 | Multi-model ensemble (different LLMs as different writers) | **CONCEPT ONLY** | CS Design §8, Research Cat. Source 7 | Persona + CoT validated on single model first | Different cloud models as different "writers" via OpenRouter. Research shows ensembles approach human variability. Scaling lever, not prerequisite. |
+| 4.9 | Trained local evaluator for spine quality | **DESIGNED** | Gap Analysis v2.0, CS Design §8, Research Cat. Source 5 | Corpus of 600+ pairwise comparisons from Stage 5 runs and player ratings | QLoRA fine-tune of local model on pairwise evaluation task. Three axes: structural quality, novelty, diversity. SpineSummary compression format for training context. `evaluation_pairs` table logs training data from cloud Stage 5 and player ratings. 80% agreement calibration threshold against cloud reference. Drop-in replacement via `SagaConfig.evaluator` setting (cloud/local/ensemble). |
+| 4.10 | Multi-model ensemble (different LLMs as different writers) | **DESIGNED** | Gap Analysis v2.0, CS Design §8, Research Cat. Source 7 | Persona + CoT validated on single model first | Model-aware WriterConfig per writer with model/provider assignment. EnsembleConfig with configurable model pool and three assignment strategies (round_robin, weighted, random). Parallel asyncio execution in Stage 2. RunDiversityMetrics logging for Bitter Lesson monitoring. Graceful degradation to single-model on provider unavailability. Optional — default is single-model baseline. |
 
 ---
 
@@ -394,12 +396,15 @@ Issues identified during the March 5, 2026 cross-document review:
    is now v1.2 (funnel pivot). CS Implementation is now v1.1. Both
    aligned.
 
-3. **Retired research docs.** RESEARCH_SCOPING.md and
+3. **Retired research docs.** ~~RESEARCH_SCOPING.md and
    SAGA_RESEARCH_FINDINGS.md are superseded by Research Catalogue v1.0.
-   Should be removed from project files. Tracked as item 0.4.
+   Should be removed from project files. Tracked as item 0.4.~~
+   **RESOLVED:** Files removed from project. Item 0.4 marked DONE.
 
-4. **CLAUDE.md content.** Referenced in repo structure (Impl §3) but
-   content not authored. Tracked as item 1.34.
+4. **CLAUDE.md content.** ~~Referenced in repo structure (Impl §3) but
+   content not authored. Tracked as item 1.34.~~ **RESOLVED:** CLAUDE.md
+   authored (item 1.34 DONE in v2.4) and updated with project guide
+   reference and five new spec documents in v3.0.
 
 5. **V1 prompt additions completeness.** Items 1.17–1.21 capture five
    specific prompt additions from Game Mechanics (anti-positivity,
@@ -414,24 +419,145 @@ Issues identified during the March 5, 2026 cross-document review:
    format, to avoid a breaking migration when the Campaign Studio ships.
    Tracked as item 3.0c.
 
+7. **Phase 8 dependency gap.** ~~Phase 8 (Motivation Track Wiring) lists
+   dependencies as "V1 complete" but should also list "Phase 7 complete."~~
+   **RESOLVED:** Build Roadmap Phase 8 already correctly lists "V1
+   complete, Phase 7 complete" as dependencies. The Deferred Design and
+   Logic Analysis §4.4 identified this as a potential gap, but the Build
+   Roadmap was already correct at v1.0.
+
+8. **Character-centric management principle.** Vision §8 states the game
+   develops around the player character ("A tabletop GM asks 'who do you
+   want to play?' and reshapes the adventure around the answer"). The
+   cross-era import system (GM §20) is character-centric. This implies
+   the primary management entity should be the character, not the
+   campaign session. Item 2.25 has been revised accordingly. Consider
+   making the character-centric principle explicit in Vision §8 or §17.
+
 ---
 
 ## Document Status Summary
 
 | Document | Version | Status | Next Action |
 |----------|---------|--------|-------------|
-| Vision | v3.1 | **CURRENT** | Character funnel pivot applied. Source of truth for experience goals. |
+| Vision | v3.1 | **CURRENT** | Character funnel pivot applied. Consider adding explicit character-centric management principle (Alignment Note 8). |
 | Game Mechanics | v1.8 | **CURRENT** | 27 sections (0-26). Reputation echo delivery and conditional choice availability designed. |
-| Implementation (Game Engine) | v2.4 | **CURRENT** | Evaluation risk mitigations applied. Prompt rotation, memory enrichment, thread state, style exemplars. |
-| LLM Evaluation | v2.0 | **CURRENT** | Monitor DeepSeek V4 and Qwen3.5-397B. |
-| Campaign Studio Design | v1.2 | **CURRENT** | Character funnel pivot applied. Allegiance schema, integration layer, scene library defined. |
-| Campaign Studio Implementation | v1.1 | **CURRENT** | Schema models updated for funnel pivot. |
+| Implementation (Game Engine) | v2.5 | **CURRENT** | §14 backlog updated: 2.19, 2.28, 3.28 added to designed items; distillation pipeline moved to designed; Gap Analysis references corrected. |
+| Build Roadmap | v1.1 | **CURRENT** | Reference document versions updated. Phase content unchanged. |
+| LLM Evaluation | v2.0 | **NEEDS UPDATE** | Add Category 6 (behavioral envelope compliance) to §11 test protocol. Monitor DeepSeek V4 and Qwen3.5-397B. |
+| Campaign Studio Design | v1.3 | **CURRENT** | Game Mechanics v1.5 cross-references applied. |
+| Campaign Studio Implementation | v1.3 | **CURRENT** | FactionSpec and GenerationMetadata schema models added. Gate 1 and Gate 4 validation expanded. CS-2/CS-4 deliverables updated. Saga config, ensemble, and evaluator training infrastructure specified. |
 | Research Catalogue | v1.0 | **CURRENT** | No pending additions. |
-| This Backlog | v2.7 | **CURRENT** | Evaluation risk mitigations tracked. Expanded compliance tests added. |
+| Design Gap Analysis | v2.0 | **CURRENT** | Full design specs for all project items. v1.1 items applied. v2.0 adds: 2.19, 2.28, 3.26, 3.27, 3.28, 4.9, 4.10, 4.0a, 4.0d. Zero CONCEPT ONLY / FILED / CONSIDER items remain. |
+| Deferred Design and Logic Analysis | v1.0 | **CURRENT** | Turn loop verification, data flow analysis, invariant proofs, token budgets, post-V1 integration points. |
+| Project Guide | v1.1 | **NEW** | Front-door orientation. Authority map, reading orders, current state, key invariants, quick reference. |
+| Project State Matrix | v1.1 | **NEW** | Compact capability status view. All audit-identified gaps now have specs. |
+| Choice Quality Validation Spec | v1.0 | **NEW** | Post-generation choice quality validator. Activation contingent on calibration from initial playtesting. |
+| Prologue Inference Spec | v1.0 | **NEW** | Robustness rules for psychometric prologue. Extends GM §5 core design with edge case handling. |
+| Import Package Quality Spec | v1.0 | **NEW** | Quality standards for narrative compression in cross-campaign import. Extends GM §20 and CS Impl §6. |
+| This Backlog | v3.0 | **CURRENT** | Gap audit integration. Five new documents added to project. Item 0.4 DONE. Item 1.45 added. Spec references added to 2.1 and 2.27. |
 
 ---
 
 ## Revision History
+
+**v3.0 — Gap audit integration (March 2026)**
+
+1. **Five new project documents added.** Project Guide v1.1
+   (front-door orientation), Project State Matrix v1.1 (capability
+   status view), Choice Quality Validation Spec v1.0 (post-generation
+   choice validator), Prologue Inference Spec v1.0 (prologue
+   robustness rules), Import Package Quality Spec v1.0 (narrative
+   compression quality standards). All produced from the gap audit
+   findings.
+
+2. **Item 0.4 marked DONE.** Superseded research documents
+   (RESEARCH_SCOPING.md, SAGA_RESEARCH_FINDINGS.md) removed from
+   project files. Alignment Note 3 marked RESOLVED.
+
+3. **Item 1.45 added.** Choice quality validation (DESIGNED). Five-
+   dimension rubric, local model evaluator, shared retry budget,
+   calibration protocol. Activation contingent on initial playtesting
+   results. See Choice Quality Validation Spec v1.0.
+
+4. **Item 2.1 updated.** Prologue Inference Spec v1.0 added to design
+   doc references. Robustness requirements (contradiction handling,
+   confidence scoring, anti-gaming, fallback behavior, scene library
+   diversity) now specified.
+
+5. **Item 2.27 updated.** Import Package Quality Spec v1.0 added to
+   design doc references. Narrative compression quality standards for
+   import packages now specified.
+
+6. **Document Status Summary updated.** Five new documents added.
+   Deferred Design and Logic Analysis listed (was missing). Backlog
+   version bumped to v3.0.
+
+**v2.9 — Design gap analysis v2.0 completion (March 2026)**
+
+1. **Nine items upgraded to DESIGNED.** 2.19 (turn counter — PacingSignal
+   model with deterministic zones), 2.28 (generative entity persistence —
+   upgraded from CONCEPT ONLY with full reconciliation prompt, DB schema,
+   tier promotion, and cross-campaign persistence), 3.26 (deterministic
+   seeding — per-stage seed derivation, partial regeneration UX), 3.27
+   (spine difficulty calibration — four-signal scoring, curve shape
+   classification, Gate 4 integration), 3.28 (campaign rating/feedback —
+   rating collection, exemplar selection, failure pattern detection),
+   4.9 (trained local evaluator — QLoRA training spec, calibration
+   protocol, drop-in replacement), 4.10 (multi-model ensemble —
+   WriterConfig, assignment strategies, diversity metrics logging).
+
+2. **Two pre-build items upgraded to DESIGNED (template/drafted).**
+   4.0a (saga test artifacts — full template specified, partial artifact
+   path documented), 4.0d (persona pool — 55 personas across 11 clusters
+   drafted with tag distribution verification, subset selection algorithm,
+   five-subset validation protocol).
+
+3. **Zero undesigned items remain.** Every item that can be designed
+   without runtime data now has a full design specification. Only Phase 5
+   long-term aspirations (5.1–5.6) and open research questions (R.1–R.7)
+   remain without design, as intended.
+
+4. **Document Status Summary updated.** Design Gap Analysis upgraded to
+   v2.0. Backlog version corrected to v2.9.
+
+**v2.8 — Design gap analysis integration (March 2026)**
+
+1. **Design Gap Analysis document created.** Comprehensive audit of all
+   items not fully designed across the project. Full design specs
+   provided for 14 items. Added to project as a companion design
+   document.
+
+2. **Eleven items upgraded to DESIGNED.** 2.11 (faction state tracking),
+   2.16 (distillation evaluation taxonomy), 2.20 (NPC relationship
+   triangles), 2.22 (behavioral envelope enforcement — compliance test
+   protocol), 2.23 (NPC information propagation), 2.25 (character-
+   centric campaign management — revised from session-centric), 2.26
+   (settings/API key UI), 3.17 (NPC voice generation — prompt template),
+   3.32 (character funnel frontend UI), 3.33 (integration layer
+   validation — 5 checks), 3.34 (allegiance diversity validation —
+   3 checks).
+
+3. **New item 2.28 added.** Generative entity persistence (CONCEPT
+   ONLY). Emergent NPCs, locations, and facts promoted from prose to
+   persistent world state via reconciliation step extension. Evaluate
+   need after Milestone 1 playtesting.
+
+4. **Item 2.25 revised.** Renamed from "Multiple save slots / campaign
+   management UI" to "Character-centric campaign management." Data
+   model changed: character is primary entity, campaigns are chapters.
+   Aligns with Vision §8 and cross-era import design (GM §20).
+
+5. **Items 4.0a and 4.0d expanded.** Design approaches documented for
+   saga layer test artifacts and persona pool curation.
+
+6. **Alignment Notes 7, 8 added.** Phase 8 dependency gap (requires
+   Build Roadmap fix). Character-centric management principle (consider
+   Vision Document update).
+
+7. **Document Status Summary updated.** Design Gap Analysis added.
+   Build Roadmap and LLM Evaluation flagged as NEEDS UPDATE.
+   CS Design corrected to v1.3, CS Implementation to v1.2.
 
 **v2.7 — Evaluation risk mitigations (March 2026)**
 
@@ -582,5 +708,5 @@ every planned, deferred, and tracked item across all project documents.
 
 ---
 
-*Storyteller V3 — Comprehensive Project Backlog v2.7*
+*Storyteller V3 — Comprehensive Project Backlog v3.0*
 *Everything planned. Nothing floating.*

@@ -33,8 +33,11 @@ The campaign spine JSON is the interface contract between them.
 
 ## Documentation
 
-All project documents live in `docs/`. Read these in this order.
-Every design decision is deliberate.
+All project documents live in `docs/`. For full orientation —
+authority map, reading order, current project state, and navigation —
+start with `docs/00_PROJECT_GUIDE.md`.
+
+**For implementation, read in this order:**
 
 1. **`docs/STORYTELLER_V3_IMPLEMENTATION.md`** — THE PRIMARY SPEC.
    Complete code-level specification for the Game Engine. V1 build
@@ -58,6 +61,8 @@ Every design decision is deliberate.
    game should feel like. Read for context, not for implementation
    detail.
 
+**Reference documents (consult when needed):**
+
 5. **`docs/STORYTELLER_V3_CAMPAIGN_STUDIO_IMPLEMENTATION.md`** —
    Campaign Studio code spec. Contains the Pydantic spine schema
    (`studio/schema.py`) which is the interface contract. Relevant to
@@ -80,6 +85,37 @@ Every design decision is deliberate.
     System logic walkthrough verifying all data flows, integration
     points, invariants, and token budgets. Reference during
     implementation to understand how components connect.
+
+11. **`docs/STORYTELLER_V3_DESIGN_GAP_ANALYSIS_V2.md`** — Full design
+    specifications for every item across the project not covered in
+    Game Mechanics or Implementation. Reference when implementing any
+    post-V1 item. v2.0 is the only current source — v1.1 is
+    superseded.
+
+**Orientation and audit documents:**
+
+12. **`docs/00_PROJECT_GUIDE.md`** — Front-door orientation. Document
+    authority map, reading orders, current project state, key
+    invariants, quick-reference lookup.
+
+13. **`docs/PROJECT_STATE_MATRIX.md`** — Single-page view of every
+    capability: what's promised, designed, V1-scoped, and deferred.
+
+**Validation and quality specs (post-V1 reference):**
+
+14. **`docs/CHOICE_QUALITY_VALIDATION_SPEC.md`** — Post-generation
+    choice quality validator. Rubric, local model evaluator, retry
+    integration. Activates late Phase 3 or Phase 7 based on
+    calibration.
+
+15. **`docs/PROLOGUE_INFERENCE_SPEC.md`** — Robustness rules for the
+    psychometric prologue: contradiction handling, confidence scoring,
+    anti-gaming, fallback behavior, scene library diversity. Phase 18.
+
+16. **`docs/IMPORT_PACKAGE_QUALITY_SPEC.md`** — Quality standards for
+    narrative compression in cross-campaign character transfer:
+    relationship summaries, throughline history, voice notes, memory
+    shards. Phase 19.
 
 ## The Rule That Overrides Everything
 
@@ -187,16 +223,22 @@ storyteller-v3/
 ├── pyproject.toml
 ├── .env.example
 ├── docs/                  # All project documentation
-│   ├── STORYTELLER_V3_IMPLEMENTATION.md      # Primary spec
-│   ├── STORYTELLER_V3_BUILD_ROADMAP.md       # Phase plan
-│   ├── STORYTELLER_V3_GAME_MECHANICS.md      # Game design
-│   ├── STORYTELLER_V3_VISION.md              # Creative vision
-│   ├── STORYTELLER_V3_CAMPAIGN_STUDIO.md     # Studio design
+│   ├── 00_PROJECT_GUIDE.md                     # Start here — orientation
+│   ├── PROJECT_STATE_MATRIX.md                 # What's promised/designed/built
+│   ├── STORYTELLER_V3_IMPLEMENTATION.md        # Primary spec
+│   ├── STORYTELLER_V3_BUILD_ROADMAP.md         # Phase plan
+│   ├── STORYTELLER_V3_GAME_MECHANICS.md        # Game design
+│   ├── STORYTELLER_V3_VISION.md                # Creative vision
+│   ├── STORYTELLER_V3_CAMPAIGN_STUDIO.md       # Studio design
 │   ├── STORYTELLER_V3_CAMPAIGN_STUDIO_IMPLEMENTATION.md
 │   ├── STORYTELLER_V3_LLM_EVALUATION.md
 │   ├── STORYTELLER_V3_RESEARCH_CATALOGUE.md
 │   ├── STORYTELLER_V3_DEFERRED_DESIGN_AND_LOGIC_ANALYSIS.md
-│   └── STORYTELLER_V3_BACKLOG.md
+│   ├── STORYTELLER_V3_DESIGN_GAP_ANALYSIS_V2.md
+│   ├── STORYTELLER_V3_BACKLOG.md
+│   ├── CHOICE_QUALITY_VALIDATION_SPEC.md       # Post-V1 quality spec
+│   ├── PROLOGUE_INFERENCE_SPEC.md              # Post-V1 robustness spec
+│   └── IMPORT_PACKAGE_QUALITY_SPEC.md          # Post-V1 quality spec
 ├── engine/                # Pure Python — dice, character, checks
 ├── gm/                    # LLM orchestration — local + cloud GM
 │   └── prompts/           # Prompt templates
@@ -204,10 +246,17 @@ storyteller-v3/
 ├── api/                   # FastAPI routes
 ├── web/                   # Single-file frontend
 ├── studio/                # Campaign Studio (post-V1)
-│   └── schema.py          # Spine schema — interface contract
+│   ├── schema.py          # Spine schema — interface contract
+│   ├── seeding.py         # Deterministic seed derivation
+│   ├── difficulty.py      # Spine difficulty calibration
+│   └── saga/              # Saga layer pipeline
+│       ├── ensemble.py    # Multi-model writer assignment
+│       └── evaluator.py   # Trained local evaluator
 ├── data/
 │   ├── characters/        # Character JSON files
 │   ├── campaigns/         # Campaign spine JSON files
+│   ├── personas/          # Writer's Room persona pool (55 personas)
+│   ├── evaluation_pairs/  # Pairwise comparison training data
 │   ├── talent_trees/      # Post-V1: talent tree data
 │   ├── force_powers/      # Post-V1: Force power data
 │   └── canon_profiles/    # Post-V1: canon character profiles
