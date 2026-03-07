@@ -174,10 +174,14 @@ def _validate_decision(data: dict) -> CheckDecision:
             moral_weight=moral_weight,
             reasoning=data.get("reasoning", ""),
         )
-    if "skill" not in data:
-        raise ValueError("Missing 'skill'")
-    if "difficulty" not in data:
-        raise ValueError("Missing 'difficulty'")
+    if "skill" not in data or "difficulty" not in data:
+        # Model said requires_check but gave incomplete data — fall back to no-check
+        return CheckDecision(
+            requires_check=False,
+            scene_type=scene_type,
+            moral_weight=moral_weight,
+            reasoning=data.get("reasoning", "incomplete check data, defaulting to no-check"),
+        )
     return CheckDecision(
         requires_check=True,
         skill=_normalize_skill(data["skill"]),

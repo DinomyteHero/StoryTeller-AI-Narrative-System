@@ -29,8 +29,9 @@ MAX_TOKENS  = 1500
 CLOUD_PROVIDER    = os.getenv("CLOUD_PROVIDER", "openai")
 CLOUD_MODEL       = os.getenv("CLOUD_MODEL", "gpt-5.2")
 NARRATIVE_BACKEND = os.getenv("NARRATIVE_BACKEND", "cloud")
-OLLAMA_URL        = os.getenv("OLLAMA_URL", "http://localhost:11434")
-LOCAL_MODEL       = os.getenv("LOCAL_MODEL", "qwen3.5:9b")
+OLLAMA_URL             = os.getenv("OLLAMA_URL", "http://localhost:11434")
+LOCAL_MODEL            = os.getenv("LOCAL_MODEL", "qwen3.5:9b")
+LOCAL_NARRATION_MODEL  = os.getenv("LOCAL_NARRATION_MODEL", LOCAL_MODEL)
 
 PROVIDER_BASE_URLS = {
     "openai":     None,
@@ -225,7 +226,7 @@ def _make_client() -> tuple[OpenAI, str]:
     if NARRATIVE_BACKEND == "local":
         return (
             OpenAI(api_key="ollama", base_url=f"{OLLAMA_URL}/v1"),
-            LOCAL_MODEL,
+            LOCAL_NARRATION_MODEL,
         )
     api_key  = (os.getenv("OPENAI_API_KEY") if CLOUD_PROVIDER == "openai"
                 else os.getenv("OPENROUTER_API_KEY"))
@@ -296,15 +297,23 @@ def _parse_response(raw: str, used_local: bool = False) -> NarrationResult:
     Strips skill tags from choice text (e.g., "[Deception]") and stores
     them separately. The player never sees the skill name.
     """
-    # Normalize delimiter variants: "---\nCHOICES---", "--- CHOICES:", "---\nCHOICES:", etc.
-    normalized = re.sub(r"-{3,}\s*CHOICES\s*-{3,}", "---CHOICES---", raw)
-    normalized = re.sub(r"-{3,}\s*CHOICES\s*:?", "---CHOICES---", normalized)
+    # Normalize any line that is essentially "CHOICES" surrounded by formatting
+    # Handles: ---CHOICES---, **CHOICES---, CHOICES:, --- CHOICES :, etc.
+    normalized = re.sub(
+        r"^[\s*-]*CHOICES[\s*-:]*$", "---CHOICES---", raw, flags=re.MULTILINE
+    )
     if "---CHOICES---" not in normalized:
         raise CloudGMError("GM response missing ---CHOICES--- delimiter")
 
     passage, choices_raw = normalized.split("---CHOICES---", 1)
     passage     = passage.strip()
     choices_raw = choices_raw.strip()
+
+    # Strip markdown emphasis (*italic* and **bold**) — frontend is plain text
+    passage = re.sub(r"\*{1,2}(.+?)\*{1,2}", r"\1", passage)
+    # Strip stray --- separators from passage edges
+    passage = re.sub(r"^-{3,}\s*\n", "", passage)
+    passage = re.sub(r"\n\s*-{3,}\s*$", "", passage)
 
     word_count = len(passage.split())
     if word_count < 250:
@@ -321,8 +330,11 @@ def _parse_response(raw: str, used_local: bool = False) -> NarrationResult:
         line = line.strip()
         if not line or re.match(r"^-{2,}$", line):
             continue
-        line = re.sub(r"^\d+[\.\)]\s*", "", line)
-        line = re.sub(r"^-\s+", "", line)
+        line = re.sub(r"^\d+[\.\)]\s*", "", line)   # strip "1. " or "1) "
+        line = re.sub(r"^-\s+", "", line)            # strip "- "
+        line = re.sub(r"^[\s*#]+", "", line)         # strip leading whitespace, *, #
+        line = re.sub(r"[\s*]+$", "", line)          # strip trailing whitespace, *
+        line = line.strip('"').strip()               # strip wrapping quotes
         if line:
             raw_choices.append(line)
 
@@ -399,7 +411,8 @@ def _narrate_with_backend(
     last_error    = None
 
     for attempt in range(max_retries + 1):
-        msg_content = f"/no_think\n{prompt}" if used_local else prompt
+        is_qwen = used_local and "qwen" in LOCAL_NARRATION_MODEL.lower()
+        msg_content = f"/no_think\n{prompt}" if is_qwen else prompt
         messages = [{"role": "user", "content": msg_content}]
         if attempt > 0 and last_error:
             messages.append({
@@ -410,11 +423,12 @@ def _narrate_with_backend(
                 ),
             })
 
+        timeout = 180.0 if used_local else 60.0
         response = client.chat.completions.create(
             model=model,
             max_completion_tokens=MAX_TOKENS,
             messages=messages,
-            timeout=60.0,
+            timeout=timeout,
         )
         raw = response.choices[0].message.content or ""
 
@@ -438,8 +452,9 @@ def _narrate_with_local_fallback(ctx: ContextPackage) -> NarrationResult:
     Output quality will be lower but the turn advances.
     """
     import httpx
+    qwen_prefix = "/no_think\n" if "qwen" in LOCAL_NARRATION_MODEL.lower() else ""
     simplified_prompt = (
-        f"/no_think\nYou are the narrator for a Star Wars RPG. Write in second person "
+        f"{qwen_prefix}You are the narrator for a Star Wars RPG. Write in second person "
         f"present tense, 250-400 words.\n\n"
         f"SITUATION: {ctx.situation}\n"
         f"LOCATION: {ctx.location}\n"
@@ -450,7 +465,7 @@ def _narrate_with_local_fallback(ctx: ContextPackage) -> NarrationResult:
     response = httpx.post(
         f"{OLLAMA_URL}/api/generate",
         json={
-            "model": LOCAL_MODEL,
+            "model": LOCAL_NARRATION_MODEL,
             "prompt": simplified_prompt,
             "stream": False,
             "options": {"temperature": 0.7, "num_predict": 1200},
