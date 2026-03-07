@@ -12,11 +12,13 @@ import json
 import logging
 import os
 import random
+import threading
 from dataclasses import asdict
 from datetime import datetime, timezone
 
 import httpx
 from fastapi import APIRouter, BackgroundTasks, HTTPException
+from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 
 from engine.character import Character
@@ -27,7 +29,13 @@ from engine.checks import (
     describe_pool_for_display,
 )
 from engine.dice import roll_pool
-from gm.cloud_gm import narrate_turn, NARRATIVE_BACKEND
+from gm.cloud_gm import (
+    narrate_turn,
+    narrate_turn_stream,
+    _parse_response,
+    CloudGMError,
+    NARRATIVE_BACKEND,
+)
 from gm.context import (
     ArcState,
     ContextPackage,
@@ -37,7 +45,7 @@ from gm.context import (
 )
 from gm.local_gm import decide_check
 from state.db import get_connection
-from state.memory import compress_if_needed
+from state.memory import compress_if_needed, should_compress, compress_act_turns
 from state.session import (
     create_session,
     get_act_summaries,
@@ -51,6 +59,7 @@ router = APIRouter()
 
 OLLAMA_URL  = os.getenv("OLLAMA_URL", "http://localhost:11434")
 LOCAL_MODEL = os.getenv("LOCAL_MODEL", "qwen3.5:9b")
+STREAMING_ENABLED = os.getenv("STREAMING_ENABLED", "true").lower() == "true"
 
 
 # ── Request / Response Models ──────────────────────────────────────────
@@ -367,6 +376,7 @@ async def create_session_route(
         "session_id": session_id,
         "opening_narration": narration_result.passage,
         "choices": narration_result.choices,
+        "streaming_enabled": STREAMING_ENABLED,
     }
 
 
@@ -569,6 +579,7 @@ async def get_session_route(session_id: str):
         "session_id": session_id,
         "campaign_name": session["campaign_name"],
         "turn_count": turn_count,
+        "streaming_enabled": STREAMING_ENABLED,
         "session_state": {
             "wounds": character.current_wounds,
             "strain": character.current_strain,
@@ -588,3 +599,239 @@ async def get_session_route(session_id: str):
         ],
         "last_turn": last_turn,
     }
+
+
+@router.post("/session/{session_id}/turn/stream")
+async def handle_turn_stream(
+    session_id: str,
+    req: TurnRequest,
+):
+    """
+    SSE streaming variant of the turn handler.
+    Streams narration text chunks, then sends a final 'done' event
+    with choices, dice result, and session state.
+    """
+    if not STREAMING_ENABLED:
+        raise HTTPException(400, "Streaming is not enabled")
+
+    # ── Step 0: Load session state ────────────────────────────────────
+    session = get_session(session_id)
+    if session is None:
+        raise HTTPException(404, "Session not found")
+
+    character = Character.model_validate_json(session["character_json"])
+    arc_state = json.loads(session["arc_state_json"])
+    spine = load_campaign_spine(session["campaign_name"])
+    current_act = spine["acts"][arc_state["current_act"] - 1]
+
+    # ── Step 1: Resolve the player's choice ───────────────────────────
+    last_turn = get_most_recent_turn(session_id)
+    previous_choices = json.loads(last_turn["choices_json"])
+
+    if req.choice_index < 0 or req.choice_index >= len(previous_choices):
+        raise HTTPException(400, f"Invalid choice_index: {req.choice_index}")
+
+    player_action = previous_choices[req.choice_index]
+
+    # ── Step 2: Build scene description for local GM ──────────────────
+    scene_description = (
+        f"PREVIOUS: {last_turn['narration'][-500:]}\n\n"
+        f"THE PLAYER CHOSE: {player_action}"
+    )
+
+    # ── Step 3: Check decision (local model) ──────────────────────────
+    recent_turns = get_recent_turns(session_id, limit=5)
+    recent_failure_count = sum(
+        1 for t in recent_turns[-3:]
+        if t.outcome_quadrant and t.outcome_quadrant.startswith("failure")
+    )
+
+    check_decision = decide_check(
+        character=character,
+        scene_description=scene_description,
+        player_action=player_action,
+        arc_state=arc_state,
+        recent_failure_count=recent_failure_count,
+    )
+
+    # ── Step 4: Dice resolution (if check required) ───────────────────
+    dice_pool = None
+    roll_result = None
+
+    if check_decision.requires_check:
+        check_request = CheckRequest(
+            skill=check_decision.skill,
+            difficulty=DIFFICULTY_LABELS[check_decision.difficulty],
+            boost_dice=check_decision.boost_dice,
+            setback_dice=check_decision.setback_dice,
+        )
+        dice_pool = build_pool(character, check_request)
+        roll_result = roll_pool(dice_pool)
+
+        # Apply mechanical consequences (wounds, strain) — physics first
+        if roll_result.outcome_quadrant in ("failure_threat", "success_threat"):
+            if abs(roll_result.net_advantages) >= 2:
+                character.current_strain = min(
+                    character.current_strain + 1,
+                    character.strain_threshold,
+                )
+
+    # ── Step 5: Assemble context package ──────────────────────────────
+    story_summary = get_act_summaries(session_id)
+    npc_states = load_npc_states(session_id, spine)
+
+    ctx = ContextPackage(
+        character=character,
+        arc=ArcState(
+            campaign_name=spine["name"],
+            current_act=arc_state["current_act"],
+            total_acts=spine["total_acts"],
+            act_name=current_act["name"],
+            act_progress=arc_state.get("act_progress", 0.0),
+            current_anchor=current_act["anchor"],
+            next_anchor=current_act.get("next_anchor", ""),
+            anchors_completed=arc_state.get("anchors_completed", []),
+            throughline_question=spine["throughline_question"],
+            tension_level=current_act["tension"],
+            open_threads=[
+                ThreadState(name=t) if isinstance(t, str) else t
+                for t in (
+                    current_act.get("open_threads", [])
+                    + arc_state.get("dynamic_threads", [])
+                )
+            ],
+            closed_threads=arc_state.get("closed_threads", []),
+        ),
+        story_summary=story_summary,
+        recent_turns=recent_turns,
+        active_npcs=npc_states,
+        location=arc_state.get("current_location", ""),
+        situation=scene_description,
+        galactic_context=current_act.get("galactic_context", ""),
+        scene_type=check_decision.scene_type,
+        dice_pool=dice_pool,
+        roll_result=roll_result,
+    )
+
+    # ── Step 6: Stream narration via SSE ──────────────────────────────
+    # The generator streams text chunks, then a final JSON event.
+    # Runs in a threadpool via StreamingResponse (sync generator).
+    DELIMITER = "---CHOICES---"
+    BUFFER_SIZE = len(DELIMITER)
+
+    def generate():
+        full_text = ""
+        sent_up_to = 0
+        choices_detected = False
+
+        try:
+            for chunk in narrate_turn_stream(ctx):
+                full_text += chunk
+
+                if choices_detected:
+                    continue
+
+                if DELIMITER in full_text:
+                    choices_detected = True
+                    delimiter_pos = full_text.index(DELIMITER)
+                    unsent = full_text[sent_up_to:delimiter_pos]
+                    if unsent.strip():
+                        yield f"data: {json.dumps({'text': unsent})}\n\n"
+                    sent_up_to = len(full_text)
+                else:
+                    # Buffer last BUFFER_SIZE chars to avoid sending
+                    # a partial delimiter across chunk boundaries
+                    safe_end = len(full_text) - BUFFER_SIZE
+                    if safe_end > sent_up_to:
+                        to_send = full_text[sent_up_to:safe_end]
+                        yield f"data: {json.dumps({'text': to_send})}\n\n"
+                        sent_up_to = safe_end
+        except Exception as e:
+            yield f"event: error\ndata: {json.dumps({'error': str(e)})}\n\n"
+            return
+
+        # Flush any remaining buffered passage text
+        if not choices_detected:
+            remaining = full_text[sent_up_to:]
+            if remaining.strip():
+                yield f"data: {json.dumps({'text': remaining})}\n\n"
+
+        # ── Parse response ────────────────────────────────────────────
+        try:
+            narration_result = _parse_response(
+                full_text,
+                used_local=(NARRATIVE_BACKEND == "local"),
+            )
+        except CloudGMError as e:
+            yield f"event: error\ndata: {json.dumps({'error': str(e)})}\n\n"
+            return
+
+        # ── Step 7: Persist ───────────────────────────────────────────
+        turn_number = get_turn_count(session_id) + 1
+
+        log_turn(
+            session_id=session_id,
+            turn_number=turn_number,
+            player_action=player_action,
+            choice_index=req.choice_index,
+            narration=narration_result.passage,
+            choices=narration_result.choices,
+            check_skill=(check_decision.skill
+                         if check_decision.requires_check else None),
+            check_difficulty=(check_decision.difficulty
+                              if check_decision.requires_check else None),
+            dice_pool_json=(json.dumps(asdict(dice_pool))
+                            if dice_pool else None),
+            roll_result_json=(json.dumps(asdict(roll_result))
+                              if roll_result else None),
+            context_json=(json.dumps(asdict(ctx))
+                          if NARRATIVE_BACKEND != "local" else None),
+            scene_type=check_decision.scene_type,
+            moral_weight=check_decision.moral_weight,
+            skill_tags_json=json.dumps(narration_result.skill_tags),
+        )
+
+        # ── Step 8: Update session state ──────────────────────────────
+        update_session_state(session_id, character, arc_state)
+
+        # ── Step 9: Background compression (sync in generator thread) ─
+        try:
+            if should_compress(session_id):
+                compress_act_turns(session_id, arc_state["current_act"])
+        except Exception:
+            pass
+
+        # ── Step 10: NPC knowledge update (fire and forget) ───────────
+        def _npc_update():
+            import asyncio
+            try:
+                loop = asyncio.new_event_loop()
+                loop.run_until_complete(
+                    update_npc_knowledge(
+                        session_id, narration_result.passage, npc_states
+                    )
+                )
+                loop.close()
+            except Exception:
+                pass
+
+        threading.Thread(target=_npc_update, daemon=True).start()
+
+        # ── Final event with turn data ────────────────────────────────
+        payload = {
+            "narration": narration_result.passage,
+            "choices": narration_result.choices,
+            "dice_result": (describe_pool_for_display(dice_pool)
+                            if dice_pool else None),
+            "roll_summary": (roll_result.narrative_label()
+                             if roll_result else None),
+            "session_state": {
+                "turn_number": turn_number,
+                "wounds": character.current_wounds,
+                "strain": character.current_strain,
+            },
+            "used_local_narration": narration_result.used_local,
+        }
+        yield f"event: done\ndata: {json.dumps(payload)}\n\n"
+
+    return StreamingResponse(generate(), media_type="text/event-stream")

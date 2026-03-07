@@ -343,6 +343,7 @@ header {
 const API = '';  // same origin
 let sessionId = null;
 let currentChoices = [];
+let streamingEnabled = false;
 
 /* ── Start session ─────────────────────────────────────────────── */
 async function startSession() {
@@ -368,6 +369,7 @@ async function startSession() {
 
     const data = await res.json();
     sessionId = data.session_id;
+    streamingEnabled = data.streaming_enabled || false;
 
     // Switch to game screen
     document.getElementById('start-screen').style.display = 'none';
@@ -387,6 +389,9 @@ async function startSession() {
 
 /* ── Take a turn ───────────────────────────────────────────────── */
 async function takeTurn(choiceIndex) {
+  if (streamingEnabled) {
+    return takeTurnStream(choiceIndex);
+  }
   disableChoices();
   highlightChoice(choiceIndex);
   showLoading(true);
@@ -437,6 +442,112 @@ async function takeTurn(choiceIndex) {
   } finally {
     showLoading(false);
   }
+}
+
+/* ── Take a turn (streaming) ────────────────────────────────────── */
+async function takeTurnStream(choiceIndex) {
+  disableChoices();
+  highlightChoice(choiceIndex);
+  showLoading(true);
+  clearError();
+  hideDicePanel();
+
+  try {
+    const res = await fetch(API + '/session/' + sessionId + '/turn/stream', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ choice_index: choiceIndex }),
+    });
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ detail: res.statusText }));
+      throw new Error(err.detail || 'Turn failed');
+    }
+
+    showLoading(false);
+    const passageEl = document.getElementById('passage');
+    passageEl.innerHTML = '';
+
+    const reader = res.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = '';
+    let passageText = '';
+    let turnComplete = false;
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buffer += decoder.decode(value, { stream: true });
+
+      // Parse complete SSE events (separated by \n\n)
+      while (true) {
+        const eventEnd = buffer.indexOf('\n\n');
+        if (eventEnd === -1) break;
+
+        const eventBlock = buffer.slice(0, eventEnd);
+        buffer = buffer.slice(eventEnd + 2);
+
+        let eventType = 'message';
+        let eventData = '';
+
+        for (const line of eventBlock.split('\n')) {
+          if (line.startsWith('event: ')) {
+            eventType = line.slice(7);
+          } else if (line.startsWith('data: ')) {
+            eventData += line.slice(6);
+          }
+        }
+
+        if (!eventData) continue;
+
+        let data;
+        try { data = JSON.parse(eventData); } catch { continue; }
+
+        if (eventType === 'done') {
+          turnComplete = true;
+          renderPassage(data.narration);
+          renderChoices(data.choices);
+
+          if (data.dice_result) {
+            renderDicePanel(data.dice_result, data.roll_summary);
+          }
+
+          const warn = document.getElementById('local-warning');
+          if (data.used_local_narration) warn.classList.add('visible');
+          else warn.classList.remove('visible');
+
+          if (data.session_state) {
+            showStatus(
+              data.session_state.turn_number,
+              data.session_state.wounds,
+              data.session_state.strain
+            );
+          }
+        } else if (eventType === 'error') {
+          throw new Error(data.error || 'Stream error');
+        } else {
+          // Text chunk — append to streamed passage
+          passageText += data.text;
+          renderStreamedPassage(passageText);
+        }
+      }
+    }
+
+    if (!turnComplete) {
+      throw new Error('Stream ended without completion');
+    }
+  } catch (e) {
+    showError(e.message);
+    enableChoices();
+    showLoading(false);
+  }
+}
+
+/* ── Render streamed prose (progressive) ───────────────────────── */
+function renderStreamedPassage(text) {
+  const el = document.getElementById('passage');
+  const paragraphs = text.split(/\n\n+/).filter(p => p.trim());
+  el.innerHTML = paragraphs.map(p => '<p>' + escapeHtml(p.trim()) + '</p>').join('');
 }
 
 /* ── Render prose ──────────────────────────────────────────────── */
@@ -578,6 +689,7 @@ async function resumeSession(sid) {
 
     const data = await res.json();
     sessionId = data.session_id;
+    streamingEnabled = data.streaming_enabled || false;
 
     document.getElementById('start-screen').style.display = 'none';
     document.getElementById('game-screen').style.display = 'block';
