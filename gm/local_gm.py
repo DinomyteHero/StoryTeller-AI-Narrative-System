@@ -103,7 +103,7 @@ def decide_check(
     else:
         failure_calibration = ""
 
-    template = PROMPT_PATH.read_text()
+    template = PROMPT_PATH.read_text(encoding="utf-8")
     prompt   = template.format(
         character_summary=character.narrative_status(),
         current_act=arc_state.get("current_act", 1),
@@ -130,7 +130,10 @@ def decide_check(
                 timeout=30.0,
             )
             response.raise_for_status()
-            raw_text = response.json()["response"].strip()
+            resp_json = response.json()
+            raw_text = resp_json["response"].strip()
+            if not raw_text and resp_json.get("thinking", "").strip():
+                raw_text = resp_json["thinking"].strip()
 
             if raw_text.startswith("```"):
                 raw_text = raw_text.split("```")[1]

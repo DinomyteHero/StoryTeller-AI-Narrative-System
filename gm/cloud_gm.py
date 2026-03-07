@@ -247,7 +247,7 @@ class CloudGMError(Exception):
 
 
 def _build_prompt(ctx: ContextPackage) -> str:
-    template       = PROMPT_PATH.read_text()
+    template       = PROMPT_PATH.read_text(encoding="utf-8")
     recent_summary = _format_recent_turns(ctx.recent_turns)
     full_summary   = f"{ctx.story_summary}\n\nRECENT TURNS:\n{recent_summary}"
     scene_pacing   = _get_scene_block(ctx.scene_type)
@@ -296,10 +296,13 @@ def _parse_response(raw: str, used_local: bool = False) -> NarrationResult:
     Strips skill tags from choice text (e.g., "[Deception]") and stores
     them separately. The player never sees the skill name.
     """
-    if "---CHOICES---" not in raw:
+    # Normalize delimiter variants: "---\nCHOICES---", "--- CHOICES:", "---\nCHOICES:", etc.
+    normalized = re.sub(r"-{3,}\s*CHOICES\s*-{3,}", "---CHOICES---", raw)
+    normalized = re.sub(r"-{3,}\s*CHOICES\s*:?", "---CHOICES---", normalized)
+    if "---CHOICES---" not in normalized:
         raise CloudGMError("GM response missing ---CHOICES--- delimiter")
 
-    passage, choices_raw = raw.split("---CHOICES---", 1)
+    passage, choices_raw = normalized.split("---CHOICES---", 1)
     passage     = passage.strip()
     choices_raw = choices_raw.strip()
 
@@ -308,17 +311,20 @@ def _parse_response(raw: str, used_local: bool = False) -> NarrationResult:
         raise CloudGMError(
             f"Passage too short ({word_count} words, minimum 250). Retrying."
         )
-    if word_count > 600:
+    if word_count > 800:
         raise CloudGMError(
-            f"Passage too long ({word_count} words, maximum 600). Retrying."
+            f"Passage too long ({word_count} words, maximum 800). Retrying."
         )
 
-    raw_choices = [
-        re.sub(r"^\d+[\.\)]\s*", "", line.strip())
-        for line in choices_raw.split("\n")
-        if line.strip()
-    ]
-    raw_choices = [c for c in raw_choices if c]
+    raw_choices = []
+    for line in choices_raw.split("\n"):
+        line = line.strip()
+        if not line or re.match(r"^-{2,}$", line):
+            continue
+        line = re.sub(r"^\d+[\.\)]\s*", "", line)
+        line = re.sub(r"^-\s+", "", line)
+        if line:
+            raw_choices.append(line)
 
     if len(raw_choices) < 2:
         raise CloudGMError(
@@ -405,9 +411,9 @@ def _narrate_with_backend(
 
         response = client.chat.completions.create(
             model=model,
-            max_tokens=MAX_TOKENS,
+            max_completion_tokens=MAX_TOKENS,
             messages=messages,
-            timeout=20.0,  # v1.5: 20-second timeout
+            timeout=60.0,
         )
         raw = response.choices[0].message.content or ""
 

@@ -13,7 +13,7 @@ import logging
 import os
 import random
 import threading
-from dataclasses import asdict
+from dataclasses import asdict, fields
 from datetime import datetime, timezone
 
 import httpx
@@ -132,7 +132,11 @@ def load_npc_states(session_id: str, spine: dict) -> list[NPCState]:
         ).fetchall()
 
     if rows:
-        return [NPCState(**json.loads(r["state_json"])) for r in rows]
+        valid_fields = {f.name for f in fields(NPCState)}
+        return [
+            NPCState(**{k: v for k, v in json.loads(r["state_json"]).items() if k in valid_fields})
+            for r in rows
+        ]
 
     # First turn — initialize from spine roster
     npcs = []
@@ -368,8 +372,7 @@ async def create_session_route(
         choices=narration_result.choices,
         scene_type="exploration",
         skill_tags_json=json.dumps(narration_result.skill_tags),
-        context_json=(json.dumps(asdict(ctx))
-                      if NARRATIVE_BACKEND != "local" else None),
+        context_json=None,
     )
 
     return {
@@ -508,8 +511,7 @@ async def handle_turn(
         check_difficulty=check_decision.difficulty if check_decision.requires_check else None,
         dice_pool_json=json.dumps(asdict(dice_pool)) if dice_pool else None,
         roll_result_json=json.dumps(asdict(roll_result)) if roll_result else None,
-        context_json=(json.dumps(asdict(ctx))
-                      if NARRATIVE_BACKEND != "local" else None),
+        context_json=None,
         scene_type=check_decision.scene_type,
         moral_weight=check_decision.moral_weight,
         skill_tags_json=json.dumps(narration_result.skill_tags),
@@ -784,8 +786,7 @@ async def handle_turn_stream(
                             if dice_pool else None),
             roll_result_json=(json.dumps(asdict(roll_result))
                               if roll_result else None),
-            context_json=(json.dumps(asdict(ctx))
-                          if NARRATIVE_BACKEND != "local" else None),
+            context_json=None,
             scene_type=check_decision.scene_type,
             moral_weight=check_decision.moral_weight,
             skill_tags_json=json.dumps(narration_result.skill_tags),
