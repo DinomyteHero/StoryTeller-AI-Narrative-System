@@ -81,6 +81,9 @@ class ArcState:
     tension_level:        str
     open_threads:         list[ThreadState]  # v2.4: structured threads with state (evaluation §2.2)
     closed_threads:       list[str]
+    turns_this_act:       int = 0            # v2.5: incremented each turn, reset at act boundary (§26)
+    anchor_proximity:     str = "distant"    # v2.5: distant/approaching/imminent/reached (§26.3)
+    anchor_description:   str = ""           # v2.5: narrative description of the anchor beat (§26.4)
 
 
 @dataclass
@@ -96,9 +99,11 @@ class ContextPackage:
     sequence:         Optional[dict] = None  # v1.6: multi-beat sequence state (Game Mechanics §3) — null for normal turns
     dice_pool:        Optional[DicePool]   = None
     roll_result:      Optional[RollResult] = None
-    scene_type:       str = "social"   # v2.1: from check decision (Game Mechanics §10)
-    tone_instruction: str = "Maintain established tone"
-    prose_diagnostic: Optional[dict] = None  # v1.5: reserved for prose diagnostic signal (Game Mechanics v1.1 §13)
+    scene_type:         str = "social"   # v2.1: from check decision (Game Mechanics §10)
+    tone_instruction:   str = "Maintain established tone"
+    prose_diagnostic:   Optional[dict] = None  # v1.5: reserved for prose diagnostic signal (Game Mechanics v1.1 §13)
+    anchor_instruction: Optional[str] = None   # v2.5: set when act_progress >= 1.0 (§26.4)
+    expected_turns:     list[int] = field(default_factory=lambda: [8, 12])  # v2.5: [min, max] from spine
 
     def build_dice_result_block(self) -> str:
         if self.roll_result is None:
@@ -132,6 +137,52 @@ class ContextPackage:
         if not self.active_npcs:
             return "No NPCs currently active in scene."
         return "\n\n".join(npc.to_prompt_block() for npc in self.active_npcs)
+
+    def build_pacing_block(self) -> str:
+        """Assemble the PACING block for the narration prompt (§26.6)."""
+        if self.anchor_instruction:
+            return self.anchor_instruction
+
+        progress_pct = int(self.arc.act_progress * 100)
+        expected_mid = sum(self.expected_turns) // 2
+
+        lines = [
+            "PACING:",
+            f"Act progress: {progress_pct}%",
+            f"Turns in act: {self.arc.turns_this_act} of ~{expected_mid}",
+            f"Next structural beat: {self.arc.anchor_description or self.arc.next_anchor}",
+            f"Proximity: {self.arc.anchor_proximity}",
+        ]
+
+        if progress_pct <= 30:
+            lines.append(
+                "This is early in the act. Establish the situation, introduce "
+                "complications, let the player explore. Do not rush toward the "
+                "anchor. There is time for character moments, world detail, and setup."
+            )
+        elif progress_pct <= 70:
+            lines.append(
+                "The act is developing. Threads should be converging. "
+                "Complications are mounting. The player should feel increasing "
+                "pressure from the situation, but the anchor is not imminent. "
+                "Maintain tension without premature resolution."
+            )
+        elif progress_pct <= 90:
+            lines.append(
+                "The act is approaching its anchor beat. Begin converging "
+                "threads. Increase urgency. The choices should narrow toward "
+                "the conditions that will trigger the anchor. The player should "
+                "sense that something is about to change."
+            )
+        else:
+            lines.append(
+                "The anchor beat is imminent. The next 1-2 turns should bring "
+                "the current threads to a convergence point. The choices should "
+                "be consequential — the player is making the decisions that "
+                "determine how they enter the anchor situation."
+            )
+
+        return "\n".join(lines)
 
     def build_open_threads_block(self) -> str:
         if not self.arc.open_threads:

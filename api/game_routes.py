@@ -16,7 +16,6 @@ import threading
 from dataclasses import asdict, fields
 from datetime import datetime, timezone
 
-import httpx
 from fastapi import APIRouter, BackgroundTasks, HTTPException
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
@@ -43,6 +42,15 @@ from gm.context import (
     ThreadState,
     TurnMemory,
 )
+from engine.reconciliation import (
+    reconcile_turn,
+    apply_npc_updates,
+    apply_story_progress,
+    apply_thread_updates,
+    detect_act_boundary,
+    build_anchor_instruction,
+    run_between_act_pipeline,
+)
 from gm.local_gm import decide_check
 from state.db import get_connection
 from state.memory import compress_if_needed, should_compress, compress_act_turns
@@ -57,8 +65,6 @@ from state.session import (
 
 router = APIRouter()
 
-OLLAMA_URL  = os.getenv("OLLAMA_URL", "http://localhost:11434")
-LOCAL_MODEL = os.getenv("LOCAL_MODEL", "qwen3.5:9b")
 STREAMING_ENABLED = os.getenv("STREAMING_ENABLED", "true").lower() == "true"
 
 
@@ -195,87 +201,6 @@ def resolve_initial_variations(session_id: str, spine: dict) -> None:
                         conn.commit()
 
 
-NPC_KNOWLEDGE_PROMPT = """You are analyzing a narrative passage from an RPG session to determine what NPCs learned.
-
-PASSAGE:
-{narration}
-
-CURRENT NPC STATES:
-{npc_states}
-
-For each NPC present in the scene, list any NEW information they learned from this passage.
-Return a JSON array. Each element: {{"npc_name": "...", "learned": ["fact 1", "fact 2"]}}
-If no NPC learned anything new, return an empty array: []
-Return ONLY valid JSON, no explanation."""
-
-
-async def update_npc_knowledge(
-    session_id: str, narration: str, npc_states: list[NPCState]
-) -> None:
-    """V1 minimal reconciliation — update NPC knowledge via local model."""
-    if not npc_states:
-        return
-    try:
-        npc_block = "\n".join(
-            f"- {npc.name}: knows {npc.knows}" for npc in npc_states
-        )
-        async with httpx.AsyncClient() as client:
-            response = await client.post(
-                f"{OLLAMA_URL}/api/generate",
-                json={
-                    "model": LOCAL_MODEL,
-                    "prompt": NPC_KNOWLEDGE_PROMPT.format(
-                        narration=narration, npc_states=npc_block
-                    ),
-                    "stream": False,
-                    "options": {"temperature": 0.1, "num_predict": 200},
-                },
-                timeout=30.0,
-            )
-            response.raise_for_status()
-            raw = response.json()["response"].strip()
-
-            # Strip markdown code fences if present
-            if raw.startswith("```"):
-                raw = raw.split("```")[1]
-                if raw.startswith("json"):
-                    raw = raw[4:]
-                raw = raw.strip()
-
-            updates = json.loads(raw)
-            if not isinstance(updates, list):
-                return
-
-            for update in updates:
-                npc_name = update.get("npc_name")
-                learned = update.get("learned", [])
-                if not npc_name or not learned:
-                    continue
-                # Find and update the NPC
-                with get_connection() as conn:
-                    row = conn.execute(
-                        "SELECT state_json FROM npc_states "
-                        "WHERE session_id = ? AND npc_name = ?",
-                        (session_id, npc_name),
-                    ).fetchone()
-                    if row:
-                        state = json.loads(row["state_json"])
-                        existing_knows = state.get("knows", [])
-                        for fact in learned:
-                            if fact not in existing_knows:
-                                existing_knows.append(fact)
-                        state["knows"] = existing_knows
-                        now = datetime.now(timezone.utc).isoformat()
-                        conn.execute(
-                            "UPDATE npc_states SET state_json = ?, updated_at = ? "
-                            "WHERE session_id = ? AND npc_name = ?",
-                            (json.dumps(state), now, session_id, npc_name),
-                        )
-                        conn.commit()
-    except Exception as e:
-        logging.error(f"NPC knowledge update failed: {e}")
-
-
 # ── Routes ──────────────────────────────────────────────────────────────
 
 @router.post("/session")
@@ -299,6 +224,8 @@ async def create_session_route(
         "closed_threads": [],
         "dynamic_threads": [],
         "current_location": act_1.get("opening_location", ""),
+        "turns_this_act": 0,
+        "anchor_proximity": "distant",
     }
 
     # ── Create session in database ────────────────────────────────────
@@ -344,6 +271,7 @@ async def create_session_route(
                 ThreadState(name=t) for t in act_1.get("open_threads", [])
             ],
             closed_threads=[],
+            anchor_description=act_1.get("anchor_description", ""),
         ),
         story_summary="",
         recent_turns=[],
@@ -357,6 +285,7 @@ async def create_session_route(
             "the character's voice, and the immediate situation. Ground "
             "the reader in a specific sensory moment."
         ),
+        expected_turns=act_1.get("expected_turns", [8, 12]),
     )
 
     # ── Generate opening narration (one cloud call) ───────────────────
@@ -461,6 +390,13 @@ async def handle_turn(
     story_summary = get_act_summaries(session_id)
     npc_states = load_npc_states(session_id, spine)
 
+    # Check if anchor was reached on previous turn — inject anchor instruction
+    anchor_inst = None
+    if arc_state.get("act_progress", 0.0) >= 1.0:
+        next_act_idx = arc_state["current_act"]  # 0-indexed next
+        next_act = spine["acts"][next_act_idx] if next_act_idx < spine["total_acts"] else None
+        anchor_inst = build_anchor_instruction(current_act, next_act)
+
     ctx = ContextPackage(
         character=character,
         arc=ArcState(
@@ -482,6 +418,9 @@ async def handle_turn(
                 )
             ],
             closed_threads=arc_state.get("closed_threads", []),
+            turns_this_act=arc_state.get("turns_this_act", 0),
+            anchor_proximity=arc_state.get("anchor_proximity", "distant"),
+            anchor_description=current_act.get("anchor_description", ""),
         ),
         story_summary=story_summary,
         recent_turns=recent_turns,
@@ -492,12 +431,47 @@ async def handle_turn(
         scene_type=check_decision.scene_type,
         dice_pool=dice_pool,
         roll_result=roll_result,
+        anchor_instruction=anchor_inst,
+        expected_turns=current_act.get("expected_turns", [8, 12]),
     )
 
     # ── Step 6: Narrate (cloud model — one call) ─────────────────────
     narration_result = narrate_turn(ctx)
 
-    # ── Step 7: Persist ──────────────────────────────────────────────
+    # ── Step 7: Reconciliation (local model) ─────────────────────────
+    check_result_str = ""
+    if roll_result:
+        check_result_str = (
+            f"{check_decision.skill} ({check_decision.difficulty}): "
+            f"{roll_result.narrative_label()}"
+        )
+
+    recon_result = reconcile_turn(
+        narration=narration_result.passage,
+        player_action=player_action,
+        check_result=check_result_str,
+        active_npcs=npc_states,
+        arc=ctx.arc,
+        spine_act=current_act,
+    )
+
+    # ── Step 8: Apply state updates ──────────────────────────────────
+    # NPC updates (knowledge, disposition)
+    apply_npc_updates(recon_result.npc_updates, npc_states)
+    for npc in npc_states:
+        save_npc_state(session_id, npc)
+
+    # Story progress (act_progress, anchor_proximity)
+    arc_state["turns_this_act"] = arc_state.get("turns_this_act", 0) + 1
+    apply_story_progress(recon_result.story_progress, arc_state, current_act)
+
+    # Thread updates
+    apply_thread_updates(recon_result.thread_updates, arc_state, current_act)
+
+    # ── Step 9: Check act boundary ───────────────────────────────────
+    act_boundary_reached = detect_act_boundary(arc_state)
+
+    # ── Step 10: Persist ─────────────────────────────────────────────
     turn_number = get_turn_count(session_id) + 1
 
     log_turn(
@@ -517,18 +491,30 @@ async def handle_turn(
         skill_tags_json=json.dumps(narration_result.skill_tags),
     )
 
-    # ── Step 8: Update session state ──────────────────────────────────
+    # ── Step 11: Update session state ─────────────────────────────────
     update_session_state(session_id, character, arc_state)
 
-    # ── Step 9: Background tasks ──────────────────────────────────────
+    # ── Step 12: Background compression ───────────────────────────────
     background_tasks.add_task(
         compress_if_needed, session_id, arc_state["current_act"]
     )
 
-    # ── Step 10: NPC state update (V1 minimal reconciliation) ────────
-    background_tasks.add_task(
-        update_npc_knowledge, session_id, narration_result.passage, npc_states
-    )
+    # ── Step 13: Between-act processing (if boundary reached) ────────
+    # Runs synchronously — the pipeline updates DB state (act reset, NPC drift,
+    # compression) and the response must reflect the new act.
+    if act_boundary_reached:
+        pipeline_result = run_between_act_pipeline(
+            session_id, character, spine, arc_state["current_act"],
+        )
+        # Reload arc_state from DB — pipeline step 16 wrote the reset
+        if pipeline_result.next_act_loaded:
+            with get_connection() as conn:
+                row = conn.execute(
+                    "SELECT arc_state_json FROM sessions WHERE id = ?",
+                    (session_id,),
+                ).fetchone()
+                if row:
+                    arc_state = json.loads(row["arc_state_json"])
 
     # ── Return ────────────────────────────────────────────────────────
     return {
@@ -540,8 +526,11 @@ async def handle_turn(
             "turn_number": turn_number,
             "wounds": character.current_wounds,
             "strain": character.current_strain,
+            "act_progress": arc_state.get("act_progress", 0.0),
+            "anchor_proximity": arc_state.get("anchor_proximity", "distant"),
         },
         "used_local_narration": narration_result.used_local,
+        "act_boundary": act_boundary_reached,
     }
 
 
@@ -682,6 +671,13 @@ async def handle_turn_stream(
     story_summary = get_act_summaries(session_id)
     npc_states = load_npc_states(session_id, spine)
 
+    # Check if anchor was reached on previous turn
+    anchor_inst = None
+    if arc_state.get("act_progress", 0.0) >= 1.0:
+        next_act_idx = arc_state["current_act"]
+        next_act = spine["acts"][next_act_idx] if next_act_idx < spine["total_acts"] else None
+        anchor_inst = build_anchor_instruction(current_act, next_act)
+
     ctx = ContextPackage(
         character=character,
         arc=ArcState(
@@ -703,6 +699,9 @@ async def handle_turn_stream(
                 )
             ],
             closed_threads=arc_state.get("closed_threads", []),
+            turns_this_act=arc_state.get("turns_this_act", 0),
+            anchor_proximity=arc_state.get("anchor_proximity", "distant"),
+            anchor_description=current_act.get("anchor_description", ""),
         ),
         story_summary=story_summary,
         recent_turns=recent_turns,
@@ -713,6 +712,8 @@ async def handle_turn_stream(
         scene_type=check_decision.scene_type,
         dice_pool=dice_pool,
         roll_result=roll_result,
+        anchor_instruction=anchor_inst,
+        expected_turns=current_act.get("expected_turns", [8, 12]),
     )
 
     # ── Step 6: Stream narration via SSE ──────────────────────────────
@@ -768,7 +769,36 @@ async def handle_turn_stream(
             yield f"event: error\ndata: {json.dumps({'error': str(e)})}\n\n"
             return
 
-        # ── Step 7: Persist ───────────────────────────────────────────
+        # ── Step 7: Reconciliation (local model) ─────────────────────
+        check_result_str = ""
+        if roll_result:
+            check_result_str = (
+                f"{check_decision.skill} ({check_decision.difficulty}): "
+                f"{roll_result.narrative_label()}"
+            )
+
+        recon_result = reconcile_turn(
+            narration=narration_result.passage,
+            player_action=player_action,
+            check_result=check_result_str,
+            active_npcs=npc_states,
+            arc=ctx.arc,
+            spine_act=current_act,
+        )
+
+        # ── Step 8: Apply state updates ───────────────────────────────
+        apply_npc_updates(recon_result.npc_updates, npc_states)
+        for npc in npc_states:
+            save_npc_state(session_id, npc)
+
+        arc_state["turns_this_act"] = arc_state.get("turns_this_act", 0) + 1
+        apply_story_progress(recon_result.story_progress, arc_state, current_act)
+        apply_thread_updates(recon_result.thread_updates, arc_state, current_act)
+
+        # ── Step 9: Check act boundary ────────────────────────────────
+        act_boundary_reached = detect_act_boundary(arc_state)
+
+        # ── Step 10: Persist ──────────────────────────────────────────
         turn_number = get_turn_count(session_id) + 1
 
         log_turn(
@@ -792,31 +822,34 @@ async def handle_turn_stream(
             skill_tags_json=json.dumps(narration_result.skill_tags),
         )
 
-        # ── Step 8: Update session state ──────────────────────────────
+        # ── Step 11: Update session state ─────────────────────────────
         update_session_state(session_id, character, arc_state)
 
-        # ── Step 9: Background compression (sync in generator thread) ─
+        # ── Step 12: Background compression ───────────────────────────
         try:
             if should_compress(session_id):
                 compress_act_turns(session_id, arc_state["current_act"])
         except Exception:
             pass
 
-        # ── Step 10: NPC knowledge update (fire and forget) ───────────
-        def _npc_update():
-            import asyncio
+        # ── Step 13: Between-act processing ───────────────────────────
+        if act_boundary_reached:
             try:
-                loop = asyncio.new_event_loop()
-                loop.run_until_complete(
-                    update_npc_knowledge(
-                        session_id, narration_result.passage, npc_states
-                    )
+                pipeline_result = run_between_act_pipeline(
+                    session_id, character, spine, arc_state["current_act"],
                 )
-                loop.close()
-            except Exception:
-                pass
-
-        threading.Thread(target=_npc_update, daemon=True).start()
+                if pipeline_result.next_act_loaded:
+                    with get_connection() as conn:
+                        row = conn.execute(
+                            "SELECT arc_state_json FROM sessions WHERE id = ?",
+                            (session_id,),
+                        ).fetchone()
+                        if row:
+                            # Mutate in place — reassignment breaks closure scoping
+                            arc_state.clear()
+                            arc_state.update(json.loads(row["arc_state_json"]))
+            except Exception as e:
+                logging.error(f"Between-act pipeline failed: {e}")
 
         # ── Final event with turn data ────────────────────────────────
         payload = {
@@ -830,8 +863,11 @@ async def handle_turn_stream(
                 "turn_number": turn_number,
                 "wounds": character.current_wounds,
                 "strain": character.current_strain,
+                "act_progress": arc_state.get("act_progress", 0.0),
+                "anchor_proximity": arc_state.get("anchor_proximity", "distant"),
             },
             "used_local_narration": narration_result.used_local,
+            "act_boundary": act_boundary_reached,
         }
         yield f"event: done\ndata: {json.dumps(payload)}\n\n"
 

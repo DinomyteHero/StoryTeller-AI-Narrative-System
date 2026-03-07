@@ -1,0 +1,512 @@
+"""
+Post-turn state reconciliation — Game Mechanics §26.
+
+After the cloud GM produces narration, the local model analyzes what happened
+and produces structured state updates: NPC knowledge/disposition changes, story
+progression, thread updates, anchor proximity detection.
+
+The between-act pipeline runs when an act boundary is detected.
+"""
+
+import json
+import logging
+import os
+from dataclasses import dataclass, field
+from pathlib import Path
+from typing import Optional
+
+import httpx
+
+from gm.context import ArcState, NPCState, ThreadState
+
+PROMPT_PATH = Path(__file__).resolve().parent.parent / "gm" / "prompts" / "reconciliation.txt"
+OLLAMA_URL  = os.getenv("OLLAMA_URL", "http://localhost:11434")
+LOCAL_MODEL = os.getenv("LOCAL_MODEL", "qwen3.5:9b")
+
+# JSON schema for structured output from the local model
+RECONCILIATION_SCHEMA = {
+    "type": "object",
+    "properties": {
+        "npc_updates": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "npc_name": {"type": "string"},
+                    "knowledge_gained": {"type": "array", "items": {"type": "string"}},
+                    "knowledge_lost": {"type": "array", "items": {"type": "string"}},
+                    "disposition_shift": {"type": "number"},
+                },
+                "required": ["npc_name"],
+            },
+        },
+        "thread_updates": {
+            "type": "object",
+            "properties": {
+                "threads_advanced": {"type": "array", "items": {"type": "string"}},
+                "threads_resolved": {"type": "array", "items": {"type": "string"}},
+                "threads_opened": {"type": "array", "items": {"type": "string"}},
+            },
+        },
+        "story_progress": {
+            "type": "object",
+            "properties": {
+                "anchor_proximity": {
+                    "type": "string",
+                    "enum": ["distant", "approaching", "imminent", "reached"],
+                },
+                "progress_delta": {"type": "number"},
+                "reasoning": {"type": "string"},
+            },
+            "required": ["anchor_proximity", "progress_delta"],
+        },
+    },
+    "required": ["npc_updates", "thread_updates", "story_progress"],
+}
+
+
+@dataclass
+class ReconciliationResult:
+    """Structured output from the reconciliation step."""
+    npc_updates: list[dict] = field(default_factory=list)
+    thread_updates: dict = field(default_factory=lambda: {
+        "threads_advanced": [], "threads_resolved": [], "threads_opened": [],
+    })
+    story_progress: dict = field(default_factory=lambda: {
+        "anchor_proximity": "distant", "progress_delta": 0.05, "reasoning": "",
+    })
+
+
+@dataclass
+class BetweenActResult:
+    """Output from the between-act processing pipeline."""
+    act_summary: str = ""
+    character_drift_note: str = ""
+    strain_recovered: int = 0
+    wounds_recovered: int = 0
+    next_act_loaded: bool = False
+    steps_completed: list[str] = field(default_factory=list)
+
+
+def reconcile_turn(
+    narration: str,
+    player_action: str,
+    check_result: str,
+    active_npcs: list[NPCState],
+    arc: ArcState,
+    spine_act: dict,
+    max_retries: int = 2,
+) -> ReconciliationResult:
+    """
+    Orchestrate the local model reconciliation call and parse the response.
+
+    Runs AFTER narration, BEFORE turn logging. Produces structured state
+    updates that are applied to NPC states, arc state, and thread lists.
+    """
+    npc_block = "\n".join(npc.to_prompt_block() for npc in active_npcs) if active_npcs else "No NPCs in scene."
+
+    open_threads_block = "\n".join(
+        f"- {t.name}" for t in arc.open_threads
+    ) if arc.open_threads else "None established yet."
+
+    expected_turns = spine_act.get("expected_turns", [8, 12])
+    expected_mid = sum(expected_turns) // 2
+
+    template = PROMPT_PATH.read_text(encoding="utf-8")
+    prompt = template.format(
+        player_action=player_action,
+        check_result=check_result or "No dice check this turn.",
+        narration=narration,
+        npc_states=npc_block,
+        anchor_name=spine_act.get("anchor", "unknown"),
+        anchor_description=spine_act.get("anchor_description", ""),
+        act_progress=f"{arc.act_progress:.0%}",
+        turns_this_act=arc.turns_this_act,
+        expected_turns=expected_mid,
+        open_threads=open_threads_block,
+    )
+
+    last_error = None
+    for _ in range(max_retries + 1):
+        try:
+            is_qwen = "qwen" in LOCAL_MODEL.lower()
+            msg = f"/no_think\n{prompt}" if is_qwen else prompt
+
+            response = httpx.post(
+                f"{OLLAMA_URL}/api/generate",
+                json={
+                    "model": LOCAL_MODEL,
+                    "prompt": msg,
+                    "stream": False,
+                    "format": RECONCILIATION_SCHEMA,
+                    "options": {"temperature": 0.1, "num_predict": 500},
+                },
+                timeout=30.0,
+            )
+            response.raise_for_status()
+            resp_json = response.json()
+            raw_text = resp_json["response"].strip()
+
+            # Handle thinking mode producing empty response
+            if not raw_text and resp_json.get("thinking", "").strip():
+                raw_text = resp_json["thinking"].strip()
+
+            # Strip markdown code fences
+            if raw_text.startswith("```"):
+                raw_text = raw_text.split("```")[1]
+                if raw_text.startswith("json"):
+                    raw_text = raw_text[4:]
+                raw_text = raw_text.strip()
+
+            data = json.loads(raw_text)
+            return _validate_result(data)
+
+        except (json.JSONDecodeError, KeyError, ValueError) as e:
+            last_error = e
+        except httpx.HTTPError as e:
+            logging.error(f"Reconciliation Ollama error: {e}")
+            last_error = e
+
+    logging.error(f"Reconciliation failed after {max_retries + 1} attempts: {last_error}")
+    return ReconciliationResult()  # graceful degradation — return defaults
+
+
+def _validate_result(data: dict) -> ReconciliationResult:
+    """Validate and normalize the reconciliation JSON."""
+    npc_updates = []
+    for npc in data.get("npc_updates", []):
+        if not isinstance(npc, dict) or "npc_name" not in npc:
+            continue
+        # Clamp disposition_shift to [-0.2, 0.2]
+        shift = float(npc.get("disposition_shift", 0.0))
+        shift = max(-0.2, min(0.2, shift))
+        npc_updates.append({
+            "npc_name": npc["npc_name"],
+            "knowledge_gained": npc.get("knowledge_gained", []),
+            "knowledge_lost": npc.get("knowledge_lost", []),
+            "disposition_shift": shift,
+        })
+
+    thread_raw = data.get("thread_updates", {})
+    thread_updates = {
+        "threads_advanced": thread_raw.get("threads_advanced", []),
+        "threads_resolved": thread_raw.get("threads_resolved", []),
+        "threads_opened": thread_raw.get("threads_opened", []),
+    }
+
+    progress_raw = data.get("story_progress", {})
+    proximity = progress_raw.get("anchor_proximity", "distant")
+    if proximity not in ("distant", "approaching", "imminent", "reached"):
+        proximity = "distant"
+
+    delta = float(progress_raw.get("progress_delta", 0.05))
+    delta = max(0.0, min(0.25, delta))
+
+    story_progress = {
+        "anchor_proximity": proximity,
+        "progress_delta": delta,
+        "reasoning": progress_raw.get("reasoning", ""),
+    }
+
+    return ReconciliationResult(
+        npc_updates=npc_updates,
+        thread_updates=thread_updates,
+        story_progress=story_progress,
+    )
+
+
+def apply_npc_updates(
+    updates: list[dict], npc_states: list[NPCState]
+) -> list[NPCState]:
+    """Apply knowledge changes and disposition shifts to NPC state cards."""
+    npc_map = {npc.name: npc for npc in npc_states}
+
+    for update in updates:
+        name = update.get("npc_name")
+        if name not in npc_map:
+            continue
+
+        npc = npc_map[name]
+
+        # Knowledge gained
+        for fact in update.get("knowledge_gained", []):
+            if fact and fact not in npc.knows:
+                npc.knows.append(fact)
+
+        # Knowledge lost (remove from knows, optionally add to doesnt_know)
+        for fact in update.get("knowledge_lost", []):
+            if fact in npc.knows:
+                npc.knows.remove(fact)
+            if fact and fact not in npc.doesnt_know:
+                npc.doesnt_know.append(fact)
+
+        # Disposition shift — clamp to [0.0, 1.0]
+        shift = update.get("disposition_shift", 0.0)
+        npc.disposition = max(0.0, min(1.0, npc.disposition + shift))
+
+    return npc_states
+
+
+def apply_story_progress(
+    progress: dict, arc_state: dict, spine_act: dict
+) -> dict:
+    """Update act_progress and anchor_proximity in the arc state dict."""
+    proximity = progress.get("anchor_proximity", "distant")
+    delta = progress.get("progress_delta", 0.05)
+
+    if proximity == "reached":
+        arc_state["act_progress"] = 1.0
+    else:
+        arc_state["act_progress"] = min(1.0, arc_state.get("act_progress", 0.0) + delta)
+
+    arc_state["anchor_proximity"] = proximity
+    return arc_state
+
+
+def apply_thread_updates(
+    thread_updates: dict, arc_state: dict, spine_act: dict
+) -> dict:
+    """Manage open/closed thread lists in the arc state."""
+    open_threads = list(arc_state.get("dynamic_threads", []))
+    closed_threads = list(arc_state.get("closed_threads", []))
+
+    # Threads resolved — move from open to closed
+    for thread_name in thread_updates.get("threads_resolved", []):
+        if thread_name not in closed_threads:
+            closed_threads.append(thread_name)
+        # Remove from dynamic threads if present
+        open_threads = [t for t in open_threads if t != thread_name]
+
+    # Threads opened — add new threads
+    for thread_name in thread_updates.get("threads_opened", []):
+        if thread_name not in open_threads:
+            open_threads.append(thread_name)
+
+    arc_state["dynamic_threads"] = open_threads
+    arc_state["closed_threads"] = closed_threads
+    return arc_state
+
+
+def detect_act_boundary(arc_state: dict) -> bool:
+    """Returns True when act_progress >= 1.0."""
+    return arc_state.get("act_progress", 0.0) >= 1.0
+
+
+def build_anchor_instruction(spine_act: dict, next_act: Optional[dict]) -> str:
+    """Build the anchor instruction that replaces the pacing block when anchor is reached."""
+    anchor_desc = spine_act.get("anchor_description", spine_act.get("anchor", ""))
+    next_situation = next_act.get("opening_situation", "") if next_act else ""
+
+    return (
+        f"ANCHOR BEAT — MAJOR STORY MOMENT\n"
+        f"The situation has shifted irreversibly. {anchor_desc}\n"
+        f"Write the transition into this new reality. The player should feel "
+        f"that they have crossed a threshold.\n"
+        f"{'Next situation: ' + next_situation if next_situation else ''}"
+    ).strip()
+
+
+def run_between_act_pipeline(
+    session_id: str,
+    character,  # engine.character.Character
+    spine: dict,
+    completed_act_number: int,
+) -> BetweenActResult:
+    """
+    The between-act processing pipeline (§26.5).
+
+    16 steps. Steps that depend on unbuilt systems (XP, behavioral inference,
+    milestones, obligation, morality, destiny, growth passage, time skip) are
+    stubbed and will be wired in later phases.
+    """
+    from state.db import get_connection
+    from state.memory import compress_act_turns
+
+    result = BetweenActResult()
+    next_act_number = completed_act_number + 1
+    total_acts = spine.get("total_acts", 4)
+
+    # ── Step 1: Act summary compression ──────────────────────────────
+    try:
+        compress_act_turns(session_id, completed_act_number)
+        result.steps_completed.append("act_summary_compression")
+        logging.info(f"Between-act step 1: compressed act {completed_act_number}")
+    except Exception as e:
+        logging.error(f"Between-act step 1 failed: {e}")
+
+    # ── Step 2: Character drift note ─────────────────────────────────
+    # Behavioral pattern observation — uses local model
+    try:
+        drift_note = _generate_character_drift_note(session_id, completed_act_number)
+        result.character_drift_note = drift_note
+        result.steps_completed.append("character_drift_note")
+        logging.info(f"Between-act step 2: drift note generated")
+    except Exception as e:
+        logging.error(f"Between-act step 2 failed: {e}")
+
+    # ── Steps 3-4: XP award and reservation (Phase 8+) ──────────────
+    result.steps_completed.append("xp_award_stub")
+    result.steps_completed.append("xp_reservation_stub")
+
+    # ── Step 5: Behavioral inference (Phase 8+) ──────────────────────
+    result.steps_completed.append("behavioral_inference_stub")
+
+    # ── Step 6: Choice annotation aggregation (Phase 13+) ────────────
+    result.steps_completed.append("choice_annotation_stub")
+
+    # ── Step 7: Milestone check (Phase 8+) ───────────────────────────
+    result.steps_completed.append("milestone_check_stub")
+
+    # ── Step 8: Obligation/Duty activation roll (Phase 8) ────────────
+    result.steps_completed.append("obligation_duty_stub")
+
+    # ── Step 9: Strain and wound recovery ────────────────────────────
+    strain_before = character.current_strain
+    wounds_before = character.current_wounds
+    # Partial recovery — not full unless time skip follows
+    character.current_strain = max(0, character.current_strain - 2)
+    character.current_wounds = max(0, character.current_wounds - 1)
+    result.strain_recovered = strain_before - character.current_strain
+    result.wounds_recovered = wounds_before - character.current_wounds
+    result.steps_completed.append("strain_wound_recovery")
+    logging.info(f"Between-act step 9: recovered {result.strain_recovered} strain, {result.wounds_recovered} wounds")
+
+    # ── Step 10: Morality resolution (Phase 8+) ──────────────────────
+    result.steps_completed.append("morality_resolution_stub")
+
+    # ── Step 11: NPC relationship drift ──────────────────────────────
+    # Minor disposition adjustments for NPCs not seen during the act
+    try:
+        _apply_npc_relationship_drift(session_id, completed_act_number)
+        result.steps_completed.append("npc_relationship_drift")
+        logging.info("Between-act step 11: NPC relationship drift applied")
+    except Exception as e:
+        logging.error(f"Between-act step 11 failed: {e}")
+
+    # ── Step 12: Destiny Pool regeneration (Phase 8+) ────────────────
+    result.steps_completed.append("destiny_pool_stub")
+
+    # ── Step 13: Growth passage generation (Phase 8+) ────────────────
+    result.steps_completed.append("growth_passage_stub")
+
+    # ── Step 14: Milestone reflection (Phase 8+) ─────────────────────
+    result.steps_completed.append("milestone_reflection_stub")
+
+    # ── Step 15: Time skip sequence (Phase 8+) ───────────────────────
+    result.steps_completed.append("time_skip_stub")
+
+    # ── Step 16: Load next act ───────────────────────────────────────
+    if next_act_number <= total_acts:
+        next_act = spine["acts"][next_act_number - 1]
+        with get_connection() as conn:
+            row = conn.execute(
+                "SELECT arc_state_json FROM sessions WHERE id = ?",
+                (session_id,),
+            ).fetchone()
+            if row:
+                arc_state = json.loads(row["arc_state_json"])
+                arc_state["current_act"] = next_act_number
+                arc_state["act_progress"] = 0.0
+                arc_state["anchor_proximity"] = "distant"
+                arc_state["turns_this_act"] = 0
+                arc_state["current_location"] = next_act.get("opening_location", "")
+                arc_state["anchors_completed"] = arc_state.get("anchors_completed", [])
+                arc_state["anchors_completed"].append(
+                    spine["acts"][completed_act_number - 1].get("anchor", "")
+                )
+                # Carry forward dynamic threads that weren't resolved
+                # (closed_threads and dynamic_threads persist as-is)
+
+                from datetime import datetime, timezone
+                now = datetime.now(timezone.utc).isoformat()
+                conn.execute(
+                    "UPDATE sessions SET arc_state_json = ?, character_json = ?, "
+                    "updated_at = ? WHERE id = ?",
+                    (json.dumps(arc_state), character.model_dump_json(), now, session_id),
+                )
+                conn.commit()
+
+        result.next_act_loaded = True
+        result.steps_completed.append("load_next_act")
+        logging.info(f"Between-act step 16: loaded act {next_act_number}")
+    else:
+        result.steps_completed.append("campaign_complete")
+        logging.info("Between-act: campaign complete, no next act to load")
+
+    return result
+
+
+def _generate_character_drift_note(session_id: str, act_number: int) -> str:
+    """Generate a brief behavioral observation about the character's choices this act."""
+    from state.session import get_recent_turns
+
+    turns = get_recent_turns(session_id, limit=20)
+    if not turns:
+        return ""
+
+    actions = "\n".join(
+        f"Turn {t.turn_number}: {t.player_action}"
+        + (f" [{t.check_made}: {t.outcome_quadrant}]" if t.check_made else "")
+        for t in turns
+    )
+
+    prompt = (
+        f"Based on these player choices from Act {act_number} of a Star Wars RPG, "
+        f"write ONE sentence noting a behavioral pattern or character tendency you observed. "
+        f"Be specific. Do not moralize.\n\n"
+        f"CHOICES:\n{actions}\n\n"
+        f"ONE SENTENCE:"
+    )
+
+    is_qwen = "qwen" in LOCAL_MODEL.lower()
+    msg = f"/no_think\n{prompt}" if is_qwen else prompt
+
+    response = httpx.post(
+        f"{OLLAMA_URL}/api/generate",
+        json={
+            "model": LOCAL_MODEL,
+            "prompt": msg,
+            "stream": False,
+            "options": {"temperature": 0.3, "num_predict": 100},
+        },
+        timeout=30.0,
+    )
+    response.raise_for_status()
+    return response.json()["response"].strip()
+
+
+def _apply_npc_relationship_drift(session_id: str, act_number: int) -> None:
+    """Minor disposition adjustments for NPCs not interacted with during the act."""
+    from state.db import get_connection
+    from dataclasses import fields as dc_fields
+
+    with get_connection() as conn:
+        rows = conn.execute(
+            "SELECT npc_name, state_json FROM npc_states WHERE session_id = ?",
+            (session_id,),
+        ).fetchall()
+
+    if not rows:
+        return
+
+    # NPCs with disposition far from 0.5 drift slightly back toward neutral
+    # This represents the natural cooling of relationships over time
+    from datetime import datetime, timezone
+    now = datetime.now(timezone.utc).isoformat()
+
+    for row in rows:
+        state = json.loads(row["state_json"])
+        disp = state.get("disposition", 0.5)
+        # Drift 0.02 toward 0.5
+        if disp > 0.55:
+            state["disposition"] = disp - 0.02
+        elif disp < 0.45:
+            state["disposition"] = disp + 0.02
+
+        with get_connection() as conn:
+            conn.execute(
+                "UPDATE npc_states SET state_json = ?, updated_at = ? "
+                "WHERE session_id = ? AND npc_name = ?",
+                (json.dumps(state), now, session_id, row["npc_name"]),
+            )
+            conn.commit()

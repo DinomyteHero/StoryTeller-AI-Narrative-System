@@ -13,7 +13,9 @@
             "opening_location": "Aboard Mira's Luck, approaching Nar Shaddaa orbit",
             "galactic_context": "Imperial customs interdiction has tightened across the Y'Toub system following a Rebel supply intercept at Nal Hutta. Hutt Council territorial disputes between Vossk's faction and the Besadii clan have made landing clearances unpredictable — bribes that worked last month now go to the wrong people. An unrelated freighter explosion at Dock 14 yesterday has every security team on the Promenade running nervous.",
             "anchor": "arrival_with_hot_cargo",
+            "anchor_description": "Keth lands on Nar Shaddaa with the cargo and begins navigating the station, establishing his presence and making initial contact attempts to find Doss or an alternative drop point.",
             "next_anchor": "contact_discovered",
+            "expected_turns": [8, 12],
             "open_threads": [
                 "Who is the mysterious comm voice?",
                 "What happened to Doss?",
@@ -27,7 +29,9 @@
             "opening_location": "Nar Shaddaa, mid-level Promenade district",
             "galactic_context": "A Rebel cell has been broken on the Smuggler's Moon — ISB is running sweeps through the mid-levels. Vossk's patience with late deliveries has become a topic of discussion among his intermediaries, and discussions among Hutts have consequences.",
             "anchor": "contact_discovered",
+            "anchor_description": "Keth discovers what happened to Doss — whether arrested, hiding, or having betrayed him. The truth about his contact's fate forces Keth to reassess the job and his next move.",
             "next_anchor": "obligation_triggered",
+            "expected_turns": [8, 12],
             "open_threads": []
         },
         {
@@ -37,7 +41,9 @@
             "opening_location": "Nar Shaddaa, lower levels near Vossk's territory",
             "galactic_context": "The Besadii clan has moved on one of Vossk's subsidiary operations in the lower levels, pulling his enforcers away from the Promenade. For a narrow window, Vossk's grip on this district is weaker than it has been in years.",
             "anchor": "obligation_triggered",
+            "anchor_description": "Vossk's patience runs out. Through intermediaries, enforcers, or a direct message, the weight of Keth's debt makes itself undeniable. The job is no longer optional — it is survive or pay.",
             "next_anchor": "resolution_approach",
+            "expected_turns": [6, 10],
             "open_threads": []
         },
         {
@@ -47,7 +53,9 @@
             "opening_location": "Nar Shaddaa, docking ring and departure corridors",
             "galactic_context": "Imperial customs has announced a 48-hour lockdown of all non-essential departures from Nar Shaddaa. Officially, it is a security sweep. Unofficially, someone important lost something valuable, and nobody leaves until it is found.",
             "anchor": "resolution_approach",
+            "anchor_description": "Keth finds or creates a path to resolve the job — deliver the cargo, negotiate with Vossk, escape Nar Shaddaa, or some combination. The endgame is in motion.",
             "next_anchor": "campaign_end",
+            "expected_turns": [6, 10],
             "open_threads": []
         }
     ],

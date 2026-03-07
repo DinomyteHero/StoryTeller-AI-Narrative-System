@@ -45,6 +45,8 @@ STORY SO FAR:
 OPEN THREADS:
 {open_threads}
 
+{pacing_block}
+
 ═══════════════════════════════════════════
 ACTIVE NPCs
 ═══════════════════════════════════════════

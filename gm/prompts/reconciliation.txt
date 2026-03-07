@@ -1,0 +1,75 @@
+You are analyzing what happened in a narrative RPG turn to produce structured state updates.
+
+PLAYER'S CHOICE: {player_action}
+
+CHECK RESULT: {check_result}
+
+GM'S NARRATION:
+{narration}
+
+CURRENT NPC STATES:
+{npc_states}
+
+CURRENT ANCHOR BEAT: {anchor_name}
+ANCHOR DESCRIPTION: {anchor_description}
+
+CURRENT ACT PROGRESS: {act_progress}
+TURNS IN THIS ACT: {turns_this_act} of ~{expected_turns}
+
+OPEN THREADS:
+{open_threads}
+
+INSTRUCTIONS:
+
+Analyze the narration and produce a JSON object with these sections:
+
+1. NPC UPDATES — For each NPC present in the scene:
+   - knowledge_gained: new facts the NPC learned from this turn
+   - knowledge_lost: facts the NPC previously believed that were contradicted
+   - disposition_shift: a number between -0.2 and 0.2. Guidelines:
+     * Most turns: 0.0 (disposition is sticky)
+     * Positive interaction (helped, protected, showed respect): +0.03 to +0.08
+     * Negative interaction (lied and caught, threatened, betrayed): -0.05 to -0.15
+     * Significant betrayal or sacrifice: -0.2 to +0.2 (rare — requires an explicitly relationship-changing moment)
+   - Do NOT update NPCs who are not present in the scene
+
+2. THREAD UPDATES:
+   - threads_advanced: threads that received new information or development
+   - threads_resolved: threads whose central question was answered
+   - threads_opened: new questions raised by this narration not in the original list
+
+3. STORY PROGRESS:
+   - anchor_proximity: one of "distant", "approaching", "imminent", "reached"
+     * distant: player actions are unrelated to the anchor's setup
+     * approaching: player actions are moving toward the anchor conditions
+     * imminent: the anchor could fire in 1-2 turns
+     * reached: the anchor conditions are met in this narration
+   - progress_delta: how much to advance act_progress (0.0 to 0.25)
+     * distant: 0.03-0.05
+     * approaching: 0.06-0.10
+     * imminent: 0.10-0.15
+     * reached: set to 1.0 minus current progress
+     * Adjust based on pacing: if the player is ahead of expected turn count, use smaller deltas. If behind, use larger deltas.
+   - reasoning: brief explanation of your assessment
+
+Return ONLY valid JSON matching this structure:
+{{
+  "npc_updates": [
+    {{
+      "npc_name": "Name",
+      "knowledge_gained": [],
+      "knowledge_lost": [],
+      "disposition_shift": 0.0
+    }}
+  ],
+  "thread_updates": {{
+    "threads_advanced": [],
+    "threads_resolved": [],
+    "threads_opened": []
+  }},
+  "story_progress": {{
+    "anchor_proximity": "distant",
+    "progress_delta": 0.05,
+    "reasoning": "..."
+  }}
+}}

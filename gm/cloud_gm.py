@@ -17,7 +17,7 @@ from openai import OpenAI
 from gm.context import ContextPackage
 
 PROMPT_PATH = Path(__file__).parent / "prompts" / "narration.txt"
-MAX_TOKENS  = 1500
+MAX_TOKENS  = int(os.getenv("MAX_COMPLETION_TOKENS", "16000"))
 
 # Provider config — all from environment variables
 # CLOUD_PROVIDER:    "openai" | "openrouter"
@@ -261,6 +261,7 @@ def _build_prompt(ctx: ContextPackage) -> str:
         tension_level=ctx.arc.tension_level,
         story_summary=full_summary,
         open_threads=ctx.build_open_threads_block(),
+        pacing_block=ctx.build_pacing_block(),
         npc_states=ctx.build_npc_block(),
         location=ctx.location,
         situation=ctx.situation,
@@ -302,6 +303,22 @@ def _parse_response(raw: str, used_local: bool = False) -> NarrationResult:
     normalized = re.sub(
         r"^[\s*-]*CHOICES[\s*-:]*$", "---CHOICES---", raw, flags=re.MULTILINE
     )
+    # Also catch "Your choices:", "Options:", "Your options:", "## Choices", etc.
+    if "---CHOICES---" not in normalized:
+        normalized = re.sub(
+            r"^[\s#*]*(Your\s+)?(Choices|Options)\s*:?\s*$",
+            "---CHOICES---", normalized, flags=re.MULTILINE | re.IGNORECASE
+        )
+    # Last resort: detect a numbered list (1. ...) near the end as implicit choices
+    if "---CHOICES---" not in normalized:
+        lines = normalized.split("\n")
+        for i in range(len(lines) - 1, max(len(lines) - 15, -1), -1):
+            if re.match(r"^\s*1[\.\)]\s+\S", lines[i]):
+                # Check that line before isn't also numbered (part of passage list)
+                if i > 0 and not re.match(r"^\s*\d+[\.\)]\s+\S", lines[i - 1]):
+                    lines.insert(i, "---CHOICES---")
+                    normalized = "\n".join(lines)
+                    break
     if "---CHOICES---" not in normalized:
         raise CloudGMError("GM response missing ---CHOICES--- delimiter")
 
@@ -424,13 +441,26 @@ def _narrate_with_backend(
             })
 
         timeout = 180.0 if used_local else 60.0
-        response = client.chat.completions.create(
+        kwargs = dict(
             model=model,
             max_completion_tokens=MAX_TOKENS,
             messages=messages,
             timeout=timeout,
         )
-        raw = response.choices[0].message.content or ""
+        # Reasoning models (gpt-o*, gpt-5*) support reasoning_effort
+        reasoning = os.getenv("REASONING_EFFORT", "low")
+        if not used_local and reasoning:
+            kwargs["reasoning_effort"] = reasoning
+        response = client.chat.completions.create(**kwargs)
+        import logging
+        choice = response.choices[0]
+        raw = choice.message.content or ""
+        logging.warning(
+            f"=== GM RESPONSE (attempt {attempt+1}) ===\n"
+            f"model={model}, finish_reason={choice.finish_reason}, "
+            f"content_len={len(raw)}, refusal={getattr(choice.message, 'refusal', None)}\n"
+            f"RAW:\n{raw[:2000]}\n=== END ==="
+        )
 
         try:
             return _parse_response(raw, used_local=used_local)
@@ -489,12 +519,16 @@ def narrate_turn_stream(ctx: ContextPackage) -> Iterator[str]:
         result = _parse_response(full_text)
     """
     client, model = _make_client()
-    stream = client.chat.completions.create(
+    kwargs = dict(
         model=model,
-        max_tokens=MAX_TOKENS,
+        max_completion_tokens=MAX_TOKENS,
         messages=[{"role": "user", "content": _build_prompt(ctx)}],
         stream=True,
     )
+    reasoning = os.getenv("REASONING_EFFORT", "low")
+    if NARRATIVE_BACKEND != "local" and reasoning:
+        kwargs["reasoning_effort"] = reasoning
+    stream = client.chat.completions.create(**kwargs)
     for chunk in stream:
         delta = chunk.choices[0].delta.content
         if delta:
