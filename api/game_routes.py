@@ -38,6 +38,7 @@ from gm.cloud_gm import (
 from gm.context import (
     ArcState,
     ContextPackage,
+    EmotionalState,
     NPCState,
     ThreadState,
     TurnMemory,
@@ -68,6 +69,33 @@ from state.session import (
 router = APIRouter()
 
 STREAMING_ENABLED = os.getenv("STREAMING_ENABLED", "true").lower() == "true"
+
+# Phase 8.5: Social skill → NPC emotion mapping (§25.2)
+SOCIAL_EMOTION_MAP = {
+    # skill: (emotion_on_failure, base_intensity)
+    "deception":   ("suspicious", 0.5),
+    "coercion":    ("angry", 0.6),
+    "charm":       ("suspicious", 0.3),  # mild — they sense insincerity
+    "negotiation": ("angry", 0.4),       # deal went sour
+    "leadership":  ("conflicted", 0.4),  # doubt in the leader
+}
+
+
+def _apply_emotion_from_check(
+    npc_states: list, skill: str, outcome_quadrant: str, turn_number: int,
+) -> None:
+    """Set NPC emotional state based on failed social checks (§25.2)."""
+    if skill not in SOCIAL_EMOTION_MAP:
+        return
+    if not outcome_quadrant or not outcome_quadrant.startswith("failure"):
+        return
+    mood, base_intensity = SOCIAL_EMOTION_MAP[skill]
+    # Boost intensity for failure_threat (worse outcome)
+    intensity = base_intensity + (0.15 if outcome_quadrant == "failure_threat" else 0.0)
+    # Apply to the first NPC present (social checks target scene NPCs)
+    for npc in npc_states:
+        npc.set_emotion(mood, intensity, f"Failed {skill} check", turn_number)
+        break  # only the primary scene NPC
 
 
 # ── Request / Response Models ──────────────────────────────────────────
@@ -141,10 +169,14 @@ def load_npc_states(session_id: str, spine: dict) -> list[NPCState]:
 
     if rows:
         valid_fields = {f.name for f in fields(NPCState)}
-        return [
-            NPCState(**{k: v for k, v in json.loads(r["state_json"]).items() if k in valid_fields})
-            for r in rows
-        ]
+        npcs = []
+        for r in rows:
+            data = {k: v for k, v in json.loads(r["state_json"]).items() if k in valid_fields}
+            # Deserialize emotional_state from dict to EmotionalState
+            if isinstance(data.get("emotional_state"), dict):
+                data["emotional_state"] = EmotionalState.from_dict(data["emotional_state"])
+            npcs.append(NPCState(**data))
+        return npcs
 
     # First turn — initialize from spine roster
     npcs = []
@@ -409,6 +441,17 @@ async def handle_turn(
     # ── Step 5: Assemble context package ──────────────────────────────
     story_summary = get_act_summaries(session_id)
     npc_states = load_npc_states(session_id, spine)
+    turn_number = get_turn_count(session_id) + 1
+
+    # Phase 8.5: Decay emotions + set from dice results (§25)
+    for npc in npc_states:
+        npc.decay_emotion()
+        npc.nudge_disposition_from_emotion()
+    if roll_result and check_decision.requires_check:
+        _apply_emotion_from_check(
+            npc_states, check_decision.skill,
+            roll_result.outcome_quadrant, turn_number,
+        )
 
     # Check if anchor was reached on previous turn — inject anchor instruction
     anchor_inst = None
@@ -497,8 +540,6 @@ async def handle_turn(
     act_boundary_reached = detect_act_boundary(arc_state)
 
     # ── Step 10: Persist ─────────────────────────────────────────────
-    turn_number = get_turn_count(session_id) + 1
-
     log_turn(
         session_id=session_id,
         turn_number=turn_number,
@@ -704,6 +745,17 @@ async def handle_turn_stream(
     # ── Step 5: Assemble context package ──────────────────────────────
     story_summary = get_act_summaries(session_id)
     npc_states = load_npc_states(session_id, spine)
+    turn_number = get_turn_count(session_id) + 1
+
+    # Phase 8.5: Decay emotions + set from dice results (§25)
+    for npc in npc_states:
+        npc.decay_emotion()
+        npc.nudge_disposition_from_emotion()
+    if roll_result and check_decision.requires_check:
+        _apply_emotion_from_check(
+            npc_states, check_decision.skill,
+            roll_result.outcome_quadrant, turn_number,
+        )
 
     # Check if anchor was reached on previous turn
     anchor_inst = None
@@ -838,8 +890,6 @@ async def handle_turn_stream(
         act_boundary_reached = detect_act_boundary(arc_state)
 
         # ── Step 10: Persist ──────────────────────────────────────────
-        turn_number = get_turn_count(session_id) + 1
-
         log_turn(
             session_id=session_id,
             turn_number=turn_number,

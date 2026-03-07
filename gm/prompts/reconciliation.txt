@@ -31,6 +31,10 @@ Analyze the narration and produce a JSON object with these sections:
      * Positive interaction (helped, protected, showed respect): +0.03 to +0.08
      * Negative interaction (lied and caught, threatened, betrayed): -0.05 to -0.15
      * Significant betrayal or sacrifice: -0.2 to +0.2 (rare — requires an explicitly relationship-changing moment)
+   - emotional_state: if the narration describes the NPC reacting emotionally,
+     set this to one of: "angry", "afraid", "grieving", "suspicious", "grateful",
+     "desperate", "amused", "conflicted". If the NPC seems calm or no strong
+     emotion is described, omit this field or set it to "calm".
    - Do NOT update NPCs who are not present in the scene
 
 2. THREAD UPDATES:
@@ -59,7 +63,8 @@ Return ONLY valid JSON matching this structure:
       "npc_name": "Name",
       "knowledge_gained": [],
       "knowledge_lost": [],
-      "disposition_shift": 0.0
+      "disposition_shift": 0.0,
+      "emotional_state": "calm"
     }}
   ],
   "thread_updates": {{

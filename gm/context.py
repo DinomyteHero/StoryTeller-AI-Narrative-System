@@ -13,6 +13,59 @@ from engine.character import Character
 from engine.dice import RollResult, DicePool
 
 
+# Phase 8.5: Decay rates per mood (§25.3) — intensity reduction per turn
+MOOD_DECAY_RATES = {
+    "calm": 0.0,
+    "angry": 0.15,
+    "afraid": 0.10,
+    "grieving": 0.05,
+    "suspicious": 0.08,
+    "grateful": 0.20,
+    "desperate": 0.12,
+    "amused": 0.25,
+    "conflicted": 0.05,
+}
+
+# Moods that nudge disposition negatively when sustained (3+ turns)
+NEGATIVE_MOODS = {"angry", "suspicious", "afraid"}
+# Moods that nudge disposition positively when sustained
+POSITIVE_MOODS = {"grateful"}
+
+
+@dataclass
+class EmotionalState:
+    """Transient emotional overlay on an NPC (§25)."""
+    mood:        str = "calm"       # constrained vocabulary above
+    intensity:   float = 0.0       # 0.0 to 1.0
+    source:      str = ""          # what caused this emotion
+    set_at_turn: int = 0           # when it was set
+    decay_rate:  float = 0.0       # intensity drop per turn (auto-set from mood)
+    sustained_turns: int = 0       # consecutive turns in non-calm state
+
+    def is_active(self) -> bool:
+        return self.mood != "calm" and self.intensity >= 0.1
+
+    def to_dict(self) -> dict:
+        return {
+            "mood": self.mood, "intensity": self.intensity,
+            "source": self.source, "set_at_turn": self.set_at_turn,
+            "decay_rate": self.decay_rate, "sustained_turns": self.sustained_turns,
+        }
+
+    @classmethod
+    def from_dict(cls, d: dict) -> "EmotionalState":
+        if not d:
+            return cls()
+        return cls(
+            mood=d.get("mood", "calm"),
+            intensity=d.get("intensity", 0.0),
+            source=d.get("source", ""),
+            set_at_turn=d.get("set_at_turn", 0),
+            decay_rate=d.get("decay_rate", MOOD_DECAY_RATES.get(d.get("mood", "calm"), 0.0)),
+            sustained_turns=d.get("sustained_turns", 0),
+        )
+
+
 @dataclass
 class NPCState:
     name:                str
@@ -23,6 +76,7 @@ class NPCState:
     voice_notes:         str = ""
     motivation:          str = ""
     behavioral_envelope: list[str] = field(default_factory=list)  # hard "never" constraints
+    emotional_state:     EmotionalState = field(default_factory=EmotionalState)  # Phase 8.5 (§25)
 
     def disposition_label(self) -> str:
         """Human-readable label for prompt injection."""
@@ -32,6 +86,35 @@ class NPCState:
         if self.disposition >= 0.2:   return "wary"
         return "hostile"
 
+    def set_emotion(self, mood: str, intensity: float, source: str, turn: int):
+        """Set a new emotional state (§25.2). Replaces current emotion."""
+        decay = MOOD_DECAY_RATES.get(mood, 0.10)
+        self.emotional_state = EmotionalState(
+            mood=mood, intensity=min(1.0, max(0.0, intensity)),
+            source=source, set_at_turn=turn, decay_rate=decay,
+            sustained_turns=0,
+        )
+
+    def decay_emotion(self):
+        """Apply one turn of emotional decay (§25.3)."""
+        es = self.emotional_state
+        if not es.is_active():
+            return
+        es.intensity = max(0.0, es.intensity - es.decay_rate)
+        es.sustained_turns += 1
+        if es.intensity < 0.1:
+            self.emotional_state = EmotionalState()  # reset to calm
+
+    def nudge_disposition_from_emotion(self):
+        """If sustained 3+ turns in non-calm state, nudge disposition (§25.5)."""
+        es = self.emotional_state
+        if es.sustained_turns < 3 or not es.is_active():
+            return
+        if es.mood in NEGATIVE_MOODS:
+            self.disposition = max(0.0, self.disposition - 0.02)
+        elif es.mood in POSITIVE_MOODS:
+            self.disposition = min(1.0, self.disposition + 0.02)
+
     def to_prompt_block(self) -> str:
         lines = [f"{self.name}:"]
         if self.knows:
@@ -39,6 +122,10 @@ class NPCState:
         if self.doesnt_know:
             lines.append(f"  Doesn't know: {'; '.join(self.doesnt_know)}")
         lines.append(f"  Disposition: {self.disposition_label()} ({self.disposition:.2f})")
+        # Phase 8.5: emotional state overlay (§25.4)
+        if self.emotional_state.is_active():
+            es = self.emotional_state
+            lines.append(f"  Currently: {es.mood} (intensity {es.intensity:.1f}) — {es.source}")
         if self.voice_notes:
             lines.append(f"  Voice: {self.voice_notes}")
         if self.motivation:

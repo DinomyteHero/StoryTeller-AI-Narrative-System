@@ -37,6 +37,7 @@ RECONCILIATION_SCHEMA = {
                     "knowledge_gained": {"type": "array", "items": {"type": "string"}},
                     "knowledge_lost": {"type": "array", "items": {"type": "string"}},
                     "disposition_shift": {"type": "number"},
+                    "emotional_state": {"type": "string"},
                 },
                 "required": ["npc_name"],
             },
@@ -344,6 +345,15 @@ def apply_npc_updates(
         # Disposition shift — clamp to [0.0, 1.0]
         shift = update.get("disposition_shift", 0.0)
         npc.disposition = max(0.0, min(1.0, npc.disposition + shift))
+
+        # Phase 8.5: GM-inferred emotional state (§25.2)
+        inferred_mood = update.get("emotional_state", "calm")
+        if inferred_mood and inferred_mood != "calm":
+            from gm.context import MOOD_DECAY_RATES
+            if inferred_mood in MOOD_DECAY_RATES:
+                # Only override if no stronger emotion already set by dice
+                if not npc.emotional_state.is_active() or npc.emotional_state.intensity < 0.4:
+                    npc.set_emotion(inferred_mood, 0.4, "GM narration", 0)
 
     return npc_states
 
