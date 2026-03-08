@@ -1,0 +1,40 @@
+You are analyzing a player's choice in a Star Wars narrative RPG to extract
+its behavioral meaning.
+
+SELECTED CHOICE:
+{selected_choice}
+
+REJECTED ALTERNATIVES:
+{rejected_choices}
+
+SCENE CONTEXT:
+{scene_context}
+
+ACTIVE NPCs:
+{npc_summary}
+
+RECENT BEHAVIORAL PATTERN (last 3-5 turns):
+{recent_pattern}
+
+THROUGHLINE QUESTION:
+{throughline_question}
+
+Analyze what this choice MEANS — not what skill it uses, but what it reveals
+about the player's values and priorities. The rejected alternatives are
+crucial context: what the player chose NOT to do is as important as what
+they chose.
+
+Return a JSON object with these fields:
+- "choice_target": What the player is trying to accomplish (intent, not skill)
+- "choice_method": How they are trying (narrative terms)
+- "sacrifice": What was given up or risked by choosing this over alternatives
+- "priority_revealed": What this choice reveals about player values
+  (e.g. "relationship_over_safety", "mission_over_compassion", "truth_over_advantage")
+- "npc_impact": Object mapping NPC names to relational verbs
+  (e.g. "trust_invested", "antagonized", "protected", "manipulated")
+- "throughline_relevance": "high", "medium", or "low"
+- "throughline_direction": Which direction the choice pushes the throughline answer
+- "behavioral_tags": Array of 2-5 free-form tags characterizing the choice
+  (e.g. "protective", "deceptive", "risk_taking", "loyal", "pragmatic")
+
+Return ONLY valid JSON. No explanation.

@@ -105,5 +105,29 @@
             "resolution": "randomly_determined",
             "options": ["arrested_by_isb", "sold_keth_out", "in_hiding"]
         }
+    ],
+    "vehicle_registry": [
+        {
+            "ship_id": "miras_luck",
+            "name": "Mira's Luck",
+            "type": "YT-2000 light freighter",
+            "silhouette": 4,
+            "speed": 3,
+            "handling": -1,
+            "hull_threshold": 22,
+            "system_strain_threshold": 16,
+            "armor": 3,
+            "shields": {"fore": 1, "aft": 1},
+            "weapons": [
+                {
+                    "name": "Dorsal laser turret",
+                    "skill": "gunnery",
+                    "damage": 6,
+                    "arc": "all",
+                    "qualities": ["linked_1"]
+                }
+            ],
+            "narrative_notes": "Battered but reliable. The hyperdrive has a tendency to stutter on cold starts. Keth knows every sound she makes and can tell by engine pitch alone when something is wrong."
+        }
     ]
 }

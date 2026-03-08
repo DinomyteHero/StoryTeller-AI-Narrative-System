@@ -93,6 +93,9 @@ class BetweenActResult:
     advancement: Optional[dict] = None                      # Phase 10: skill rank increase entry (§14.2)
     milestone_passage: str = ""                             # Phase 12: reflection prose (§14.3)
     milestone_choices: list = field(default_factory=list)    # Phase 12: list of choice dicts for API
+    force_power_milestone_passage: str = ""                  # Phase 15: Force power upgrade reflection (§16.4)
+    force_power_milestone_choices: list = field(default_factory=list)  # Phase 15: Force power upgrade choices
+    behavioral_fingerprint: Optional[dict] = None            # Phase 13: aggregated choice annotations (§24)
     steps_completed: list[str] = field(default_factory=list)
 
 
@@ -392,6 +395,13 @@ def apply_thread_updates(
         # Remove from dynamic threads if present
         open_threads = [t for t in open_threads if t != thread_name]
 
+    # Threads advanced — promote spine threads into dynamic_threads so they
+    # persist across act boundaries even if the next act's spine has no threads
+    spine_threads = spine_act.get("open_threads", [])
+    for thread_name in thread_updates.get("threads_advanced", []):
+        if thread_name in spine_threads and thread_name not in open_threads:
+            open_threads.append(thread_name)
+
     # Threads opened — add new threads
     for thread_name in thread_updates.get("threads_opened", []):
         if thread_name not in open_threads:
@@ -499,10 +509,25 @@ def run_between_act_pipeline(
         result.steps_completed.append("xp_award_failed")
 
     # ── Step 5: Behavioral inference (§14.2) ──────────────────────────
+    # Phase 13: Parse annotations from turn rows for enriched inference
+    parsed_annotations = []
+    for t in turn_rows:
+        ci = t.get("choice_implications")
+        if ci:
+            try:
+                parsed_annotations.append(
+                    json.loads(ci) if isinstance(ci, str) else ci
+                )
+            except (json.JSONDecodeError, TypeError):
+                pass
+
     try:
         from engine.advancement import compute_behavioral_signals, select_and_apply_advancement
 
-        signals = compute_behavioral_signals(turn_rows)
+        signals = compute_behavioral_signals(
+            turn_rows,
+            annotations=parsed_annotations if parsed_annotations else None,
+        )
         advancement = select_and_apply_advancement(
             signals, character, character.available_xp, completed_act_number,
         )
@@ -512,8 +537,24 @@ def run_between_act_pipeline(
         logging.error(f"Between-act step 5 failed: {e}")
         result.steps_completed.append("behavioral_inference_failed")
 
-    # ── Step 6: Choice annotation aggregation (Phase 13+) ────────────
-    result.steps_completed.append("choice_annotation_stub")
+    # ── Step 6: Choice annotation aggregation (Phase 13, §24) ────────
+    try:
+        from engine.advancement import aggregate_behavioral_fingerprint
+
+        fingerprint = aggregate_behavioral_fingerprint(turn_rows)
+        result.behavioral_fingerprint = fingerprint
+        if fingerprint:
+            result.steps_completed.append("behavioral_fingerprint")
+            logging.info(
+                f"Between-act step 6: behavioral fingerprint — "
+                f"priorities={fingerprint['dominant_priorities']}, "
+                f"strength={fingerprint['pattern_strength']}"
+            )
+        else:
+            result.steps_completed.append("behavioral_fingerprint_insufficient_data")
+    except Exception as e:
+        logging.error(f"Between-act step 6 failed: {e}")
+        result.steps_completed.append("behavioral_fingerprint_failed")
 
     # ── Step 7: Milestone eligibility check (Phase 12, §14.3) ────────
     milestone_eligible = False
@@ -647,6 +688,50 @@ def run_between_act_pipeline(
             result.steps_completed.append("milestone_reflection_failed")
     else:
         result.steps_completed.append("milestone_skipped")
+
+    # ── Step 14c: Force power milestone check (Phase 15, §16.4) ───────
+    if character.force_rating > 0 and character.force_powers:
+        try:
+            from engine.force import build_force_power_milestone_choices
+            fp_choices = build_force_power_milestone_choices(
+                character, character.reserved_xp,
+            )
+            if fp_choices:
+                from gm.cloud_gm import generate_force_power_milestone_reflection
+                from state.session import get_act_summaries
+
+                act_summary = get_act_summaries(session_id)
+                fp_result = generate_force_power_milestone_reflection(
+                    character=character,
+                    choices=fp_choices,
+                    campaign_name=spine.get("name", ""),
+                    current_act=completed_act_number,
+                    total_acts=total_acts,
+                    act_summary=act_summary,
+                )
+                result.force_power_milestone_passage = fp_result.passage
+                result.force_power_milestone_choices = [
+                    {
+                        "display": (fp_result.choices[i]
+                                    if i < len(fp_result.choices) else ""),
+                        "force_tag": (fp_result.skill_tags[i]
+                                      if i < len(fp_result.skill_tags) else ""),
+                        "power_name": fp_choices[i].power_name if i < len(fp_choices) else "",
+                        "upgrade_name": fp_choices[i].upgrade_name if i < len(fp_choices) else "",
+                        "xp_cost": fp_choices[i].xp_cost if i < len(fp_choices) else 0,
+                    }
+                    for i in range(len(fp_choices))
+                ]
+                result.steps_completed.append("force_power_milestone_reflection")
+                logging.info(
+                    f"Between-act step 14c: Force power milestone with "
+                    f"{len(fp_choices)} choices"
+                )
+            else:
+                result.steps_completed.append("force_power_milestone_no_choices")
+        except Exception as e:
+            logging.error(f"Between-act step 14c (Force power milestone) failed: {e}")
+            result.steps_completed.append("force_power_milestone_failed")
 
     # ── Step 15: Time skip sequence (Phase 8+) ───────────────────────
     result.steps_completed.append("time_skip_stub")

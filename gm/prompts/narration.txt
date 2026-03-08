@@ -30,7 +30,13 @@ CHARACTER VOICE:
 LOADOUT:
 {equipment_block}
 
+{force_state_block}
+
+{force_capabilities_block}
+
 {talent_capabilities_block}
+
+{aspiration_echo_block}
 
 ═══════════════════════════════════════════
 STORY CONTEXT
@@ -54,6 +60,8 @@ OPEN THREADS:
 
 {motivation_block}
 
+{ship_state_block}
+
 ═══════════════════════════════════════════
 ACTIVE NPCs
 ═══════════════════════════════════════════
@@ -72,7 +80,11 @@ GALACTIC CONTEXT:
 
 {dice_result_block}
 
+{force_result_block}
+
 {talent_activations_block}
+
+{prose_diagnostic_block}
 
 ═══════════════════════════════════════════
 YOUR TASK

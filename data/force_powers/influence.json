@@ -1,0 +1,45 @@
+{
+    "power_id": "influence",
+    "name": "Influence",
+    "category": "mental_influence",
+    "base_pips_required": 1,
+    "base_effect": "Influence the emotions of one engaged target. Can inflict 1 strain to add success/failure to social check.",
+    "narrative_capability": "Can subtly influence the emotions of nearby beings — calming hostility, heightening fear, or implanting a single suggestion in a weak-willed mind.",
+    "gm_choice_guidance": "Offer mind-affecting choices when the character could persuade, deceive, or calm someone through the Force rather than words alone. Influence replaces Charm/Coercion/Deception tags with Force:Influence. Mind tricks presented as social choices with Force tag. Do not offer against strong-willed targets unless the character has Strength upgrades.",
+    "dark_side_flavor": "Dark side Influence doesn't suggest — it overrides. The target's will bends not because they're persuaded but because something stronger than their own mind is pressing down on them. Their eyes go slightly unfocused. They agree too quickly.",
+    "upgrades": {
+        "control_mind_trick": {
+            "name": "Control: Mind Trick",
+            "type": "control",
+            "xp_cost": 10,
+            "prerequisites": [],
+            "effect": "Implant a single short command in the target's mind. Opposed by Discipline.",
+            "pips_required_increase": 1,
+            "narrative": "The gap between suggesting and commanding narrows to nothing. A thought placed precisely enough becomes the target's own."
+        },
+        "range_1": {
+            "name": "Range",
+            "type": "range",
+            "xp_cost": 10,
+            "prerequisites": [],
+            "effect": "Increase range of Influence by one range band.",
+            "narrative": "Distance is no longer a shield. The character's will reaches further than their voice."
+        },
+        "strength_1": {
+            "name": "Strength: Deeper Influence",
+            "type": "strength",
+            "xp_cost": 15,
+            "prerequisites": ["control_mind_trick"],
+            "effect": "Mind trick commands can be more complex. Longer-lasting emotional manipulation.",
+            "narrative": "The crude tool refines. What was a blunt push becomes a precise adjustment — the target's motivations rearranged, their priorities gently rewritten."
+        },
+        "magnitude_1": {
+            "name": "Magnitude",
+            "type": "magnitude",
+            "xp_cost": 10,
+            "prerequisites": [],
+            "effect": "Affect one additional target.",
+            "narrative": "One mind, then two. The Force doesn't distinguish between them — what it can do to one, it can do to many."
+        }
+    }
+}

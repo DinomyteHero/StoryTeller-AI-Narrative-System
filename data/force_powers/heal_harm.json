@@ -1,0 +1,46 @@
+{
+    "power_id": "heal_harm",
+    "name": "Heal/Harm",
+    "category": "restoration_harm",
+    "base_pips_required": 2,
+    "base_effect": "Heal: Heal 1 wound on an engaged living target. Harm: Inflict 1 wound on an engaged living target (earns Conflict).",
+    "narrative_capability": "Can channel the Force to mend wounds in living tissue, or — at terrible cost — to tear it apart. The same power that heals can destroy. The only difference is intent.",
+    "gm_choice_guidance": "Offer healing choices when the character or an ally is wounded and there is a moment to concentrate. Offer harm choices ONLY in desperate situations or when dark side temptation is narratively appropriate. Harm checks always carry heavy Conflict. This is the most morally loaded power — the choice between heal and harm IS the Star Wars question. Tag as [Force:Heal] or [Force:Harm].",
+    "dark_side_flavor": "Harm is not violence — it's violation. The Force reaches into living tissue and unmakes it. The target feels their cells rebel. The character feels their cells respond. It is intimate and it is wrong and it works immediately.",
+    "upgrades": {
+        "strength_heal": {
+            "name": "Strength: Greater Healing",
+            "type": "strength",
+            "xp_cost": 10,
+            "prerequisites": [],
+            "effect": "Heal additional wounds per pip spent.",
+            "narrative": "The healing deepens. What was surface mending becomes structural repair — bone knits, tissue regenerates, the body remembers what it was before the damage."
+        },
+        "strength_harm": {
+            "name": "Strength: Greater Harm",
+            "type": "strength",
+            "xp_cost": 10,
+            "prerequisites": [],
+            "effect": "Inflict additional wounds per pip spent. +2 Conflict per use.",
+            "conflict_cost": 2,
+            "narrative": "The harm intensifies. What was disruption becomes destruction. The dark side offers efficiency — more damage, less effort. The cost is measured in what the character becomes."
+        },
+        "range_1": {
+            "name": "Range",
+            "type": "range",
+            "xp_cost": 10,
+            "prerequisites": [],
+            "effect": "Increase range from engaged to short.",
+            "narrative": "Healing at a distance. The Force bridges the gap between the character's hands and the wound they cannot reach."
+        },
+        "control_critical": {
+            "name": "Control: Heal Critical",
+            "type": "control",
+            "xp_cost": 15,
+            "prerequisites": ["strength_heal"],
+            "effect": "Can attempt to heal a Critical Injury. Requires additional pip.",
+            "pips_required_increase": 1,
+            "narrative": "Beyond wounds now. The deep damage — the kind that changes how a body works. Healing this requires understanding what was broken and rebuilding it from memory."
+        }
+    }
+}

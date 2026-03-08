@@ -30,7 +30,27 @@ from engine.checks import (
     CheckRequest,
     DIFFICULTY_LABELS,
     build_pool,
+    build_pure_force_pool,
     describe_pool_for_display,
+)
+from engine.force import (
+    ForceResult,
+    ForcePowerMilestoneChoice,
+    apply_force_power_upgrade,
+    apply_temptation_choice,
+    build_clean_success,
+    build_force_capabilities_block,
+    build_force_power_milestone_choices,
+    build_force_result_block,
+    build_force_state_block,
+    build_temptation_choice,
+    build_total_failure,
+    character_has_power,
+    commit_force_die,
+    get_available_force_dice,
+    get_effective_pips_required,
+    release_commitment,
+    resolve_force_pips,
 )
 from engine.destiny import DestinyState, roll_initial_destiny
 from engine.dice import DicePool, roll_pool
@@ -40,6 +60,13 @@ from engine.talents import (
     acquire_talent,
     build_milestone_choices,
     MilestoneChoice,
+)
+from engine.vehicle import (
+    ShipState,
+    is_vehicle_skill,
+    load_ship_from_spine,
+    roll_vehicle_critical,
+    build_vehicle_damage_block,
 )
 from gm.cloud_gm import (
     narrate_turn,
@@ -67,16 +94,20 @@ from engine.reconciliation import (
     roll_obligation_duty,
     morality_label,
 )
-from gm.local_gm import decide_check
+from gm.local_gm import annotate_choice, decide_check, run_prose_diagnostic
 from state.db import get_connection
 from state.memory import compress_if_needed, should_compress, compress_act_turns
 from state.session import (
     create_session,
     get_act_summaries,
+    get_recent_narrations,
     get_recent_turns,
     get_session,
     get_turn_count,
+    load_ship_state,
+    load_ship_states,
     log_turn,
+    save_ship_state,
     update_destiny_pool,
 )
 
@@ -127,8 +158,22 @@ class InterventionRequest(BaseModel):
     accept: bool
 
 
+class TemptationRequest(BaseModel):
+    accept: bool
+
+
 class MilestoneRequest(BaseModel):
     choice_index: int
+
+
+class ForcePowerMilestoneRequest(BaseModel):
+    choice_index: int
+
+
+class CommitmentRequest(BaseModel):
+    power_id: str
+    upgrade_id: str
+    release: bool = False
 
 
 # ── Helper Functions ────────────────────────────────────────────────────
@@ -257,6 +302,85 @@ def resolve_initial_variations(session_id: str, spine: dict) -> None:
                         conn.commit()
 
 
+# ── Phase 13: Annotation + Diagnostic Helpers ─────────────────────────
+
+def _build_aspiration_echo(character, arc_state: dict) -> str:
+    """Build aspiration echo instructions from behavioral inference (§14.5).
+
+    Phase 13 starts with Force sensitivity echoes only.
+    Skill growth and advancement direction echoes are reserved for future phases.
+    """
+    # Force sensitivity echoes (§14.4)
+    if getattr(character, "latent_force_sensitive", False):
+        return (
+            "The character has an untapped connection to something they "
+            "cannot name. In moments of stillness, danger, or deep emotion, "
+            "weave a brief interiority moment — a sensation that is more "
+            "than instinct, a certainty that arrives before reason. Do not "
+            "name the Force. Let the character feel it as heightened "
+            "awareness, inexplicable calm under pressure, or a pull toward "
+            "something they cannot articulate."
+        )
+
+    # Skill growth echoes — derived from advancement_log
+    adv_log = getattr(character, "advancement_log", [])
+    if adv_log:
+        recent = adv_log[-1]
+        skill = recent.get("skill", "")
+        if skill:
+            return (
+                f"The character has been developing their {skill.replace('_', ' ')} "
+                f"capability. Occasionally weave a brief moment of interiority "
+                f"where they notice this growth — not as narrated fact, but as "
+                f"the character's own awareness of becoming more capable. "
+                f"Make it specific to how they use {skill.replace('_', ' ')} "
+                f"in their life, not a generic observation."
+            )
+
+    return ""
+
+
+def _run_annotation_background(
+    session_id: str,
+    player_action: str,
+    all_choices: list[str],
+    choice_index: int,
+    scene_description: str,
+    npc_states: list,
+    recent_turns: list,
+    throughline_question: str,
+) -> str | None:
+    """Run choice annotation and return JSON string or None.
+
+    Called as a background thread so it doesn't block narration.
+    """
+    rejected = [c for i, c in enumerate(all_choices) if i != choice_index]
+
+    npc_summary = "\n".join(
+        f"- {npc.name}: {npc.disposition_label()} ({npc.disposition:.2f})"
+        for npc in npc_states[:4]
+    ) if npc_states else "No NPCs present."
+
+    recent_pattern = "\n".join(
+        f"Turn {t.turn_number}: {t.player_action}"
+        + (f" [{t.check_made}]" if t.check_made else "")
+        for t in recent_turns[-5:]
+    ) if recent_turns else "No prior turns."
+
+    annotation = annotate_choice(
+        selected_choice=player_action,
+        rejected_choices=rejected,
+        scene_context=scene_description,
+        npc_summary=npc_summary,
+        recent_pattern=recent_pattern,
+        throughline_question=throughline_question,
+    )
+
+    if annotation:
+        return json.dumps(annotation)
+    return None
+
+
 # ── Routes ──────────────────────────────────────────────────────────────
 
 @router.post("/session")
@@ -315,6 +439,11 @@ async def create_session_route(
             motivation=npc_data.get("motivation", ""),
             behavioral_envelope=npc_data.get("behavioral_envelope", []),
         ))
+
+    # ── Initialize ship states from spine vehicle registry (§17) ──────
+    for vehicle_entry in spine.get("vehicle_registry", []):
+        ship = load_ship_from_spine(vehicle_entry)
+        save_ship_state(session_id, ship)
 
     # ── Resolve variation points (e.g. Doss's fate) ───────────────────
     resolve_initial_variations(session_id, spine)
@@ -415,6 +544,10 @@ async def handle_turn(
     if arc_state.get("duty_active"):
         effective_wound_threshold = character.wound_threshold + 1
 
+    # Phase 16: Load ship states (§17) — primary ship for vehicle checks
+    ships = load_ship_states(session_id)
+    primary_ship = ships[0] if ships else None
+
     # ── Step 1: Resolve the player's choice ───────────────────────────
     last_turn = get_most_recent_turn(session_id)
     previous_choices = json.loads(last_turn["choices_json"])
@@ -444,6 +577,7 @@ async def handle_turn(
         player_action=player_action,
         arc_state=arc_state,
         recent_failure_count=recent_failure_count,
+        ship_state=primary_ship if primary_ship else None,
     )
 
     # ── Step 4: Dice resolution (if check required) ───────────────────
@@ -451,6 +585,7 @@ async def handle_turn(
     roll_result = None
     talent_activations = []
     destiny_result = None
+    force_result = None  # Phase 14: Force resolution result (§16)
 
     # Phase 11.5: Load destiny state (§23)
     destiny = DestinyState(
@@ -460,31 +595,47 @@ async def handle_turn(
         dark_spent_this_act=arc_state.get("destiny_dark_spent_this_act", 0),
     )
 
+    is_pure_force = (check_decision.requires_check
+                     and check_decision.force_use
+                     and not check_decision.skill)
+
     if check_decision.requires_check:
-        check_request = CheckRequest(
-            skill=check_decision.skill,
-            difficulty=DIFFICULTY_LABELS[check_decision.difficulty],
-            boost_dice=check_decision.boost_dice,
-            setback_dice=check_decision.setback_dice,
-        )
+        if is_pure_force:
+            # Pure Force action — no skill check, only Force dice (§16.1)
+            dice_pool = build_pure_force_pool(
+                character,
+                boost_dice=check_decision.boost_dice,
+                setback_dice=check_decision.setback_dice,
+            )
+            talent_activations = []
+        else:
+            check_request = CheckRequest(
+                skill=check_decision.skill,
+                difficulty=DIFFICULTY_LABELS[check_decision.difficulty],
+                boost_dice=check_decision.boost_dice,
+                setback_dice=check_decision.setback_dice,
+            )
 
-        # Check for antagonist NPC in scene (disposition < 0.3)
-        npc_hostile = any(
-            npc.disposition < 0.3
-            for npc in load_npc_states(session_id, spine)
-        )
+            # Check for antagonist NPC in scene (disposition < 0.3)
+            npc_hostile = any(
+                npc.disposition < 0.3
+                for npc in load_npc_states(session_id, spine)
+            )
 
-        dice_pool, talent_activations, destiny_result = build_pool(
-            character, check_request,
-            scene_type=check_decision.scene_type,
-            destiny_state=destiny,
-            tension_level=current_act["tension"],
-            anchor_proximity=arc_state.get("anchor_proximity", "distant"),
-            act_progress=arc_state.get("act_progress", 0.0),
-            obligation_active=arc_state.get("obligation_active", False),
-            npc_disposition_below_threshold=npc_hostile,
-            spine_dark_trigger=current_act.get("destiny_dark_trigger", False),
-        )
+            dice_pool, talent_activations, destiny_result = build_pool(
+                character, check_request,
+                scene_type=check_decision.scene_type,
+                destiny_state=destiny,
+                tension_level=current_act["tension"],
+                anchor_proximity=arc_state.get("anchor_proximity", "distant"),
+                act_progress=arc_state.get("act_progress", 0.0),
+                obligation_active=arc_state.get("obligation_active", False),
+                npc_disposition_below_threshold=npc_hostile,
+                spine_dark_trigger=current_act.get("destiny_dark_trigger", False),
+                force_use=check_decision.force_use,
+                ship_state=primary_ship if check_decision.scene_type == "space_combat" else None,
+            )
+
         roll_result = roll_pool(dice_pool)
 
         # Persist destiny pool changes
@@ -501,8 +652,91 @@ async def handle_turn(
                     effective_strain_threshold,
                 )
 
+        # Phase 16: Apply vehicle damage from check results (§17.3)
+        if (primary_ship and check_decision.scene_type == "space_combat"
+                and check_decision.skill and is_vehicle_skill(check_decision.skill)):
+            # Threat → system strain on the ship
+            if roll_result.net_advantages < 0:
+                primary_ship.apply_system_strain(abs(roll_result.net_advantages))
+            # Failed combat check → hull trauma from enemy fire
+            if not roll_result.succeeded and check_decision.skill in ("gunnery", "piloting_space", "piloting_planetary"):
+                primary_ship.apply_hull_trauma(3)  # standard hit
+            # Triumph → no extra vehicle effect (personal triumph)
+            # Despair → vehicle critical hit
+            if roll_result.despairs > 0:
+                roll_vehicle_critical(primary_ship)
+            save_ship_state(session_id, primary_ship)
+
+    # ── Step 4a: Force pip resolution (Phase 14, §16.1) ───────────────
+    if roll_result and check_decision.force_use and character.force_rating > 0:
+        morality = character.motivation.morality
+        pips_req = check_decision.force_pips_required or 1
+        resolution = resolve_force_pips(roll_result, pips_req, morality)
+
+        if resolution.force_succeeded:
+            force_result = build_clean_success(
+                roll_result, pips_req, morality,
+                force_power=check_decision.force_power or "",
+            )
+        elif resolution.temptation_available:
+            # ── Step 4b: Dark side temptation (§16.2) ─────────────────
+            temptation = build_temptation_choice(
+                resolution,
+                force_power=check_decision.force_power or "",
+            )
+            arc_state["pending_temptation"] = {
+                "check_skill": check_decision.skill,
+                "check_difficulty": check_decision.difficulty,
+                "scene_type": check_decision.scene_type,
+                "moral_weight": check_decision.moral_weight,
+                "force_use": True,
+                "force_power": check_decision.force_power or "",
+                "force_pips_required": pips_req,
+                "is_pure_force": is_pure_force,
+                "dice_pool": asdict(dice_pool),
+                "roll_result": asdict(roll_result),
+                "resolution": {
+                    "light_pips": resolution.light_pips,
+                    "dark_pips": resolution.dark_pips,
+                    "pips_required": resolution.pips_required,
+                    "is_dark_dominant": resolution.is_dark_dominant,
+                    "is_grey": resolution.is_grey,
+                    "pips_needed_from_costly_side": resolution.pips_needed_from_costly_side,
+                    "conflict_cost": resolution.conflict_cost,
+                    "strain_cost": resolution.strain_cost,
+                },
+                "talent_activations": [asdict(a) for a in talent_activations],
+                "destiny_narrative_note": (
+                    destiny_result.narrative_note if destiny_result else ""
+                ),
+                "player_action": player_action,
+                "choice_index": req.choice_index,
+            }
+            update_session_state(session_id, character, arc_state)
+            return {
+                "pending": True,
+                "temptation_offer": temptation,
+                "dice_result": describe_pool_for_display(dice_pool),
+                "roll_summary": roll_result.narrative_label() if not is_pure_force else None,
+                "force_pips": {
+                    "light": roll_result.light_pips,
+                    "dark": roll_result.dark_pips,
+                    "required": pips_req,
+                },
+                "session_state": {
+                    "turn_number": get_turn_count(session_id) + 1,
+                    "wounds": character.current_wounds,
+                    "strain": character.current_strain,
+                },
+            }
+        else:
+            force_result = build_total_failure(
+                roll_result, pips_req,
+                force_power=check_decision.force_power or "",
+            )
+
     # ── Step 3.5: Intervention check (Phase 12, §15.1) ──────────────
-    if roll_result and check_decision.requires_check:
+    if roll_result and check_decision.requires_check and check_decision.skill:
         offer = check_interventions(
             character, check_decision.skill, roll_result.succeeded,
             current_act=arc_state["current_act"],
@@ -553,6 +787,68 @@ async def handle_turn(
         if weapon:
             combat_damage_note = build_combat_damage_block(roll_result, weapon)
 
+    # Phase 16: Vehicle damage context for narration (§17.3)
+    if (primary_ship and check_decision.scene_type == "space_combat"
+            and roll_result and check_decision.skill):
+        vehicle_damage_note = build_vehicle_damage_block(
+            primary_ship, roll_result, check_decision.skill,
+        )
+        if vehicle_damage_note:
+            combat_damage_note = (
+                (combat_damage_note + "\n" if combat_damage_note else "")
+                + vehicle_damage_note
+            )
+
+    # ── Phase 13: Choice annotation (background thread, §24) ─────────
+    annotation_result = [None]  # mutable container for thread result
+
+    def _annotation_thread():
+        annotation_result[0] = _run_annotation_background(
+            session_id=session_id,
+            player_action=player_action,
+            all_choices=previous_choices,
+            choice_index=req.choice_index,
+            scene_description=scene_description,
+            npc_states=load_npc_states(session_id, spine),
+            recent_turns=recent_turns,
+            throughline_question=spine.get("throughline_question", ""),
+        )
+
+    annotation_thread = threading.Thread(target=_annotation_thread, daemon=True)
+    annotation_thread.start()
+
+    # ── Phase 13: Prose diagnostic (§13) ──────────────────────────────
+    recent_narrations = get_recent_narrations(session_id, limit=4)
+    prose_diagnostic = None
+    if len(recent_narrations) >= 2:
+        npc_states_for_diag = load_npc_states(session_id, spine)
+        npc_diag_block = "\n".join(
+            npc.to_prompt_block() for npc in npc_states_for_diag
+        ) if npc_states_for_diag else "No NPCs."
+        prose_diagnostic = run_prose_diagnostic(recent_narrations, npc_diag_block)
+
+    # ── Phase 13: Aspiration echo (§14.5) ─────────────────────────────
+    aspiration_echo = _build_aspiration_echo(character, arc_state)
+
+    # ── Phase 14: Apply Force mechanical effects (§16) ────────────────
+    if force_result:
+        if force_result.conflict_earned:
+            character.motivation.conflict += force_result.conflict_earned
+        if force_result.strain_charged:
+            character.current_strain = min(
+                character.current_strain + force_result.strain_charged,
+                effective_strain_threshold,
+            )
+
+    # Phase 14: Build Force context blocks for narration (§16)
+    _force_state_block = build_force_state_block(character)
+    _force_result_block = ""
+    if force_result:
+        skill_succeeded = roll_result.succeeded if (roll_result and not is_pure_force) else None
+        _force_result_block = build_force_result_block(
+            force_result, skill_succeeded, character.motivation.morality,
+        )
+
     # ── Step 5: Assemble context package ──────────────────────────────
     story_summary = get_act_summaries(session_id)
     npc_states = load_npc_states(session_id, spine)
@@ -562,7 +858,7 @@ async def handle_turn(
     for npc in npc_states:
         npc.decay_emotion()
         npc.nudge_disposition_from_emotion()
-    if roll_result and check_decision.requires_check:
+    if roll_result and check_decision.requires_check and check_decision.skill:
         _apply_emotion_from_check(
             npc_states, check_decision.skill,
             roll_result.outcome_quadrant, turn_number,
@@ -594,6 +890,8 @@ async def handle_turn(
                     current_act.get("open_threads", [])
                     + arc_state.get("dynamic_threads", [])
                 )
+                if (t if isinstance(t, str) else t.name)
+                not in arc_state.get("closed_threads", [])
             ],
             closed_threads=arc_state.get("closed_threads", []),
             turns_this_act=arc_state.get("turns_this_act", 0),
@@ -620,6 +918,14 @@ async def handle_turn(
         talent_activations=talent_activations,
         destiny_narrative_note=(
             destiny_result.narrative_note if destiny_result else ""
+        ),
+        aspiration_echo_instructions=aspiration_echo,
+        prose_diagnostic=prose_diagnostic,
+        force_state_block=_force_state_block,
+        force_result_block=_force_result_block,
+        ship_state_block=(
+            primary_ship.to_narration_block() if primary_ship
+            and check_decision.scene_type == "space_combat" else ""
         ),
     )
 
@@ -659,6 +965,10 @@ async def handle_turn(
     # ── Step 9: Check act boundary ───────────────────────────────────
     act_boundary_reached = detect_act_boundary(arc_state)
 
+    # Phase 13: Wait for annotation thread to complete (§24)
+    annotation_thread.join(timeout=5.0)  # don't block more than 5s
+    choice_implications_json = annotation_result[0]
+
     # ── Step 10: Persist ─────────────────────────────────────────────
     log_turn(
         session_id=session_id,
@@ -675,6 +985,10 @@ async def handle_turn(
         scene_type=check_decision.scene_type,
         moral_weight=check_decision.moral_weight,
         skill_tags_json=json.dumps(narration_result.skill_tags),
+        choice_implications=choice_implications_json,
+        force_result_json=(
+            json.dumps(asdict(force_result)) if force_result else None
+        ),
     )
 
     # ── Step 11: Update session state ─────────────────────────────────
@@ -689,6 +1003,7 @@ async def handle_turn(
     # Runs synchronously — the pipeline updates DB state (act reset, NPC drift,
     # compression) and the response must reflect the new act.
     milestone_data = None
+    force_power_milestone_data = None
     if act_boundary_reached:
         pipeline_result = run_between_act_pipeline(
             session_id, character, spine, arc_state["current_act"],
@@ -710,6 +1025,16 @@ async def handle_turn(
                 "choices": pipeline_result.milestone_choices,
             }
             arc_state["pending_milestone"] = milestone_data
+
+        # Phase 15: Store pending Force power milestone (§16.4)
+        if pipeline_result.force_power_milestone_passage:
+            force_power_milestone_data = {
+                "passage": pipeline_result.force_power_milestone_passage,
+                "choices": pipeline_result.force_power_milestone_choices,
+            }
+            arc_state["pending_force_power_milestone"] = force_power_milestone_data
+
+        if milestone_data or force_power_milestone_data:
             update_session_state(session_id, character, arc_state)
 
     # ── Return ────────────────────────────────────────────────────────
@@ -730,6 +1055,8 @@ async def handle_turn(
     }
     if milestone_data:
         response["milestone"] = milestone_data
+    if force_power_milestone_data:
+        response["force_power_milestone"] = force_power_milestone_data
     return response
 
 
@@ -823,6 +1150,10 @@ async def handle_turn_stream(
     if arc_state.get("duty_active"):
         effective_wound_threshold = character.wound_threshold + 1
 
+    # Phase 16: Load ship states (§17) — primary ship for vehicle checks
+    ships_s = load_ship_states(session_id)
+    primary_ship_s = ships_s[0] if ships_s else None
+
     # ── Step 1: Resolve the player's choice ───────────────────────────
     last_turn = get_most_recent_turn(session_id)
     previous_choices = json.loads(last_turn["choices_json"])
@@ -851,6 +1182,7 @@ async def handle_turn_stream(
         player_action=player_action,
         arc_state=arc_state,
         recent_failure_count=recent_failure_count,
+        ship_state=primary_ship_s if primary_ship_s else None,
     )
 
     # ── Step 4: Dice resolution (if check required) ───────────────────
@@ -858,6 +1190,7 @@ async def handle_turn_stream(
     roll_result = None
     talent_activations = []
     destiny_result = None
+    force_result = None  # Phase 14: Force resolution result (§16)
 
     # Phase 11.5: Load destiny state (§23)
     destiny = DestinyState(
@@ -867,40 +1200,52 @@ async def handle_turn_stream(
         dark_spent_this_act=arc_state.get("destiny_dark_spent_this_act", 0),
     )
 
+    is_pure_force_s = (check_decision.requires_check
+                       and check_decision.force_use
+                       and not check_decision.skill)
+
     if check_decision.requires_check:
-        check_request = CheckRequest(
-            skill=check_decision.skill,
-            difficulty=DIFFICULTY_LABELS[check_decision.difficulty],
-            boost_dice=check_decision.boost_dice,
-            setback_dice=check_decision.setback_dice,
-        )
+        if is_pure_force_s:
+            dice_pool = build_pure_force_pool(
+                character,
+                boost_dice=check_decision.boost_dice,
+                setback_dice=check_decision.setback_dice,
+            )
+            talent_activations = []
+        else:
+            check_request = CheckRequest(
+                skill=check_decision.skill,
+                difficulty=DIFFICULTY_LABELS[check_decision.difficulty],
+                boost_dice=check_decision.boost_dice,
+                setback_dice=check_decision.setback_dice,
+            )
 
-        # Check for antagonist NPC in scene (disposition < 0.3)
-        npc_hostile = any(
-            npc.disposition < 0.3
-            for npc in load_npc_states(session_id, spine)
-        )
+            npc_hostile = any(
+                npc.disposition < 0.3
+                for npc in load_npc_states(session_id, spine)
+            )
 
-        dice_pool, talent_activations, destiny_result = build_pool(
-            character, check_request,
-            scene_type=check_decision.scene_type,
-            destiny_state=destiny,
-            tension_level=current_act["tension"],
-            anchor_proximity=arc_state.get("anchor_proximity", "distant"),
-            act_progress=arc_state.get("act_progress", 0.0),
-            obligation_active=arc_state.get("obligation_active", False),
-            npc_disposition_below_threshold=npc_hostile,
-            spine_dark_trigger=current_act.get("destiny_dark_trigger", False),
-        )
+            dice_pool, talent_activations, destiny_result = build_pool(
+                character, check_request,
+                scene_type=check_decision.scene_type,
+                destiny_state=destiny,
+                tension_level=current_act["tension"],
+                anchor_proximity=arc_state.get("anchor_proximity", "distant"),
+                act_progress=arc_state.get("act_progress", 0.0),
+                obligation_active=arc_state.get("obligation_active", False),
+                npc_disposition_below_threshold=npc_hostile,
+                spine_dark_trigger=current_act.get("destiny_dark_trigger", False),
+                force_use=check_decision.force_use,
+                ship_state=primary_ship_s if check_decision.scene_type == "space_combat" else None,
+            )
+
         roll_result = roll_pool(dice_pool)
 
-        # Persist destiny pool changes
         if destiny_result and destiny_result.pool_modified:
             update_destiny_pool(session_id, destiny.light, destiny.dark)
             arc_state["destiny_light_spent_this_act"] = destiny.light_spent_this_act
             arc_state["destiny_dark_spent_this_act"] = destiny.dark_spent_this_act
 
-        # Apply mechanical consequences (wounds, strain) — physics first
         if roll_result.outcome_quadrant in ("failure_threat", "success_threat"):
             if abs(roll_result.net_advantages) >= 2:
                 character.current_strain = min(
@@ -908,8 +1253,92 @@ async def handle_turn_stream(
                     effective_strain_threshold,
                 )
 
+        # Phase 16: Apply vehicle damage from check results (§17.3)
+        if (primary_ship_s and check_decision.scene_type == "space_combat"
+                and check_decision.skill and is_vehicle_skill(check_decision.skill)):
+            if roll_result.net_advantages < 0:
+                primary_ship_s.apply_system_strain(abs(roll_result.net_advantages))
+            if not roll_result.succeeded and check_decision.skill in ("gunnery", "piloting_space", "piloting_planetary"):
+                primary_ship_s.apply_hull_trauma(3)
+            if roll_result.despairs > 0:
+                roll_vehicle_critical(primary_ship_s)
+            save_ship_state(session_id, primary_ship_s)
+
+    # ── Step 4a: Force pip resolution (Phase 14, §16.1) ───────────────
+    if roll_result and check_decision.force_use and character.force_rating > 0:
+        morality_s = character.motivation.morality
+        pips_req_s = check_decision.force_pips_required or 1
+        resolution_s = resolve_force_pips(roll_result, pips_req_s, morality_s)
+
+        if resolution_s.force_succeeded:
+            force_result = build_clean_success(
+                roll_result, pips_req_s, morality_s,
+                force_power=check_decision.force_power or "",
+            )
+        elif resolution_s.temptation_available:
+            temptation_s = build_temptation_choice(
+                resolution_s,
+                force_power=check_decision.force_power or "",
+            )
+            arc_state["pending_temptation"] = {
+                "check_skill": check_decision.skill,
+                "check_difficulty": check_decision.difficulty,
+                "scene_type": check_decision.scene_type,
+                "moral_weight": check_decision.moral_weight,
+                "force_use": True,
+                "force_power": check_decision.force_power or "",
+                "force_pips_required": pips_req_s,
+                "is_pure_force": is_pure_force_s,
+                "dice_pool": asdict(dice_pool),
+                "roll_result": asdict(roll_result),
+                "resolution": {
+                    "light_pips": resolution_s.light_pips,
+                    "dark_pips": resolution_s.dark_pips,
+                    "pips_required": resolution_s.pips_required,
+                    "is_dark_dominant": resolution_s.is_dark_dominant,
+                    "is_grey": resolution_s.is_grey,
+                    "pips_needed_from_costly_side": resolution_s.pips_needed_from_costly_side,
+                    "conflict_cost": resolution_s.conflict_cost,
+                    "strain_cost": resolution_s.strain_cost,
+                },
+                "talent_activations": [asdict(a) for a in talent_activations],
+                "destiny_narrative_note": (
+                    destiny_result.narrative_note if destiny_result else ""
+                ),
+                "player_action": player_action,
+                "choice_index": req.choice_index,
+            }
+            update_session_state(session_id, character, arc_state)
+
+            def temptation_sse():
+                payload = {
+                    "pending": True,
+                    "temptation_offer": temptation_s,
+                    "dice_result": describe_pool_for_display(dice_pool),
+                    "roll_summary": roll_result.narrative_label() if not is_pure_force_s else None,
+                    "force_pips": {
+                        "light": roll_result.light_pips,
+                        "dark": roll_result.dark_pips,
+                        "required": pips_req_s,
+                    },
+                    "session_state": {
+                        "turn_number": get_turn_count(session_id) + 1,
+                        "wounds": character.current_wounds,
+                        "strain": character.current_strain,
+                    },
+                }
+                yield f"event: temptation\ndata: {json.dumps(payload)}\n\n"
+            return StreamingResponse(
+                temptation_sse(), media_type="text/event-stream"
+            )
+        else:
+            force_result = build_total_failure(
+                roll_result, pips_req_s,
+                force_power=check_decision.force_power or "",
+            )
+
     # ── Step 3.5: Intervention check (Phase 12, §15.1) ──────────────
-    if roll_result and check_decision.requires_check:
+    if roll_result and check_decision.requires_check and check_decision.skill:
         offer = check_interventions(
             character, check_decision.skill, roll_result.succeeded,
             current_act=arc_state["current_act"],
@@ -966,6 +1395,69 @@ async def handle_turn_stream(
         if weapon:
             combat_damage_note = build_combat_damage_block(roll_result, weapon)
 
+    # Phase 16: Vehicle damage context for narration (§17.3)
+    if (primary_ship_s and check_decision.scene_type == "space_combat"
+            and roll_result and check_decision.skill):
+        vehicle_damage_note_s = build_vehicle_damage_block(
+            primary_ship_s, roll_result, check_decision.skill,
+        )
+        if vehicle_damage_note_s:
+            combat_damage_note = (
+                (combat_damage_note + "\n" if combat_damage_note else "")
+                + vehicle_damage_note_s
+            )
+
+    # ── Phase 13: Choice annotation (background thread, §24) ─────────
+    annotation_result_stream = [None]
+
+    def _annotation_thread_stream():
+        annotation_result_stream[0] = _run_annotation_background(
+            session_id=session_id,
+            player_action=player_action,
+            all_choices=previous_choices,
+            choice_index=req.choice_index,
+            scene_description=scene_description,
+            npc_states=load_npc_states(session_id, spine),
+            recent_turns=recent_turns,
+            throughline_question=spine.get("throughline_question", ""),
+        )
+
+    annotation_thread_s = threading.Thread(
+        target=_annotation_thread_stream, daemon=True,
+    )
+    annotation_thread_s.start()
+
+    # ── Phase 13: Prose diagnostic (§13) ──────────────────────────────
+    recent_narrations_s = get_recent_narrations(session_id, limit=4)
+    prose_diagnostic_s = None
+    if len(recent_narrations_s) >= 2:
+        npc_states_for_diag_s = load_npc_states(session_id, spine)
+        npc_diag_block_s = "\n".join(
+            npc.to_prompt_block() for npc in npc_states_for_diag_s
+        ) if npc_states_for_diag_s else "No NPCs."
+        prose_diagnostic_s = run_prose_diagnostic(recent_narrations_s, npc_diag_block_s)
+
+    # ── Phase 13: Aspiration echo (§14.5) ─────────────────────────────
+    aspiration_echo_s = _build_aspiration_echo(character, arc_state)
+
+    # ── Phase 14: Apply Force mechanical effects (§16) ────────────────
+    if force_result:
+        if force_result.conflict_earned:
+            character.motivation.conflict += force_result.conflict_earned
+        if force_result.strain_charged:
+            character.current_strain = min(
+                character.current_strain + force_result.strain_charged,
+                effective_strain_threshold,
+            )
+
+    _force_state_block_s = build_force_state_block(character)
+    _force_result_block_s = ""
+    if force_result:
+        skill_succ_s = roll_result.succeeded if (roll_result and not is_pure_force_s) else None
+        _force_result_block_s = build_force_result_block(
+            force_result, skill_succ_s, character.motivation.morality,
+        )
+
     # ── Step 5: Assemble context package ──────────────────────────────
     story_summary = get_act_summaries(session_id)
     npc_states = load_npc_states(session_id, spine)
@@ -975,7 +1467,7 @@ async def handle_turn_stream(
     for npc in npc_states:
         npc.decay_emotion()
         npc.nudge_disposition_from_emotion()
-    if roll_result and check_decision.requires_check:
+    if roll_result and check_decision.requires_check and check_decision.skill:
         _apply_emotion_from_check(
             npc_states, check_decision.skill,
             roll_result.outcome_quadrant, turn_number,
@@ -1007,6 +1499,8 @@ async def handle_turn_stream(
                     current_act.get("open_threads", [])
                     + arc_state.get("dynamic_threads", [])
                 )
+                if (t if isinstance(t, str) else t.name)
+                not in arc_state.get("closed_threads", [])
             ],
             closed_threads=arc_state.get("closed_threads", []),
             turns_this_act=arc_state.get("turns_this_act", 0),
@@ -1033,6 +1527,14 @@ async def handle_turn_stream(
         talent_activations=talent_activations,
         destiny_narrative_note=(
             destiny_result.narrative_note if destiny_result else ""
+        ),
+        aspiration_echo_instructions=aspiration_echo_s,
+        prose_diagnostic=prose_diagnostic_s,
+        force_state_block=_force_state_block_s,
+        force_result_block=_force_result_block_s,
+        ship_state_block=(
+            primary_ship_s.to_narration_block() if primary_ship_s
+            and check_decision.scene_type == "space_combat" else ""
         ),
     )
 
@@ -1118,6 +1620,10 @@ async def handle_turn_stream(
         # ── Step 9: Check act boundary ────────────────────────────────
         act_boundary_reached = detect_act_boundary(arc_state)
 
+        # Phase 13: Wait for annotation thread (§24)
+        annotation_thread_s.join(timeout=5.0)
+        choice_implications_json_s = annotation_result_stream[0]
+
         # ── Step 10: Persist ──────────────────────────────────────────
         log_turn(
             session_id=session_id,
@@ -1138,6 +1644,10 @@ async def handle_turn_stream(
             scene_type=check_decision.scene_type,
             moral_weight=check_decision.moral_weight,
             skill_tags_json=json.dumps(narration_result.skill_tags),
+            choice_implications=choice_implications_json_s,
+            force_result_json=(
+                json.dumps(asdict(force_result)) if force_result else None
+            ),
         )
 
         # ── Step 11: Update session state ─────────────────────────────
@@ -1152,6 +1662,7 @@ async def handle_turn_stream(
 
         # ── Step 13: Between-act processing ───────────────────────────
         milestone_data = None
+        force_power_milestone_data = None
         if act_boundary_reached:
             try:
                 pipeline_result = run_between_act_pipeline(
@@ -1175,6 +1686,16 @@ async def handle_turn_stream(
                         "choices": pipeline_result.milestone_choices,
                     }
                     arc_state["pending_milestone"] = milestone_data
+
+                # Phase 15: Store pending Force power milestone (§16.4)
+                if pipeline_result.force_power_milestone_passage:
+                    force_power_milestone_data = {
+                        "passage": pipeline_result.force_power_milestone_passage,
+                        "choices": pipeline_result.force_power_milestone_choices,
+                    }
+                    arc_state["pending_force_power_milestone"] = force_power_milestone_data
+
+                if milestone_data or force_power_milestone_data:
                     update_session_state(session_id, character, arc_state)
             except Exception as e:
                 logging.error(f"Between-act pipeline failed: {e}")
@@ -1199,9 +1720,295 @@ async def handle_turn_stream(
         }
         if milestone_data:
             payload["milestone"] = milestone_data
+        if force_power_milestone_data:
+            payload["force_power_milestone"] = force_power_milestone_data
         yield f"event: done\ndata: {json.dumps(payload)}\n\n"
 
     return StreamingResponse(generate(), media_type="text/event-stream")
+
+
+# ── Phase 14: Dark Side Temptation endpoint (§16.2) ─────────────────────
+
+@router.post("/session/{session_id}/temptation")
+async def handle_temptation(
+    session_id: str,
+    req: TemptationRequest,
+    background_tasks: BackgroundTasks,
+):
+    """
+    Handle a player's response to a dark side temptation.
+    Accept: Force succeeds using costly pips (Conflict + strain or just strain).
+    Reject: Force fails, no cost.
+    """
+    from engine.force import ForceResolution
+
+    session = get_session(session_id)
+    if session is None:
+        raise HTTPException(404, "Session not found")
+
+    character = Character.model_validate_json(session["character_json"])
+    arc_state = json.loads(session["arc_state_json"])
+
+    pending = arc_state.get("pending_temptation")
+    if not pending:
+        raise HTTPException(400, "No pending temptation")
+
+    spine = load_campaign_spine(session["campaign_name"])
+    current_act = spine["acts"][arc_state["current_act"] - 1]
+
+    # Rebuild state from pending
+    dice_pool = DicePool(**pending["dice_pool"])
+    roll_result = _rebuild_roll_result(pending["roll_result"])
+    talent_activations = [
+        _rebuild_talent_activation(a) for a in pending.get("talent_activations", [])
+    ]
+
+    # Rebuild ForceResolution from stored data
+    res_data = pending["resolution"]
+    resolution = ForceResolution(
+        light_pips=res_data["light_pips"],
+        dark_pips=res_data["dark_pips"],
+        pips_required=res_data["pips_required"],
+        is_dark_dominant=res_data["is_dark_dominant"],
+        is_grey=res_data["is_grey"],
+        pips_needed_from_costly_side=res_data["pips_needed_from_costly_side"],
+        conflict_cost=res_data["conflict_cost"],
+        strain_cost=res_data["strain_cost"],
+        morality=character.motivation.morality,
+    )
+
+    # Apply temptation choice
+    force_result = apply_temptation_choice(
+        resolution, req.accept,
+        force_power=pending.get("force_power", ""),
+    )
+
+    # Clear pending state
+    del arc_state["pending_temptation"]
+
+    # Apply mechanical effects
+    effective_strain_threshold = character.strain_threshold
+    if arc_state.get("obligation_active"):
+        effective_strain_threshold = max(1, character.strain_threshold - 2)
+
+    if force_result.conflict_earned:
+        character.motivation.conflict += force_result.conflict_earned
+    if force_result.strain_charged:
+        character.current_strain = min(
+            character.current_strain + force_result.strain_charged,
+            effective_strain_threshold,
+        )
+
+    # Build Force context blocks for narration
+    is_pure_force = pending.get("is_pure_force", False)
+    _force_state_block = build_force_state_block(character)
+    skill_succeeded = roll_result.succeeded if (not is_pure_force) else None
+    _force_result_block = build_force_result_block(
+        force_result, skill_succeeded, character.motivation.morality,
+    )
+
+    # Compute combat damage for the result
+    combat_damage_note = ""
+    check_skill = pending.get("check_skill")
+    if check_skill and check_skill in COMBAT_SKILLS and roll_result.succeeded:
+        weapon = get_weapon_for_skill(character.loadout, check_skill)
+        if weapon:
+            combat_damage_note = build_combat_damage_block(roll_result, weapon)
+
+    # Apply mechanical consequences from dice
+    if roll_result.outcome_quadrant in ("failure_threat", "success_threat"):
+        if abs(roll_result.net_advantages) >= 2:
+            character.current_strain = min(
+                character.current_strain + 1,
+                effective_strain_threshold,
+            )
+
+    # Assemble context and narrate (Steps 5-6)
+    story_summary = get_act_summaries(session_id)
+    npc_states = load_npc_states(session_id, spine)
+    turn_number = get_turn_count(session_id) + 1
+    recent_turns = get_recent_turns(session_id, limit=5)
+
+    for npc in npc_states:
+        npc.decay_emotion()
+        npc.nudge_disposition_from_emotion()
+    if check_skill:
+        _apply_emotion_from_check(
+            npc_states, check_skill,
+            roll_result.outcome_quadrant, turn_number,
+        )
+
+    player_action = pending["player_action"]
+    scene_description = f"THE PLAYER CHOSE: {player_action}"
+
+    anchor_inst = None
+    if arc_state.get("act_progress", 0.0) >= 1.0:
+        next_act_idx = arc_state["current_act"]
+        next_act = (spine["acts"][next_act_idx]
+                    if next_act_idx < spine["total_acts"] else None)
+        anchor_inst = build_anchor_instruction(current_act, next_act)
+
+    ctx = ContextPackage(
+        character=character,
+        arc=ArcState(
+            campaign_name=spine["name"],
+            current_act=arc_state["current_act"],
+            total_acts=spine["total_acts"],
+            act_name=current_act["name"],
+            act_progress=arc_state.get("act_progress", 0.0),
+            current_anchor=current_act["anchor"],
+            next_anchor=current_act.get("next_anchor", ""),
+            anchors_completed=arc_state.get("anchors_completed", []),
+            throughline_question=spine["throughline_question"],
+            tension_level=current_act["tension"],
+            open_threads=[
+                ThreadState(name=t) if isinstance(t, str) else t
+                for t in (
+                    current_act.get("open_threads", [])
+                    + arc_state.get("dynamic_threads", [])
+                )
+                if (t if isinstance(t, str) else t.name)
+                not in arc_state.get("closed_threads", [])
+            ],
+            closed_threads=arc_state.get("closed_threads", []),
+            turns_this_act=arc_state.get("turns_this_act", 0),
+            anchor_proximity=arc_state.get("anchor_proximity", "distant"),
+            anchor_description=current_act.get("anchor_description", ""),
+            obligation_active=arc_state.get("obligation_active", False),
+            obligation_type=arc_state.get("obligation_type", ""),
+            duty_active=arc_state.get("duty_active", False),
+            duty_type=arc_state.get("duty_type", ""),
+            morality_label=arc_state.get("morality_label", ""),
+        ),
+        story_summary=story_summary,
+        recent_turns=recent_turns,
+        active_npcs=npc_states,
+        location=arc_state.get("current_location", ""),
+        situation=scene_description,
+        galactic_context=current_act.get("galactic_context", ""),
+        scene_type=pending.get("scene_type", "social"),
+        dice_pool=dice_pool,
+        roll_result=roll_result,
+        anchor_instruction=anchor_inst,
+        expected_turns=current_act.get("expected_turns", [8, 12]),
+        combat_damage_note=combat_damage_note,
+        talent_activations=talent_activations,
+        destiny_narrative_note=pending.get("destiny_narrative_note", ""),
+        force_state_block=_force_state_block,
+        force_result_block=_force_result_block,
+    )
+
+    narration_result = narrate_turn(ctx)
+
+    # Reconciliation
+    check_result_str = ""
+    if check_skill:
+        check_difficulty = pending.get("check_difficulty", "")
+        check_result_str = (
+            f"{check_skill} ({check_difficulty}): "
+            f"{roll_result.narrative_label()}"
+        )
+
+    recon_result = reconcile_turn(
+        narration=narration_result.passage,
+        player_action=player_action,
+        check_result=check_result_str,
+        active_npcs=npc_states,
+        arc=ctx.arc,
+        spine_act=current_act,
+    )
+
+    apply_npc_updates(recon_result.npc_updates, npc_states)
+    for npc in npc_states:
+        save_npc_state(session_id, npc)
+
+    arc_state["turns_this_act"] = arc_state.get("turns_this_act", 0) + 1
+    apply_story_progress(recon_result.story_progress, arc_state, current_act)
+    apply_thread_updates(recon_result.thread_updates, arc_state, current_act)
+
+    act_boundary_reached = detect_act_boundary(arc_state)
+
+    log_turn(
+        session_id=session_id,
+        turn_number=turn_number,
+        player_action=player_action,
+        choice_index=pending.get("choice_index", 0),
+        narration=narration_result.passage,
+        choices=narration_result.choices,
+        check_skill=check_skill,
+        check_difficulty=pending.get("check_difficulty"),
+        dice_pool_json=json.dumps(asdict(dice_pool)),
+        roll_result_json=json.dumps(asdict(roll_result)),
+        scene_type=pending.get("scene_type", "social"),
+        moral_weight=pending.get("moral_weight", 0),
+        skill_tags_json=json.dumps(narration_result.skill_tags),
+        force_result_json=json.dumps(asdict(force_result)),
+    )
+
+    update_session_state(session_id, character, arc_state)
+
+    background_tasks.add_task(
+        compress_if_needed, session_id, arc_state["current_act"]
+    )
+
+    milestone_data = None
+    force_power_milestone_data = None
+    if act_boundary_reached:
+        pipeline_result = run_between_act_pipeline(
+            session_id, character, spine, arc_state["current_act"],
+        )
+        if pipeline_result.next_act_loaded:
+            with get_connection() as conn:
+                row = conn.execute(
+                    "SELECT arc_state_json FROM sessions WHERE id = ?",
+                    (session_id,),
+                ).fetchone()
+                if row:
+                    arc_state = json.loads(row["arc_state_json"])
+
+        if pipeline_result.milestone_passage:
+            milestone_data = {
+                "passage": pipeline_result.milestone_passage,
+                "choices": pipeline_result.milestone_choices,
+            }
+            arc_state["pending_milestone"] = milestone_data
+
+        if pipeline_result.force_power_milestone_passage:
+            force_power_milestone_data = {
+                "passage": pipeline_result.force_power_milestone_passage,
+                "choices": pipeline_result.force_power_milestone_choices,
+            }
+            arc_state["pending_force_power_milestone"] = force_power_milestone_data
+
+        if milestone_data or force_power_milestone_data:
+            update_session_state(session_id, character, arc_state)
+
+    response = {
+        "narration": narration_result.passage,
+        "choices": narration_result.choices,
+        "dice_result": describe_pool_for_display(dice_pool),
+        "roll_summary": roll_result.narrative_label() if not is_pure_force else None,
+        "temptation_accepted": req.accept,
+        "force_result": {
+            "force_succeeded": force_result.force_succeeded,
+            "conflict_earned": force_result.conflict_earned,
+            "strain_charged": force_result.strain_charged,
+        },
+        "session_state": {
+            "turn_number": turn_number,
+            "wounds": character.current_wounds,
+            "strain": character.current_strain,
+            "act_progress": arc_state.get("act_progress", 0.0),
+            "anchor_proximity": arc_state.get("anchor_proximity", "distant"),
+        },
+        "used_local_narration": narration_result.used_local,
+        "act_boundary": act_boundary_reached,
+    }
+    if milestone_data:
+        response["milestone"] = milestone_data
+    if force_power_milestone_data:
+        response["force_power_milestone"] = force_power_milestone_data
+    return response
 
 
 # ── Phase 12: Intervention endpoint (§15.1) ────────────────────────────
@@ -1321,6 +2128,8 @@ async def handle_intervention(
                     current_act.get("open_threads", [])
                     + arc_state.get("dynamic_threads", [])
                 )
+                if (t if isinstance(t, str) else t.name)
+                not in arc_state.get("closed_threads", [])
             ],
             closed_threads=arc_state.get("closed_threads", []),
             turns_this_act=arc_state.get("turns_this_act", 0),
@@ -1397,6 +2206,7 @@ async def handle_intervention(
     )
 
     milestone_data = None
+    force_power_milestone_data = None
     if act_boundary_reached:
         pipeline_result = run_between_act_pipeline(
             session_id, character, spine, arc_state["current_act"],
@@ -1415,6 +2225,15 @@ async def handle_intervention(
                 "choices": pipeline_result.milestone_choices,
             }
             arc_state["pending_milestone"] = milestone_data
+
+        if pipeline_result.force_power_milestone_passage:
+            force_power_milestone_data = {
+                "passage": pipeline_result.force_power_milestone_passage,
+                "choices": pipeline_result.force_power_milestone_choices,
+            }
+            arc_state["pending_force_power_milestone"] = force_power_milestone_data
+
+        if milestone_data or force_power_milestone_data:
             update_session_state(session_id, character, arc_state)
 
     response = {
@@ -1434,6 +2253,8 @@ async def handle_intervention(
     }
     if milestone_data:
         response["milestone"] = milestone_data
+    if force_power_milestone_data:
+        response["force_power_milestone"] = force_power_milestone_data
     return response
 
 
@@ -1501,6 +2322,122 @@ async def handle_milestone(session_id: str, req: MilestoneRequest):
             "wound_threshold": character.wound_threshold,
             "strain_threshold": character.strain_threshold,
         },
+    }
+
+
+@router.post("/session/{session_id}/force_power_milestone")
+async def handle_force_power_milestone(session_id: str, req: ForcePowerMilestoneRequest):
+    """
+    Handle a player's Force power upgrade selection at an act boundary.
+    Applies the selected upgrade, deducts reserved XP, persists character.
+    """
+    session = get_session(session_id)
+    if session is None:
+        raise HTTPException(404, "Session not found")
+
+    character = Character.model_validate_json(session["character_json"])
+    arc_state = json.loads(session["arc_state_json"])
+
+    pending = arc_state.get("pending_force_power_milestone")
+    if not pending:
+        raise HTTPException(400, "No pending Force power milestone")
+
+    choices = pending.get("choices", [])
+    if req.choice_index < 0 or req.choice_index >= len(choices):
+        raise HTTPException(400, f"Invalid choice_index: {req.choice_index}")
+
+    selected = choices[req.choice_index]
+    power_id = selected.get("power_id", "")
+    upgrade_id = selected.get("upgrade_id", "")
+
+    # Rebuild ForcePowerMilestoneChoice from stored data
+    available = build_force_power_milestone_choices(
+        character, character.reserved_xp,
+    )
+
+    matching = None
+    for fmc in available:
+        if fmc.power_id == power_id and fmc.upgrade_id == upgrade_id:
+            matching = fmc
+            break
+
+    if not matching:
+        raise HTTPException(
+            400,
+            f"Force power upgrade {power_id}:{upgrade_id} not available",
+        )
+
+    # Apply the upgrade
+    apply_force_power_upgrade(character, matching)
+
+    # Clear pending
+    del arc_state["pending_force_power_milestone"]
+
+    # Persist
+    update_session_state(session_id, character, arc_state)
+
+    return {
+        "acquired": {
+            "power_id": matching.power_id,
+            "power_name": matching.power_name,
+            "upgrade_id": matching.upgrade_id,
+            "upgrade_name": matching.upgrade_name,
+            "upgrade_type": matching.upgrade_type,
+            "xp_cost": matching.xp_cost,
+        },
+        "character_state": {
+            "reserved_xp": character.reserved_xp,
+            "force_powers": character.force_powers,
+        },
+    }
+
+
+@router.post("/session/{session_id}/commitment")
+async def handle_commitment(session_id: str, req: CommitmentRequest):
+    """
+    Commit or release a Force die for a sustained power effect.
+    """
+    session = get_session(session_id)
+    if session is None:
+        raise HTTPException(404, "Session not found")
+
+    character = Character.model_validate_json(session["character_json"])
+    arc_state = json.loads(session["arc_state_json"])
+    turn_number = arc_state.get("turn_number", 0)
+
+    if req.release:
+        success = release_commitment(character, req.power_id)
+        if not success:
+            raise HTTPException(
+                400,
+                f"No active commitment for power '{req.power_id}' to release",
+            )
+        action = "released"
+    else:
+        # Validate the character has the power and the upgrade is sustained
+        if not character_has_power(character, req.power_id):
+            raise HTTPException(400, f"Character does not have power '{req.power_id}'")
+
+        success = commit_force_die(
+            character, req.power_id, req.upgrade_id, turn_number,
+        )
+        if not success:
+            raise HTTPException(
+                400,
+                "Cannot commit Force die — no available dice or already committed",
+            )
+        action = "committed"
+
+    # Persist
+    update_session_state(session_id, character, arc_state)
+
+    return {
+        "action": action,
+        "power_id": req.power_id,
+        "upgrade_id": req.upgrade_id,
+        "force_committed": character.force_committed,
+        "force_available": get_available_force_dice(character),
+        "active_commitments": character.active_commitments,
     }
 
 

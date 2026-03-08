@@ -1,0 +1,160 @@
+{
+    "specialization": "shadow",
+    "career": "sentinel",
+    "game_line": "force_and_destiny",
+    "talents": [
+        {
+            "id": "shadow_t1_0",
+            "talent_ref": "sleight_of_mind",
+            "tier": 1,
+            "position": 0,
+            "xp_cost": 5,
+            "prerequisites": []
+        },
+        {
+            "id": "shadow_t1_1",
+            "talent_ref": "stalker",
+            "tier": 1,
+            "position": 1,
+            "xp_cost": 5,
+            "prerequisites": []
+        },
+        {
+            "id": "shadow_t1_2",
+            "talent_ref": "uncanny_senses",
+            "tier": 1,
+            "position": 2,
+            "xp_cost": 5,
+            "prerequisites": []
+        },
+        {
+            "id": "shadow_t1_3",
+            "talent_ref": "grit",
+            "tier": 1,
+            "position": 3,
+            "xp_cost": 5,
+            "prerequisites": []
+        },
+        {
+            "id": "shadow_t2_0",
+            "talent_ref": "dodge",
+            "tier": 2,
+            "position": 0,
+            "xp_cost": 10,
+            "prerequisites": ["shadow_t1_0"]
+        },
+        {
+            "id": "shadow_t2_1",
+            "talent_ref": "shien_technique",
+            "tier": 2,
+            "position": 1,
+            "xp_cost": 10,
+            "prerequisites": ["shadow_t1_1"]
+        },
+        {
+            "id": "shadow_t2_2",
+            "talent_ref": "street_smarts",
+            "tier": 2,
+            "position": 2,
+            "xp_cost": 10,
+            "prerequisites": ["shadow_t1_2"]
+        },
+        {
+            "id": "shadow_t2_3",
+            "talent_ref": "rapid_recovery",
+            "tier": 2,
+            "position": 3,
+            "xp_cost": 10,
+            "prerequisites": ["shadow_t1_3"]
+        },
+        {
+            "id": "shadow_t3_0",
+            "talent_ref": "sleight_of_mind",
+            "tier": 3,
+            "position": 0,
+            "xp_cost": 15,
+            "prerequisites": ["shadow_t2_0"]
+        },
+        {
+            "id": "shadow_t3_1",
+            "talent_ref": "parry",
+            "tier": 3,
+            "position": 1,
+            "xp_cost": 15,
+            "prerequisites": ["shadow_t2_1"]
+        },
+        {
+            "id": "shadow_t3_2",
+            "talent_ref": "uncanny_senses",
+            "tier": 3,
+            "position": 2,
+            "xp_cost": 15,
+            "prerequisites": ["shadow_t2_2"]
+        },
+        {
+            "id": "shadow_t3_3",
+            "talent_ref": "stalker",
+            "tier": 3,
+            "position": 3,
+            "xp_cost": 15,
+            "prerequisites": ["shadow_t2_3"]
+        },
+        {
+            "id": "shadow_t4_0",
+            "talent_ref": "dodge",
+            "tier": 4,
+            "position": 0,
+            "xp_cost": 20,
+            "prerequisites": ["shadow_t3_0"]
+        },
+        {
+            "id": "shadow_t4_1",
+            "talent_ref": "sense_danger",
+            "tier": 4,
+            "position": 1,
+            "xp_cost": 20,
+            "prerequisites": ["shadow_t3_1"]
+        },
+        {
+            "id": "shadow_t4_2",
+            "talent_ref": "force_rating",
+            "tier": 4,
+            "position": 2,
+            "xp_cost": 20,
+            "prerequisites": ["shadow_t3_2"]
+        },
+        {
+            "id": "shadow_t4_3",
+            "talent_ref": "grit",
+            "tier": 4,
+            "position": 3,
+            "xp_cost": 20,
+            "prerequisites": ["shadow_t3_3"]
+        },
+        {
+            "id": "shadow_t5_1",
+            "talent_ref": "dedication",
+            "tier": 5,
+            "position": 1,
+            "xp_cost": 25,
+            "prerequisites": ["shadow_t4_1"]
+        }
+    ],
+    "tree_paths": {
+        "infiltration": {
+            "theme": "infiltration",
+            "description": "The path of the unseen. The Force as concealment, misdirection, and the ability to pass through hostile territory like smoke.",
+            "talent_ids": ["shadow_t1_0", "shadow_t2_0", "shadow_t3_0", "shadow_t4_0"]
+        },
+        "shadow_blade": {
+            "theme": "shadow_blade",
+            "description": "The path of the hidden blade. Shien Technique replaces Brawn with Cunning, making lightsaber combat an extension of tactical thinking.",
+            "talent_ids": ["shadow_t1_1", "shadow_t2_1", "shadow_t3_1", "shadow_t4_1"]
+        },
+        "force_growth": {
+            "theme": "force_growth",
+            "description": "The path of quiet power. Perception sharpened by the Force, awareness expanded beyond ordinary limits.",
+            "talent_ids": ["shadow_t1_2", "shadow_t2_2", "shadow_t3_2", "shadow_t4_2"]
+        }
+    }
+}

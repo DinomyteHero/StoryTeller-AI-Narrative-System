@@ -1,0 +1,61 @@
+{
+    "power_id": "move",
+    "name": "Move",
+    "category": "physical_manipulation",
+    "base_pips_required": 1,
+    "base_effect": "Move one silhouette 0 object within short range.",
+    "narrative_capability": "Can move objects up to silhouette 1 within medium range using the Force. With concentration, can hurl small objects with enough force to harm.",
+    "gm_choice_guidance": "Offer telekinetic choices when physical objects could be manipulated at a distance. Lifting, pushing, pulling, catching, throwing. Scale to current upgrades — base Move cannot shift a starship.",
+    "dark_side_flavor": "Dark side Move is violent. Objects don't drift — they slam. The Force doesn't suggest motion, it demands it.",
+    "upgrades": {
+        "range_1": {
+            "name": "Range",
+            "type": "range",
+            "xp_cost": 10,
+            "prerequisites": [],
+            "effect": "Increase range of Move by one range band (short -> medium).",
+            "narrative": "Reach further. The stone across the clearing. The tool on the far workbench. Distance was a wall, and it's thinning."
+        },
+        "range_2": {
+            "name": "Range (Improved)",
+            "type": "range",
+            "xp_cost": 15,
+            "prerequisites": ["range_1"],
+            "effect": "Increase range of Move by another range band (medium -> long).",
+            "narrative": "Distance is irrelevant now. What used to require proximity responds to intention alone."
+        },
+        "strength_1": {
+            "name": "Strength",
+            "type": "strength",
+            "xp_cost": 10,
+            "prerequisites": [],
+            "effect": "Increase silhouette of objects that can be moved by 1 (sil 0 -> sil 1).",
+            "narrative": "Push harder. Not just the stone but the boulder. Mass is resistance, and resistance can be overcome."
+        },
+        "strength_2": {
+            "name": "Strength (Improved)",
+            "type": "strength",
+            "xp_cost": 15,
+            "prerequisites": ["strength_1"],
+            "effect": "Increase silhouette of objects that can be moved by 1 (sil 1 -> sil 2).",
+            "narrative": "The weight of a speeder is nothing now. What once required straining concentration is routine."
+        },
+        "control_hurl": {
+            "name": "Control: Hurl",
+            "type": "control",
+            "xp_cost": 10,
+            "prerequisites": ["strength_1"],
+            "effect": "Can hurl objects to deal damage equal to silhouette x 10. Requires additional pip.",
+            "pips_required_increase": 1,
+            "narrative": "Think faster. The stone in mid-air, held and then redirected. The Force as reflex, not deliberation."
+        },
+        "control_pull": {
+            "name": "Control: Fine Manipulation",
+            "type": "control",
+            "xp_cost": 10,
+            "prerequisites": [],
+            "effect": "Can perform fine manipulation at range — turning keys, pressing buttons, picking locks via the Force.",
+            "narrative": "Precision over power. The smallest movements require the most control, and control is what separates training from instinct."
+        }
+    }
+}

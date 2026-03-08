@@ -1,0 +1,160 @@
+{
+    "specialization": "niman_disciple",
+    "career": "consular",
+    "game_line": "force_and_destiny",
+    "talents": [
+        {
+            "id": "niman_t1_0",
+            "talent_ref": "niman_technique",
+            "tier": 1,
+            "position": 0,
+            "xp_cost": 5,
+            "prerequisites": []
+        },
+        {
+            "id": "niman_t1_1",
+            "talent_ref": "parry",
+            "tier": 1,
+            "position": 1,
+            "xp_cost": 5,
+            "prerequisites": []
+        },
+        {
+            "id": "niman_t1_2",
+            "talent_ref": "nobody_s_fool",
+            "tier": 1,
+            "position": 2,
+            "xp_cost": 5,
+            "prerequisites": []
+        },
+        {
+            "id": "niman_t1_3",
+            "talent_ref": "grit",
+            "tier": 1,
+            "position": 3,
+            "xp_cost": 5,
+            "prerequisites": []
+        },
+        {
+            "id": "niman_t2_0",
+            "talent_ref": "reflect",
+            "tier": 2,
+            "position": 0,
+            "xp_cost": 10,
+            "prerequisites": ["niman_t1_0"]
+        },
+        {
+            "id": "niman_t2_1",
+            "talent_ref": "calming_aura",
+            "tier": 2,
+            "position": 1,
+            "xp_cost": 10,
+            "prerequisites": ["niman_t1_1"]
+        },
+        {
+            "id": "niman_t2_2",
+            "talent_ref": "healing_trance",
+            "tier": 2,
+            "position": 2,
+            "xp_cost": 10,
+            "prerequisites": ["niman_t1_2"]
+        },
+        {
+            "id": "niman_t2_3",
+            "talent_ref": "knowledge_is_power",
+            "tier": 2,
+            "position": 3,
+            "xp_cost": 10,
+            "prerequisites": ["niman_t1_3"]
+        },
+        {
+            "id": "niman_t3_0",
+            "talent_ref": "parry",
+            "tier": 3,
+            "position": 0,
+            "xp_cost": 15,
+            "prerequisites": ["niman_t2_0"]
+        },
+        {
+            "id": "niman_t3_1",
+            "talent_ref": "center_of_being",
+            "tier": 3,
+            "position": 1,
+            "xp_cost": 15,
+            "prerequisites": ["niman_t2_1"]
+        },
+        {
+            "id": "niman_t3_2",
+            "talent_ref": "natural_mystic",
+            "tier": 3,
+            "position": 2,
+            "xp_cost": 15,
+            "prerequisites": ["niman_t2_2"]
+        },
+        {
+            "id": "niman_t3_3",
+            "talent_ref": "researcher",
+            "tier": 3,
+            "position": 3,
+            "xp_cost": 15,
+            "prerequisites": ["niman_t2_3"]
+        },
+        {
+            "id": "niman_t4_0",
+            "talent_ref": "reflect",
+            "tier": 4,
+            "position": 0,
+            "xp_cost": 20,
+            "prerequisites": ["niman_t3_0"]
+        },
+        {
+            "id": "niman_t4_1",
+            "talent_ref": "grit",
+            "tier": 4,
+            "position": 1,
+            "xp_cost": 20,
+            "prerequisites": ["niman_t3_1"]
+        },
+        {
+            "id": "niman_t4_2",
+            "talent_ref": "force_rating",
+            "tier": 4,
+            "position": 2,
+            "xp_cost": 20,
+            "prerequisites": ["niman_t3_2"]
+        },
+        {
+            "id": "niman_t4_3",
+            "talent_ref": "nobody_s_fool",
+            "tier": 4,
+            "position": 3,
+            "xp_cost": 20,
+            "prerequisites": ["niman_t3_3"]
+        },
+        {
+            "id": "niman_t5_1",
+            "talent_ref": "dedication",
+            "tier": 5,
+            "position": 1,
+            "xp_cost": 25,
+            "prerequisites": ["niman_t4_1"]
+        }
+    ],
+    "tree_paths": {
+        "niman_mastery": {
+            "theme": "niman_mastery",
+            "description": "The path of the balanced blade. Niman Technique replaces Brawn with Willpower, making the lightsaber an instrument of the mind.",
+            "talent_ids": ["niman_t1_0", "niman_t2_0", "niman_t3_0", "niman_t4_0"]
+        },
+        "diplomat_warrior": {
+            "theme": "diplomat_warrior",
+            "description": "The path between violence and peace. Calming presence, centered combat, and the discipline to choose when to draw.",
+            "talent_ids": ["niman_t1_1", "niman_t2_1", "niman_t3_1", "niman_t4_1"]
+        },
+        "force_scholar": {
+            "theme": "force_scholar",
+            "description": "The path of understanding. Knowledge, healing, and a Force connection that deepens through study.",
+            "talent_ids": ["niman_t1_2", "niman_t2_2", "niman_t3_2", "niman_t4_2"]
+        }
+    }
+}

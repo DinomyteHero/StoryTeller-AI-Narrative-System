@@ -38,12 +38,23 @@ def _stage_1_base_pool(character: Character, check: CheckRequest) -> DicePool:
     Standard FFG formula: max(characteristic, skill_rank) ability dice,
     upgrade min(characteristic, skill_rank) to proficiency. Add difficulty
     dice. Situational boost/setback from check decision.
+
+    Phase 15.5: Checks for characteristic overrides from Type 3 substitution
+    talents (e.g., Niman Technique lets lightsaber use Willpower instead of
+    Brawn).
     """
+    from engine.talents import get_characteristic_override
+
     skill_name     = check.skill.lower().replace(" ", "_").replace("-", "_")
     governing_char = SKILL_CHARACTERISTICS.get(skill_name)
 
     if governing_char is None:
         raise ValueError(f"Unknown skill: {check.skill!r}")
+
+    # Phase 15.5: Apply characteristic override from substitution talents
+    override = get_characteristic_override(character, skill_name)
+    if override:
+        governing_char = override
 
     char_value   = character.get_characteristic(governing_char)
     skill_rank   = character.get_skill_rank(skill_name)
@@ -68,6 +79,7 @@ def _stage_1_base_pool(character: Character, check: CheckRequest) -> DicePool:
 # Stage 3: Conditional talent modifiers (Phase 11)
 # Stage 4: Destiny Point modification (Phase 11.5) — empty slot
 # Stage 5: Force dice addition (Phase 14) — empty slot
+# Stage 6: Vehicle modifiers — handling + damage setback (Phase 16)
 
 
 def build_pool(
@@ -89,6 +101,7 @@ def build_pool(
       Stage 3 — Conditional talent modifiers (§15.3)
       Stage 4 — Destiny Point modification (Phase 11.5)
       Stage 5 — Force dice addition (Phase 14 — pass-through)
+      Stage 6 — Vehicle modifiers (Phase 16 — handling + damage setback)
     """
     from engine.talents import apply_passive_modifiers, apply_conditional_modifiers
 
@@ -123,10 +136,45 @@ def build_pool(
             spine_dark_trigger=kwargs.get("spine_dark_trigger", False),
         )
 
-    # Stage 5: Force dice addition (Phase 14 — pass-through)
-    # pool = _stage_5_force(pool, character)
+    # Stage 5: Force dice addition (Phase 14, §16.1)
+    force_use = kwargs.get("force_use", False)
+    if force_use and character.force_rating > 0:
+        from engine.force import get_available_force_dice
+        available = get_available_force_dice(character)
+        if available > 0:
+            pool.force = available
+
+    # Stage 6: Vehicle modifiers (Phase 16, §17.2)
+    ship_state = kwargs.get("ship_state")
+    if ship_state is not None:
+        from engine.vehicle import is_vehicle_skill
+        if is_vehicle_skill(skill_name):
+            # Handling: positive → boost, negative → setback
+            pool.boost += ship_state.handling_boost()
+            pool.setback += ship_state.handling_setback()
+            # Damage tier: stressed → +1 setback, critical → +2 setback
+            pool.setback += ship_state.damage_setback()
 
     return pool, activations, destiny_result
+
+
+def build_pure_force_pool(
+    character: Character,
+    boost_dice: int = 0,
+    setback_dice: int = 0,
+) -> DicePool:
+    """
+    Build a pool for pure Force actions — no skill check (§16.1).
+    Only Force dice + boost + setback. No ability, proficiency,
+    difficulty, or challenge dice.
+    """
+    from engine.force import get_available_force_dice
+    available = get_available_force_dice(character)
+    return DicePool(
+        force=available,
+        boost=boost_dice,
+        setback=setback_dice,
+    )
 
 
 def describe_pool_for_display(pool: DicePool) -> dict:

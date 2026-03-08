@@ -200,6 +200,11 @@ class ContextPackage:
     combat_damage_note: str = ""               # v3.0: Phase 9 — weapon damage context for combat checks (§18)
     talent_activations: list = field(default_factory=list)  # Phase 11: TalentActivation records for this turn (§15)
     destiny_narrative_note: str = ""           # Phase 11.5: narrative guidance when Destiny Points spent (§23)
+    aspiration_echo_instructions: str = ""     # Phase 13: interiority guidance from behavioral inference (§14.5)
+    # prose_diagnostic already declared above   # Phase 13: prose quality signal (§13)
+    force_result_block: str = ""              # Phase 14: Force result context for narration (§16)
+    force_state_block:  str = ""              # Phase 14: Force state context for narration (§16)
+    ship_state_block:   str = ""              # Phase 16: Ship state context for narration (§17)
 
     def build_dice_result_block(self) -> str:
         if self.roll_result is None:
@@ -314,6 +319,49 @@ class ContextPackage:
         if self.arc.morality_label:
             lines.append(f"MORALITY: {self.arc.morality_label}")
         return "\n\n".join(lines)
+
+    def build_aspiration_echo_block(self) -> str:
+        """Assemble aspiration echo block (Phase 13, §14.5).
+
+        Returns empty string when no echo is active — the prompt placeholder
+        simply vanishes.  Scene-type-aware: foregrounded in introspection
+        and social, backgrounded in combat/chase, omitted in multi-beat
+        action.
+        """
+        if not self.aspiration_echo_instructions:
+            return ""
+
+        # Omit in high-action scenes where pacing cannot accommodate interiority
+        if self.scene_type in ("combat", "chase"):
+            return ""
+
+        return (
+            "ASPIRATION ECHOES (interiority guidance):\n"
+            f"{self.aspiration_echo_instructions}\n\n"
+            "Do not include aspiration echo interiority in every passage. "
+            "These moments should feel organic and occasional, not systematic. "
+            "When you include one, make it brief — a sentence or two of "
+            "interiority, not a paragraph."
+        )
+
+    def build_prose_diagnostic_block(self) -> str:
+        """Assemble prose diagnostic injection (Phase 13, §13).
+
+        When the diagnostic is populated, injects an anti-staleness signal
+        into the cloud model's context.  When null/empty, returns empty
+        string so the placeholder vanishes.
+        """
+        if not self.prose_diagnostic:
+            return ""
+
+        import json
+        return (
+            "PROSE DIAGNOSTIC (for your reference — do not mention this "
+            "to the player):\n"
+            "The diagnostic below identifies patterns in recent passages. "
+            "Vary your approach to address any flagged issues.\n\n"
+            f"{json.dumps(self.prose_diagnostic, indent=2)}"
+        )
 
     def build_open_threads_block(self) -> str:
         if not self.arc.open_threads:
