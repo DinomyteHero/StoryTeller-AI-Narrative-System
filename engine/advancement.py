@@ -177,6 +177,10 @@ def _evaluate_condition(
                     return True
         return False
 
+    elif condition == "force_usage":
+        # Phase 15: at least one Force check during the act
+        return any(t.get("force_result_json") for t in turn_rows)
+
     return False
 
 
@@ -184,12 +188,17 @@ def _evaluate_condition(
 
 def compute_behavioral_signals(
     turn_rows: list[dict],
+    annotations: Optional[list[dict]] = None,
 ) -> list[SkillSignal]:
     """
     Analyze the act's turn log for three behavioral signals (§14.2):
       1. Choice aspiration (50%) — skill tags on selected choices
       2. Failure learning (35%) — failed checks
       3. Practiced competence (15%) — successful checks
+
+    When annotations are available (Phase 13, §24), priority_revealed and
+    behavioral_tags fields enrich the aspiration signal beyond skill tags.
+    Falls back to skill-tag-only computation when annotations are None.
 
     Returns SkillSignal list sorted by weighted total (descending).
     """
@@ -213,8 +222,33 @@ def compute_behavioral_signals(
                 skill_data.setdefault(tag, {
                     "aspirations": 0, "failures": 0,
                     "successes": 0, "threat_successes": 0,
+                    "annotation_boost": 0.0,
                 })
                 skill_data[tag]["aspirations"] += 1
+
+    # Phase 13: Enrich aspiration signal from annotations (§24)
+    if annotations:
+        for ann in annotations:
+            if not ann:
+                continue
+            # Map behavioral_tags to skill categories for aspiration boost
+            priority = ann.get("priority_revealed", "")
+            btags = ann.get("behavioral_tags", [])
+            relevance = ann.get("throughline_relevance", "low")
+            relevance_weight = {"high": 0.15, "medium": 0.08, "low": 0.0}.get(
+                relevance, 0.0
+            )
+
+            # Boost skills that align with the annotation's priority
+            for skill, data in skill_data.items():
+                category = SKILL_CATEGORIES.get(skill, "")
+                # If behavioral tags overlap with the skill's category, boost
+                tag_overlap = any(
+                    t in category or category in t
+                    for t in btags if t and category
+                )
+                if tag_overlap:
+                    data["annotation_boost"] += relevance_weight
 
     # Signals 2 & 3: Failure Learning and Practiced Competence
     for t in turn_rows:
@@ -229,6 +263,7 @@ def compute_behavioral_signals(
         skill_data.setdefault(skill, {
             "aspirations": 0, "failures": 0,
             "successes": 0, "threat_successes": 0,
+            "annotation_boost": 0.0,
         })
 
         if not rr.get("succeeded", True):
@@ -249,6 +284,9 @@ def compute_behavioral_signals(
             asp_score = 0.5
         else:
             asp_score = 0.0
+
+        # Phase 13: annotation boost enriches aspiration signal
+        asp_score = min(1.0, asp_score + data.get("annotation_boost", 0.0))
 
         # Failure: full weight for failures, half for threat successes
         fail_count = data["failures"] + data["threat_successes"] * 0.5
@@ -273,6 +311,80 @@ def compute_behavioral_signals(
 
     signals.sort(key=lambda s: s.weighted_total, reverse=True)
     return signals
+
+
+# ── Phase 13: Behavioral Fingerprint Aggregation (§24) ───────────────
+
+def aggregate_behavioral_fingerprint(
+    turn_rows: list[dict],
+) -> Optional[dict]:
+    """
+    Aggregate choice annotations from an act's turns into a behavioral
+    fingerprint (§24). Returns None if fewer than 3 annotated turns.
+
+    Output:
+      dominant_priorities: top 3 most frequent priority_revealed values
+      dominant_tags: top 6 most frequent behavioral_tags
+      throughline_lean: dominant throughline_direction from high-relevance annotations
+      pattern_strength: concentration ratio (0-1)
+    """
+    annotations = []
+    for t in turn_rows:
+        ci = t.get("choice_implications")
+        if not ci:
+            continue
+        try:
+            ann = json.loads(ci) if isinstance(ci, str) else ci
+            annotations.append(ann)
+        except (json.JSONDecodeError, TypeError):
+            continue
+
+    if len(annotations) < 3:
+        return None
+
+    # Count priorities
+    priority_counts: dict[str, int] = {}
+    for ann in annotations:
+        p = ann.get("priority_revealed", "")
+        if p:
+            priority_counts[p] = priority_counts.get(p, 0) + 1
+
+    # Count behavioral tags
+    tag_counts: dict[str, int] = {}
+    for ann in annotations:
+        for tag in ann.get("behavioral_tags", []):
+            if tag:
+                tag_counts[tag] = tag_counts.get(tag, 0) + 1
+
+    # Throughline direction from high-relevance annotations
+    direction_counts: dict[str, int] = {}
+    for ann in annotations:
+        if ann.get("throughline_relevance") == "high":
+            d = ann.get("throughline_direction", "")
+            if d:
+                direction_counts[d] = direction_counts.get(d, 0) + 1
+
+    # Sort and pick top items
+    sorted_priorities = sorted(
+        priority_counts.items(), key=lambda x: x[1], reverse=True
+    )
+    sorted_tags = sorted(
+        tag_counts.items(), key=lambda x: x[1], reverse=True
+    )
+    sorted_directions = sorted(
+        direction_counts.items(), key=lambda x: x[1], reverse=True
+    )
+
+    # Pattern strength: top priority's count / total annotated turns
+    top_priority_count = sorted_priorities[0][1] if sorted_priorities else 0
+    pattern_strength = round(top_priority_count / len(annotations), 2)
+
+    return {
+        "dominant_priorities": [p for p, _ in sorted_priorities[:3]],
+        "dominant_tags": [t for t, _ in sorted_tags[:6]],
+        "throughline_lean": sorted_directions[0][0] if sorted_directions else "",
+        "pattern_strength": pattern_strength,
+    }
 
 
 def select_and_apply_advancement(

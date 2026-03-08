@@ -11,6 +11,8 @@ EQUIPMENT:
 {equipment_section}
 
 {talent_effects_section}
+{force_section}
+{ship_status_section}
 STORY POSITION:
 Act {current_act} of {total_acts} — {act_name}
 Tension level: {tension_level}
@@ -47,6 +49,7 @@ Classify the current scene. This controls prose pacing in the narration.
 - social: dialogue-driven, NPC interaction, negotiation
 - exploration: investigating, observing, navigating, gathering information
 - introspection: quiet reflection, internal decision, no external pressure
+- space_combat: vehicle/starship engagement, piloting under fire, ship operations
 
 MORAL WEIGHT:
 Rate the moral weight of the player's action (0-3):
@@ -65,13 +68,37 @@ underworld, warfare, xenology, lightsaber
 
 Respond ONLY with valid JSON. No preamble, no explanation, no markdown fences.
 
-If a check IS required:
+If a check IS required (no Force):
 {{
     "requires_check": true,
     "skill": "<exact_skill_name_from_list>",
     "difficulty": "<difficulty_label>",
     "boost_dice": <0-2>,
     "setback_dice": <0-2>,
+    "scene_type": "<scene_type>",
+    "moral_weight": <0-3>,
+    "reasoning": "<one sentence explaining the call>"
+}}
+
+If a Force-ENHANCED skill check is required:
+{{
+    "requires_check": true,
+    "skill": "<mundane_skill_being_enhanced>",
+    "difficulty": "<difficulty_label>",
+    "boost_dice": <0-2>,
+    "setback_dice": <0-2>,
+    "force_use": true,
+    "force_pips_required": <1-5>,
+    "scene_type": "<scene_type>",
+    "moral_weight": <0-3>,
+    "reasoning": "<one sentence explaining the call>"
+}}
+
+If a PURE Force action is required (no mundane skill):
+{{
+    "requires_check": true,
+    "force_use": true,
+    "force_pips_required": <1-5>,
     "scene_type": "<scene_type>",
     "moral_weight": <0-3>,
     "reasoning": "<one sentence explaining the call>"

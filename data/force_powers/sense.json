@@ -1,0 +1,53 @@
+{
+    "power_id": "sense",
+    "name": "Sense",
+    "category": "perception_knowledge",
+    "base_pips_required": 1,
+    "base_effect": "Sense the Force in a living being within short range. Determine emotional state.",
+    "narrative_capability": "Can sense the emotions and intentions of nearby beings. With concentration, can detect danger before it arrives.",
+    "gm_choice_guidance": "Offer sensing choices when the character could read emotions, detect lies, feel danger, or perceive hidden threats. Sense enhances Vigilance, Perception, and social checks. Danger sense is ongoing awareness, not active scanning.",
+    "dark_side_flavor": "Dark side Sense is invasive. Not reading — ripping. The character doesn't feel emotions, they crack them open and read the contents like data.",
+    "commitment_option": {
+        "upgrade_id": "control_danger_sense",
+        "dice_committed": 1,
+        "effect": "Ongoing danger awareness. Add one upgrade to all Vigilance checks while committed.",
+        "narrative_note": "The character feels threats before they materialize — a constant low hum of awareness that never quite goes silent."
+    },
+    "upgrades": {
+        "control_danger_sense": {
+            "name": "Control: Danger Sense",
+            "type": "control",
+            "xp_cost": 10,
+            "prerequisites": [],
+            "effect": "Commit 1 Force die. Upgrade Vigilance checks once while committed.",
+            "is_sustained": true,
+            "narrative": "Something new has opened. A current beneath thought, persistent, always there — the Force whispering about what hasn't happened yet."
+        },
+        "control_defense": {
+            "name": "Control: Defense",
+            "type": "control",
+            "xp_cost": 15,
+            "prerequisites": ["control_danger_sense"],
+            "effect": "Commit 1 Force die. Gain 1 ranged defense while committed.",
+            "is_sustained": true,
+            "narrative": "The danger sense deepens into something predictive. Knowing where the bolt will be before the trigger is pulled."
+        },
+        "range_1": {
+            "name": "Range",
+            "type": "range",
+            "xp_cost": 10,
+            "prerequisites": [],
+            "effect": "Increase range of Sense by one range band (short -> medium).",
+            "narrative": "The range of awareness expands. What was a room is now a building. What was a building could be a block."
+        },
+        "strength_1": {
+            "name": "Strength: Read Thoughts",
+            "type": "strength",
+            "xp_cost": 15,
+            "prerequisites": ["range_1"],
+            "effect": "Sense surface thoughts of one target at range. Opposed by Discipline.",
+            "pips_required_increase": 1,
+            "narrative": "Beyond emotions now. The surface of thought — not words exactly, but the shape of intention. It takes effort and it feels like trespassing."
+        }
+    }
+}

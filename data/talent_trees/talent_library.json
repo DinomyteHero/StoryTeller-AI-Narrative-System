@@ -411,6 +411,311 @@
             ],
             "narrative_identity": "A fundamental shift in who the character is. Not what they can do, but what they are made of.",
             "prose_tags": ["transformation", "core_identity", "growth"]
+        },
+
+        "parry": {
+            "name": "Parry",
+            "talent_type": "conditional",
+            "ranked": true,
+            "max_rank": 5,
+            "effects": [
+                {
+                    "type": "conditional",
+                    "modifier": {"setback": -1},
+                    "condition": {
+                        "scene_types": ["combat"],
+                        "check_skills": ["lightsaber", "melee"]
+                    },
+                    "strain_cost": 1
+                }
+            ],
+            "narrative_identity": "The blade catches what the body cannot. Each parry is a conversation — the opponent speaks, and the character answers.",
+            "prose_tags": ["defense", "lightsaber", "melee", "discipline"]
+        },
+        "reflect": {
+            "name": "Reflect",
+            "talent_type": "conditional",
+            "ranked": true,
+            "max_rank": 3,
+            "effects": [
+                {
+                    "type": "conditional",
+                    "modifier": {"setback": -1},
+                    "condition": {
+                        "scene_types": ["combat"],
+                        "check_skills": ["lightsaber"]
+                    },
+                    "strain_cost": 1
+                }
+            ],
+            "narrative_identity": "The lightsaber becomes a shield. Blaster bolts arrive and are returned — not deflected randomly but guided, the Force whispering where each bolt will be.",
+            "prose_tags": ["defense", "lightsaber", "ranged_defense", "force_guided"]
+        },
+        "niman_technique": {
+            "name": "Niman Technique",
+            "talent_type": "substitution",
+            "ranked": false,
+            "max_rank": 1,
+            "effects": [
+                {
+                    "type": "substitution",
+                    "original_skills": ["lightsaber"],
+                    "characteristic_override": "willpower"
+                }
+            ],
+            "narrative_identity": "The sixth form. The diplomat's form. The lightsaber responds not to muscle but to will — the Force itself guiding the blade where thought directs it.",
+            "prose_tags": ["lightsaber", "niman", "willpower", "force_harmony"]
+        },
+        "shien_technique": {
+            "name": "Shien Technique",
+            "talent_type": "substitution",
+            "ranked": false,
+            "max_rank": 1,
+            "effects": [
+                {
+                    "type": "substitution",
+                    "original_skills": ["lightsaber"],
+                    "characteristic_override": "cunning"
+                }
+            ],
+            "narrative_identity": "The fifth form, reversed. Every defense becomes a counterattack, every block an opening. The blade moves with tactical cunning, not brute force.",
+            "prose_tags": ["lightsaber", "shien", "cunning", "counterattack"]
+        },
+        "soresu_technique": {
+            "name": "Soresu Technique",
+            "talent_type": "substitution",
+            "ranked": false,
+            "max_rank": 1,
+            "effects": [
+                {
+                    "type": "substitution",
+                    "original_skills": ["lightsaber"],
+                    "characteristic_override": "intellect"
+                }
+            ],
+            "narrative_identity": "The third form. Pure defense. The blade traces the tightest possible arcs, conserving energy, outlasting the opponent. Victory through patience and geometric precision.",
+            "prose_tags": ["lightsaber", "soresu", "intellect", "defense", "patience"]
+        },
+        "force_rating": {
+            "name": "Force Rating",
+            "talent_type": "passive",
+            "ranked": false,
+            "max_rank": 1,
+            "effects": [
+                {
+                    "type": "force_rating_increase",
+                    "modifier": 1
+                }
+            ],
+            "narrative_identity": "The current deepens. What was a trickle becomes a river. The Force answers more readily, more fully, in ways the character cannot yet name.",
+            "prose_tags": ["force", "growth", "deepening", "connection"]
+        },
+        "uncanny_senses": {
+            "name": "Uncanny Senses",
+            "talent_type": "passive",
+            "ranked": true,
+            "max_rank": 2,
+            "effects": [
+                {
+                    "type": "modify_pool",
+                    "target_skills": ["perception"],
+                    "modifier": {"setback": -1}
+                }
+            ],
+            "narrative_identity": "The character notices what others miss. Not through vigilance but through something quieter — the Force pressing awareness into places the eyes cannot reach.",
+            "prose_tags": ["perception", "force_awareness", "subtle"]
+        },
+        "sleight_of_mind": {
+            "name": "Sleight of Mind",
+            "talent_type": "passive",
+            "ranked": true,
+            "max_rank": 2,
+            "effects": [
+                {
+                    "type": "modify_pool",
+                    "target_skills": ["stealth"],
+                    "modifier": {"setback": -1}
+                }
+            ],
+            "narrative_identity": "The character's presence dims in the Force. Not invisibility — something subtler. Attention slides past them the way water slides past a smooth stone.",
+            "prose_tags": ["stealth", "force_concealment", "misdirection"]
+        },
+        "sense_danger": {
+            "name": "Sense Danger",
+            "talent_type": "passive",
+            "ranked": false,
+            "max_rank": 1,
+            "effects": [
+                {
+                    "type": "modify_pool",
+                    "target_skills": ["vigilance"],
+                    "modifier": {"setback": -1}
+                }
+            ],
+            "narrative_identity": "A prickling at the base of the skull. Not thought — sensation. The Force speaking in the language of the body, warning before the mind has time to reason.",
+            "prose_tags": ["vigilance", "force_warning", "precognition"]
+        },
+        "healing_trance": {
+            "name": "Healing Trance",
+            "talent_type": "narrative_enabler",
+            "ranked": false,
+            "max_rank": 1,
+            "effects": [
+                {
+                    "type": "narrative_enabler",
+                    "capability": "force_healing_meditation",
+                    "description": "The character can enter a healing trance, using the Force to accelerate natural recovery. The GM should offer meditation choices during downtime that other characters would not have."
+                }
+            ],
+            "narrative_identity": "The body heals itself. The Force simply removes the obstacles — pain, inflammation, the body's own panic response. What takes weeks takes hours.",
+            "prose_tags": ["healing", "meditation", "force_restoration"]
+        },
+        "force_protection": {
+            "name": "Force Protection",
+            "talent_type": "passive",
+            "ranked": true,
+            "max_rank": 3,
+            "effects": [
+                {
+                    "type": "modify_pool",
+                    "target_skills": ["resilience"],
+                    "modifier": {"setback": -1}
+                }
+            ],
+            "narrative_identity": "The Force cushions impact. Not visibly — no shimmering shield. The character simply absorbs damage that should have broken bone.",
+            "prose_tags": ["defense", "force_shield", "resilience"]
+        },
+        "center_of_being": {
+            "name": "Center of Being",
+            "talent_type": "conditional",
+            "ranked": true,
+            "max_rank": 2,
+            "effects": [
+                {
+                    "type": "conditional",
+                    "modifier": {"setback": -1},
+                    "condition": {
+                        "scene_types": ["combat"],
+                        "check_skills": ["lightsaber"]
+                    },
+                    "strain_cost": 0
+                }
+            ],
+            "narrative_identity": "Stillness at the center of violence. The character does not fight the chaos — they become the point around which it revolves.",
+            "prose_tags": ["lightsaber", "calm", "center", "focus"]
+        },
+        "saber_throw": {
+            "name": "Saber Throw",
+            "talent_type": "narrative_enabler",
+            "ranked": false,
+            "max_rank": 1,
+            "effects": [
+                {
+                    "type": "narrative_enabler",
+                    "capability": "throw_lightsaber",
+                    "description": "The character can throw their lightsaber and recall it through the Force. The GM should offer ranged lightsaber attack choices when the character has their weapon drawn."
+                }
+            ],
+            "narrative_identity": "The blade leaves the hand and keeps cutting. The Force holds the trajectory, curving it through targets and back to the palm. A weapon that never leaves.",
+            "prose_tags": ["lightsaber", "force_throw", "ranged_combat"]
+        },
+        "calming_aura": {
+            "name": "Calming Aura",
+            "talent_type": "passive",
+            "ranked": false,
+            "max_rank": 1,
+            "effects": [
+                {
+                    "type": "modify_pool",
+                    "target_skills": ["cool", "discipline"],
+                    "modifier": {"setback": -1}
+                }
+            ],
+            "narrative_identity": "The character radiates stillness. Not serenity — something harder than that. A calm that has been tested and did not break.",
+            "prose_tags": ["calm", "force_presence", "discipline"]
+        },
+        "natural_blademaster": {
+            "name": "Natural Blademaster",
+            "talent_type": "intervention",
+            "ranked": false,
+            "max_rank": 1,
+            "effects": [
+                {
+                    "type": "intervention",
+                    "trigger": "any_check",
+                    "applicable_skills": ["lightsaber"],
+                    "effect": "reroll",
+                    "strain_cost": 1,
+                    "scope": "session",
+                    "narrative_prompt": "The blade finds the angle the body forgot. Muscle memory from a thousand repetitions of a form the character has never been taught."
+                }
+            ],
+            "narrative_identity": "Some students of the blade learn through study. This one learns through the Force — the body moving before the mind finishes deciding.",
+            "prose_tags": ["lightsaber", "instinct", "force_guided_combat"]
+        },
+        "natural_mystic": {
+            "name": "Natural Mystic",
+            "talent_type": "intervention",
+            "ranked": false,
+            "max_rank": 1,
+            "effects": [
+                {
+                    "type": "intervention",
+                    "trigger": "any_check",
+                    "applicable_skills": ["discipline"],
+                    "effect": "reroll",
+                    "strain_cost": 1,
+                    "scope": "session",
+                    "narrative_prompt": "The Force surges where concentration faltered. Not stronger — deeper. As if the current found a channel the character did not know existed."
+                }
+            ],
+            "narrative_identity": "The Force is not a tool to this character. It is a companion. When the connection wavers, it finds its own way back.",
+            "prose_tags": ["force_connection", "instinct", "discipline"]
+        },
+        "knowledge_is_power": {
+            "name": "Knowledge Is Power",
+            "talent_type": "passive",
+            "ranked": false,
+            "max_rank": 1,
+            "effects": [
+                {
+                    "type": "modify_pool",
+                    "target_skills": ["lore", "education"],
+                    "modifier": {"setback": -1}
+                }
+            ],
+            "narrative_identity": "The archives are not dead records. They are living memory, and this character reads them the way others read faces — for what they reveal and what they conceal.",
+            "prose_tags": ["knowledge", "archives", "scholarship"]
+        },
+        "researcher": {
+            "name": "Researcher",
+            "talent_type": "passive",
+            "ranked": true,
+            "max_rank": 2,
+            "effects": [
+                {
+                    "type": "modify_pool",
+                    "target_skills": ["lore", "education", "core_worlds", "outer_rim"],
+                    "modifier": {"setback": -1}
+                }
+            ],
+            "narrative_identity": "Every question has been asked before. This character knows where to find the answers that were buried, forgotten, or deliberately hidden.",
+            "prose_tags": ["research", "knowledge", "thoroughness"]
+        },
+        "nobody_s_fool": {
+            "name": "Nobody's Fool",
+            "talent_type": "passive",
+            "ranked": true,
+            "max_rank": 2,
+            "effects": [
+                {
+                    "type": "modify_pool",
+                    "target_skills": ["charm", "coercion", "deception"],
+                    "modifier": {"setback": -1}
+                }
+            ],
+            "narrative_identity": "The character reads deception the way a mechanic reads engine noise — instinctively, catching the wrong note before the speaker finishes the sentence.",
+            "prose_tags": ["perception", "social_defense", "skepticism"]
         }
     }
 }

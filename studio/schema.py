@@ -12,7 +12,7 @@ interface.
 """
 
 from pydantic import BaseModel, Field, field_validator
-from typing import Optional
+from typing import Any, Optional, Union
 
 
 # ── Prologue ──────────────────────────────────────────────────────────
@@ -347,10 +347,14 @@ class Act(BaseModel):
     anchor: str
     next_anchor: str | None = None
     open_threads: list[str] = []
-    expected_turns: str
+    expected_turns: Union[str, list[int]] = ""
     # ── New fields (Game Mechanics v1.5) ──
     xp_base: int = Field(ge=0, default=15)
     xp_bonus_conditions: list[BonusCondition] = []
+    xp_config: Optional[dict[str, Any]] = None  # alternative XP format
+    destiny_dark_trigger: bool = False
+    seize_the_moment: bool = False
+    time_skip: Optional[dict[str, Any]] = None  # inline time skip data
     time_skip_after: Optional[TimeSkip] = None  # skip between this act
                                                  # and the next
     milestone_windows: list[MilestoneWindow] = []

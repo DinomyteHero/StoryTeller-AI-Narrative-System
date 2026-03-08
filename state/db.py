@@ -43,6 +43,8 @@ CREATE TABLE IF NOT EXISTS turns (
     context_json     TEXT,
     scene_type       TEXT,
     moral_weight     INTEGER DEFAULT 0,
+    choice_implications TEXT,
+    force_result_json TEXT,
     compressed       INTEGER DEFAULT 0,
     created_at       TEXT NOT NULL
 );
@@ -97,6 +99,15 @@ CREATE TABLE IF NOT EXISTS reputation_log (
     surfaced_count INTEGER DEFAULT 0,
     created_at     TEXT NOT NULL
 );
+
+CREATE TABLE IF NOT EXISTS ship_states (
+    id         INTEGER PRIMARY KEY AUTOINCREMENT,
+    session_id TEXT NOT NULL REFERENCES sessions(id),
+    ship_id    TEXT NOT NULL,
+    state_json TEXT NOT NULL,
+    updated_at TEXT NOT NULL,
+    UNIQUE(session_id, ship_id)
+);
 """
 
 
@@ -117,4 +128,34 @@ def init_db():
     os.makedirs(os.path.dirname(os.path.abspath(DB_PATH)), exist_ok=True)
     with get_connection() as conn:
         conn.executescript(SCHEMA)
+        # Phase 13: migrate existing DBs — add choice_implications column
+        try:
+            conn.execute(
+                "ALTER TABLE turns ADD COLUMN choice_implications TEXT"
+            )
+            conn.commit()
+        except Exception:
+            pass  # column already exists
+        # Phase 14: migrate existing DBs — add Force result column
+        try:
+            conn.execute(
+                "ALTER TABLE turns ADD COLUMN force_result_json TEXT"
+            )
+            conn.commit()
+        except Exception:
+            pass  # column already exists
+        # Phase 16: migrate existing DBs — create ship_states table
+        try:
+            conn.execute(
+                "CREATE TABLE IF NOT EXISTS ship_states ("
+                "id INTEGER PRIMARY KEY AUTOINCREMENT, "
+                "session_id TEXT NOT NULL REFERENCES sessions(id), "
+                "ship_id TEXT NOT NULL, "
+                "state_json TEXT NOT NULL, "
+                "updated_at TEXT NOT NULL, "
+                "UNIQUE(session_id, ship_id))"
+            )
+            conn.commit()
+        except Exception:
+            pass  # table already exists
         conn.commit()

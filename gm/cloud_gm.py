@@ -213,6 +213,35 @@ SCENE_PACING = {
             "shifted dynamic."
         ),
     },
+    "space_combat": {
+        "pacing": (
+            "PACING: Space combat. The ship is the character's body — "
+            "every system response is felt through the deck plates. "
+            "Tactical prose — angles, vectors, power allocation. "
+            "250-400 words. Choices are operational decisions: fly, "
+            "fire, reroute, or command."
+        ),
+        "voice_exemplar": (
+            "VOICE TARGET — write like this:\n"
+            "\"The Luck shuddered as the first bolt cut across her bow "
+            "— close enough that the cockpit transparisteel lit white "
+            "for a half-second and the proximity alarm screamed before "
+            "Keth slapped it silent. Two contacts on the scope, closing "
+            "from high starboard, and the freighter's handling was never "
+            "going to outmaneuver a pair of uglies in open space.\""
+        ),
+        "craft": (
+            "SCENE CRAFT:\n"
+            "- The ship has personality — it groans, shudders, responds. "
+            "Write the ship as a character the pilot knows intimately.\n"
+            "- Each choice represents a different tactical philosophy: "
+            "aggressive (weapons), evasive (piloting), technical "
+            "(mechanics/computers), or command (leadership).\n"
+            "- Damage is felt physically — sparks, alarms, the smell "
+            "of burning circuits, the deck lurching. Do not report "
+            "damage in game terms."
+        ),
+    },
 }
 
 
@@ -250,6 +279,7 @@ class CloudGMError(Exception):
 
 def _build_prompt(ctx: ContextPackage) -> str:
     from engine.talents import build_talent_capabilities, build_talent_activations_block
+    from engine.force import build_force_capabilities_block
 
     template       = PROMPT_PATH.read_text(encoding="utf-8")
     recent_summary = _format_recent_turns(ctx.recent_turns)
@@ -262,11 +292,17 @@ def _build_prompt(ctx: ContextPackage) -> str:
         getattr(ctx, "talent_activations", [])
     )
 
+    # Phase 15: Force power capabilities for narration (§16.3)
+    force_caps = build_force_capabilities_block(ctx.character)
+
     return template.format(
         character_summary=ctx.character.narrative_status(),
         character_voice=ctx.character.voice_notes,
         equipment_block=build_equipment_narration_block(ctx.character.loadout),
+        force_state_block=ctx.force_state_block,
+        force_capabilities_block=force_caps,
         talent_capabilities_block=talent_caps,
+        aspiration_echo_block=ctx.build_aspiration_echo_block(),
         campaign_name=ctx.arc.campaign_name,
         story_position=f"Part {ctx.arc.current_act} of {ctx.arc.total_acts} — {ctx.arc.act_name}",
         throughline_question=ctx.arc.throughline_question,
@@ -275,12 +311,15 @@ def _build_prompt(ctx: ContextPackage) -> str:
         open_threads=ctx.build_open_threads_block(),
         pacing_block=ctx.build_pacing_block(),
         motivation_block=ctx.build_motivation_block(),
+        ship_state_block=ctx.ship_state_block,
         npc_states=ctx.build_npc_block(),
         location=ctx.location,
         situation=ctx.situation,
         galactic_context=ctx.galactic_context or "No wider context provided for this act.",
         dice_result_block=ctx.build_dice_result_block(),
+        force_result_block=ctx.force_result_block,
         talent_activations_block=talent_acts,
+        prose_diagnostic_block=ctx.build_prose_diagnostic_block(),
         scene_pacing=scene_pacing,
         tone_instruction=ctx.tone_instruction,
     )
@@ -374,15 +413,17 @@ def _parse_response(raw: str, used_local: bool = False) -> NarrationResult:
             f"GM returned {len(raw_choices)} choice(s). Minimum 2 required. Retrying."
         )
 
-    # Extract and strip skill tags: "[Deception]" at end of choice text
-    skill_tag_pattern = re.compile(r"\s*\[([A-Za-z_\s]+)\]\s*$")
+    # Extract and strip skill tags: "[Deception]" or "[Force:Move]" at end of choice text
+    skill_tag_pattern = re.compile(r"\s*\[([A-Za-z_:\s]+)\]\s*$")
     choices = []
     skill_tags = []
     for choice_text in raw_choices[:4]:
         match = skill_tag_pattern.search(choice_text)
         if match:
             choices.append(skill_tag_pattern.sub("", choice_text).rstrip())
-            skill_tags.append(match.group(1).strip().lower().replace(" ", "_"))
+            tag = match.group(1).strip()
+            # Normalize: "Force:Move" stays as "force:move", regular skills lowercase+underscore
+            skill_tags.append(tag.lower().replace(" ", "_"))
         else:
             choices.append(choice_text)
             skill_tags.append(None)
@@ -675,3 +716,231 @@ def _parse_milestone_response(raw: str, expected_choices: list) -> NarrationResu
         skill_tags=milestone_tags,  # repurpose skill_tags for milestone refs
         used_local=(NARRATIVE_BACKEND == "local"),
     )
+
+
+# ── Force power milestone reflection (Phase 15, §16.4) ──────────────
+
+FORCE_POWER_MILESTONE_PROMPT_PATH = Path(__file__).parent / "prompts" / "force_power_milestone.txt"
+
+
+def generate_force_power_milestone_reflection(
+    character,
+    choices: list,
+    campaign_name: str,
+    current_act: int,
+    total_acts: int,
+    act_summary: str,
+) -> NarrationResult:
+    """
+    Generate a Force power upgrade milestone reflection passage + choices.
+
+    Uses the cloud GM to produce a narrative passage presenting Force
+    power upgrades as experiential discoveries, not mechanical purchases.
+    Returns a NarrationResult with passage + tagged choices.
+    """
+    from engine.force import build_force_state_block, ForcePowerMilestoneChoice
+
+    # Build choices block for prompt
+    choices_lines = []
+    for i, choice in enumerate(choices, 1):
+        choices_lines.append(
+            f"Choice {i}: {choice.power_name} — {choice.upgrade_name}\n"
+            f"  Type: {choice.upgrade_type} upgrade\n"
+            f"  Experience: {choice.narrative}\n"
+            f"  Tag: [FORCEPOWER:{choice.power_id}:{choice.upgrade_id}]"
+        )
+
+    template = FORCE_POWER_MILESTONE_PROMPT_PATH.read_text(encoding="utf-8")
+    prompt = template.format(
+        character_summary=character.narrative_status(),
+        character_voice=getattr(character, "voice_notes", ""),
+        force_state=build_force_state_block(character),
+        campaign_name=campaign_name,
+        current_act=current_act,
+        total_acts=total_acts,
+        act_summary=act_summary or "No summary available.",
+        choices_block="\n\n".join(choices_lines),
+    )
+
+    client, model = _make_client()
+    is_local = NARRATIVE_BACKEND == "local"
+    is_qwen = is_local and "qwen" in LOCAL_NARRATION_MODEL.lower()
+    msg_content = f"/no_think\n{prompt}" if is_qwen else prompt
+
+    timeout = 180.0 if is_local else 60.0
+    kwargs = dict(
+        model=model,
+        max_completion_tokens=MAX_TOKENS,
+        messages=[{"role": "user", "content": msg_content}],
+        timeout=timeout,
+    )
+    reasoning = os.getenv("REASONING_EFFORT", "low")
+    if not is_local and reasoning:
+        kwargs["reasoning_effort"] = reasoning
+
+    response = client.chat.completions.create(**kwargs)
+    raw = response.choices[0].message.content or ""
+
+    return _parse_force_power_milestone_response(raw, choices)
+
+
+def _parse_force_power_milestone_response(
+    raw: str, expected_choices: list,
+) -> NarrationResult:
+    """
+    Parse a Force power milestone reflection response.
+
+    Extracts the passage and maps [FORCEPOWER:power_id:upgrade_id] tags
+    back to compound keys.
+    """
+    # Normalize choices delimiter
+    normalized = re.sub(
+        r"^[\s*-]*CHOICES[\s*-:]*$", "---CHOICES---", raw, flags=re.MULTILINE
+    )
+    if "---CHOICES---" not in normalized:
+        normalized = re.sub(
+            r"^[\s#*]*(Your\s+)?(Choices|Options)\s*:?\s*$",
+            "---CHOICES---", normalized, flags=re.MULTILINE | re.IGNORECASE
+        )
+
+    if "---CHOICES---" not in normalized:
+        raise CloudGMError("Force power milestone response missing ---CHOICES--- delimiter")
+
+    passage, choices_raw = normalized.split("---CHOICES---", 1)
+    passage = passage.strip()
+
+    # Strip markdown emphasis
+    passage = re.sub(r"\*{1,2}(.+?)\*{1,2}", r"\1", passage)
+
+    # Parse choices — extract Force power milestone tags
+    choice_lines = [
+        line.strip()
+        for line in re.split(r"\n(?=\d+[\.\)]|\-\s|\*\s)", choices_raw.strip())
+        if line.strip()
+    ]
+
+    parsed_choices = []
+    force_tags = []
+    for line in choice_lines:
+        clean = re.sub(r"^\d+[\.\)]\s*", "", line).strip()
+        clean = re.sub(r"^[-*]\s*", "", clean).strip()
+        if not clean:
+            continue
+
+        # Extract [FORCEPOWER:power_id:upgrade_id] tag
+        tag_match = re.search(r"\[FORCEPOWER:(\w+):(\w+)\]", clean)
+        if tag_match:
+            tag = f"{tag_match.group(1)}:{tag_match.group(2)}"
+        else:
+            tag = ""
+        # Strip the tag from display text
+        display = re.sub(r"\s*\[FORCEPOWER:\w+:\w+\]", "", clean).strip()
+        display = re.sub(r"\*{1,2}(.+?)\*{1,2}", r"\1", display)
+
+        parsed_choices.append(display)
+        force_tags.append(tag)
+
+    return NarrationResult(
+        passage=passage,
+        choices=parsed_choices,
+        skill_tags=force_tags,  # repurpose for "power_id:upgrade_id" compound keys
+        used_local=(NARRATIVE_BACKEND == "local"),
+    )
+
+
+# ── Time skip passage generation (Phase 17, §19) ─────────────────────
+
+TIME_SKIP_OPENING_PROMPT_PATH = Path(__file__).parent / "prompts" / "time_skip_opening.txt"
+TIME_SKIP_CLOSING_PROMPT_PATH = Path(__file__).parent / "prompts" / "time_skip_closing.txt"
+
+
+def generate_time_skip_opening(
+    character,
+    duration_months: int,
+    framing: str,
+    campaign_name: str,
+    act_summary: str,
+) -> str:
+    """
+    Generate the opening montage passage for a time skip.
+
+    Returns a 2-3 paragraph impressionistic montage (NOT interactive).
+    """
+    template = TIME_SKIP_OPENING_PROMPT_PATH.read_text(encoding="utf-8")
+    prompt = template.format(
+        character_summary=character.narrative_status(),
+        character_voice=getattr(character, "voice_notes", ""),
+        campaign_name=campaign_name,
+        duration_months=duration_months,
+        framing=framing,
+        act_summary=act_summary or "No summary available.",
+    )
+
+    client, model = _make_client()
+    is_local = NARRATIVE_BACKEND == "local"
+    is_qwen = is_local and "qwen" in LOCAL_NARRATION_MODEL.lower()
+    msg_content = f"/no_think\n{prompt}" if is_qwen else prompt
+
+    timeout = 180.0 if is_local else 60.0
+    kwargs = dict(
+        model=model,
+        max_completion_tokens=MAX_TOKENS,
+        messages=[{"role": "user", "content": msg_content}],
+        timeout=timeout,
+    )
+    reasoning = os.getenv("REASONING_EFFORT", "low")
+    if not is_local and reasoning:
+        kwargs["reasoning_effort"] = reasoning
+
+    response = client.chat.completions.create(**kwargs)
+    raw = response.choices[0].message.content or ""
+
+    # Strip markdown emphasis
+    passage = re.sub(r"\*{1,2}(.+?)\*{1,2}", r"\1", raw.strip())
+    return passage
+
+
+def generate_time_skip_closing(
+    character,
+    duration_months: int,
+    campaign_name: str,
+    vignette_summary: str,
+    next_act_situation: str,
+) -> str:
+    """
+    Generate the closing passage after all vignettes are resolved.
+
+    Returns a 1-2 paragraph bridge into the new act (NOT interactive).
+    """
+    template = TIME_SKIP_CLOSING_PROMPT_PATH.read_text(encoding="utf-8")
+    prompt = template.format(
+        character_summary=character.narrative_status(),
+        character_voice=getattr(character, "voice_notes", ""),
+        campaign_name=campaign_name,
+        duration_months=duration_months,
+        vignette_summary=vignette_summary,
+        next_act_situation=next_act_situation,
+    )
+
+    client, model = _make_client()
+    is_local = NARRATIVE_BACKEND == "local"
+    is_qwen = is_local and "qwen" in LOCAL_NARRATION_MODEL.lower()
+    msg_content = f"/no_think\n{prompt}" if is_qwen else prompt
+
+    timeout = 180.0 if is_local else 60.0
+    kwargs = dict(
+        model=model,
+        max_completion_tokens=MAX_TOKENS,
+        messages=[{"role": "user", "content": msg_content}],
+        timeout=timeout,
+    )
+    reasoning = os.getenv("REASONING_EFFORT", "low")
+    if not is_local and reasoning:
+        kwargs["reasoning_effort"] = reasoning
+
+    response = client.chat.completions.create(**kwargs)
+    raw = response.choices[0].message.content or ""
+
+    # Strip markdown emphasis
+    passage = re.sub(r"\*{1,2}(.+?)\*{1,2}", r"\1", raw.strip())
+    return passage

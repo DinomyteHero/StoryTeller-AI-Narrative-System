@@ -290,6 +290,33 @@ def apply_conditional_modifiers(
     return activations
 
 
+# ── Characteristic override (Phase 15.5) ─────────────────────────────
+
+def get_characteristic_override(character, skill: str) -> str | None:
+    """
+    Check if the character has a Type 3 substitution talent that overrides
+    the governing characteristic for a skill (e.g., lightsaber uses
+    Willpower instead of Brawn via Niman Technique).
+
+    Returns the override characteristic name, or None if no override applies.
+    """
+    library = _get_library()
+    acquired_refs = get_acquired_refs(character)
+
+    for talent_ref in acquired_refs:
+        defn = library.get(talent_ref)
+        if not defn:
+            continue
+        for eff in defn.get("effects", []):
+            if eff.get("type") != "substitution":
+                continue
+            if skill in eff.get("original_skills", []):
+                override = eff.get("characteristic_override")
+                if override:
+                    return override
+    return None
+
+
 # ── Context builders for GM prompts ───────────────────────────────────
 
 def build_talent_check_effects(character) -> str:
@@ -311,15 +338,29 @@ def build_talent_check_effects(character) -> str:
 
         for eff in defn.get("effects", []):
             if eff.get("type") == "substitution":
-                original = ", ".join(
-                    s.replace("_", " ").title()
-                    for s in eff.get("original_skills", [])
-                )
-                sub = eff.get("substitute_skill", "").replace("_", " ").title()
-                lines.append(
-                    f"- {defn['name']}: This character may use {sub} "
-                    f"in place of {original}."
-                )
+                char_override = eff.get("characteristic_override")
+                if char_override:
+                    # Characteristic substitution (e.g., lightsaber uses Willpower)
+                    original = ", ".join(
+                        s.replace("_", " ").title()
+                        for s in eff.get("original_skills", [])
+                    )
+                    lines.append(
+                        f"- {defn['name']}: {original} skill may use "
+                        f"{char_override.replace('_', ' ').title()} "
+                        f"instead of the default characteristic."
+                    )
+                else:
+                    # Skill substitution (e.g., use Deception in place of Charm)
+                    original = ", ".join(
+                        s.replace("_", " ").title()
+                        for s in eff.get("original_skills", [])
+                    )
+                    sub = eff.get("substitute_skill", "").replace("_", " ").title()
+                    lines.append(
+                        f"- {defn['name']}: This character may use {sub} "
+                        f"in place of {original}."
+                    )
 
             elif eff.get("type") == "narrative_enabler":
                 desc = eff.get("description", "")
@@ -616,6 +657,7 @@ def acquire_talent(character, choice: MilestoneChoice) -> None:
     """
     Apply a milestone talent acquisition to the character.
     Deducts reserved_xp, adds to acquired_talents, applies threshold modifiers.
+    Phase 15: also handles Force Rating increase via Category 3 milestone (§16.4).
     """
     character.reserved_xp = max(0, character.reserved_xp - choice.xp_cost)
     character.acquired_talents.append({
@@ -632,6 +674,20 @@ def acquire_talent(character, choice: MilestoneChoice) -> None:
             if eff.get("type") == "modify_threshold":
                 apply_threshold_modifiers(character)
                 break
+            # Phase 15: Force Rating increase (§16.4)
+            if eff.get("type") == "force_rating_increase":
+                old_rating = character.force_rating
+                character.force_rating += eff.get("modifier", 1)
+                logging.info(
+                    f"Force Rating increase: {old_rating} -> {character.force_rating} "
+                    f"via {defn.get('name', choice.talent_ref)}"
+                )
+                character.advancement_log.append({
+                    "type": "force_rating_increase",
+                    "old_rating": old_rating,
+                    "new_rating": character.force_rating,
+                    "talent_ref": choice.talent_ref,
+                })
 
 
 # ── Type 5 Intervention helpers (Phase 12, §15.1) ───────────────────

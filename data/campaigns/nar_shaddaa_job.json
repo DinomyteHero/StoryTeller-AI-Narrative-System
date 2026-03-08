@@ -263,31 +263,184 @@
             "number": 3,
             "name": "The Squeeze",
             "tension": "climax",
-            "opening_situation": "Vossk's patience has run out. The Besadii clan's move on his operations has made him desperate for results. The walls are closing in.",
+            "opening_situation": "Three months have passed since Keth discovered the truth about Doss. He has been laying low on Nar Shaddaa, running small jobs to stay afloat while the heat dies down. But debts do not forget, and Vossk's intermediaries have started leaving messages again.",
             "opening_location": "Nar Shaddaa, lower levels near Vossk's territory",
             "galactic_context": "The Besadii clan has moved on one of Vossk's subsidiary operations in the lower levels, pulling his enforcers away from the Promenade. For a narrow window, Vossk's grip on this district is weaker than it has been in years.",
             "anchor": "obligation_triggered",
             "next_anchor": "resolution_approach",
+            "expected_turns": [6, 10],
+            "xp_config": {
+                "base_xp": 25,
+                "bonus_conditions": ["anchor_engagement", "motivation_interaction", "failure_engagement"]
+            },
+            "destiny_dark_trigger": true,
+            "seize_the_moment": true,
             "open_threads": [],
-            "expected_turns": "6-10",
-            "xp_base": 25,
-            "xp_bonus_conditions": [
-                {
-                    "condition_type": "anchor_engagement",
-                    "description": "Player confronts the obligation trigger directly",
-                    "xp_value": 5
-                },
-                {
-                    "condition_type": "motivation_interaction",
-                    "description": "Player's obligation shapes a major decision",
-                    "xp_value": 5
-                },
-                {
-                    "condition_type": "failure_engagement",
-                    "description": "Player engages with failure consequences",
-                    "xp_value": 5
-                }
-            ]
+            "time_skip": {
+                "duration_months": 3,
+                "framing": "Three months on the Smuggler's Moon. The kind of time that passes in small jobs and smaller rooms, in the rhythm of a man who knows he is waiting for the other boot to drop. Keth runs cargo between docking bays, keeps his head down, and tries not to think about the debt that grows whether he pays attention to it or not.",
+                "vignettes": [
+                    {
+                        "vignette_id": "skip_sabacc_lesson",
+                        "category": "training",
+                        "skill_domain": ["deception", "cool", "negotiation"],
+                        "passage": "The sabacc table at the Crimson Corridor is not a place for high stakes. The regulars are dock workers, off-duty mechanics, a Toydarian who cheats badly enough that everyone lets him because it is funnier than calling him on it. But Keth has been coming here three nights a week for two months now, and he has learned something that has nothing to do with cards.\n\nThe game is not about the hand you are holding. It is about the hand everyone else thinks you are holding. And the distance between those two things is where a smuggler lives.\n\nTonight the pot is modest — maybe two hundred credits — but the Rodian across from you is reading your tells. She is good. Better than the table deserves. And you realize you have a choice about what to teach her about you.",
+                        "choices": [
+                            {
+                                "text": "Let her read the false tell you have been building for three weeks. Time to cash in the long game.",
+                                "skill_tag": "deception",
+                                "npc_effects": {},
+                                "moral_weight": 0,
+                                "morality_bonus": 0,
+                                "aspiration_tags": ["cunning", "patience", "deception"],
+                                "narrative_consequence": "The Rodian folds on a winning hand. The credits are modest, but the lesson is not — you can build a lie so slowly that it becomes the truth. She buys you a drink afterward, which means she knows what you did and respects it."
+                            },
+                            {
+                                "text": "Play it straight tonight. You are here to sharpen skills, not to fleece dock workers.",
+                                "skill_tag": "cool",
+                                "npc_effects": {},
+                                "moral_weight": 0,
+                                "morality_bonus": 1,
+                                "aspiration_tags": ["discipline", "integrity", "cool"],
+                                "narrative_consequence": "You lose forty credits and learn something about the Rodian's style that you file away for later. She nods at you when you leave. There is a respect between card players who do not need to cheat."
+                            },
+                            {
+                                "text": "Raise the stakes. Push the table past its comfort zone and see who blinks.",
+                                "skill_tag": "negotiation",
+                                "npc_effects": {},
+                                "moral_weight": 1,
+                                "morality_bonus": 0,
+                                "aspiration_tags": ["aggression", "confidence", "negotiation"],
+                                "narrative_consequence": "Two players fold immediately. The Toydarian squeaks something about rent. The Rodian stays, and for twenty minutes the table belongs to the two of you. You win. She does not buy you a drink."
+                            }
+                        ]
+                    },
+                    {
+                        "vignette_id": "skip_doss_message",
+                        "category": "relationship",
+                        "npc_focus": "Doss",
+                        "skill_domain": ["streetwise", "charm"],
+                        "passage": "The message arrives on a disposable chip, slipped under the door of your rented room six weeks into the skip. No return address. No encryption — which tells you it was sent by someone who knows that encryption draws attention.\n\nIt is Doss. Three sentences: he is alive. He is sorry. He needs to know if you are still in the game.\n\nYou hold the chip and think about the last time you saw him — or the last time you heard from him, anyway. The message does not ask for help. Doss is too smart for that. But the fact that he reached out at all means he is either desperate or loyal, and with Doss those two things have always been hard to separate.",
+                        "choices": [
+                            {
+                                "text": "Send a reply through the same dead-drop method. One word: Yes.",
+                                "skill_tag": "streetwise",
+                                "npc_effects": {"Doss": 0.1},
+                                "moral_weight": 0,
+                                "morality_bonus": 0,
+                                "aspiration_tags": ["loyalty", "caution", "streetwise"],
+                                "narrative_consequence": "You find the dead drop — a loose panel behind a coolant pipe on Level 7. You leave the chip face-down with the word scratched into the casing. Simple. Deniable. The kind of communication that survives even when everything else burns. Two days later, the chip is gone."
+                            },
+                            {
+                                "text": "Destroy the chip. Whatever Doss is mixed up in now, you cannot afford the connection.",
+                                "skill_tag": "cool",
+                                "npc_effects": {"Doss": -0.05},
+                                "moral_weight": 1,
+                                "morality_bonus": 0,
+                                "aspiration_tags": ["self_preservation", "pragmatism", "cool"],
+                                "narrative_consequence": "The chip goes into the incinerator behind the cantina. It takes three seconds to melt. You tell yourself it is the smart move, and it is. But you dream about Doss twice that week — nervous, fast-talking Doss who always covered his fear with speed."
+                            },
+                            {
+                                "text": "Track the dead drop back to its source. You need to know where Doss is before you respond.",
+                                "skill_tag": "charm",
+                                "npc_effects": {"Doss": 0.05},
+                                "moral_weight": 0,
+                                "morality_bonus": 0,
+                                "aspiration_tags": ["resourcefulness", "loyalty", "investigation"],
+                                "narrative_consequence": "It takes a week of casual questions and two favors called in, but you trace the chain: Doss is somewhere on the lower levels. You do not have an address, but you have a district. That is enough for now."
+                            }
+                        ]
+                    },
+                    {
+                        "vignette_id": "skip_miras_luck_repairs",
+                        "category": "mundane",
+                        "skill_domain": ["mechanics", "piloting_space"],
+                        "passage": "The port lateral stabilizer has been pulling three degrees to starboard for as long as you have owned the Luck. You have compensated for it so long that you do it without thinking — a fraction of pressure on the yoke that is now muscle memory. But today, with nothing pressing and a parts crate from a scrapped YT-1300, you decide to fix it.\n\nTwo hours into the job, you are on your back under the ventral hull with coolant dripping on your face, and you realize this is the first time in weeks that your mind is not running scenarios. There is just the work. The ship. The particular satisfaction of a coupling that seats properly after three attempts.",
+                        "choices": [
+                            {
+                                "text": "Fix it properly. Align the stabilizer, recalibrate the thrust vectoring, and give the Luck what she deserves.",
+                                "skill_tag": "mechanics",
+                                "npc_effects": {},
+                                "moral_weight": 0,
+                                "morality_bonus": 1,
+                                "aspiration_tags": ["craftsmanship", "patience", "mechanics"],
+                                "narrative_consequence": "It takes six hours instead of two, but when you take the Luck out for a test loop around the station, the yoke sits dead center for the first time in years. Your hands feel strange without the compensation. Better. Like meeting someone you thought you knew and realizing there was more to them."
+                            },
+                            {
+                                "text": "Fix the stabilizer, then keep going. The shield generator could use attention too.",
+                                "skill_tag": "mechanics",
+                                "npc_effects": {},
+                                "moral_weight": 0,
+                                "morality_bonus": 0,
+                                "aspiration_tags": ["thoroughness", "preparedness", "mechanics"],
+                                "narrative_consequence": "You spend three days on the ship. Stabilizer. Shield emitters. A power coupling in the dorsal turret that was one hard turn from failure. By the end, the Luck is in better shape than she has been in years, and your hands smell like hydraulic fluid in a way that feels honest."
+                            }
+                        ]
+                    },
+                    {
+                        "vignette_id": "skip_imperial_patrol",
+                        "category": "crisis",
+                        "skill_domain": ["deception", "stealth", "vigilance"],
+                        "passage": "The ISB sweep catches you in the mid-level market two months into the skip. Gray uniforms and scanner wands and the particular brand of polite authority that means someone is looking for something specific. You are not what they are looking for — probably — but your transit documents are forged and your cargo history would not survive a deep scan.\n\nTwo officers are working the market methodically, stall by stall. You have maybe three minutes before they reach you.",
+                        "choices": [
+                            {
+                                "text": "Blend in. Become a shopper. Pick up a produce crate and haggle with the vendor next to you like you have been here all morning.",
+                                "skill_tag": "deception",
+                                "npc_effects": {},
+                                "moral_weight": 0,
+                                "morality_bonus": 0,
+                                "aspiration_tags": ["cunning", "composure", "deception"],
+                                "narrative_consequence": "The vendor gives you a look but plays along when you press ten credits into his hand. The officers pass within two meters and do not look twice. Your heart rate does not spike. That is new — you used to feel it. Now the lie sits on you like an old coat."
+                            },
+                            {
+                                "text": "Slip out through the maintenance access behind the food stalls. You spotted it when you arrived — old habit.",
+                                "skill_tag": "stealth",
+                                "npc_effects": {},
+                                "moral_weight": 0,
+                                "morality_bonus": 0,
+                                "aspiration_tags": ["caution", "awareness", "stealth"],
+                                "narrative_consequence": "The maintenance corridor smells like recycled air and the particular mildew that colonizes every surface below Level 10. You emerge three blocks east and circle back an hour later. The officers are gone. You note the patrol pattern for later."
+                            },
+                            {
+                                "text": "Walk toward them. Show your documents voluntarily — the forged ones are good, and running looks worse than confidence.",
+                                "skill_tag": "vigilance",
+                                "npc_effects": {},
+                                "moral_weight": 0,
+                                "morality_bonus": 1,
+                                "aspiration_tags": ["confidence", "nerve", "vigilance"],
+                                "narrative_consequence": "The officer scans your chip, frowns at the screen for two seconds that feel like ten, then waves you through. You walk three more blocks before your hands stop shaking. But you learn something: the forged documents hold. Good to know."
+                            }
+                        ]
+                    },
+                    {
+                        "vignette_id": "skip_sleepless_night",
+                        "category": "solitary",
+                        "skill_domain": ["discipline", "willpower"],
+                        "requires": {},
+                        "passage": "Some nights, sleep does not come. This is one of them.\n\nYou lie in the narrow bunk of your rented room and listen to the station breathe — the ventilation cycling, the distant bass thrum of the reactor levels, the occasional shout from the corridor that could be a fight or a celebration. Nar Shaddaa does not distinguish.\n\nYour mind runs the numbers without permission. The debt. The job. The cargo still sitting in the Luck's hold, sealed and waiting. Three months of small jobs have barely covered rent and fuel. The math does not work, and you know it. Something has to change.",
+                        "choices": [
+                            {
+                                "text": "Get up. Run the numbers again on your datapad. There has to be an angle you have not seen.",
+                                "skill_tag": "discipline",
+                                "npc_effects": {},
+                                "moral_weight": 0,
+                                "morality_bonus": 0,
+                                "aspiration_tags": ["discipline", "pragmatism", "planning"],
+                                "narrative_consequence": "You find it at 0300 hours. Not a solution — a possibility. A route through the lower level trade corridors that would let you move cargo without Vossk's intermediaries knowing. It would not pay the debt, but it would buy time. You save the route and fall asleep with the datapad on your chest."
+                            },
+                            {
+                                "text": "Let it go. The answer will come when it comes. Force yourself to breathe and stop chasing the problem.",
+                                "skill_tag": "willpower",
+                                "npc_effects": {},
+                                "moral_weight": 0,
+                                "morality_bonus": 1,
+                                "aspiration_tags": ["patience", "acceptance", "willpower"],
+                                "narrative_consequence": "Sleep comes eventually, thin and restless but real. In the morning, the problem is still there, but you are not afraid of it. That distinction matters more than you expected."
+                            }
+                        ]
+                    }
+                ]
+            }
         },
         {
             "number": 4,
@@ -469,6 +622,30 @@
                 "3": {"awareness": 0.15},
                 "4": {"awareness": 0.2, "disposition": -0.1}
             }
+        }
+    ],
+    "vehicle_registry": [
+        {
+            "ship_id": "miras_luck",
+            "name": "Mira's Luck",
+            "type": "YT-2000 light freighter",
+            "silhouette": 4,
+            "speed": 3,
+            "handling": -1,
+            "hull_threshold": 22,
+            "system_strain_threshold": 16,
+            "armor": 3,
+            "shields": {"fore": 1, "aft": 1},
+            "weapons": [
+                {
+                    "name": "Dorsal laser turret",
+                    "skill": "gunnery",
+                    "damage": 6,
+                    "arc": "all",
+                    "qualities": ["linked_1"]
+                }
+            ],
+            "narrative_notes": "Battered but reliable. The hyperdrive has a tendency to stutter on cold starts. Keth knows every sound she makes and can tell by engine pitch alone when something is wrong."
         }
     ]
 }

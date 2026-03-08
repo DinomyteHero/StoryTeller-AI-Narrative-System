@@ -1,0 +1,52 @@
+{
+    "power_id": "enhance",
+    "name": "Enhance",
+    "category": "physical_manipulation",
+    "base_pips_required": 1,
+    "base_effect": "Enhance Brawn-based checks. Spend pips to add successes.",
+    "narrative_capability": "Can channel the Force through physical action — enhanced jumps, bursts of speed, feats of strength beyond normal capability.",
+    "gm_choice_guidance": "Offer Force-enhanced physical choices when the character could augment their body with the Force. Enhanced leaps, preternatural speed, impossible feats of strength. Enhance functions primarily as a Force-enhanced skill check rather than pure Force action. Tag as [Force:Enhance] when the physical action is clearly augmented.",
+    "dark_side_flavor": "Dark side Enhance is raw. Not augmentation but override — the body pushed past its limits by something that doesn't care about limits. Muscles tear, joints pop, and the pain is distant because the dark side doesn't acknowledge it.",
+    "commitment_option": {
+        "upgrade_id": "control_sustained_brawn",
+        "dice_committed": 1,
+        "effect": "Ongoing physical augmentation. Add +1 to Brawn for checks while committed.",
+        "narrative_note": "The Force sustains a constant physical enhancement — every motion a fraction stronger, a fraction faster than the body alone could manage."
+    },
+    "upgrades": {
+        "control_sustained_brawn": {
+            "name": "Control: Sustained Brawn",
+            "type": "control",
+            "xp_cost": 10,
+            "prerequisites": [],
+            "effect": "Commit 1 Force die. Add +1 to Brawn characteristic for skill checks while committed.",
+            "is_sustained": true,
+            "narrative": "Not a burst of power but a constant presence. The Force flows through muscle and bone continuously, a quiet strength that doesn't fade."
+        },
+        "control_sustained_agility": {
+            "name": "Control: Sustained Agility",
+            "type": "control",
+            "xp_cost": 15,
+            "prerequisites": ["control_sustained_brawn"],
+            "effect": "Commit 1 Force die. Add +1 to Agility characteristic for skill checks while committed.",
+            "is_sustained": true,
+            "narrative": "Speed and precision sharpen. Reactions quicken. The body moves before conscious thought directs it — the Force fills the gap between intent and execution."
+        },
+        "control_leap": {
+            "name": "Control: Force Leap",
+            "type": "control",
+            "xp_cost": 10,
+            "prerequisites": [],
+            "effect": "Can perform Force-enhanced leaps, clearing horizontal or vertical distances far beyond normal capability.",
+            "narrative": "The jump is wrong — too far, too high, held at the apex too long. The Force doesn't cancel gravity. It just makes gravity irrelevant for a moment."
+        },
+        "strength_1": {
+            "name": "Strength",
+            "type": "strength",
+            "xp_cost": 10,
+            "prerequisites": [],
+            "effect": "Add additional successes to Force-enhanced physical checks.",
+            "narrative": "The augmentation deepens. What was assistance becomes dominance — the Force doesn't help the body, it carries it."
+        }
+    }
+}

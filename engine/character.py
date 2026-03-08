@@ -171,6 +171,8 @@ class Character(BaseModel):
     advancement_log:      list[dict] = Field(default_factory=list)  # Phase 10: record of all advancement events (§14.2)
     acquired_talents:     list[dict] = Field(default_factory=list)  # Phase 11: acquired talent entries (§15)
     talent_uses:          dict[str, int] = Field(default_factory=dict)  # Phase 11: intervention usage per act (§15.1)
+    force_powers:         list[dict] = Field(default_factory=list)      # Phase 15: acquired Force powers (§16.3)
+    active_commitments:   list[dict] = Field(default_factory=list)      # Phase 15: committed Force dice (§16.5)
     throughline_question: str = ""
     voice_notes:          str = ""
     active_injuries:      list[str] = Field(default_factory=list)  # narrative injury descriptions (Game Mechanics §3)
