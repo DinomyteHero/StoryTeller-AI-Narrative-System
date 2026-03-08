@@ -1,5 +1,5 @@
 """
-Campaign Studio API routes — Mode 3 collaborative authoring.
+Campaign Studio API routes — Modes 3 and 2, plus cross-era import.
 
 Routes:
 - POST /studio/spine/validate     — Validate a spine (partial or complete)
@@ -7,6 +7,9 @@ Routes:
 - POST /studio/spine/finalize     — Parse, validate, and finalize a spine
 - POST /studio/assist/context     — Generate galactic context for an act
 - POST /studio/assist/voice       — Generate NPC voice notes
+- POST /studio/generate/mode2     — Generate spine from thematic brief
+- POST /studio/import/apply       — Apply import interface to character
+- POST /studio/import/default     — Build default character from variant
 - GET  /studio/campaigns          — List stored campaigns
 - POST /studio/campaigns          — Store a validated campaign spine
 - GET  /studio/campaigns/{id}     — Retrieve a stored campaign spine
@@ -32,6 +35,13 @@ from studio.generate import (
     generate_npc_voice_notes,
     finalize_spine,
     validate_and_report,
+    generate_from_brief,
+    ThematicBrief,
+)
+from studio.import_interface import (
+    ImportPackage,
+    apply_import,
+    build_default_character,
 )
 from studio.seeding import generate_master_seed
 from state.db import get_connection
@@ -68,6 +78,29 @@ class VoiceRequest(BaseModel):
     era: str
     location: str = ""
     master_seed: Optional[int] = None
+
+
+class Mode2GenerateRequest(BaseModel):
+    era: str
+    location: str
+    tone: str
+    throughline_question: str
+    campaign_concept: str
+    moral_register: str = "morally gray"
+    total_acts: int = 4
+    constraints: str = ""
+    master_seed: Optional[int] = None
+
+
+class ImportApplyRequest(BaseModel):
+    import_package: dict
+    spine_data: dict
+    variant_id: str
+
+
+class ImportDefaultRequest(BaseModel):
+    spine_data: dict
+    variant_id: str
 
 
 class StoreCampaignRequest(BaseModel):
@@ -174,6 +207,88 @@ async def assist_npc_voice(req: VoiceRequest):
         }
     except RuntimeError as e:
         raise HTTPException(status_code=502, detail=f"LLM call failed: {e}")
+
+
+# ── Mode 2 Generation Routes ─────────────────────────────────────────
+
+
+@router.post("/generate/mode2")
+async def generate_mode2(req: Mode2GenerateRequest):
+    """Generate a complete campaign spine from a thematic brief.
+
+    Mode 2: AI generates the entire spine from thematic direction.
+    The author reviews and edits the result before finalizing.
+    """
+    brief = ThematicBrief(
+        era=req.era,
+        location=req.location,
+        tone=req.tone,
+        throughline_question=req.throughline_question,
+        campaign_concept=req.campaign_concept,
+        moral_register=req.moral_register,
+        total_acts=req.total_acts,
+        constraints=req.constraints,
+    )
+    try:
+        spine_data, master_seed = generate_from_brief(
+            brief, master_seed=req.master_seed,
+        )
+        # Run gap analysis on the generated spine
+        gaps = identify_gaps(spine_data)
+        return {
+            "spine_data": spine_data,
+            "master_seed": master_seed,
+            "gaps": gaps,
+        }
+    except RuntimeError as e:
+        raise HTTPException(status_code=502, detail=str(e))
+
+
+# ── Cross-Era Import Routes ──────────────────────────────────────────
+
+
+@router.post("/import/apply")
+async def apply_import_route(req: ImportApplyRequest):
+    """Apply import interface to transfer a character to a new campaign.
+
+    Takes a character's import package and the receiving spine, returns
+    the assembled character data for the Game Engine.
+    """
+    try:
+        spine = CampaignSpine(**req.spine_data)
+    except Exception as e:
+        raise HTTPException(status_code=422, detail=f"Invalid spine: {e}")
+
+    try:
+        package = ImportPackage.from_dict(req.import_package)
+        result = apply_import(package, spine, req.variant_id)
+        return {
+            "character_data": result.character_data,
+            "applied_mappings": result.applied_mappings,
+            "warnings": result.warnings,
+            "xp_adjusted": result.xp_adjusted,
+        }
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@router.post("/import/default")
+async def build_default_route(req: ImportDefaultRequest):
+    """Build a default character from a variant (no import).
+
+    For players starting fresh. Returns character data indistinguishable
+    from a new start.
+    """
+    try:
+        spine = CampaignSpine(**req.spine_data)
+    except Exception as e:
+        raise HTTPException(status_code=422, detail=f"Invalid spine: {e}")
+
+    try:
+        char_data = build_default_character(spine, req.variant_id)
+        return {"character_data": char_data}
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
 
 # ── Campaign Storage Routes ──────────────────────────────────────────

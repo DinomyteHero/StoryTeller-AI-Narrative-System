@@ -1,29 +1,22 @@
 """
-Campaign spine generation orchestration — Mode 3 (collaborative authoring).
+Campaign spine generation orchestration — Modes 3 and 2.
 
-Mode 3 workflow:
-1. Author provides throughline question, era, campaign concept
-2. Author designs anchor beats and NPC roster (AI suggests and flags)
-3. AI generates galactic context drafts per act (author reviews)
-4. Author designs allegiances, variants, integration layers
-   (AI generates prologue scene drafts and validates diversity)
-5. AI runs validation suite; author addresses flags
-6. Output: validated campaign spine JSON
+Mode 3 (collaborative authoring):
+  Human drives, AI assists. Functions for galactic context drafting,
+  NPC voice generation, gap identification, and spine finalization.
 
-The author makes all structural decisions. The AI assists with:
-- Galactic context drafting
-- NPC voice note generation
-- Gap identification (missing fields, structural issues)
-- Prologue scene drafts
+Mode 2 (thematic steering):
+  AI generates from a thematic brief. Author reviews and edits.
+  generate_from_brief() produces a complete spine draft.
 
-This module provides the orchestration functions. Each function handles
-one assistance task, callable via the Studio API routes.
+This module provides orchestration functions callable via Studio API routes.
 """
 
 from __future__ import annotations
 
 import json
 import os
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Optional
 
@@ -38,6 +31,10 @@ from studio.seeding import (
     derive_all_seeds,
     STAGE_WORLD,
     STAGE_VOICE,
+    STAGE_NPCS,
+    STAGE_ANCHORS,
+    STAGE_VARIANTS,
+    STAGE_THREADS,
 )
 
 
@@ -45,6 +42,7 @@ from studio.seeding import (
 
 PROMPT_DIR = Path(__file__).parent / "prompts"
 MODE3_PROMPT_PATH = PROMPT_DIR / "mode3_assist.txt"
+MODE2_PROMPT_PATH = PROMPT_DIR / "mode2_generate.txt"
 NPC_VOICE_PROMPT_PATH = PROMPT_DIR / "npc_voice_gen.txt"
 
 CLOUD_PROVIDER = os.getenv("CLOUD_PROVIDER", "openai")
@@ -476,3 +474,110 @@ def finalize_spine(
         raise ValueError(f"Spine failed validation: {error_msgs}")
 
     return spine, report
+
+
+# ── Mode 2: Thematic Steering ────────────────────────────────────────
+
+
+@dataclass
+class ThematicBrief:
+    """Input for Mode 2 generation."""
+    era: str
+    location: str
+    tone: str
+    throughline_question: str
+    campaign_concept: str
+    moral_register: str = "morally gray"
+    total_acts: int = 4
+    constraints: str = ""
+
+
+def generate_from_brief(
+    brief: ThematicBrief,
+    *,
+    master_seed: Optional[int] = None,
+    max_retries: int = 3,
+) -> tuple[dict, int]:
+    """Generate a complete campaign spine from a thematic brief.
+
+    Mode 2 workflow: AI generates the entire spine from thematic direction.
+    The author reviews and edits the result.
+
+    Args:
+        brief: Thematic direction from the author.
+        master_seed: Optional seed for reproducibility. If None, generated.
+        max_retries: Number of LLM attempts before giving up.
+
+    Returns:
+        Tuple of (spine_data dict, master_seed used).
+
+    Raises:
+        RuntimeError: If generation fails after all retries.
+    """
+    if master_seed is None:
+        master_seed = generate_master_seed()
+
+    seed = derive_stage_seed(master_seed, STAGE_WORLD)
+
+    template = _load_prompt(MODE2_PROMPT_PATH)
+    system_prompt = template.format(
+        era=brief.era,
+        location=brief.location,
+        tone=brief.tone,
+        throughline_question=brief.throughline_question,
+        campaign_concept=brief.campaign_concept,
+        moral_register=brief.moral_register,
+        total_acts=brief.total_acts,
+        constraints=brief.constraints or "(none)",
+    )
+
+    for attempt in range(max_retries):
+        try:
+            raw = _call_llm(
+                system_prompt,
+                "Generate the complete campaign spine JSON now.",
+                seed=seed,
+                max_tokens=8000,
+                temperature=0.8,
+            )
+
+            # Strip markdown code fences if present
+            cleaned = raw.strip()
+            if cleaned.startswith("```"):
+                lines = cleaned.split("\n")
+                # Remove first line (```json) and last line (```)
+                lines = [l for l in lines if not l.strip().startswith("```")]
+                cleaned = "\n".join(lines)
+
+            spine_data = json.loads(cleaned)
+
+            # Ensure required top-level fields
+            spine_data.setdefault("era", brief.era)
+            spine_data.setdefault("total_acts", brief.total_acts)
+            spine_data.setdefault("throughline_question", brief.throughline_question)
+
+            # Attach generation metadata
+            stage_seeds = derive_all_seeds(master_seed)
+            spine_data["generation_metadata"] = build_generation_metadata(
+                master_seed=master_seed,
+                stage_seeds=stage_seeds,
+                model_used=CLOUD_MODEL,
+                generation_mode="mode2",
+            )
+
+            return spine_data, master_seed
+
+        except json.JSONDecodeError as e:
+            if attempt == max_retries - 1:
+                raise RuntimeError(
+                    f"Mode 2 generation failed: LLM returned invalid JSON after "
+                    f"{max_retries} attempts. Last error: {e}"
+                )
+        except Exception as e:
+            if attempt == max_retries - 1:
+                raise RuntimeError(
+                    f"Mode 2 generation failed after {max_retries} attempts: {e}"
+                )
+
+    # Should not reach here, but satisfy type checker
+    raise RuntimeError("Mode 2 generation failed unexpectedly")
