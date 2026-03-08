@@ -8,7 +8,7 @@ turns, dice results — flows through this module.
 
 import re
 from dataclasses import dataclass, field
-from typing import Optional
+from typing import Optional, Union
 from engine.character import Character
 from engine.dice import RollResult, DicePool
 
@@ -196,7 +196,7 @@ class ContextPackage:
     tone_instruction:   str = "Maintain established tone"
     prose_diagnostic:   Optional[dict] = None  # v1.5: reserved for prose diagnostic signal (Game Mechanics v1.1 §13)
     anchor_instruction: Optional[str] = None   # v2.5: set when act_progress >= 1.0 (§26.4)
-    expected_turns:     list[int] = field(default_factory=lambda: [8, 12])  # v2.5: [min, max] from spine
+    expected_turns:     Union[list[int], str] = field(default_factory=lambda: [8, 12])  # v2.5: [min, max] from spine or "8-12" string
     combat_damage_note: str = ""               # v3.0: Phase 9 — weapon damage context for combat checks (§18)
     talent_activations: list = field(default_factory=list)  # Phase 11: TalentActivation records for this turn (§15)
     destiny_narrative_note: str = ""           # Phase 11.5: narrative guidance when Destiny Points spent (§23)
@@ -257,7 +257,11 @@ class ContextPackage:
             return self.anchor_instruction
 
         progress_pct = int(self.arc.act_progress * 100)
-        expected_mid = sum(self.expected_turns) // 2
+        turns = self.expected_turns
+        if isinstance(turns, str):
+            parts = [int(x.strip()) for x in turns.split("-") if x.strip().isdigit()]
+            turns = parts if len(parts) == 2 else [8, 12]
+        expected_mid = sum(turns) // 2
 
         lines = [
             "PACING:",
