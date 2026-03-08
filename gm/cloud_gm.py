@@ -249,14 +249,24 @@ class CloudGMError(Exception):
 
 
 def _build_prompt(ctx: ContextPackage) -> str:
+    from engine.talents import build_talent_capabilities, build_talent_activations_block
+
     template       = PROMPT_PATH.read_text(encoding="utf-8")
     recent_summary = _format_recent_turns(ctx.recent_turns)
     full_summary   = f"{ctx.story_summary}\n\nRECENT TURNS:\n{recent_summary}"
     scene_pacing   = _get_scene_block(ctx.scene_type)
+
+    # Phase 11: Talent context for narration (§15.5)
+    talent_caps = build_talent_capabilities(ctx.character)
+    talent_acts = build_talent_activations_block(
+        getattr(ctx, "talent_activations", [])
+    )
+
     return template.format(
         character_summary=ctx.character.narrative_status(),
         character_voice=ctx.character.voice_notes,
         equipment_block=build_equipment_narration_block(ctx.character.loadout),
+        talent_capabilities_block=talent_caps,
         campaign_name=ctx.arc.campaign_name,
         story_position=f"Part {ctx.arc.current_act} of {ctx.arc.total_acts} — {ctx.arc.act_name}",
         throughline_question=ctx.arc.throughline_question,
@@ -270,6 +280,7 @@ def _build_prompt(ctx: ContextPackage) -> str:
         situation=ctx.situation,
         galactic_context=ctx.galactic_context or "No wider context provided for this act.",
         dice_result_block=ctx.build_dice_result_block(),
+        talent_activations_block=talent_acts,
         scene_pacing=scene_pacing,
         tone_instruction=ctx.tone_instruction,
     )
@@ -536,3 +547,131 @@ def narrate_turn_stream(ctx: ContextPackage) -> Iterator[str]:
         delta = chunk.choices[0].delta.content
         if delta:
             yield delta
+
+
+# ── Milestone reflection generation (Phase 12, §14.3) ────────────────
+
+MILESTONE_PROMPT_PATH = Path(__file__).parent / "prompts" / "milestone_reflection.txt"
+
+
+def generate_milestone_reflection(
+    character,
+    choices: list,
+    campaign_name: str,
+    current_act: int,
+    total_acts: int,
+    act_summary: str,
+) -> NarrationResult:
+    """
+    Generate a talent milestone reflection passage + choices.
+
+    Uses the cloud GM to produce a narrative passage that presents
+    talent acquisition as a character identity decision.
+    Returns a NarrationResult with passage + tagged choices.
+    """
+    from engine.talents import MilestoneChoice
+
+    # Build choices block for prompt
+    choices_lines = []
+    for i, choice in enumerate(choices, 1):
+        choices_lines.append(
+            f"Choice {i}: {choice.talent_name}\n"
+            f"  Branch: {choice.branch_theme} — {choice.branch_description}\n"
+            f"  Identity: {choice.narrative_identity}\n"
+            f"  Tag: [MILESTONE:{choice.talent_ref}]"
+        )
+
+    template = MILESTONE_PROMPT_PATH.read_text(encoding="utf-8")
+    prompt = template.format(
+        character_summary=character.narrative_status(),
+        character_voice=getattr(character, "voice_notes", ""),
+        campaign_name=campaign_name,
+        current_act=current_act,
+        total_acts=total_acts,
+        act_summary=act_summary or "No summary available.",
+        choices_block="\n\n".join(choices_lines),
+    )
+
+    client, model = _make_client()
+    is_local = NARRATIVE_BACKEND == "local"
+    is_qwen = is_local and "qwen" in LOCAL_NARRATION_MODEL.lower()
+    msg_content = f"/no_think\n{prompt}" if is_qwen else prompt
+
+    timeout = 180.0 if is_local else 60.0
+    kwargs = dict(
+        model=model,
+        max_completion_tokens=MAX_TOKENS,
+        messages=[{"role": "user", "content": msg_content}],
+        timeout=timeout,
+    )
+    reasoning = os.getenv("REASONING_EFFORT", "low")
+    if not is_local and reasoning:
+        kwargs["reasoning_effort"] = reasoning
+
+    response = client.chat.completions.create(**kwargs)
+    raw = response.choices[0].message.content or ""
+
+    # Parse milestone response — reuse _parse_response with milestone tag handling
+    return _parse_milestone_response(raw, choices)
+
+
+def _parse_milestone_response(raw: str, expected_choices: list) -> NarrationResult:
+    """
+    Parse a milestone reflection response.
+
+    Extracts the passage and maps [MILESTONE:talent_ref] tagged choices
+    back to the expected MilestoneChoice objects.
+    """
+    import re
+
+    # Normalize choices delimiter
+    normalized = re.sub(
+        r"^[\s*-]*CHOICES[\s*-:]*$", "---CHOICES---", raw, flags=re.MULTILINE
+    )
+    if "---CHOICES---" not in normalized:
+        normalized = re.sub(
+            r"^[\s#*]*(Your\s+)?(Choices|Options)\s*:?\s*$",
+            "---CHOICES---", normalized, flags=re.MULTILINE | re.IGNORECASE
+        )
+
+    if "---CHOICES---" not in normalized:
+        raise CloudGMError("Milestone response missing ---CHOICES--- delimiter")
+
+    passage, choices_raw = normalized.split("---CHOICES---", 1)
+    passage = passage.strip()
+
+    # Strip markdown emphasis
+    passage = re.sub(r"\*{1,2}(.+?)\*{1,2}", r"\1", passage)
+
+    # Parse choices — extract milestone tags
+    choice_lines = [
+        line.strip()
+        for line in re.split(r"\n(?=\d+[\.\)]|\-\s|\*\s)", choices_raw.strip())
+        if line.strip()
+    ]
+
+    parsed_choices = []
+    milestone_tags = []
+    for line in choice_lines:
+        clean = re.sub(r"^\d+[\.\)]\s*", "", line).strip()
+        clean = re.sub(r"^[-*]\s*", "", clean).strip()
+        if not clean:
+            continue
+
+        # Extract [MILESTONE:talent_ref] tag
+        tag_match = re.search(r"\[MILESTONE:(\w+)\]", clean)
+        talent_ref = tag_match.group(1) if tag_match else ""
+        # Strip the tag from display text
+        display = re.sub(r"\s*\[MILESTONE:\w+\]", "", clean).strip()
+        # Also strip bold/italic
+        display = re.sub(r"\*{1,2}(.+?)\*{1,2}", r"\1", display)
+
+        parsed_choices.append(display)
+        milestone_tags.append(talent_ref)
+
+    return NarrationResult(
+        passage=passage,
+        choices=parsed_choices,
+        skill_tags=milestone_tags,  # repurpose skill_tags for milestone refs
+        used_local=(NARRATIVE_BACKEND == "local"),
+    )

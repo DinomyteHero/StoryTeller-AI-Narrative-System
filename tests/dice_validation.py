@@ -163,7 +163,7 @@ def test_keth_deception_pool():
     keth = Character(**data)
 
     check = CheckRequest(skill="deception", difficulty=Difficulty.AVERAGE)
-    pool = build_pool(keth, check)
+    pool, _, _ = build_pool(keth, check)
 
     assert pool.proficiency == 2, f"Expected 2 proficiency, got {pool.proficiency}"
     assert pool.ability == 2, f"Expected 2 ability, got {pool.ability}"

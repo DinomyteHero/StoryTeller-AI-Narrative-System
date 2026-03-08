@@ -32,6 +32,8 @@
     ],
     "reserved_xp": 0,
     "advancement_log": [],
+    "acquired_talents": [],
+    "talent_uses": {},
     "loadout": {
         "weapons": [
             {

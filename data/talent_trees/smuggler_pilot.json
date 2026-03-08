@@ -1,0 +1,160 @@
+{
+    "specialization": "pilot",
+    "career": "smuggler",
+    "game_line": "edge_of_empire",
+    "talents": [
+        {
+            "id": "pilot_t1_0",
+            "talent_ref": "full_throttle",
+            "tier": 1,
+            "position": 0,
+            "xp_cost": 5,
+            "prerequisites": []
+        },
+        {
+            "id": "pilot_t1_1",
+            "talent_ref": "skilled_jockey",
+            "tier": 1,
+            "position": 1,
+            "xp_cost": 5,
+            "prerequisites": []
+        },
+        {
+            "id": "pilot_t1_2",
+            "talent_ref": "galaxy_mapper",
+            "tier": 1,
+            "position": 2,
+            "xp_cost": 5,
+            "prerequisites": []
+        },
+        {
+            "id": "pilot_t1_3",
+            "talent_ref": "lets_ride",
+            "tier": 1,
+            "position": 3,
+            "xp_cost": 5,
+            "prerequisites": []
+        },
+        {
+            "id": "pilot_t2_0",
+            "talent_ref": "rapid_recovery",
+            "tier": 2,
+            "position": 0,
+            "xp_cost": 10,
+            "prerequisites": ["pilot_t1_0"]
+        },
+        {
+            "id": "pilot_t2_1",
+            "talent_ref": "dead_to_rights",
+            "tier": 2,
+            "position": 1,
+            "xp_cost": 10,
+            "prerequisites": ["pilot_t1_1"]
+        },
+        {
+            "id": "pilot_t2_2",
+            "talent_ref": "skilled_jockey",
+            "tier": 2,
+            "position": 2,
+            "xp_cost": 10,
+            "prerequisites": ["pilot_t1_2"]
+        },
+        {
+            "id": "pilot_t2_3",
+            "talent_ref": "grit",
+            "tier": 2,
+            "position": 3,
+            "xp_cost": 10,
+            "prerequisites": ["pilot_t1_3"]
+        },
+        {
+            "id": "pilot_t3_0",
+            "talent_ref": "toughened",
+            "tier": 3,
+            "position": 0,
+            "xp_cost": 15,
+            "prerequisites": ["pilot_t2_0"]
+        },
+        {
+            "id": "pilot_t3_1",
+            "talent_ref": "natural_pilot",
+            "tier": 3,
+            "position": 1,
+            "xp_cost": 15,
+            "prerequisites": ["pilot_t2_1"]
+        },
+        {
+            "id": "pilot_t3_2",
+            "talent_ref": "defensive_driving",
+            "tier": 3,
+            "position": 2,
+            "xp_cost": 15,
+            "prerequisites": ["pilot_t2_2"]
+        },
+        {
+            "id": "pilot_t3_3",
+            "talent_ref": "shortcut",
+            "tier": 3,
+            "position": 3,
+            "xp_cost": 15,
+            "prerequisites": ["pilot_t2_3"]
+        },
+        {
+            "id": "pilot_t4_0",
+            "talent_ref": "tricky_target",
+            "tier": 4,
+            "position": 0,
+            "xp_cost": 20,
+            "prerequisites": ["pilot_t3_0"]
+        },
+        {
+            "id": "pilot_t4_1",
+            "talent_ref": "grit",
+            "tier": 4,
+            "position": 1,
+            "xp_cost": 20,
+            "prerequisites": ["pilot_t3_1"]
+        },
+        {
+            "id": "pilot_t4_2",
+            "talent_ref": "toughened",
+            "tier": 4,
+            "position": 2,
+            "xp_cost": 20,
+            "prerequisites": ["pilot_t3_2"]
+        },
+        {
+            "id": "pilot_t4_3",
+            "talent_ref": "rapid_recovery",
+            "tier": 4,
+            "position": 3,
+            "xp_cost": 20,
+            "prerequisites": ["pilot_t3_3"]
+        },
+        {
+            "id": "pilot_t5_1",
+            "talent_ref": "dedication",
+            "tier": 5,
+            "position": 1,
+            "xp_cost": 25,
+            "prerequisites": ["pilot_t4_1"]
+        }
+    ],
+    "tree_paths": {
+        "vehicle_mastery": {
+            "theme": "vehicle_mastery",
+            "description": "The path of the ace pilot. Speed, evasion, and the ship as extension of self.",
+            "talent_ids": ["pilot_t1_0", "pilot_t1_1", "pilot_t2_2", "pilot_t3_2", "pilot_t4_0"]
+        },
+        "gunnery": {
+            "theme": "gunnery_and_combat",
+            "description": "The path of the gunship pilot. Precision fire and combat instinct.",
+            "talent_ids": ["pilot_t2_1", "pilot_t3_1", "pilot_t4_1"]
+        },
+        "survivability": {
+            "theme": "survivability",
+            "description": "The path of the survivor. Endurance, recovery, and staying in the fight.",
+            "talent_ids": ["pilot_t2_0", "pilot_t2_3", "pilot_t3_0", "pilot_t4_2", "pilot_t4_3"]
+        }
+    }
+}

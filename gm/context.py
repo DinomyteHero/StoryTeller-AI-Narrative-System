@@ -198,6 +198,8 @@ class ContextPackage:
     anchor_instruction: Optional[str] = None   # v2.5: set when act_progress >= 1.0 (§26.4)
     expected_turns:     list[int] = field(default_factory=lambda: [8, 12])  # v2.5: [min, max] from spine
     combat_damage_note: str = ""               # v3.0: Phase 9 — weapon damage context for combat checks (§18)
+    talent_activations: list = field(default_factory=list)  # Phase 11: TalentActivation records for this turn (§15)
+    destiny_narrative_note: str = ""           # Phase 11.5: narrative guidance when Destiny Points spent (§23)
 
     def build_dice_result_block(self) -> str:
         if self.roll_result is None:
@@ -233,6 +235,10 @@ class ContextPackage:
         soak = self.character.effective_soak()
         if soak > 0:
             lines.append(f"  Character soak: {soak} (incoming wounds reduced by this amount)")
+        # Phase 11.5: Destiny Point narrative guidance (§23)
+        if self.destiny_narrative_note:
+            lines.append("")
+            lines.append(self.destiny_narrative_note)
         return "\n".join(lines)
 
     def build_npc_block(self) -> str:

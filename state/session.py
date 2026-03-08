@@ -147,6 +147,18 @@ def get_turn_count(session_id: str) -> int:
         ).fetchone()[0]
 
 
+def update_destiny_pool(session_id: str, light: int, dark: int) -> None:
+    """Write updated Destiny Point pool values to the sessions table (§23)."""
+    now = datetime.now(timezone.utc).isoformat()
+    with get_connection() as conn:
+        conn.execute(
+            "UPDATE sessions SET destiny_light = ?, destiny_dark = ?, "
+            "updated_at = ? WHERE id = ?",
+            (light, dark, now, session_id),
+        )
+        conn.commit()
+
+
 def get_act_turns(session_id: str, count: int) -> list[dict]:
     """
     Return the most recent `count` turns as dicts for XP evaluation (§14.1).

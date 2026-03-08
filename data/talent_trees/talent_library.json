@@ -1,0 +1,416 @@
+{
+    "talents": {
+        "skilled_jockey": {
+            "name": "Skilled Jockey",
+            "talent_type": "passive",
+            "ranked": true,
+            "max_rank": 2,
+            "effects": [
+                {
+                    "type": "modify_pool",
+                    "target_skills": ["piloting_space", "piloting_planetary"],
+                    "modifier": {"setback": -1}
+                }
+            ],
+            "narrative_identity": "The ship responds to the pilot's hands like an extension of their body. What looks reckless to passengers is precision to the pilot.",
+            "prose_tags": ["piloting", "instinct", "vehicle_mastery"]
+        },
+        "galaxy_mapper": {
+            "name": "Galaxy Mapper",
+            "talent_type": "passive",
+            "ranked": false,
+            "max_rank": 1,
+            "effects": [
+                {
+                    "type": "modify_pool",
+                    "target_skills": ["astrogation"],
+                    "modifier": {"setback": -1}
+                }
+            ],
+            "narrative_identity": "Hyperspace lanes are not abstractions to this pilot. They are roads walked a hundred times, each one remembered by the way the ship shudders at the transition point.",
+            "prose_tags": ["navigation", "hyperspace", "experience"]
+        },
+        "stalker": {
+            "name": "Stalker",
+            "talent_type": "passive",
+            "ranked": true,
+            "max_rank": 2,
+            "effects": [
+                {
+                    "type": "modify_pool",
+                    "target_skills": ["stealth", "coordination"],
+                    "modifier": {"boost": 1}
+                }
+            ],
+            "narrative_identity": "Movement without sound. Presence without notice. The character has learned to occupy space without disturbing it.",
+            "prose_tags": ["stealth", "silence", "shadow"]
+        },
+        "street_smarts": {
+            "name": "Street Smarts",
+            "talent_type": "passive",
+            "ranked": true,
+            "max_rank": 2,
+            "effects": [
+                {
+                    "type": "modify_pool",
+                    "target_skills": ["streetwise", "underworld"],
+                    "modifier": {"setback": -1}
+                }
+            ],
+            "narrative_identity": "The underworld has its own geography. This character reads it the way cartographers read terrain — instinctively, without having to think about why the alley narrows or the lights go out.",
+            "prose_tags": ["underworld", "street_knowledge", "survival"]
+        },
+        "bypass_security": {
+            "name": "Bypass Security",
+            "talent_type": "passive",
+            "ranked": false,
+            "max_rank": 1,
+            "effects": [
+                {
+                    "type": "modify_pool",
+                    "target_skills": ["computers", "skulduggery"],
+                    "modifier": {"setback": -1}
+                },
+                {
+                    "type": "narrative_enabler",
+                    "capability": "bypass_security_systems",
+                    "description": "The character has trained knowledge of security systems. The GM should offer choices involving security bypass more readily."
+                }
+            ],
+            "narrative_identity": "Locks are puzzles with known solutions. Security systems are designed by people who think like designers. This character thinks like a thief.",
+            "prose_tags": ["security", "intrusion", "technical"]
+        },
+        "dead_to_rights": {
+            "name": "Dead to Rights",
+            "talent_type": "passive",
+            "ranked": false,
+            "max_rank": 1,
+            "effects": [
+                {
+                    "type": "modify_pool",
+                    "target_skills": ["gunnery", "ranged_heavy"],
+                    "modifier": {"boost": 1}
+                }
+            ],
+            "narrative_identity": "Every shot is deliberate. The character does not spray and pray. They pick their moment, pick their target, and make it count.",
+            "prose_tags": ["marksmanship", "precision", "patience"]
+        },
+        "grit": {
+            "name": "Grit",
+            "talent_type": "passive",
+            "ranked": true,
+            "max_rank": 5,
+            "effects": [
+                {
+                    "type": "modify_threshold",
+                    "target": "strain_threshold",
+                    "modifier": 1
+                }
+            ],
+            "narrative_identity": "Endurance that does not announce itself. The character simply keeps going past the point where others stop.",
+            "prose_tags": ["endurance", "resilience", "willpower"]
+        },
+        "toughened": {
+            "name": "Toughened",
+            "talent_type": "passive",
+            "ranked": true,
+            "max_rank": 5,
+            "effects": [
+                {
+                    "type": "modify_threshold",
+                    "target": "wound_threshold",
+                    "modifier": 1
+                }
+            ],
+            "narrative_identity": "The body learns to take damage. Not painlessly, but efficiently. Bruises that would have stopped the character a year ago are now absorbed without breaking stride.",
+            "prose_tags": ["durability", "physical", "toughness"]
+        },
+        "rapid_recovery": {
+            "name": "Rapid Recovery",
+            "talent_type": "passive",
+            "ranked": true,
+            "max_rank": 2,
+            "effects": [
+                {
+                    "type": "modify_recovery",
+                    "target": "strain_recovery",
+                    "modifier": 1
+                }
+            ],
+            "narrative_identity": "Rest comes faster now. The character has learned to let go of tension the way a sailor sleeps through storms.",
+            "prose_tags": ["recovery", "rest", "adaptation"]
+        },
+        "dodge": {
+            "name": "Dodge",
+            "talent_type": "conditional",
+            "ranked": true,
+            "max_rank": 3,
+            "effects": [
+                {
+                    "type": "conditional",
+                    "modifier": {"difficulty": -1},
+                    "condition": {
+                        "scene_types": ["combat", "chase"],
+                        "context": "any"
+                    },
+                    "strain_cost": 1
+                }
+            ],
+            "narrative_identity": "The character moves before they think. Instinct sharpened by years of being shot at.",
+            "prose_tags": ["evasion", "reflexes", "survival_instinct"]
+        },
+        "quick_strike": {
+            "name": "Quick Strike",
+            "talent_type": "conditional",
+            "ranked": false,
+            "max_rank": 1,
+            "effects": [
+                {
+                    "type": "conditional",
+                    "modifier": {"boost": 1},
+                    "condition": {
+                        "scene_types": ["combat"],
+                        "context": "any"
+                    },
+                    "strain_cost": 0
+                }
+            ],
+            "narrative_identity": "The first move is the one that matters. This character reads the moment a situation turns violent and acts before the other side finishes deciding.",
+            "prose_tags": ["initiative", "speed", "decisiveness"]
+        },
+        "defensive_driving": {
+            "name": "Defensive Driving",
+            "talent_type": "conditional",
+            "ranked": false,
+            "max_rank": 1,
+            "effects": [
+                {
+                    "type": "conditional",
+                    "modifier": {"difficulty": -1},
+                    "condition": {
+                        "scene_types": ["combat", "chase"],
+                        "check_skills": ["piloting_space", "piloting_planetary"]
+                    },
+                    "strain_cost": 1
+                }
+            ],
+            "narrative_identity": "Flying defensively is not about timidity. It is about knowing which vectors the enemy cannot reach and putting the ship there before they fire.",
+            "prose_tags": ["evasive_flying", "defensive", "spatial_awareness"]
+        },
+        "side_step": {
+            "name": "Side Step",
+            "talent_type": "conditional",
+            "ranked": true,
+            "max_rank": 2,
+            "effects": [
+                {
+                    "type": "conditional",
+                    "modifier": {"difficulty": -1},
+                    "condition": {
+                        "scene_types": ["combat"],
+                        "context": "any"
+                    },
+                    "strain_cost": 1
+                }
+            ],
+            "narrative_identity": "The character shifts weight before the shot arrives. Not a dramatic dive — a half-step, a lean, the kind of movement that comes from knowing exactly how far a blaster bolt spreads at twenty meters.",
+            "prose_tags": ["evasion", "ranged_defense", "positioning"]
+        },
+        "tricky_target": {
+            "name": "Tricky Target",
+            "talent_type": "conditional",
+            "ranked": false,
+            "max_rank": 1,
+            "effects": [
+                {
+                    "type": "conditional",
+                    "modifier": {"difficulty": -1},
+                    "condition": {
+                        "scene_types": ["combat", "chase"],
+                        "check_skills": ["piloting_space", "piloting_planetary"]
+                    },
+                    "strain_cost": 1
+                }
+            ],
+            "narrative_identity": "The ship does not fly in straight lines. It jinks, rolls, and slides through firing solutions like water through a grate.",
+            "prose_tags": ["evasive_maneuvers", "unpredictable", "vehicle_defense"]
+        },
+        "convincing_demeanor": {
+            "name": "Convincing Demeanor",
+            "talent_type": "substitution",
+            "ranked": false,
+            "max_rank": 1,
+            "effects": [
+                {
+                    "type": "substitution",
+                    "original_skills": ["charm", "leadership", "negotiation"],
+                    "substitute_skill": "deception"
+                }
+            ],
+            "narrative_identity": "The character's lies function as social tools — not crude deception but performed sincerity, tactical empathy, the ability to become whoever the situation requires.",
+            "prose_tags": ["manipulation", "social_fluency", "masks"]
+        },
+        "black_market_contacts": {
+            "name": "Black Market Contacts",
+            "talent_type": "narrative_enabler",
+            "ranked": false,
+            "max_rank": 1,
+            "effects": [
+                {
+                    "type": "narrative_enabler",
+                    "capability": "acquire_restricted_goods",
+                    "description": "Has reliable black market contacts for acquiring illegal or restricted equipment. GM should offer acquisition choices when contextually appropriate."
+                }
+            ],
+            "narrative_identity": "The character knows who to call. Not friends — professionals. The kind of people who have what you need and do not ask why you need it.",
+            "prose_tags": ["contacts", "black_market", "acquisition"]
+        },
+        "full_throttle": {
+            "name": "Full Throttle",
+            "talent_type": "narrative_enabler",
+            "ranked": false,
+            "max_rank": 1,
+            "effects": [
+                {
+                    "type": "narrative_enabler",
+                    "capability": "push_vehicle_speed",
+                    "description": "The character can push a vehicle to its maximum speed as a deliberate action. The GM should offer speed-related choices in vehicle scenes that other characters would not have."
+                }
+            ],
+            "narrative_identity": "There is a point past which most pilots ease off the throttle. This character has never found it.",
+            "prose_tags": ["speed", "risk", "vehicle_mastery"]
+        },
+        "lets_ride": {
+            "name": "Let's Ride",
+            "talent_type": "narrative_enabler",
+            "ranked": false,
+            "max_rank": 1,
+            "effects": [
+                {
+                    "type": "narrative_enabler",
+                    "capability": "instant_vehicle_access",
+                    "description": "The character can mount or enter a vehicle as an incidental. In escape or chase scenes, the GM should allow immediate vehicle access without delay."
+                }
+            ],
+            "narrative_identity": "The cockpit is home. Getting into it is not an action — it is a reflex. The character is already moving before the hatch finishes opening.",
+            "prose_tags": ["vehicle_access", "speed", "readiness"]
+        },
+        "shortcut": {
+            "name": "Shortcut",
+            "talent_type": "narrative_enabler",
+            "ranked": true,
+            "max_rank": 2,
+            "effects": [
+                {
+                    "type": "narrative_enabler",
+                    "capability": "find_faster_routes",
+                    "description": "The character can find faster routes. In chase sequences, the GM can offer shortcut choices that other characters would not have access to."
+                }
+            ],
+            "narrative_identity": "Every station has its hidden geometry. Maintenance corridors, service lifts, the gaps between what the architects intended and what the residents discovered. This character knows them.",
+            "prose_tags": ["shortcuts", "navigation", "local_knowledge"]
+        },
+        "quick_draw": {
+            "name": "Quick Draw",
+            "talent_type": "narrative_enabler",
+            "ranked": false,
+            "max_rank": 1,
+            "effects": [
+                {
+                    "type": "narrative_enabler",
+                    "capability": "draw_weapon_instantly",
+                    "description": "The character draws and holsters weapons as an incidental. In tense standoff scenes, the GM should reflect this readiness."
+                }
+            ],
+            "narrative_identity": "The weapon appears. Not drawn — appeared. The motion is too practiced to have a visible beginning.",
+            "prose_tags": ["fast_draw", "readiness", "weapon_mastery"]
+        },
+        "indistinguishable": {
+            "name": "Indistinguishable",
+            "talent_type": "narrative_enabler",
+            "ranked": false,
+            "max_rank": 1,
+            "effects": [
+                {
+                    "type": "narrative_enabler",
+                    "capability": "blend_in",
+                    "description": "The character is forgettable by design. NPCs have difficulty recalling specific details about them. The GM should make identification and pursuit harder when this character is trying to disappear into a crowd."
+                }
+            ],
+            "narrative_identity": "Average height, average build, average face. The kind of person you look at and immediately forget. This is not an accident — it is a skill refined over years of wanting to be invisible.",
+            "prose_tags": ["anonymity", "forgettable", "crowd_blending"]
+        },
+        "natural_pilot": {
+            "name": "Natural Pilot",
+            "talent_type": "intervention",
+            "ranked": false,
+            "max_rank": 1,
+            "effects": [
+                {
+                    "type": "intervention",
+                    "trigger": "any_check",
+                    "applicable_skills": ["piloting_space", "piloting_planetary"],
+                    "effect": "reroll",
+                    "strain_cost": 1,
+                    "scope": "session",
+                    "narrative_prompt": "A correction so small and so fast it might have been the ship itself deciding to live."
+                }
+            ],
+            "narrative_identity": "Some pilots fly. This one breathes it. When everything goes wrong, something deeper than training takes over.",
+            "prose_tags": ["natural_talent", "instinct", "piloting"]
+        },
+        "natural_charmer": {
+            "name": "Natural Charmer",
+            "talent_type": "intervention",
+            "ranked": false,
+            "max_rank": 1,
+            "effects": [
+                {
+                    "type": "intervention",
+                    "trigger": "any_check",
+                    "applicable_skills": ["charm", "deception"],
+                    "effect": "reroll",
+                    "strain_cost": 1,
+                    "scope": "session",
+                    "narrative_prompt": "A moment of recovery — the character finds the right angle just when everything seemed lost."
+                }
+            ],
+            "narrative_identity": "Words are this character's weapon. When a conversation turns hostile, they find the phrase that turns it back — not through intelligence but through an instinct for what people need to hear.",
+            "prose_tags": ["social_recovery", "charm", "instinct"]
+        },
+        "second_chances": {
+            "name": "Second Chances",
+            "talent_type": "intervention",
+            "ranked": true,
+            "max_rank": 2,
+            "effects": [
+                {
+                    "type": "intervention",
+                    "trigger": "failed_check",
+                    "applicable_skills": [],
+                    "effect": "reroll",
+                    "strain_cost": 1,
+                    "scope": "session",
+                    "narrative_prompt": "Not over. Not yet. The character reaches for something they did not know they had."
+                }
+            ],
+            "narrative_identity": "Failure is not the end. It is the moment before the recovery — the breath between falling and catching yourself.",
+            "prose_tags": ["persistence", "recovery", "second_wind"]
+        },
+        "dedication": {
+            "name": "Dedication",
+            "talent_type": "passive",
+            "ranked": false,
+            "max_rank": 1,
+            "effects": [
+                {
+                    "type": "modify_characteristic",
+                    "target": "player_choice",
+                    "modifier": 1
+                }
+            ],
+            "narrative_identity": "A fundamental shift in who the character is. Not what they can do, but what they are made of.",
+            "prose_tags": ["transformation", "core_identity", "growth"]
+        }
+    }
+}

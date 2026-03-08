@@ -169,6 +169,8 @@ class Character(BaseModel):
     career_skills:        list[str] = Field(default_factory=list)   # Phase 10: career + specialization skills (§14.2)
     reserved_xp:          int = 0                                   # Phase 10: XP banked for milestones (§14.2)
     advancement_log:      list[dict] = Field(default_factory=list)  # Phase 10: record of all advancement events (§14.2)
+    acquired_talents:     list[dict] = Field(default_factory=list)  # Phase 11: acquired talent entries (§15)
+    talent_uses:          dict[str, int] = Field(default_factory=dict)  # Phase 11: intervention usage per act (§15.1)
     throughline_question: str = ""
     voice_notes:          str = ""
     active_injuries:      list[str] = Field(default_factory=list)  # narrative injury descriptions (Game Mechanics §3)

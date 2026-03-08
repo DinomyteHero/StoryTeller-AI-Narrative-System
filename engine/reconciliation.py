@@ -91,6 +91,8 @@ class BetweenActResult:
     morality_result: dict = field(default_factory=dict)     # Phase 8: morality resolution output
     xp_award: Optional[object] = None                       # Phase 10: XPAward dataclass (§14.1)
     advancement: Optional[dict] = None                      # Phase 10: skill rank increase entry (§14.2)
+    milestone_passage: str = ""                             # Phase 12: reflection prose (§14.3)
+    milestone_choices: list = field(default_factory=list)    # Phase 12: list of choice dicts for API
     steps_completed: list[str] = field(default_factory=list)
 
 
@@ -513,8 +515,18 @@ def run_between_act_pipeline(
     # ── Step 6: Choice annotation aggregation (Phase 13+) ────────────
     result.steps_completed.append("choice_annotation_stub")
 
-    # ── Step 7: Milestone check (Phase 8+) ───────────────────────────
-    result.steps_completed.append("milestone_check_stub")
+    # ── Step 7: Milestone eligibility check (Phase 12, §14.3) ────────
+    milestone_eligible = False
+    try:
+        from engine.talents import build_milestone_choices
+        milestone_choices = build_milestone_choices(character, character.reserved_xp)
+        milestone_eligible = len(milestone_choices) > 0
+        result.steps_completed.append(
+            "milestone_eligible" if milestone_eligible else "milestone_no_choices"
+        )
+    except Exception as e:
+        logging.error(f"Between-act step 7 failed: {e}")
+        result.steps_completed.append("milestone_check_failed")
 
     # ── Step 8: Obligation/Duty activation roll for NEXT act (§9) ────
     try:
@@ -558,14 +570,83 @@ def run_between_act_pipeline(
     except Exception as e:
         logging.error(f"Between-act step 11 failed: {e}")
 
-    # ── Step 12: Destiny Pool regeneration (Phase 8+) ────────────────
-    result.steps_completed.append("destiny_pool_stub")
+    # ── Step 12: Destiny Pool regeneration (Phase 11.5, §23.1) ───────
+    try:
+        from engine.destiny import roll_initial_destiny
+        from state.session import update_destiny_pool
+        new_light, new_dark = roll_initial_destiny()
+        update_destiny_pool(session_id, new_light, new_dark)
+        # Reset per-act spend tracking in arc_state
+        with get_connection() as conn:
+            row = conn.execute(
+                "SELECT arc_state_json FROM sessions WHERE id = ?",
+                (session_id,),
+            ).fetchone()
+            if row:
+                arc = json.loads(row["arc_state_json"])
+                arc["destiny_light_spent_this_act"] = 0
+                arc["destiny_dark_spent_this_act"] = 0
+                conn.execute(
+                    "UPDATE sessions SET arc_state_json = ? WHERE id = ?",
+                    (json.dumps(arc), session_id),
+                )
+                conn.commit()
+        result.steps_completed.append("destiny_pool_regenerated")
+    except Exception as e:
+        logging.error(f"Between-act step 12 failed: {e}")
+        result.steps_completed.append("destiny_pool_failed")
 
     # ── Step 13: Growth passage generation (Phase 8+) ────────────────
     result.steps_completed.append("growth_passage_stub")
 
-    # ── Step 14: Milestone reflection (Phase 8+) ─────────────────────
-    result.steps_completed.append("milestone_reflection_stub")
+    # ── Step 14: Milestone reflection + intervention reset (Phase 12) ─
+    # 14a: Reset intervention talent uses at act boundary (§15.1)
+    try:
+        from engine.talents import reset_intervention_uses
+        reset_intervention_uses(character)
+        result.steps_completed.append("intervention_uses_reset")
+    except Exception as e:
+        logging.error(f"Between-act step 14a (intervention reset) failed: {e}")
+
+    # 14b: Generate milestone reflection if eligible (§14.3)
+    if milestone_eligible:
+        try:
+            from gm.cloud_gm import generate_milestone_reflection
+            from state.session import get_act_summaries
+
+            act_summary = get_act_summaries(session_id)
+            milestone_result = generate_milestone_reflection(
+                character=character,
+                choices=milestone_choices,
+                campaign_name=spine.get("name", ""),
+                current_act=completed_act_number,
+                total_acts=total_acts,
+                act_summary=act_summary,
+            )
+            result.milestone_passage = milestone_result.passage
+            result.milestone_choices = [
+                {
+                    "display": (milestone_result.choices[i]
+                                if i < len(milestone_result.choices) else ""),
+                    "talent_ref": (milestone_result.skill_tags[i]
+                                   if i < len(milestone_result.skill_tags) else ""),
+                    "branch_theme": (milestone_choices[i].branch_theme
+                                     if i < len(milestone_choices) else ""),
+                    "xp_cost": (milestone_choices[i].xp_cost
+                                if i < len(milestone_choices) else 0),
+                }
+                for i in range(len(milestone_choices))
+            ]
+            result.steps_completed.append("milestone_reflection")
+            logging.info(
+                f"Between-act step 14b: milestone reflection with "
+                f"{len(milestone_choices)} choices"
+            )
+        except Exception as e:
+            logging.error(f"Between-act step 14b (milestone reflection) failed: {e}")
+            result.steps_completed.append("milestone_reflection_failed")
+    else:
+        result.steps_completed.append("milestone_skipped")
 
     # ── Step 15: Time skip sequence (Phase 8+) ───────────────────────
     result.steps_completed.append("time_skip_stub")

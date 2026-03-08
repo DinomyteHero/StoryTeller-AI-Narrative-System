@@ -62,37 +62,71 @@ def _stage_1_base_pool(character: Character, check: CheckRequest) -> DicePool:
     )
 
 
-# ── Pipeline stages 2-5 (post-V1) ─────────────────────────────────────
-# Each stage takes a DicePool and returns a modified DicePool.
+# ── Pipeline stages 2-5 (Game Mechanics §23.5) ────────────────────────
+# Stage 1: Base pool construction (V1)
 # Stage 2: Passive talent modifiers (Phase 11)
 # Stage 3: Conditional talent modifiers (Phase 11)
-# Stage 4: Destiny Point modification (Phase 11.5)
-# Stage 5: Force dice addition (Phase 14)
-# See Game Mechanics §23.5 for the full pipeline specification.
+# Stage 4: Destiny Point modification (Phase 11.5) — empty slot
+# Stage 5: Force dice addition (Phase 14) — empty slot
 
 
-def build_pool(character: Character, check: CheckRequest, **kwargs) -> DicePool:
+def build_pool(
+    character: Character,
+    check: CheckRequest,
+    scene_type: str = "",
+    **kwargs,
+) -> tuple[DicePool, list, "DestinyResult | None"]:
     """
-    Full pool modification pipeline.
+    Full pool modification pipeline (Game Mechanics §23.5).
 
-    V1 runs Stage 1 only. Post-V1 phases insert stages by adding
-    calls between Stage 1 and return. Each stage function accepts
-    and returns a DicePool, plus whatever additional context it needs
-    via kwargs.
+    Returns (pool, talent_activations, destiny_result) — the modified
+    dice pool, a list of TalentActivation records for narration context,
+    and the destiny evaluation result (None if no destiny state passed).
 
-    Pipeline order (Game Mechanics §23.5):
-      Stage 1 — Base pool construction (V1)
-      Stage 2 — Passive talent modifiers (post-V1)
-      Stage 3 — Conditional talent modifiers (post-V1)
-      Stage 4 — Destiny Point modification (post-V1)
-      Stage 5 — Force dice addition (post-V1)
+    Pipeline order:
+      Stage 1 — Base pool construction
+      Stage 2 — Passive talent modifiers (§15.3)
+      Stage 3 — Conditional talent modifiers (§15.3)
+      Stage 4 — Destiny Point modification (Phase 11.5)
+      Stage 5 — Force dice addition (Phase 14 — pass-through)
     """
+    from engine.talents import apply_passive_modifiers, apply_conditional_modifiers
+
     pool = _stage_1_base_pool(character, check)
-    # Stage 2: pool = _stage_2_passive_talents(pool, talents)
-    # Stage 3: pool = _stage_3_conditional_talents(pool, talents, scene_ctx)
-    # Stage 4: pool = _stage_4_destiny(pool, destiny_state, arc_state)
-    # Stage 5: pool = _stage_5_force(pool, character)
-    return pool
+    activations = []
+
+    # Stage 2: Passive talent modifiers
+    skill_name = check.skill.lower().replace(" ", "_").replace("-", "_")
+    passive_acts = apply_passive_modifiers(pool, character, skill_name)
+    activations.extend(passive_acts)
+
+    # Stage 3: Conditional talent modifiers
+    conditional_acts = apply_conditional_modifiers(
+        pool, character, scene_type, check_skill=skill_name,
+    )
+    activations.extend(conditional_acts)
+
+    # Stage 4: Destiny Point modification (Phase 11.5)
+    destiny_result = None
+    destiny_state = kwargs.get("destiny_state")
+    if destiny_state is not None:
+        from engine.destiny import evaluate_destiny_spend
+        destiny_result = evaluate_destiny_spend(
+            pool=pool,
+            scene_type=scene_type,
+            tension_level=kwargs.get("tension_level", "rising"),
+            anchor_proximity=kwargs.get("anchor_proximity", "distant"),
+            act_progress=kwargs.get("act_progress", 0.0),
+            destiny=destiny_state,
+            obligation_active=kwargs.get("obligation_active", False),
+            npc_disposition_below_threshold=kwargs.get("npc_disposition_below_threshold", False),
+            spine_dark_trigger=kwargs.get("spine_dark_trigger", False),
+        )
+
+    # Stage 5: Force dice addition (Phase 14 — pass-through)
+    # pool = _stage_5_force(pool, character)
+
+    return pool, activations, destiny_result
 
 
 def describe_pool_for_display(pool: DicePool) -> dict:

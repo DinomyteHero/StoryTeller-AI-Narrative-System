@@ -10,6 +10,7 @@ CHARACTER:
 EQUIPMENT:
 {equipment_section}
 
+{talent_effects_section}
 STORY POSITION:
 Act {current_act} of {total_acts} — {act_name}
 Tension level: {tension_level}

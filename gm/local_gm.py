@@ -104,10 +104,15 @@ def decide_check(
     else:
         failure_calibration = ""
 
+    # Phase 11: Talent effects for check decision (§15.4)
+    from engine.talents import build_talent_check_effects
+    talent_effects = build_talent_check_effects(character)
+
     template = PROMPT_PATH.read_text(encoding="utf-8")
     prompt   = template.format(
         character_summary=character.narrative_status(),
         equipment_section=build_equipment_check_summary(character.loadout),
+        talent_effects_section=talent_effects,
         current_act=arc_state.get("current_act", 1),
         total_acts=arc_state.get("total_acts", 4),
         act_name=arc_state.get("act_name", "Unknown"),
