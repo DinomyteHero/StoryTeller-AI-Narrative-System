@@ -1,7 +1,7 @@
 # Storyteller V3 — Project Guide
 
-**Version:** 1.1  
-**Date:** March 6, 2026  
+**Version:** 1.2
+**Date:** March 8, 2026  
 **Purpose:** Front-door orientation for the entire project. Reading
 order, document authority, current state, and navigation.
 
@@ -33,13 +33,13 @@ same topic, the authority column says which one governs.
 | **Implementation** | How the Game Engine code is structured. File-by-file specs, V1 build phases 1–6, prompt templates, database schema, orchestration flows. | v2.5 | 149K |
 | **Campaign Studio Design** | How campaigns are authored and validated. Writer's Room methodology, three automation modes, spine JSON format, saga layer architecture, validation suite, cross-era import. | v1.3 | 62K |
 | **Campaign Studio Implementation** | How Campaign Studio code is structured. Tech stack, repo structure, Pydantic schema, pipeline stages, database additions, import interface. | v1.3 | 45K |
-| **Build Roadmap** | Phased build plan. V1 phases 1–6, post-V1 phases 7–22, four milestones, success criteria per phase. | v1.1 | 31K |
+| **Build Roadmap** | Phased build plan. V1 phases 1–6, post-V1 phases 7–22, four milestones, success criteria per phase. Status annotations per phase. | v1.2 | 31K |
 | **LLM Evaluation** | Model selection and compliance testing. Model landscape, tier assessments, five-category compliance test protocol, cost estimates, Campaign Studio model roles. | v2.0 | 39K |
 | **Backlog** | Single source of truth for every tracked item. Status of every feature, design completeness, alignment notes, pending decisions, document status summary. | v2.9 | 68K |
 | **Design Gap Analysis** | Full design specifications for items not covered in Game Mechanics or Implementation. v2.0 supersedes v1.1. Nine post-v1.1 design specs plus all v1.1 items (marked APPLIED). | v2.0 | 72K |
 | **Deferred Design and Logic Analysis** | System logic walkthrough. Turn loop verification, data flow analysis, invariant proofs, token budget analysis, post-V1 integration point mapping. | v1.0 | 35K |
 | **Research Catalogue** | Evidence basis. 13 external sources across four research domains. TAKE/REJECT decisions with rationale per source per target system. | v1.0 | 39K |
-| **Project State Matrix** | Compact view of every capability's status: promised, designed, V1-scoped, deferred. Prevents misclassifying designed-but-not-built items as missing. | v1.1 | — |
+| **Project State Matrix** | Compact view of every capability's status: promised, designed, built, deferred. Updated to reflect Milestones 0-3 and CS-1 through CS-4 completion. | v1.3 | — |
 | **Choice Quality Validation Spec** | Post-generation choice quality validator. Five-dimension rubric, local model evaluator, retry integration, calibration protocol. | v1.0 | — |
 | **Prologue Inference Spec** | Robustness rules for the psychometric prologue. Contradiction handling, confidence scoring, anti-gaming, fallback behavior, scene library diversity. | v1.0 | — |
 | **Import Package Quality Spec** | Quality standards for narrative compression in cross-campaign character transfer. Relationship summaries, throughline history, voice notes, memory shards. | v1.0 | — |
@@ -54,8 +54,8 @@ same topic, the authority column says which one governs.
    writing any code.
 2. **Build Roadmap** — phased plan with success criteria. Determines
    what to build and in what order.
-3. **Game Mechanics** — reference as needed. §0–§13 are V1-relevant.
-   §14–§26 are post-V1.
+3. **Game Mechanics** — reference as needed. §0–§19, §23–§26 cover
+   implemented systems. §20–§22 are not yet built.
 4. **Vision** — creative context. Read for intent, not for
    implementation detail.
 
@@ -110,7 +110,7 @@ authoritative.
 
 ---
 
-## Current Project State (March 7, 2026)
+## Current Project State (March 8, 2026)
 
 **Design completeness:** Every item within the current planning horizon
 has been fully designed. Zero items with status NEEDS DESIGN,
@@ -118,14 +118,27 @@ PARTIALLY DESIGNED, CONCEPT ONLY, CONSIDER, or FILED remain. Only
 Phase 5 long-term aspirations (5.1–5.6) and open research questions
 (R.1–R.7) are without design, by explicit choice.
 
-**Implementation completeness:** V1 (Phases 1–6) is implemented and
-verified. All 12 V1 success criteria pass. The game loop runs: session
-creation, narration, choice selection, local check decision, dice
-rolling, cloud narration honoring dice, session persistence across
-restart, and local-only mode. Next action: Milestone 1 (Phases 7–13)
-per the Build Roadmap.
+**Implementation completeness:**
 
-**V1 verified with:** Cloud LLM: OpenAI gpt-4.1. Local LLM: Ollama
+- **V1 (Phases 1–6):** COMPLETE. All 12 success criteria pass.
+- **Milestone 1 (Phases 7–13):** COMPLETE. Full single-campaign
+  experience — reconciliation, motivation tracks, NPC emotions,
+  equipment, XP/advancement, talent trees, Destiny Points, milestone
+  reflections, semantic memory, prose diagnostics.
+- **Milestone 2 (Phases 14–15.5):** COMPLETE. Force-sensitive
+  campaigns — Force dice, temptation, Force powers, FaD talent trees.
+- **Milestone 3 (Phase 16):** COMPLETE. Vehicles and space — ship
+  state, damage tiers, handling, critical hits.
+- **Milestone 4 (Phases 17–22):** PARTIAL. Phase 17 (time skip
+  vignettes) complete. Phases 18–22 not started.
+- **Campaign Studio (CS-1 through CS-4):** COMPLETE. Schema,
+  validation, Modes 1/2/3, saga pipeline, import interface.
+
+**Next action:** Phase 18 (Psychometric Prologue) or Phases 20–22.
+Implementation plan for Phase 18 exists at
+`docs/PHASE_18_IMPLEMENTATION_PLAN.md`.
+
+**Verified with:** Cloud LLM: OpenAI gpt-4.1. Local LLM: Ollama
 with Qwen 3.5:9b. Platform: Windows 11, Python 3.14.
 
 **Known V1 limitations:**
@@ -151,17 +164,15 @@ with Qwen 3.5:9b. Platform: Windows 11, Python 3.14.
 A common review pitfall is mistaking a designed-but-not-built item for
 a missing design. The project explicitly distinguishes:
 
-**Designed and ready for implementation** — Full spec exists. Build
-when the phase arrives. Examples: conditional choice availability
-(Deferred Design §2), reputation echo delivery (Deferred Design §1),
-psychometric prologue (GM §5), all Phase 2+ backlog items marked
-DESIGNED.
+**Built** — Implementation exists and has been verified. Milestones
+0-3 and Campaign Studio CS-1 through CS-4 are in this category. See
+Project State Matrix v1.3 for a row-by-row view.
 
-**Architecture reserved in V1** — Schema fields, pipeline stages, or
-data structures that exist in V1 but are empty or null. They ensure
-post-V1 systems don't require structural changes. Examples:
-`prose_diagnostic` on ContextPackage, `sequence` on ContextPackage,
-`reputation_log` table, `moral_weight` column on turns.
+**Designed and ready for implementation** — Full spec exists. Build
+when the phase arrives. Examples: psychometric prologue (GM §5, Phase
+18), large-scale NPC management (GM §21, Phase 20), canon character
+profiles (GM §22, Phase 21), Force discovery system (GM §14.4,
+Phase 22).
 
 **Intentionally deferred** — Acknowledged as future work. Not
 implementation-ready but not forgotten. Examples: Phase 5 aspirations
@@ -240,5 +251,23 @@ character's story, not containers that own characters.
 
 ---
 
-*Storyteller V3 — Project Guide v1.1*  
+---
+
+## Revision History
+
+**v1.2 — Post-milestone documentation sync (March 8, 2026)**
+
+Updated Current Project State to reflect Milestones 0-3 completion,
+Campaign Studio CS-1 through CS-4 completion, and Phase 17 completion.
+Updated Document Authority Map version numbers for Build Roadmap
+(v1.2) and Project State Matrix (v1.3). Revised "Designed and ready
+for implementation" section to list only unbuilt items.
+
+**v1.1 — Initial guide (March 6, 2026)**
+
+Initial document.
+
+---
+
+*Storyteller V3 — Project Guide v1.2*
 *The front door. Start here.*

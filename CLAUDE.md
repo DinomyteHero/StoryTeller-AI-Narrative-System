@@ -17,7 +17,9 @@ Two independent systems sharing one repo:
   plays it. Player-facing. Latency-sensitive. One cloud LLM call per
   turn maximum.
 - **Campaign Studio** — the authoring tool. Produces campaign spine
-  JSON. Author-facing. Multi-pass, no latency pressure. Post-V1.
+  JSON. Author-facing. Multi-pass, no latency pressure. Built in
+  parallel with Game Engine post-V1 milestones (CS-1 through CS-4
+  complete).
 
 The campaign spine JSON is the interface contract between them.
 
@@ -51,11 +53,11 @@ start with `docs/00_PROJECT_GUIDE.md`.
    this.
 
 3. **`docs/STORYTELLER_V3_GAME_MECHANICS.md`** — 27 sections of game
-   design (§0-§26). Sections 0-13 are relevant to V1. Sections 14-26
-   are post-V1 systems (advancement, talents, Force, vehicles,
-   equipment, time skips, cross-era progression, NPCs, Destiny Points,
-   semantic memory, NPC emotions, post-turn reconciliation). Reference
-   as needed during implementation.
+   design (§0-§26). Sections 0-19 and §23-§26 cover implemented
+   systems (Milestones 0-3 plus time skips). Sections 20-22 cover
+   systems not yet built (large-scale NPC management, canon character
+   profiles, Force discovery). Reference as needed during
+   implementation.
 
 4. **`docs/STORYTELLER_V3_VISION.md`** — Creative vision. What the
    game should feel like. Read for context, not for implementation
@@ -116,6 +118,17 @@ start with `docs/00_PROJECT_GUIDE.md`.
     narrative compression in cross-campaign character transfer:
     relationship summaries, throughline history, voice notes, memory
     shards. Phase 19.
+
+**Additional documents (generated during development):**
+
+17. **`docs/PHASE_18_IMPLEMENTATION_PLAN.md`** — Implementation plan
+    for the psychometric prologue (Phase 18).
+
+18. **`docs/CLAUDE_CODE_INITIAL_PROMPT.md`** — Post-milestone
+    documentation sync prompt (this audit task).
+
+19. **`docs/prose_quality_review_session_1.md`** — Prose quality
+    review notes from playtesting session.
 
 ## The Rule That Overrides Everything
 
@@ -204,16 +217,23 @@ outcomes (dice, state transitions, NPC disposition changes) BEFORE the
 narrative model receives the context. The LLM describes outcomes code
 has already determined. It never decides them.
 
-## After V1
+## Post-V1 Milestones — Current Status
 
 Follow `docs/STORYTELLER_V3_BUILD_ROADMAP.md`. Four milestones:
-- Milestone 1: Full single-campaign experience (Phases 7-13)
-- Milestone 2: Force-sensitive campaigns (Phases 14-15.5)
-- Milestone 3: Vehicles and space (Phase 16)
-- Milestone 4: Multi-campaign saga (Phases 17-22)
+- Milestone 1: Full single-campaign experience (Phases 7-13) — **COMPLETE**
+- Milestone 2: Force-sensitive campaigns (Phases 14-15.5) — **COMPLETE**
+- Milestone 3: Vehicles and space (Phase 16) — **COMPLETE**
+- Milestone 4: Multi-campaign saga (Phases 17-22) — **PARTIAL**
+  - Phase 17 (Time Skip Vignettes): COMPLETE
+  - Phases 18-22: NOT STARTED
 
-Each milestone has its own success criteria. Each phase has files,
-goals, and dependencies. Do not skip ahead.
+Campaign Studio (parallel track):
+- CS-1 (Schema & Validation): COMPLETE
+- CS-2 (Mode 3 Collaborative Authoring): COMPLETE
+- CS-3 (Mode 2 Thematic Steering + Import): COMPLETE
+- CS-4 (Saga Layer + Mode 1): COMPLETE
+
+**Next work:** Phase 18 (Psychometric Prologue) or Phases 20-22.
 
 ## Repo Structure
 
@@ -238,29 +258,75 @@ storyteller-v3/
 │   ├── STORYTELLER_V3_BACKLOG.md
 │   ├── CHOICE_QUALITY_VALIDATION_SPEC.md       # Post-V1 quality spec
 │   ├── PROLOGUE_INFERENCE_SPEC.md              # Post-V1 robustness spec
-│   └── IMPORT_PACKAGE_QUALITY_SPEC.md          # Post-V1 quality spec
+│   ├── IMPORT_PACKAGE_QUALITY_SPEC.md          # Post-V1 quality spec
+│   ├── PHASE_18_IMPLEMENTATION_PLAN.md         # Phase 18 plan
+│   ├── CLAUDE_CODE_INITIAL_PROMPT.md           # Doc sync prompt
+│   └── prose_quality_review_session_1.md       # Playtest notes
 ├── engine/                # Pure Python — dice, character, checks
+│   ├── dice.py            # FFG dice system (Phase 1)
+│   ├── character.py       # Character model (Phase 1)
+│   ├── checks.py          # 6-stage pool pipeline (Phase 1)
+│   ├── equipment.py       # Loadout system (Phase 9)
+│   ├── advancement.py     # XP and behavioral inference (Phase 10)
+│   ├── talents.py         # Talent tree engine (Phase 11)
+│   ├── destiny.py         # Destiny Point pool (Phase 11.5)
+│   ├── reconciliation.py  # Post-turn reconciliation (Phase 7/13)
+│   ├── force.py           # Force dice and powers (Phase 14-15)
+│   ├── vehicle.py         # Vehicle/starship system (Phase 16)
+│   └── time_skip.py       # Time skip vignettes (Phase 17)
 ├── gm/                    # LLM orchestration — local + cloud GM
+│   ├── local_gm.py        # Check decisions, annotations, diagnostics
+│   ├── cloud_gm.py        # Narration, milestones, time skips
+│   ├── context.py         # Context package assembly
 │   └── prompts/           # Prompt templates
+│       ├── check_decision.txt
+│       ├── narration.txt
+│       ├── choice_annotation.txt
+│       ├── reconciliation.txt
+│       ├── milestone_reflection.txt
+│       ├── force_power_milestone.txt
+│       ├── time_skip_opening.txt
+│       └── time_skip_closing.txt
 ├── state/                 # SQLite persistence
+│   ├── db.py              # Database schema and connections
+│   ├── session.py         # Turn logging and state queries
+│   └── memory.py          # Episodic compression
 ├── api/                   # FastAPI routes
+│   ├── main.py            # App bootstrap and frontend serving
+│   ├── game_routes.py     # Game Engine routes
+│   └── studio_routes.py   # Campaign Studio routes
 ├── web/                   # Single-file frontend
-├── studio/                # Campaign Studio (post-V1)
+│   └── index.html
+├── studio/                # Campaign Studio
 │   ├── schema.py          # Spine schema — interface contract
+│   ├── validate.py        # Four-gate validation suite
+│   ├── generate.py        # Modes 1, 2, 3 generation
 │   ├── seeding.py         # Deterministic seed derivation
 │   ├── difficulty.py      # Spine difficulty calibration
-│   └── saga/              # Saga layer pipeline
+│   ├── import_interface.py # Cross-era character import
+│   ├── prompts/           # Studio prompt templates
+│   │   ├── mode1_generate.txt
+│   │   ├── mode2_generate.txt
+│   │   ├── mode3_assist.txt
+│   │   └── npc_voice_gen.txt
+│   └── saga/              # Saga layer pipeline (CS-4)
+│       ├── pipeline.py    # 5-stage orchestrator
+│       ├── personas.py    # Persona pool management
+│       ├── diverge.py     # Stage 2: direction generation
+│       ├── search.py      # Stage 3: sketch expansion
+│       ├── converge.py    # Stage 4: debate and refinement
+│       ├── select.py      # Stage 5: pairwise selection
 │       ├── ensemble.py    # Multi-model writer assignment
 │       └── evaluator.py   # Trained local evaluator
 ├── data/
-│   ├── characters/        # Character JSON files
-│   ├── campaigns/         # Campaign spine JSON files
-│   ├── personas/          # Writer's Room persona pool (55 personas)
+│   ├── characters/        # keth_varso.json, talia_ren.json
+│   ├── campaigns/         # nar_shaddaa_job.json, echoes_of_the_force.json
+│   ├── talent_trees/      # 6 specialization trees + talent_library.json
+│   ├── force_powers/      # 5 powers (enhance, heal_harm, influence, move, sense)
+│   ├── personas/          # writer_room_personas.json (55 personas)
 │   ├── evaluation_pairs/  # Pairwise comparison training data
-│   ├── talent_trees/      # Post-V1: talent tree data
-│   ├── force_powers/      # Post-V1: Force power data
-│   └── canon_profiles/    # Post-V1: canon character profiles
-└── tests/
+│   └── canon_profiles/    # Phase 21: canon character profiles (not yet populated)
+└── tests/                 # 17 test files covering Phases 1-17 + Studio
 ```
 
 Game Engine scope: `engine/`, `gm/`, `state/`, `api/game_routes.py`,

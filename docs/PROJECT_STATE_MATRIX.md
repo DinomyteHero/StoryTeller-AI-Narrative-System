@@ -1,7 +1,7 @@
 # Storyteller V3 — Project State Matrix
 
-**Version:** 1.2
-**Date:** March 7, 2026  
+**Version:** 1.3
+**Date:** March 8, 2026  
 **Purpose:** Single-page view of every major capability's status.
 Prevents the most common review error: mistaking a designed-but-not-
 built item for a missing design, or mistaking a deferred item for an
@@ -14,11 +14,15 @@ Vision, is it designed, is it part of V1, and when does it get built.
 "Reserved" means V1 includes schema fields or architecture hooks but
 no active functionality.
 
-**Authoritative source for item-level status:** Backlog v2.9.  
+**Authoritative source for item-level status:** Backlog v3.0.
 **Authoritative source for design specs:** Game Mechanics v1.8,
 Implementation v2.5, Campaign Studio Design v1.3, Campaign Studio
 Implementation v1.3, Design Gap Analysis v2.0, Deferred Design and
 Logic Analysis v1.0.
+
+**Implementation status as of this version:** Milestones 0-3 complete.
+Milestone 4 partial (Phase 17 complete, Phases 18-22 not started).
+Campaign Studio CS-1 through CS-4 complete.
 
 ---
 
@@ -53,8 +57,8 @@ Logic Analysis v1.0.
 | Scene pacing guidance | §3 | ✓ | ✓ Verified | Phase 3 |
 | Introspection choice guidance | §7 | ✓ | ✓ Verified | Phase 3 |
 | Style exemplars / prompt rotation | §3 | ✓ | ✓ Verified | Phase 3 |
-| Scene-type-aware context routing | §3 | ✓ | Reserved | Late V1 / Phase 7 |
-| Prose diagnostic signal | §3 | ✓ | Reserved | Post-V1 |
+| Scene-type-aware context routing | §3 | ✓ | ✓ Built | Phase 7 |
+| Prose diagnostic signal | §3 | ✓ | ✓ Built | Phase 13 |
 | Narration distillation (QLoRA) | — | ✓ | Reserved (data instrumentation) | Post-Milestone 1 |
 
 ---
@@ -66,8 +70,8 @@ Logic Analysis v1.0.
 | 2–4 choices per turn | §7 | ✓ | ✓ Verified | Phase 3 |
 | Skill-tagged choices (invisible to player) | §6, §7 | ✓ | ✓ Verified | Phase 3 |
 | Character-specific choice design (prompt) | §7 | ✓ | ✓ Verified (prompt instruction) | Phase 3 |
-| Conditional choice availability (behavioral) | §7 | ✓ | Not in V1 | Phase 13 |
-| Semantic memory / choice annotation | §16 | ✓ | Reserved (`choice_implications`) | Phase 13 |
+| Conditional choice availability (behavioral) | §7 | ✓ | ✓ Built | Phase 13 |
+| Semantic memory / choice annotation | §16 | ✓ | ✓ Built | Phase 13 |
 | Choice quality validation + repair loop | §7 | **Spec complete** | Not in V1 | Late Phase 3 / Phase 7 |
 
 ---
@@ -79,10 +83,10 @@ Logic Analysis v1.0.
 | NPC state cards (knowledge, disposition, motivation) | §11 | ✓ | ✓ Verified | Phase 3 |
 | NPC voice notes and behavioral envelope | §11 | ✓ | ✓ Verified | Phase 3 |
 | NPC knowledge update (background task) | §11 | ✓ | ✓ Verified (minimal) | Phase 4 |
-| NPC emotional state | §11 | ✓ | Reserved | Phase 7 |
+| NPC emotional state | §11 | ✓ | ✓ Built | Phase 8.5 |
 | NPC relationship triangles (inter-NPC disposition) | §11 | ✓ | Not in V1 | Post-Milestone 1 |
 | NPC information propagation (social graph) | §11 | ✓ | Not in V1 | Post-Milestone 1 |
-| NPC voice generation (prompt template) | §11 | ✓ | Not in V1 | Campaign Studio |
+| NPC voice generation (prompt template) | §11 | ✓ | ✓ Built | CS Phase 2 |
 | Large-scale NPC management (3-tier relevance) | §11 | ✓ | Not in V1 | Phase 20 |
 | Generative entity persistence | — | ✓ | Not in V1 | Post-Milestone 1 |
 
@@ -95,11 +99,11 @@ Logic Analysis v1.0.
 | Multi-act campaign spine | §13 | ✓ | ✓ Verified (4-act test spine) | Phase 3 |
 | Galactic context layer (per act) | §4 | ✓ | ✓ Verified | Phase 3 |
 | Static act tension field | §13 | ✓ | ✓ Verified | Phase 3 |
-| Post-turn reconciliation (full system) | §13 | ✓ | Not in V1 (minimal NPC update only) | Phase 7 |
-| Act boundary detection + transition | §13 | ✓ | Not in V1 | Phase 7 |
-| Within-act pacing arc (hook → turn → cliffhanger) | §13 | ✓ | Not in V1 | Phase 7 |
-| Turn counter / PacingSignal model | — | ✓ | Not in V1 | Phase 7 |
-| Reputation echo delivery | §1, §11 | ✓ | Reserved (`reputation_log` table) | Phase 7 |
+| Post-turn reconciliation (full system) | §13 | ✓ | ✓ Built | Phase 7 |
+| Act boundary detection + transition | §13 | ✓ | ✓ Built | Phase 7 |
+| Within-act pacing arc (hook → turn → cliffhanger) | §13 | ✓ | ✓ Built | Phase 7 |
+| Turn counter / PacingSignal model | — | ✓ | ✓ Built | Phase 7 |
+| Reputation echo delivery | §1, §11 | ✓ | ✓ Built | Phase 7 |
 
 ---
 
@@ -110,12 +114,12 @@ Logic Analysis v1.0.
 | Pre-built character (Keth Varso) | §16 | ✓ | ✓ Verified | Phase 1 |
 | Character funnel (Timeline → Allegiance → Variant) | §8 | ✓ | Not in V1 | Phase 18 |
 | Psychometric prologue (3–5 scenes, 4 axes) | §8 | ✓ | Not in V1 | Phase 18 |
-| Motivation tracks (Obligation, Duty, Morality) | §10 | ✓ | Reserved (fields exist, no triggers) | Phase 8 |
-| Between-act processing pipeline (10 steps) | §10 | ✓ | Not in V1 | Phase 7–8 |
-| Behavioral inference engine | §14 | ✓ | Not in V1 | Phase 10 |
-| Character advancement (XP, skill ranks) | §14 | ✓ | Not in V1 | Phase 10 |
-| Milestone reflections (talents, specializations) | §14 | ✓ | Not in V1 | Phase 12 |
-| Aspiration echoes (latent Force, growth direction) | §14 | ✓ | Not in V1 | Phase 12 |
+| Motivation tracks (Obligation, Duty, Morality) | §10 | ✓ | ✓ Built | Phase 8 |
+| Between-act processing pipeline (16 steps) | §10 | ✓ | ✓ Built | Phase 7–8 |
+| Behavioral inference engine | §14 | ✓ | ✓ Built | Phase 10 |
+| Character advancement (XP, skill ranks) | §14 | ✓ | ✓ Built | Phase 10 |
+| Milestone reflections (talents, specializations) | §14 | ✓ | ✓ Built | Phase 12 |
+| Aspiration echoes (latent Force, growth direction) | §14 | ✓ | ✓ Built | Phase 13 |
 | Character voice notes (evolved through play) | §8 | ✓ | ✓ Verified (static, from spine) | Phase 3 |
 | Throughline question | §8 | ✓ | ✓ Verified (static, from spine) | Phase 3 |
 
@@ -125,16 +129,16 @@ Logic Analysis v1.0.
 
 | Capability | Vision | Designed | V1 | Build Phase |
 |------------|--------|----------|-----|-------------|
-| Obligation/Duty trigger system | §10 | ✓ | Not in V1 | Phase 8 |
-| Morality drift + Conflict resolution | §10 | ✓ | Reserved (`moral_weight` on turns) | Phase 8 |
-| Talent trees (5-type taxonomy) | §14 | ✓ | Not in V1 | Phase 11 |
-| Pool modification pipeline (6-stage) | §6 | ✓ | V1 has extensible structure | Phase 11 |
-| Destiny Points (light/dark pool) | §6 | ✓ | Reserved (session fields) | Phase 11.5 |
-| Force dice resolution | §9 | ✓ | Reserved (dice tables include Force) | Phase 14 |
-| Dark side temptation (pre-narration choice) | §9 | ✓ | Not in V1 | Phase 14 |
-| Force powers (narrative-tagged choices) | §9 | ✓ | Not in V1 | Phase 15 |
-| Equipment/loadout system | §11 | ✓ | Not in V1 | Phase 9 |
-| Vehicle/starship encounters | §12 | ✓ | Not in V1 | Phase 16 |
+| Obligation/Duty trigger system | §10 | ✓ | ✓ Built | Phase 8 |
+| Morality drift + Conflict resolution | §10 | ✓ | ✓ Built | Phase 8 |
+| Talent trees (5-type taxonomy) | §14 | ✓ | ✓ Built | Phase 11 |
+| Pool modification pipeline (6-stage) | §6 | ✓ | ✓ Built | Phase 11 |
+| Destiny Points (light/dark pool) | §6 | ✓ | ✓ Built | Phase 11.5 |
+| Force dice resolution | §9 | ✓ | ✓ Built | Phase 14 |
+| Dark side temptation (pre-narration choice) | §9 | ✓ | ✓ Built | Phase 14 |
+| Force powers (narrative-tagged choices) | §9 | ✓ | ✓ Built | Phase 15 |
+| Equipment/loadout system | §11 | ✓ | ✓ Built | Phase 9 |
+| Vehicle/starship encounters | §12 | ✓ | ✓ Built | Phase 16 |
 | Failure recovery calibration | §6 | ✓ | ✓ Verified | Phase 2 |
 
 ---
@@ -148,7 +152,7 @@ Logic Analysis v1.0.
 | XP rebalancing on import | §17 | ✓ | Not in V1 | Phase 19 |
 | Motivation track transition | §17 | ✓ | Not in V1 | Phase 19 |
 | Transition passage generation | §17 | ✓ | Not in V1 | Phase 19 |
-| Time skip vignettes (2–3 authored scenes) | §17 | ✓ | Not in V1 | Phase 17 |
+| Time skip vignettes (2–3 authored scenes) | §17 | ✓ | ✓ Built | Phase 17 |
 | Character-centric campaign management | §8, §17 | ✓ | Not in V1 | Post-Milestone 1 |
 | Canon character voice fidelity | §4 | ✓ | Not in V1 | Phase 21 |
 | Import package quality standard | §17 | **Spec complete** | Not in V1 | Phase 19 |
@@ -159,20 +163,20 @@ Logic Analysis v1.0.
 
 | Capability | Vision | Designed | V1 | Build Phase |
 |------------|--------|----------|-----|-------------|
-| Campaign spine JSON schema (Pydantic) | — | ✓ | Studio schema used by Engine | CS Phase 1 |
-| Schema contract validation | — | ✓ | Not in V1 | CS Phase 1 |
-| NPC coherence validation | — | ✓ | Not in V1 | CS Phase 1 |
-| Relationship network validation | — | ✓ | Not in V1 | CS Phase 1 |
-| Narrative consistency audit (3-dimension LLM) | — | ✓ | Not in V1 | CS Phase 1 |
-| Mode 3 (human-led with AI validation) | — | ✓ | Not in V1 | CS Phase 2 |
-| Mode 2 (collaborative AI + human) | — | ✓ | Not in V1 | CS Phase 3 |
-| Mode 1 (fully autonomous + human review) | — | ✓ | Not in V1 | CS Phase 3 |
-| Writer's Room (saga layer, 5-stage pipeline) | — | ✓ | Not in V1 | CS Phase 4 |
-| Protagonist integration layer authoring | §8 | ✓ | Not in V1 | CS Phase 2 |
-| Prologue scene library | §8 | ✓ | Not in V1 | CS Phase 2 |
-| Cross-era import interface | §17 | ✓ | Not in V1 | CS Phase 2 |
-| Deterministic seeding | — | ✓ | Not in V1 | CS Phase 2 |
-| Spine difficulty calibration | — | ✓ | Not in V1 | CS Phase 3 |
+| Campaign spine JSON schema (Pydantic) | — | ✓ | ✓ Built | CS Phase 1 |
+| Schema contract validation | — | ✓ | ✓ Built | CS Phase 1 |
+| NPC coherence validation | — | ✓ | ✓ Built | CS Phase 1 |
+| Relationship network validation | — | ✓ | ✓ Built | CS Phase 1 |
+| Narrative consistency audit (3-dimension LLM) | — | ✓ | ✓ Built | CS Phase 1 |
+| Mode 3 (human-led with AI validation) | — | ✓ | ✓ Built | CS Phase 2 |
+| Mode 2 (collaborative AI + human) | — | ✓ | ✓ Built | CS Phase 3 |
+| Mode 1 (fully autonomous + human review) | — | ✓ | ✓ Built | CS Phase 4 |
+| Writer's Room (saga layer, 5-stage pipeline) | — | ✓ | ✓ Built | CS Phase 4 |
+| Protagonist integration layer authoring | §8 | ✓ | ✓ Built | CS Phase 2 |
+| Prologue scene library | §8 | ✓ | ✓ Built | CS Phase 2 |
+| Cross-era import interface | §17 | ✓ | ✓ Built | CS Phase 3 |
+| Deterministic seeding | — | ✓ | ✓ Built | CS Phase 2 |
+| Spine difficulty calibration | — | ✓ | ✓ Built | CS Phase 2 |
 | Campaign rating/feedback system | — | ✓ | Not in V1 | Post-launch |
 | Trained local evaluator (QLoRA) | — | ✓ | Not in V1 | Post-CS Phase 4 |
 | Multi-model ensemble (Writer's Room) | — | ✓ | Not in V1 | Post-CS Phase 4 |
@@ -191,7 +195,7 @@ Logic Analysis v1.0.
 | 5-category compliance test protocol | — | ✓ | Not in V1 (pre-deploy test) | Phase 1 deployment |
 | Behavioral envelope enforcement | §11 | ✓ | Not in V1 | Post-Milestone 1 |
 | Sustained 5-turn play quality test | — | ✓ | Not in V1 | Phase 1 deployment |
-| Reconciliation error budget test | — | ✓ | Not in V1 | Phase 7 |
+| Reconciliation error budget test | — | ✓ | ✓ Built | Phase 7 |
 | Prologue inference robustness | §8 | **Spec complete** | Not in V1 | Phase 18 |
 
 ---
@@ -226,5 +230,23 @@ explained by intentional deferral or architecture reservation.
 
 ---
 
-*Storyteller V3 — Project State Matrix v1.2*  
+---
+
+## Revision History
+
+**v1.3 — Post-milestone implementation status sync (March 8, 2026)**
+
+Updated all capability rows to reflect actual implementation state
+after completion of Milestones 0-3, Phase 17, and Campaign Studio
+CS-1 through CS-4. Changed 30+ rows from "Not in V1" / "Reserved"
+to "✓ Built" with correct build phase. Added implementation status
+summary to header.
+
+**v1.2 — Initial matrix (March 7, 2026)**
+
+Initial comprehensive capability matrix.
+
+---
+
+*Storyteller V3 — Project State Matrix v1.3*
 *What's promised. What's designed. What's built. What's next.*
