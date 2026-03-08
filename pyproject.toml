@@ -17,9 +17,12 @@ dev = [
     "pytest>=8.0.0",
     "ruff>=0.4.0",
 ]
+studio = [
+    "networkx>=3.0",
+]
 
 [tool.hatch.build.targets.wheel]
-packages = ["engine", "gm", "state", "api"]
+packages = ["engine", "gm", "state", "api", "studio"]
 
 [build-system]
 requires = ["hatchling"]
