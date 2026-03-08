@@ -1,6 +1,6 @@
 # Storyteller V3 — Build Roadmap
 
-**Document version:** 1.1
+**Document version:** 1.2
 **Purpose:** Phased build plan from V1 completion to a playable multi-
 era saga. Each milestone produces a testable system. Each phase within
 a milestone has files, a goal, dependencies, and success criteria.
@@ -21,6 +21,8 @@ extended across the full project.
 
 ## Milestone 0: V1 — Core Loop
 
+**Status: COMPLETE — March 2026**
+
 **Already specified in Implementation Document Phases 1–6.**
 
 12 success criteria. Keth Varso, The Nar Shaddaa Job, 5 turns without
@@ -36,6 +38,8 @@ replaces it.
 
 ## Milestone 1: Full Single-Campaign Experience
 
+**Status: COMPLETE — March 2026**
+
 **Goal:** A player can play The Nar Shaddaa Job from Act 1 through
 Act 4 as Keth Varso and it feels like a complete campaign — motivation
 tracks create pressure, equipment matters, the character grows, talents
@@ -44,6 +48,8 @@ change what the character can do.
 **This is the milestone that proves the engine works at campaign scale.**
 
 ### Phase 7: Post-Turn State Reconciliation
+
+**Status: COMPLETE — March 2026.** `engine/reconciliation.py` implements full reconciliation with 16-step between-act pipeline.
 
 Files: `engine/reconciliation.py` (new),
 `gm/prompts/reconciliation.txt` (new), `gm/context.py` (extend —
@@ -83,6 +89,8 @@ Success criteria:
 
 ### Phase 8: Motivation Track Wiring
 
+**Status: COMPLETE — March 2026.** Obligation/Duty/Morality integrated into reconciliation pipeline and context assembly.
+
 Files: `state/session.py` (extend), `gm/context.py` (extend),
 `gm/prompts/narration.txt` (extend)
 
@@ -110,6 +118,8 @@ Success criteria:
 
 ### Phase 8.5: NPC Emotional State
 
+**Status: COMPLETE — March 2026.** `EmotionalState` dataclass in `gm/context.py` with mood decay, sustained emotion disposition nudging.
+
 Files: `gm/context.py` (extend — NPCState gains emotional_state),
 `state/session.py` (extend — emotional decay processing)
 
@@ -133,6 +143,8 @@ Success criteria:
 6. Sustained non-calm states (3+ turns) nudge disposition
 
 ### Phase 9: Equipment and Loadout
+
+**Status: COMPLETE — March 2026.** `engine/equipment.py` with full loadout system (weapons, armor, tools, special items, damage calculation).
 
 Files: `engine/equipment.py` (new), `engine/character.py` (extend),
 `gm/prompts/check_decision.txt` (extend), `gm/prompts/narration.txt`
@@ -160,6 +172,8 @@ Success criteria:
 6. The narration prompt receives loadout with narrative notes
 
 ### Phase 10: XP Earning and Behavioral Inference
+
+**Status: COMPLETE — March 2026.** `engine/advancement.py` with XP awards, three behavioral signals, skill advancement inference.
 
 Files: `engine/advancement.py` (new), `state/session.py` (extend)
 
@@ -189,6 +203,8 @@ Success criteria:
 8. The advancement log records each change
 
 ### Phase 11: Talent Tree Engine
+
+**Status: COMPLETE — March 2026.** `engine/talents.py` with 5 talent types, 6 specialization trees, talent library. Pool modification pipeline Stages 2-3 active.
 
 Files: `engine/talents.py` (new), `data/talent_trees/talent_library.json`
 (new), `data/talent_trees/smuggler_pilot.json` (new),
@@ -232,6 +248,8 @@ Success criteria:
 
 ### Phase 11.5: Destiny Point Pool
 
+**Status: COMPLETE — March 2026.** `engine/destiny.py` with Light/Dark spending, escalation pacing, seize-the-moment choice.
+
 Files: `engine/destiny.py` (new), `engine/checks.py` (extend — Stage 4
 of pool pipeline)
 
@@ -256,6 +274,8 @@ Success criteria:
    moments (when a Light Side point is available)
 
 ### Phase 12: Milestone Reflections and Intervention
+
+**Status: COMPLETE — March 2026.** Milestone reflections via `gm/cloud_gm.py`, Type 5 interventions via `engine/talents.py`. Prompt: `milestone_reflection.txt`.
 
 Files: `engine/advancement.py` (extend), `gm/cloud_gm.py` (extend —
 milestone passage generation), `engine/talents.py` (extend —
@@ -288,6 +308,8 @@ Success criteria:
 8. Intervention talents track usage per act and reset at boundaries
 
 ### Phase 13: Semantic Memory, Aspiration Echoes, and Prose Diagnostics
+
+**Status: COMPLETE — March 2026.** Choice annotation via `gm/local_gm.py`, aspiration echoes via `gm/context.py`, prose diagnostic via `gm/local_gm.py`. Prompt: `choice_annotation.txt`.
 
 Files: `gm/context.py` (extend — aspiration echo block),
 `gm/prompts/narration.txt` (extend), `gm/local_gm.py` (extend —
@@ -326,7 +348,7 @@ Success criteria:
 9. Act summaries include aggregated behavioral fingerprint from
    annotations
 
-### Milestone 1 Success Criteria
+### Milestone 1 Success Criteria — ACHIEVED
 
 Play The Nar Shaddaa Job Acts 1–4 as Keth Varso:
 
@@ -348,11 +370,15 @@ Play The Nar Shaddaa Job Acts 1–4 as Keth Varso:
 
 ## Milestone 2: Force-Sensitive Campaign
 
+**Status: COMPLETE — March 2026**
+
 **Goal:** A player can play as a Force-sensitive character through a
 campaign — rolling Force dice, facing dark side temptation choices,
 acquiring Force powers, and experiencing the Morality spiral.
 
 ### Phase 14: Force Dice Resolution
+
+**Status: COMPLETE — March 2026.** `engine/force.py` with pip resolution, temptation mechanics, dark-dominant inversion.
 
 Files: `engine/force.py` (new), `engine/checks.py` (extend —
 Force-enhanced pool construction), `gm/local_gm.py` (extend —
@@ -385,6 +411,8 @@ Success criteria:
 
 ### Phase 15: Force Powers and Progression
 
+**Status: COMPLETE — March 2026.** 5 Force powers (enhance, heal_harm, influence, move, sense) as JSON data. Force power milestones via `engine/force.py`. Prompt: `force_power_milestone.txt`.
+
 Files: `data/force_powers/move.json` (new), `data/force_powers/
 sense.json` (new), `data/force_powers/influence.json` (new),
 `data/force_powers/enhance.json` (new), `data/force_powers/
@@ -415,6 +443,8 @@ Success criteria:
 
 ### Phase 15.5: Force and Destiny Talent Trees
 
+**Status: COMPLETE — March 2026.** 3 FaD trees (guardian_protector, consular_niman_disciple, sentinel_shadow) + 3 Smuggler trees.
+
 Files: `data/talent_trees/` — add Force and Destiny specialization
 trees (Guardian, Consular, Sentinel at minimum)
 
@@ -432,7 +462,7 @@ Success criteria:
 3. Force-sensitive talent milestones generate appropriate reflection
    passages themed around Force training
 
-### Milestone 2 Success Criteria
+### Milestone 2 Success Criteria — ACHIEVED
 
 Play a 2-act test campaign as a Force Rating 1 character:
 
@@ -450,10 +480,14 @@ Play a 2-act test campaign as a Force Rating 1 character:
 
 ## Milestone 3: Vehicles and Space
 
+**Status: COMPLETE — March 2026**
+
 **Goal:** The player can fly Mira's Luck, engage in space encounters,
 and the ship feels like a persistent part of the story.
 
 ### Phase 16: Vehicle System
+
+**Status: COMPLETE — March 2026.** `engine/vehicle.py` with ShipState, damage tiers, handling, critical hit table. Ship persistence in `state/db.py`.
 
 Files: `engine/vehicle.py` (new), `state/db.py` (extend — ship_states
 table), `gm/local_gm.py` (extend — space_combat scene type),
@@ -481,7 +515,7 @@ Success criteria:
    applied as narrative tags
 6. The GM prompt includes ship state and writes accordingly
 
-### Milestone 3 Success Criteria
+### Milestone 3 Success Criteria — ACHIEVED
 
 Play a test scenario involving a space chase and a ship combat:
 
@@ -495,11 +529,15 @@ Play a test scenario involving a space chase and a ship combat:
 
 ## Milestone 4: Multi-Campaign Saga
 
+**Status: PARTIAL — Phase 17 complete, Phases 18-22 not started**
+
 **Goal:** A player can complete one campaign, carry their character
 into a new campaign spine, and the transition feels like a chapter
 break in an ongoing story — not a system reset.
 
 ### Phase 17: Time Skip Vignettes
+
+**Status: COMPLETE — March 2026.** `engine/time_skip.py` with vignette selection, effects, NPC drift. Time skip prose via `gm/cloud_gm.py`. Prompts: `time_skip_opening.txt`, `time_skip_closing.txt`.
 
 Files: `engine/time_skip.py` (new), `gm/cloud_gm.py` (extend —
 opening/closing passage generation), `state/session.py` (extend —
@@ -527,6 +565,8 @@ Success criteria:
 
 ### Phase 18: Psychometric Prologue
 
+**Status: NOT STARTED.** Implementation plan exists at `docs/PHASE_18_IMPLEMENTATION_PLAN.md`.
+
 Files: `engine/prologue.py` (new), `web/index.html` (extend — funnel
 UI)
 
@@ -549,6 +589,8 @@ Success criteria:
    character (same Pydantic model, same session creation path)
 
 ### Phase 19: Cross-Era Import/Export
+
+**Status: NOT STARTED.** Note: The Campaign Studio side (`studio/import_interface.py`) is built as part of CS-3. The Game Engine side (`engine/import_export.py`) is not yet implemented.
 
 Files: `engine/import_export.py` (new), `engine/advancement.py`
 (extend — Category 5 career transition milestone)
@@ -580,6 +622,8 @@ Success criteria:
 
 ### Phase 20: Large-Scale NPC Management
 
+**Status: NOT STARTED.**
+
 Files: `engine/npc_relevance.py` (new), `gm/context.py` (extend —
 tiered NPC injection)
 
@@ -606,6 +650,8 @@ Success criteria:
 
 ### Phase 21: Canon Character Profiles
 
+**Status: NOT STARTED.** `data/canon_profiles/` directory exists but is empty. Schema fields (CanonVoice, CanonRelationshipDynamics, CanonActOverride) exist in `studio/schema.py`.
+
 Files: `data/canon_profiles/` (new — initial profiles for Academy/NJO
 era characters), `gm/context.py` (extend — canon profile injection)
 
@@ -631,6 +677,8 @@ Success criteria:
    shared history in the narration
 
 ### Phase 22: Force Discovery System
+
+**Status: NOT STARTED.**
 
 Files: `engine/advancement.py` (extend — Force awakening milestone),
 `engine/force.py` (extend — latent Force sensitivity processing)
@@ -682,6 +730,8 @@ Chain two campaign spines with one character:
 ---
 
 ## Campaign Studio Track (Parallel — starts after V1)
+
+**Status: ALL FOUR PHASES COMPLETE — March 2026**
 
 The Campaign Studio builds in parallel with the Game Engine post-V1
 milestones. Its four phases are specified in Campaign Studio
@@ -744,6 +794,19 @@ were built. And the story was theirs.
 
 ## Revision History
 
+**v1.2 — Phase status annotations (March 2026)**
+
+1. **Status annotations added to every phase and milestone.** Each
+   phase now includes a status line (COMPLETE, PARTIAL, or NOT
+   STARTED) reflecting the actual implementation state as of March
+   2026. Milestones 0-3 are complete. Milestone 4 is partial (Phase
+   17 complete, Phases 18-22 not started). All four Campaign Studio
+   phases are complete.
+
+2. **No phase content changed.** All milestone definitions, phase
+   ordering, success criteria, and dependencies remain as specified.
+   Only status annotations were added.
+
 **v1.1 — Document reference updates (March 2026)**
 
 1. **Reference document versions updated.** Implementation Document
@@ -759,5 +822,5 @@ were built. And the story was theirs.
 
 ---
 
-*Storyteller V3 — Build Roadmap v1.1*
+*Storyteller V3 — Build Roadmap v1.2*
 *The path from first dice roll to the saga.*
