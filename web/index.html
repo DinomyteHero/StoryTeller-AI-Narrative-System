@@ -286,6 +286,12 @@ header {
 }
 
 .error-msg.visible { display: block; }
+
+/* ── Campaign picker ──────────────────────────────────────────── */
+#campaign-picker button:hover {
+  border-color: var(--accent-dim) !important;
+  background: var(--border) !important;
+}
 </style>
 </head>
 <body>
@@ -295,8 +301,13 @@ header {
   <div id="start-screen" class="start-screen">
     <h1>Storyteller V3</h1>
     <p>A Star Wars Narrative RPG</p>
-    <button class="start-btn" id="start-btn" onclick="startSession()">
-      Begin The Nar Shaddaa Job
+
+    <div id="campaign-picker" style="margin-top:1.5rem; text-align:left;">
+      <p style="color:var(--text-dim); font-size:0.9rem; text-align:center;">Loading campaigns...</p>
+    </div>
+
+    <button class="start-btn" id="start-btn" onclick="startSession()" disabled style="margin-top:1.5rem;">
+      Select a campaign to begin
     </button>
   </div>
 
@@ -344,9 +355,54 @@ const API = '';  // same origin
 let sessionId = null;
 let currentChoices = [];
 let streamingEnabled = false;
+let selectedCampaign = null;  // { campaign_name, display_name, character_id }
+
+/* ── Load campaign list on page load ──────────────────────────── */
+async function loadCampaigns() {
+  const picker = document.getElementById('campaign-picker');
+  try {
+    const res = await fetch(API + '/campaigns');
+    if (!res.ok) throw new Error('Failed to load campaigns');
+    const campaigns = await res.json();
+
+    let html = '';
+    for (const c of campaigns) {
+      html += `<div style="background:var(--surface); border:1px solid var(--border); border-radius:6px; padding:1rem; margin-bottom:0.75rem;">`;
+      html += `<div style="color:var(--accent); font-weight:bold; font-size:1.05rem;">${c.display_name}</div>`;
+      html += `<div style="color:var(--text-dim); font-size:0.8rem; margin-bottom:0.5rem; font-style:italic;">${c.throughline}</div>`;
+      for (const ch of c.characters) {
+        const label = `${ch.name} — ${ch.species} ${ch.career}`;
+        html += `<button onclick="selectCampaign('${c.campaign_name}', '${c.display_name}', '${ch.id}')" `
+          + `style="display:block; width:100%; text-align:left; background:var(--surface-alt); border:1px solid var(--border); color:var(--text); padding:0.6rem 0.8rem; border-radius:4px; margin-top:0.4rem; cursor:pointer; font-family:inherit; font-size:0.9rem;">`
+          + `<strong style="color:var(--accent);">${ch.name}</strong>`
+          + `<span style="color:var(--text-dim);"> — ${ch.species} ${ch.career}</span>`
+          + `<div style="color:var(--text-dim); font-size:0.8rem; margin-top:0.25rem;">${ch.pitch}</div>`
+          + `</button>`;
+      }
+      html += `</div>`;
+    }
+    picker.innerHTML = html;
+  } catch (e) {
+    picker.innerHTML = `<p style="color:var(--danger);">Could not load campaigns: ${e.message}</p>`;
+  }
+}
+
+function selectCampaign(campaignName, displayName, characterId) {
+  selectedCampaign = { campaign_name: campaignName, display_name: displayName, character_id: characterId };
+  // Highlight selected
+  document.querySelectorAll('#campaign-picker button').forEach(b => {
+    b.style.borderColor = 'var(--border)';
+  });
+  event.currentTarget.style.borderColor = 'var(--accent)';
+  // Enable start button
+  const btn = document.getElementById('start-btn');
+  btn.disabled = false;
+  btn.textContent = 'Begin ' + displayName;
+}
 
 /* ── Start session ─────────────────────────────────────────────── */
 async function startSession() {
+  if (!selectedCampaign) return;
   const btn = document.getElementById('start-btn');
   btn.disabled = true;
   btn.textContent = 'Starting...';
@@ -357,8 +413,8 @@ async function startSession() {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        campaign_name: 'nar_shaddaa_job',
-        character_id: 'keth_varso',
+        campaign_name: selectedCampaign.campaign_name,
+        character_id: selectedCampaign.character_id,
       }),
     });
 
@@ -374,7 +430,7 @@ async function startSession() {
     // Switch to game screen
     document.getElementById('start-screen').style.display = 'none';
     document.getElementById('game-screen').style.display = 'block';
-    document.getElementById('campaign-name').textContent = 'The Nar Shaddaa Job';
+    document.getElementById('campaign-name').textContent = selectedCampaign.display_name;
     updateSessionInfo(0);
 
     renderPassage(data.opening_narration);
@@ -382,10 +438,13 @@ async function startSession() {
     showStatus(0, 0, 0);
   } catch (e) {
     btn.disabled = false;
-    btn.textContent = 'Begin The Nar Shaddaa Job';
+    btn.textContent = 'Begin ' + selectedCampaign.display_name;
     showError(e.message);
   }
 }
+
+// Load campaigns on page load
+document.addEventListener('DOMContentLoaded', loadCampaigns);
 
 /* ── Take a turn ───────────────────────────────────────────────── */
 async function takeTurn(choiceIndex) {

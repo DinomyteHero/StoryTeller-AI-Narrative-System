@@ -115,6 +115,37 @@ router = APIRouter()
 
 STREAMING_ENABLED = os.getenv("STREAMING_ENABLED", "true").lower() == "true"
 
+
+@router.get("/campaigns")
+async def list_campaigns():
+    """List available campaigns with their character variants."""
+    from pathlib import Path
+
+    campaigns_dir = Path("data/campaigns")
+    result = []
+    for path in sorted(campaigns_dir.glob("*.json")):
+        with open(path, encoding="utf-8") as f:
+            spine = json.load(f)
+        characters = []
+        for allegiance in spine.get("allegiances", []):
+            for cv in allegiance.get("character_variants", []):
+                characters.append({
+                    "id": cv["id"],
+                    "name": cv["id"].replace("_", " ").title(),
+                    "pitch": cv.get("pitch", ""),
+                    "career": cv.get("career", ""),
+                    "species": cv.get("species", ""),
+                })
+        result.append({
+            "campaign_name": path.stem,
+            "display_name": spine.get("name", path.stem),
+            "era": spine.get("era", ""),
+            "throughline": spine.get("throughline_question", ""),
+            "characters": characters,
+        })
+    return result
+
+
 # Phase 8.5: Social skill → NPC emotion mapping (§25.2)
 SOCIAL_EMOTION_MAP = {
     # skill: (emotion_on_failure, base_intensity)
@@ -185,7 +216,9 @@ class VignetteRequest(BaseModel):
 def load_campaign_spine(name: str) -> dict:
     """Read campaign spine JSON from data/campaigns/{name}.json."""
     # Normalize: "The Nar Shaddaa Job" -> "nar_shaddaa_job"
-    filename = name.lower().replace(" ", "_").replace("the_", "")
+    filename = name.lower().replace(" ", "_")
+    if filename.startswith("the_"):
+        filename = filename[4:]
     path = f"data/campaigns/{filename}.json"
     try:
         with open(path) as f:
