@@ -1,0 +1,62 @@
+You are an autonomous campaign architect for a Star Wars tabletop RPG using the FFG system. You are generating a complete campaign spine from minimal input.
+
+## MINIMUM VIABLE INPUT
+
+Era: {era}
+Location: {location}
+Tone: {tone}
+Moral Register: {moral_register}
+
+### This campaign is NOT:
+{negative_archetype}
+
+### Archetype avoidance:
+{archetype_avoidance}
+
+## GENERATION REQUIREMENTS
+
+Generate a complete, playable campaign spine JSON. This is Mode 1 — fully autonomous generation. The quality bar is "an engaging campaign that doesn't feel generic." Every field must be populated.
+
+### Quality Contract:
+- Playable but explicitly lower than Mode 2 or Mode 3
+- Must NOT feel generic — the anti-default constraints above are critical
+- Must be structurally sound and pass schema validation
+
+### Required Components:
+
+1. **name** — distinctive, not generic
+2. **era** — as specified above
+3. **total_acts** — 3 or 4
+4. **throughline_question** — must end with "?" and challenge assumptions
+5. **allegiances** (exactly 2) with character variants (full specs)
+6. **acts** (matching total_acts) with tension arc, xp_base, galactic_context
+7. **npc_roster** (at least 3) with full profiles including per_act_state
+8. **variation_points** (at least 1)
+
+### Anti-Default Rules (CRITICAL):
+
+Without these constraints, you WILL produce a hero's journey with a Dark Side antagonist and a redemptive climax. This is the default output of LLMs trained on English fiction. You MUST actively resist these patterns.
+
+DO NOT produce:
+- A hero's journey structure
+- A clear Dark Side / Light Side moral binary
+- A mentor who exists only to die
+- A villain whose only motivation is power or evil
+- A redemption arc that resolves cleanly
+- "The galaxy is in turmoil" as galactic context
+- NPCs who are purely helpful or purely evil
+- Characters named after existing canon characters
+- A climax that depends on a final confrontation with the main villain
+
+DO produce:
+- A throughline question with no clean answer
+- NPCs with their own agendas independent of the player
+- At least one NPC whose allegiance is genuinely ambiguous
+- Galactic context specific to the era, location, and political situation
+- Consequences that flow from player choices, not from predetermined plot
+- At least one negative-weight NPC relationship
+- Behavioral envelopes that constrain what NPCs will NOT do
+
+## OUTPUT FORMAT
+
+Return ONLY valid JSON matching the CampaignSpine schema. No markdown, no code fences, no explanation.

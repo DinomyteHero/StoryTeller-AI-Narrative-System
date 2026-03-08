@@ -1,5 +1,5 @@
 """
-Campaign Studio API routes — Modes 3 and 2, plus cross-era import.
+Campaign Studio API routes — Modes 3, 2, and 1, plus cross-era import.
 
 Routes:
 - POST /studio/spine/validate     — Validate a spine (partial or complete)
@@ -8,6 +8,8 @@ Routes:
 - POST /studio/assist/context     — Generate galactic context for an act
 - POST /studio/assist/voice       — Generate NPC voice notes
 - POST /studio/generate/mode2     — Generate spine from thematic brief
+- POST /studio/generate/mode1     — Generate spine from minimal input
+- POST /studio/generate/saga      — Run full saga pipeline
 - POST /studio/import/apply       — Apply import interface to character
 - POST /studio/import/default     — Build default character from variant
 - GET  /studio/campaigns          — List stored campaigns
@@ -36,7 +38,9 @@ from studio.generate import (
     finalize_spine,
     validate_and_report,
     generate_from_brief,
+    generate_mode1,
     ThematicBrief,
+    Mode1Input,
 )
 from studio.import_interface import (
     ImportPackage,
@@ -44,6 +48,7 @@ from studio.import_interface import (
     build_default_character,
 )
 from studio.seeding import generate_master_seed
+from studio.saga.pipeline import run_saga_pipeline
 from state.db import get_connection
 
 
@@ -101,6 +106,26 @@ class ImportApplyRequest(BaseModel):
 class ImportDefaultRequest(BaseModel):
     spine_data: dict
     variant_id: str
+
+
+class Mode1GenerateRequest(BaseModel):
+    era: str
+    location: str
+    tone: str = "gritty"
+    moral_register: str = "morally gray"
+    negative_archetype: str = "Generic hero's journey with clear good/evil binary"
+    archetype_avoidance: str = "Avoid redemption arcs that resolve cleanly"
+    master_seed: Optional[int] = None
+
+
+class SagaPipelineRequest(BaseModel):
+    era: str
+    location: str
+    tone: str = "gritty"
+    moral_register: str = "morally gray"
+    num_directions: int = Field(default=3, ge=2, le=6)
+    prior_campaign_json: Optional[dict] = None
+    master_seed: Optional[int] = None
 
 
 class StoreCampaignRequest(BaseModel):
@@ -239,6 +264,75 @@ async def generate_mode2(req: Mode2GenerateRequest):
             "spine_data": spine_data,
             "master_seed": master_seed,
             "gaps": gaps,
+        }
+    except RuntimeError as e:
+        raise HTTPException(status_code=502, detail=str(e))
+
+
+# ── Mode 1 Generation Routes ────────────────────────────────────────
+
+
+@router.post("/generate/mode1")
+async def generate_mode1_route(req: Mode1GenerateRequest):
+    """Generate a complete campaign spine from minimal input.
+
+    Mode 1: Fully autonomous. Provide era, location, tone, and moral
+    register — the AI generates everything else.
+    """
+    inputs = Mode1Input(
+        era=req.era,
+        location=req.location,
+        tone=req.tone,
+        moral_register=req.moral_register,
+        negative_archetype=req.negative_archetype,
+        archetype_avoidance=req.archetype_avoidance,
+    )
+    try:
+        spine_data, master_seed = generate_mode1(
+            inputs, master_seed=req.master_seed,
+        )
+        gaps = identify_gaps(spine_data)
+        return {
+            "spine_data": spine_data,
+            "master_seed": master_seed,
+            "gaps": gaps,
+        }
+    except RuntimeError as e:
+        raise HTTPException(status_code=502, detail=str(e))
+
+
+# ── Saga Pipeline Route ────────────────────────────────────────────
+
+
+@router.post("/generate/saga")
+async def generate_saga_route(req: SagaPipelineRequest):
+    """Run the full 5-stage saga pipeline.
+
+    The Writer's Room pipeline: persona assignment, divergent generation,
+    branching search, convergent debate, and pairwise evaluation.
+
+    Requires a prior campaign spine as input — the saga pipeline generates
+    sequel campaigns building on previous narrative state.
+    """
+    if req.prior_campaign_json is None:
+        raise HTTPException(
+            status_code=400,
+            detail="Saga pipeline requires prior_campaign_json",
+        )
+    try:
+        result = run_saga_pipeline(
+            req.prior_campaign_json,
+            master_seed=req.master_seed,
+        )
+        return {
+            "selected_spine": result.selected_spine,
+            "all_candidates": result.all_candidates,
+            "master_seed": result.master_seed,
+            "directions_generated": result.directions_generated,
+            "sketches_generated": result.sketches_generated,
+            "drafts_generated": result.drafts_generated,
+            "passed_validation": result.passed_validation,
+            "validation_report": result.validation_report,
         }
     except RuntimeError as e:
         raise HTTPException(status_code=502, detail=str(e))

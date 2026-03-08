@@ -1,5 +1,5 @@
 """
-Campaign spine generation orchestration — Modes 3 and 2.
+Campaign spine generation orchestration — Modes 3, 2, and 1.
 
 Mode 3 (collaborative authoring):
   Human drives, AI assists. Functions for galactic context drafting,
@@ -8,6 +8,10 @@ Mode 3 (collaborative authoring):
 Mode 2 (thematic steering):
   AI generates from a thematic brief. Author reviews and edits.
   generate_from_brief() produces a complete spine draft.
+
+Mode 1 (fully autonomous):
+  AI generates from minimal input (era, location, tone, moral register).
+  Uses anti-default constraints to avoid generic outputs.
 
 This module provides orchestration functions callable via Studio API routes.
 """
@@ -44,6 +48,8 @@ PROMPT_DIR = Path(__file__).parent / "prompts"
 MODE3_PROMPT_PATH = PROMPT_DIR / "mode3_assist.txt"
 MODE2_PROMPT_PATH = PROMPT_DIR / "mode2_generate.txt"
 NPC_VOICE_PROMPT_PATH = PROMPT_DIR / "npc_voice_gen.txt"
+
+MODE1_PROMPT_PATH = PROMPT_DIR / "mode1_generate.txt"
 
 CLOUD_PROVIDER = os.getenv("CLOUD_PROVIDER", "openai")
 CLOUD_MODEL = os.getenv("CLOUD_MODEL", "gpt-5.2")
@@ -581,3 +587,104 @@ def generate_from_brief(
 
     # Should not reach here, but satisfy type checker
     raise RuntimeError("Mode 2 generation failed unexpectedly")
+
+
+# ── Mode 1: Fully Autonomous ────────────────────────────────────────
+
+
+@dataclass
+class Mode1Input:
+    """Minimal input for Mode 1 autonomous generation."""
+    era: str
+    location: str
+    tone: str = "gritty"
+    moral_register: str = "morally gray"
+    negative_archetype: str = "Generic hero's journey with clear good/evil binary"
+    archetype_avoidance: str = "Avoid redemption arcs that resolve cleanly"
+
+
+def generate_mode1(
+    inputs: Mode1Input,
+    *,
+    master_seed: Optional[int] = None,
+    max_retries: int = 3,
+) -> tuple[dict, int]:
+    """Generate a complete campaign spine from minimal input.
+
+    Mode 1 workflow: Fully autonomous. The AI generates the entire spine
+    from era, location, tone, and moral register. Anti-default constraints
+    prevent generic outputs.
+
+    Args:
+        inputs: Minimal creative direction.
+        master_seed: Optional seed for reproducibility. If None, generated.
+        max_retries: Number of LLM attempts before giving up.
+
+    Returns:
+        Tuple of (spine_data dict, master_seed used).
+
+    Raises:
+        RuntimeError: If generation fails after all retries.
+    """
+    if master_seed is None:
+        master_seed = generate_master_seed()
+
+    seed = derive_stage_seed(master_seed, STAGE_WORLD)
+
+    template = _load_prompt(MODE1_PROMPT_PATH)
+    system_prompt = template.format(
+        era=inputs.era,
+        location=inputs.location,
+        tone=inputs.tone,
+        moral_register=inputs.moral_register,
+        negative_archetype=inputs.negative_archetype,
+        archetype_avoidance=inputs.archetype_avoidance,
+    )
+
+    for attempt in range(max_retries):
+        try:
+            raw = _call_llm(
+                system_prompt,
+                "Generate the complete campaign spine JSON now.",
+                seed=seed,
+                max_tokens=8000,
+                temperature=0.85,
+            )
+
+            # Strip markdown code fences if present
+            cleaned = raw.strip()
+            if cleaned.startswith("```"):
+                lines = cleaned.split("\n")
+                lines = [l for l in lines if not l.strip().startswith("```")]
+                cleaned = "\n".join(lines)
+
+            spine_data = json.loads(cleaned)
+
+            # Ensure required top-level fields
+            spine_data.setdefault("era", inputs.era)
+            spine_data.setdefault("total_acts", 3)
+
+            # Attach generation metadata
+            stage_seeds = derive_all_seeds(master_seed)
+            spine_data["generation_metadata"] = build_generation_metadata(
+                master_seed=master_seed,
+                stage_seeds=stage_seeds,
+                model_used=CLOUD_MODEL,
+                generation_mode="mode1",
+            )
+
+            return spine_data, master_seed
+
+        except json.JSONDecodeError as e:
+            if attempt == max_retries - 1:
+                raise RuntimeError(
+                    f"Mode 1 generation failed: LLM returned invalid JSON after "
+                    f"{max_retries} attempts. Last error: {e}"
+                )
+        except Exception as e:
+            if attempt == max_retries - 1:
+                raise RuntimeError(
+                    f"Mode 1 generation failed after {max_retries} attempts: {e}"
+                )
+
+    raise RuntimeError("Mode 1 generation failed unexpectedly")
