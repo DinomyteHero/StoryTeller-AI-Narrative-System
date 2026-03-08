@@ -176,6 +176,10 @@ class CommitmentRequest(BaseModel):
     release: bool = False
 
 
+class VignetteRequest(BaseModel):
+    choice_index: int
+
+
 # ── Helper Functions ────────────────────────────────────────────────────
 
 def load_campaign_spine(name: str) -> dict:
@@ -1004,6 +1008,7 @@ async def handle_turn(
     # compression) and the response must reflect the new act.
     milestone_data = None
     force_power_milestone_data = None
+    time_skip_data = None
     if act_boundary_reached:
         pipeline_result = run_between_act_pipeline(
             session_id, character, spine, arc_state["current_act"],
@@ -1034,7 +1039,12 @@ async def handle_turn(
             }
             arc_state["pending_force_power_milestone"] = force_power_milestone_data
 
-        if milestone_data or force_power_milestone_data:
+        # Phase 17: Store pending time skip for /vignette endpoint (§19)
+        if pipeline_result.time_skip_data:
+            time_skip_data = pipeline_result.time_skip_data
+            arc_state["pending_time_skip"] = time_skip_data
+
+        if milestone_data or force_power_milestone_data or time_skip_data:
             update_session_state(session_id, character, arc_state)
 
     # ── Return ────────────────────────────────────────────────────────
@@ -1057,6 +1067,14 @@ async def handle_turn(
         response["milestone"] = milestone_data
     if force_power_milestone_data:
         response["force_power_milestone"] = force_power_milestone_data
+    if time_skip_data:
+        response["time_skip"] = {
+            "opening_passage": time_skip_data["opening_passage"],
+            "duration_months": time_skip_data["duration_months"],
+            "framing": time_skip_data["framing"],
+            "vignettes": time_skip_data["vignettes"],
+            "current_vignette_index": 0,
+        }
     return response
 
 
@@ -1663,6 +1681,7 @@ async def handle_turn_stream(
         # ── Step 13: Between-act processing ───────────────────────────
         milestone_data = None
         force_power_milestone_data = None
+        time_skip_data = None
         if act_boundary_reached:
             try:
                 pipeline_result = run_between_act_pipeline(
@@ -1695,7 +1714,12 @@ async def handle_turn_stream(
                     }
                     arc_state["pending_force_power_milestone"] = force_power_milestone_data
 
-                if milestone_data or force_power_milestone_data:
+                # Phase 17: Store pending time skip (§19)
+                if pipeline_result.time_skip_data:
+                    time_skip_data = pipeline_result.time_skip_data
+                    arc_state["pending_time_skip"] = time_skip_data
+
+                if milestone_data or force_power_milestone_data or time_skip_data:
                     update_session_state(session_id, character, arc_state)
             except Exception as e:
                 logging.error(f"Between-act pipeline failed: {e}")
@@ -1722,6 +1746,14 @@ async def handle_turn_stream(
             payload["milestone"] = milestone_data
         if force_power_milestone_data:
             payload["force_power_milestone"] = force_power_milestone_data
+        if time_skip_data:
+            payload["time_skip"] = {
+                "opening_passage": time_skip_data["opening_passage"],
+                "duration_months": time_skip_data["duration_months"],
+                "framing": time_skip_data["framing"],
+                "vignettes": time_skip_data["vignettes"],
+                "current_vignette_index": 0,
+            }
         yield f"event: done\ndata: {json.dumps(payload)}\n\n"
 
     return StreamingResponse(generate(), media_type="text/event-stream")
@@ -1953,6 +1985,7 @@ async def handle_temptation(
 
     milestone_data = None
     force_power_milestone_data = None
+    time_skip_data = None
     if act_boundary_reached:
         pipeline_result = run_between_act_pipeline(
             session_id, character, spine, arc_state["current_act"],
@@ -1980,7 +2013,11 @@ async def handle_temptation(
             }
             arc_state["pending_force_power_milestone"] = force_power_milestone_data
 
-        if milestone_data or force_power_milestone_data:
+        if pipeline_result.time_skip_data:
+            time_skip_data = pipeline_result.time_skip_data
+            arc_state["pending_time_skip"] = time_skip_data
+
+        if milestone_data or force_power_milestone_data or time_skip_data:
             update_session_state(session_id, character, arc_state)
 
     response = {
@@ -2008,6 +2045,14 @@ async def handle_temptation(
         response["milestone"] = milestone_data
     if force_power_milestone_data:
         response["force_power_milestone"] = force_power_milestone_data
+    if time_skip_data:
+        response["time_skip"] = {
+            "opening_passage": time_skip_data["opening_passage"],
+            "duration_months": time_skip_data["duration_months"],
+            "framing": time_skip_data["framing"],
+            "vignettes": time_skip_data["vignettes"],
+            "current_vignette_index": 0,
+        }
     return response
 
 
@@ -2207,6 +2252,7 @@ async def handle_intervention(
 
     milestone_data = None
     force_power_milestone_data = None
+    time_skip_data = None
     if act_boundary_reached:
         pipeline_result = run_between_act_pipeline(
             session_id, character, spine, arc_state["current_act"],
@@ -2233,7 +2279,11 @@ async def handle_intervention(
             }
             arc_state["pending_force_power_milestone"] = force_power_milestone_data
 
-        if milestone_data or force_power_milestone_data:
+        if pipeline_result.time_skip_data:
+            time_skip_data = pipeline_result.time_skip_data
+            arc_state["pending_time_skip"] = time_skip_data
+
+        if milestone_data or force_power_milestone_data or time_skip_data:
             update_session_state(session_id, character, arc_state)
 
     response = {
@@ -2255,6 +2305,14 @@ async def handle_intervention(
         response["milestone"] = milestone_data
     if force_power_milestone_data:
         response["force_power_milestone"] = force_power_milestone_data
+    if time_skip_data:
+        response["time_skip"] = {
+            "opening_passage": time_skip_data["opening_passage"],
+            "duration_months": time_skip_data["duration_months"],
+            "framing": time_skip_data["framing"],
+            "vignettes": time_skip_data["vignettes"],
+            "current_vignette_index": 0,
+        }
     return response
 
 
@@ -2451,3 +2509,144 @@ def _rebuild_talent_activation(data: dict):
     """Rebuild a TalentActivation from serialized dict."""
     from engine.talents import TalentActivation
     return TalentActivation(**data)
+
+
+# ── Phase 17: Vignette choice endpoint (§19.3) ──────────────────────────
+
+@router.post("/session/{session_id}/vignette")
+async def handle_vignette(session_id: str, req: VignetteRequest):
+    """
+    Handle a player's vignette choice during a time skip.
+
+    Each call resolves one vignette choice, applies its effects, and either
+    returns the next vignette or generates the closing passage if all
+    vignettes are complete.
+    """
+    from engine.time_skip import (
+        deserialize_time_skip_state,
+        process_vignette_choice,
+        aggregate_vignette_effects,
+        apply_vignette_npc_effects,
+        build_vignette_inference_rows,
+        serialize_time_skip_state,
+    )
+    from gm.cloud_gm import generate_time_skip_closing
+
+    session = get_session(session_id)
+    if session is None:
+        raise HTTPException(404, "Session not found")
+
+    character = Character.model_validate_json(session["character_json"])
+    arc_state = json.loads(session["arc_state_json"])
+
+    pending = arc_state.get("pending_time_skip")
+    if not pending:
+        raise HTTPException(400, "No pending time skip")
+
+    # Restore time skip state
+    vignettes, effects, current_index = deserialize_time_skip_state(
+        pending.get("state", pending)
+    )
+
+    if current_index >= len(vignettes):
+        raise HTTPException(400, "All vignettes already completed")
+
+    current_vignette = vignettes[current_index]
+
+    # Validate choice
+    if req.choice_index < 0 or req.choice_index >= len(current_vignette.choices):
+        raise HTTPException(
+            400,
+            f"Invalid choice_index {req.choice_index} for vignette "
+            f"with {len(current_vignette.choices)} choices",
+        )
+
+    # Process the choice
+    effect = process_vignette_choice(current_vignette, req.choice_index)
+    effects.append(effect)
+
+    # Advance to next vignette
+    next_index = current_index + 1
+    is_complete = next_index >= len(vignettes)
+
+    # Build response
+    response = {
+        "vignette_id": current_vignette.vignette_id,
+        "choice_index": req.choice_index,
+        "narrative_consequence": effect.narrative_consequence,
+        "is_complete": is_complete,
+    }
+
+    if is_complete:
+        # All vignettes done — apply accumulated effects and generate closing
+        aggregated = aggregate_vignette_effects(effects)
+
+        # Apply NPC disposition changes
+        spine = load_campaign_spine(session["campaign_name"])
+        npc_states = load_npc_states(session_id, spine)
+        apply_vignette_npc_effects(aggregated["npc_effects"], npc_states)
+        for npc in npc_states:
+            save_npc_state(session_id, npc)
+
+        # Add conflict to character's morality tracking
+        character.motivation.conflict += aggregated["total_conflict"]
+
+        # Add morality bonus
+        character.motivation.morality = min(
+            100, character.motivation.morality + aggregated["total_morality_bonus"]
+        )
+
+        # Generate closing passage
+        closing_passage = ""
+        try:
+            next_act_number = arc_state.get("current_act", 1)
+            next_act = spine["acts"][next_act_number - 1] if next_act_number <= spine.get("total_acts", 4) else {}
+
+            vignette_summary = "\n".join(
+                f"- {e.narrative_consequence}" for e in effects
+            )
+            closing_passage = generate_time_skip_closing(
+                character=character,
+                duration_months=pending.get("duration_months", pending.get("state", {}).get("duration_months", 1)),
+                campaign_name=spine.get("name", ""),
+                vignette_summary=vignette_summary,
+                next_act_situation=next_act.get("opening_situation", ""),
+            )
+        except Exception as e:
+            logging.error(f"Time skip closing generation failed: {e}")
+
+        response["closing_passage"] = closing_passage
+        response["effects_summary"] = {
+            "skill_tags": aggregated["skill_tags"],
+            "npc_effects": aggregated["npc_effects"],
+            "total_conflict": aggregated["total_conflict"],
+            "total_morality_bonus": aggregated["total_morality_bonus"],
+        }
+
+        # Clear pending time skip
+        del arc_state["pending_time_skip"]
+    else:
+        # Return next vignette
+        from engine.time_skip import serialize_vignette
+        next_v = vignettes[next_index]
+        response["next_vignette"] = serialize_vignette(next_v)
+
+        # Update stored state
+        config_data = pending.get("state", pending)
+        from engine.time_skip import TimeSkipConfig, Vignette as _V
+        # Rebuild a minimal config for serialization
+        updated_state = serialize_time_skip_state(
+            TimeSkipConfig(
+                duration_months=config_data.get("duration_months", 1),
+                framing=config_data.get("framing", ""),
+                vignettes=[],  # not needed — we use all_vignettes
+            ),
+            vignettes, effects, next_index,
+        )
+        pending["state"] = updated_state
+        arc_state["pending_time_skip"] = pending
+
+    # Persist
+    update_session_state(session_id, character, arc_state)
+
+    return response

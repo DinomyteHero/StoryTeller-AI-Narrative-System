@@ -96,6 +96,7 @@ class BetweenActResult:
     force_power_milestone_passage: str = ""                  # Phase 15: Force power upgrade reflection (§16.4)
     force_power_milestone_choices: list = field(default_factory=list)  # Phase 15: Force power upgrade choices
     behavioral_fingerprint: Optional[dict] = None            # Phase 13: aggregated choice annotations (§24)
+    time_skip_data: Optional[dict] = None                    # Phase 17: time skip config for API (§19)
     steps_completed: list[str] = field(default_factory=list)
 
 
@@ -733,8 +734,95 @@ def run_between_act_pipeline(
             logging.error(f"Between-act step 14c (Force power milestone) failed: {e}")
             result.steps_completed.append("force_power_milestone_failed")
 
-    # ── Step 15: Time skip sequence (Phase 8+) ───────────────────────
-    result.steps_completed.append("time_skip_stub")
+    # ── Step 15: Time skip preparation (Phase 17, §19) ─────────────
+    try:
+        from engine.time_skip import (
+            load_time_skip_config,
+            select_vignettes,
+            apply_time_skip_recovery,
+            apply_npc_time_drift,
+            serialize_time_skip_state,
+            serialize_vignette,
+        )
+        # Time skip config lives on the NEXT act (the act we're entering)
+        next_act_config = (spine["acts"][next_act_number - 1]
+                           if next_act_number <= total_acts else {})
+        ts_config = load_time_skip_config(next_act_config)
+
+        if ts_config and ts_config.vignettes:
+            # Load NPC states for prerequisite checks and selection scoring
+            from state.db import get_connection as _gc
+            with _gc() as conn:
+                npc_rows = conn.execute(
+                    "SELECT npc_name, state_json FROM npc_states WHERE session_id = ?",
+                    (session_id,),
+                ).fetchall()
+            from gm.context import NPCState as _NPC
+            npc_states_for_skip = []
+            for r in npc_rows:
+                ns = json.loads(r["state_json"])
+                npc_states_for_skip.append(_NPC(
+                    name=r["npc_name"],
+                    role=ns.get("role", ""),
+                    disposition=ns.get("disposition", 0.5),
+                    knows=ns.get("knows", []),
+                    doesnt_know=ns.get("doesnt_know", []),
+                ))
+
+            # Select vignettes based on behavioral fingerprint
+            selected = select_vignettes(
+                ts_config, character, npc_states_for_skip,
+                behavioral_fingerprint=result.behavioral_fingerprint,
+            )
+
+            if selected:
+                # Full recovery during time skip
+                recovery = apply_time_skip_recovery(character, ts_config.duration_months)
+                result.strain_recovered = recovery["strain_recovered"]
+                result.wounds_recovered = recovery["wounds_recovered"]
+
+                # NPC relationship drift
+                apply_npc_time_drift(npc_states_for_skip, ts_config.duration_months)
+
+                # Generate opening passage
+                opening_passage = ""
+                try:
+                    from gm.cloud_gm import generate_time_skip_opening
+                    from state.session import get_act_summaries
+                    act_summary = get_act_summaries(session_id)
+                    opening_passage = generate_time_skip_opening(
+                        character=character,
+                        duration_months=ts_config.duration_months,
+                        framing=ts_config.framing,
+                        campaign_name=spine.get("name", ""),
+                        act_summary=act_summary,
+                    )
+                except Exception as e:
+                    logging.error(f"Time skip opening generation failed: {e}")
+                    opening_passage = ts_config.framing  # fallback to authored framing
+
+                # Prepare time skip data for API — vignettes are interactive,
+                # so we store the state and let the API handle sequencing
+                result.time_skip_data = {
+                    "opening_passage": opening_passage,
+                    "duration_months": ts_config.duration_months,
+                    "framing": ts_config.framing,
+                    "vignettes": [serialize_vignette(v) for v in selected],
+                    "state": serialize_time_skip_state(ts_config, selected, [], 0),
+                }
+                result.steps_completed.append("time_skip_prepared")
+                logging.info(
+                    f"Between-act step 15: time skip prepared — "
+                    f"{ts_config.duration_months} months, "
+                    f"{len(selected)} vignettes"
+                )
+            else:
+                result.steps_completed.append("time_skip_no_eligible_vignettes")
+        else:
+            result.steps_completed.append("time_skip_none_defined")
+    except Exception as e:
+        logging.error(f"Between-act step 15 failed: {e}")
+        result.steps_completed.append("time_skip_failed")
 
     # ── Step 16: Load next act ───────────────────────────────────────
     if next_act_number <= total_acts:

@@ -846,3 +846,101 @@ def _parse_force_power_milestone_response(
         skill_tags=force_tags,  # repurpose for "power_id:upgrade_id" compound keys
         used_local=(NARRATIVE_BACKEND == "local"),
     )
+
+
+# ── Time skip passage generation (Phase 17, §19) ─────────────────────
+
+TIME_SKIP_OPENING_PROMPT_PATH = Path(__file__).parent / "prompts" / "time_skip_opening.txt"
+TIME_SKIP_CLOSING_PROMPT_PATH = Path(__file__).parent / "prompts" / "time_skip_closing.txt"
+
+
+def generate_time_skip_opening(
+    character,
+    duration_months: int,
+    framing: str,
+    campaign_name: str,
+    act_summary: str,
+) -> str:
+    """
+    Generate the opening montage passage for a time skip.
+
+    Returns a 2-3 paragraph impressionistic montage (NOT interactive).
+    """
+    template = TIME_SKIP_OPENING_PROMPT_PATH.read_text(encoding="utf-8")
+    prompt = template.format(
+        character_summary=character.narrative_status(),
+        character_voice=getattr(character, "voice_notes", ""),
+        campaign_name=campaign_name,
+        duration_months=duration_months,
+        framing=framing,
+        act_summary=act_summary or "No summary available.",
+    )
+
+    client, model = _make_client()
+    is_local = NARRATIVE_BACKEND == "local"
+    is_qwen = is_local and "qwen" in LOCAL_NARRATION_MODEL.lower()
+    msg_content = f"/no_think\n{prompt}" if is_qwen else prompt
+
+    timeout = 180.0 if is_local else 60.0
+    kwargs = dict(
+        model=model,
+        max_completion_tokens=MAX_TOKENS,
+        messages=[{"role": "user", "content": msg_content}],
+        timeout=timeout,
+    )
+    reasoning = os.getenv("REASONING_EFFORT", "low")
+    if not is_local and reasoning:
+        kwargs["reasoning_effort"] = reasoning
+
+    response = client.chat.completions.create(**kwargs)
+    raw = response.choices[0].message.content or ""
+
+    # Strip markdown emphasis
+    passage = re.sub(r"\*{1,2}(.+?)\*{1,2}", r"\1", raw.strip())
+    return passage
+
+
+def generate_time_skip_closing(
+    character,
+    duration_months: int,
+    campaign_name: str,
+    vignette_summary: str,
+    next_act_situation: str,
+) -> str:
+    """
+    Generate the closing passage after all vignettes are resolved.
+
+    Returns a 1-2 paragraph bridge into the new act (NOT interactive).
+    """
+    template = TIME_SKIP_CLOSING_PROMPT_PATH.read_text(encoding="utf-8")
+    prompt = template.format(
+        character_summary=character.narrative_status(),
+        character_voice=getattr(character, "voice_notes", ""),
+        campaign_name=campaign_name,
+        duration_months=duration_months,
+        vignette_summary=vignette_summary,
+        next_act_situation=next_act_situation,
+    )
+
+    client, model = _make_client()
+    is_local = NARRATIVE_BACKEND == "local"
+    is_qwen = is_local and "qwen" in LOCAL_NARRATION_MODEL.lower()
+    msg_content = f"/no_think\n{prompt}" if is_qwen else prompt
+
+    timeout = 180.0 if is_local else 60.0
+    kwargs = dict(
+        model=model,
+        max_completion_tokens=MAX_TOKENS,
+        messages=[{"role": "user", "content": msg_content}],
+        timeout=timeout,
+    )
+    reasoning = os.getenv("REASONING_EFFORT", "low")
+    if not is_local and reasoning:
+        kwargs["reasoning_effort"] = reasoning
+
+    response = client.chat.completions.create(**kwargs)
+    raw = response.choices[0].message.content or ""
+
+    # Strip markdown emphasis
+    passage = re.sub(r"\*{1,2}(.+?)\*{1,2}", r"\1", raw.strip())
+    return passage
