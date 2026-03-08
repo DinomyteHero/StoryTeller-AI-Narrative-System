@@ -10,6 +10,8 @@ import os
 from contextlib import contextmanager
 
 DB_PATH = os.getenv("DB_PATH", "./data/storyteller.db")
+# Alias for test compatibility
+_DB_PATH = DB_PATH
 
 SCHEMA = """
 PRAGMA journal_mode=WAL;
@@ -108,12 +110,31 @@ CREATE TABLE IF NOT EXISTS ship_states (
     updated_at TEXT NOT NULL,
     UNIQUE(session_id, ship_id)
 );
+
+CREATE TABLE IF NOT EXISTS campaigns (
+    id                TEXT PRIMARY KEY,
+    name              TEXT NOT NULL,
+    era               TEXT NOT NULL,
+    created_at        TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    authoring_mode    TEXT NOT NULL,
+    spine_json        TEXT NOT NULL,
+    validation_report TEXT,
+    prior_campaign_id TEXT,
+    FOREIGN KEY (prior_campaign_id) REFERENCES campaigns(id)
+);
 """
+
+
+def _get_db_path() -> str:
+    """Return current DB path — checks module-level variables (supports test overrides)."""
+    import state.db as _self
+    # Check DB_PATH first (set by some tests), then _DB_PATH
+    return getattr(_self, "DB_PATH", None) or _self._DB_PATH
 
 
 @contextmanager
 def get_connection():
-    conn = sqlite3.connect(DB_PATH)
+    conn = sqlite3.connect(_get_db_path())
     conn.row_factory = sqlite3.Row
     conn.execute("PRAGMA journal_mode=WAL")
     conn.execute("PRAGMA foreign_keys=ON")
@@ -125,7 +146,8 @@ def get_connection():
 
 def init_db():
     """Run schema creation. Safe to call on every startup."""
-    os.makedirs(os.path.dirname(os.path.abspath(DB_PATH)), exist_ok=True)
+    db_path = _get_db_path()
+    os.makedirs(os.path.dirname(os.path.abspath(db_path)), exist_ok=True)
     with get_connection() as conn:
         conn.executescript(SCHEMA)
         # Phase 13: migrate existing DBs — add choice_implications column

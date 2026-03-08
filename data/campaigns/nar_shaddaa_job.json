@@ -209,7 +209,7 @@
                 "What happened to Doss?",
                 "What is actually in the cargo?"
             ],
-            "expected_turns": "8-12",
+            "expected_turns": [8, 12],
             "xp_base": 20,
             "xp_bonus_conditions": [
                 {
@@ -239,7 +239,7 @@
             "anchor": "contact_discovered",
             "next_anchor": "obligation_triggered",
             "open_threads": [],
-            "expected_turns": "8-12",
+            "expected_turns": [8, 12],
             "xp_base": 20,
             "xp_bonus_conditions": [
                 {
@@ -452,7 +452,7 @@
             "anchor": "resolution_approach",
             "next_anchor": null,
             "open_threads": [],
-            "expected_turns": "6-10",
+            "expected_turns": [6, 10],
             "xp_base": 25,
             "xp_bonus_conditions": [
                 {

@@ -219,7 +219,15 @@ def reconcile_turn(
         f"- {t.name}" for t in arc.open_threads
     ) if arc.open_threads else "None established yet."
 
-    expected_turns = spine_act.get("expected_turns", [8, 12])
+    raw_expected = spine_act.get("expected_turns", [8, 12])
+    if isinstance(raw_expected, str):
+        # Parse "8-12" format to [8, 12]
+        parts = [int(x.strip()) for x in raw_expected.split("-") if x.strip().isdigit()]
+        expected_turns = parts if len(parts) == 2 else [8, 12]
+    elif isinstance(raw_expected, list):
+        expected_turns = [int(x) if isinstance(x, (int, float)) else 8 for x in raw_expected]
+    else:
+        expected_turns = [8, 12]
     expected_mid = sum(expected_turns) // 2
 
     template = PROMPT_PATH.read_text(encoding="utf-8")

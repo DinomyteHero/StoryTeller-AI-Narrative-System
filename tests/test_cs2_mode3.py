@@ -272,11 +272,21 @@ class TestStudioRoutes:
     """Test Studio API routes using FastAPI test client."""
 
     @pytest.fixture
-    def client(self):
-        """FastAPI test client."""
+    def client(self, tmp_path):
+        """FastAPI test client with isolated DB."""
+        import os
+        import state.db as db
         from fastapi.testclient import TestClient
         from api.main import app
-        return TestClient(app)
+
+        db_path = str(tmp_path / "test_studio.db")
+        old_path = db._DB_PATH
+        db._DB_PATH = db_path
+        db.init_db()
+        try:
+            yield TestClient(app)
+        finally:
+            db._DB_PATH = old_path
 
     def test_validate_valid_spine(self, client, nar_shaddaa_data):
         """POST /studio/spine/validate with valid spine."""
