@@ -145,3 +145,20 @@ def get_turn_count(session_id: str) -> int:
         return conn.execute(
             "SELECT COUNT(*) FROM turns WHERE session_id = ?", (session_id,)
         ).fetchone()[0]
+
+
+def get_act_turns(session_id: str, count: int) -> list[dict]:
+    """
+    Return the most recent `count` turns as dicts for XP evaluation (§14.1).
+    Returns columns needed by the advancement engine: check_skill,
+    roll_result_json, skill_tags_json, choice_index, moral_weight.
+    """
+    with get_connection() as conn:
+        rows = conn.execute(
+            "SELECT turn_number, check_skill, check_difficulty, "
+            "roll_result_json, skill_tags_json, choice_index, moral_weight "
+            "FROM turns WHERE session_id = ? "
+            "ORDER BY turn_number DESC LIMIT ?",
+            (session_id, count),
+        ).fetchall()
+    return [dict(r) for r in reversed(rows)]

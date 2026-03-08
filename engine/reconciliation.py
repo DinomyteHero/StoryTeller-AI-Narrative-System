@@ -89,6 +89,8 @@ class BetweenActResult:
     next_act_loaded: bool = False
     obligation_result: dict = field(default_factory=dict)   # Phase 8: activation roll output
     morality_result: dict = field(default_factory=dict)     # Phase 8: morality resolution output
+    xp_award: Optional[object] = None                       # Phase 10: XPAward dataclass (§14.1)
+    advancement: Optional[dict] = None                      # Phase 10: skill rank increase entry (§14.2)
     steps_completed: list[str] = field(default_factory=list)
 
 
@@ -455,12 +457,58 @@ def run_between_act_pipeline(
     except Exception as e:
         logging.error(f"Between-act step 2 failed: {e}")
 
-    # ── Steps 3-4: XP award and reservation (Phase 8+) ──────────────
-    result.steps_completed.append("xp_award_stub")
-    result.steps_completed.append("xp_reservation_stub")
+    # ── Steps 3-4: XP award and reservation (§14.1) ─────────────────
+    turn_rows = []
+    try:
+        from state.session import get_act_turns
+        from engine.advancement import award_act_xp, RESERVED_XP_CAP
 
-    # ── Step 5: Behavioral inference (Phase 8+) ──────────────────────
-    result.steps_completed.append("behavioral_inference_stub")
+        # Read arc_state from DB to get turns_this_act
+        with get_connection() as conn:
+            row = conn.execute(
+                "SELECT arc_state_json FROM sessions WHERE id = ?",
+                (session_id,),
+            ).fetchone()
+        arc_state = json.loads(row["arc_state_json"]) if row else {}
+        turns_count = arc_state.get("turns_this_act", 10)
+
+        act_config = spine["acts"][completed_act_number - 1]
+        turn_rows = get_act_turns(session_id, turns_count)
+
+        xp_award = award_act_xp(act_config, turn_rows, character, arc_state)
+
+        # Apply XP to character
+        character.total_xp += xp_award.total_xp
+        character.available_xp += xp_award.inference_xp
+        character.reserved_xp = min(
+            character.reserved_xp + xp_award.reserved_xp,
+            RESERVED_XP_CAP,
+        )
+
+        result.xp_award = xp_award
+        result.steps_completed.append("xp_award")
+        result.steps_completed.append("xp_reservation")
+        logging.info(
+            f"Between-act steps 3-4: awarded {xp_award.total_xp} XP "
+            f"(inference={xp_award.inference_xp}, reserved={xp_award.reserved_xp})"
+        )
+    except Exception as e:
+        logging.error(f"Between-act steps 3-4 failed: {e}")
+        result.steps_completed.append("xp_award_failed")
+
+    # ── Step 5: Behavioral inference (§14.2) ──────────────────────────
+    try:
+        from engine.advancement import compute_behavioral_signals, select_and_apply_advancement
+
+        signals = compute_behavioral_signals(turn_rows)
+        advancement = select_and_apply_advancement(
+            signals, character, character.available_xp, completed_act_number,
+        )
+        result.advancement = advancement
+        result.steps_completed.append("behavioral_inference")
+    except Exception as e:
+        logging.error(f"Between-act step 5 failed: {e}")
+        result.steps_completed.append("behavioral_inference_failed")
 
     # ── Step 6: Choice annotation aggregation (Phase 13+) ────────────
     result.steps_completed.append("choice_annotation_stub")

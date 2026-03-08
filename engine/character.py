@@ -166,6 +166,9 @@ class Character(BaseModel):
     force_rating:       int = 0
     force_committed:    int = 0
     loadout:              Loadout = Field(default_factory=Loadout)  # Phase 9: equipment (Game Mechanics §18)
+    career_skills:        list[str] = Field(default_factory=list)   # Phase 10: career + specialization skills (§14.2)
+    reserved_xp:          int = 0                                   # Phase 10: XP banked for milestones (§14.2)
+    advancement_log:      list[dict] = Field(default_factory=list)  # Phase 10: record of all advancement events (§14.2)
     throughline_question: str = ""
     voice_notes:          str = ""
     active_injuries:      list[str] = Field(default_factory=list)  # narrative injury descriptions (Game Mechanics §3)

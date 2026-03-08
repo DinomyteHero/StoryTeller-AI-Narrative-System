@@ -16,6 +16,10 @@
             "anchor_description": "Keth lands on Nar Shaddaa with the cargo and begins navigating the station, establishing his presence and making initial contact attempts to find Doss or an alternative drop point.",
             "next_anchor": "contact_discovered",
             "expected_turns": [8, 12],
+            "xp_config": {
+                "base_xp": 20,
+                "bonus_conditions": ["anchor_engagement", "skill_breadth", "motivation_interaction"]
+            },
             "open_threads": [
                 "Who is the mysterious comm voice?",
                 "What happened to Doss?",
@@ -32,6 +36,10 @@
             "anchor_description": "Keth discovers what happened to Doss — whether arrested, hiding, or having betrayed him. The truth about his contact's fate forces Keth to reassess the job and his next move.",
             "next_anchor": "obligation_triggered",
             "expected_turns": [8, 12],
+            "xp_config": {
+                "base_xp": 20,
+                "bonus_conditions": ["anchor_engagement", "skill_breadth", "failure_engagement"]
+            },
             "open_threads": []
         },
         {
@@ -44,6 +52,10 @@
             "anchor_description": "Vossk's patience runs out. Through intermediaries, enforcers, or a direct message, the weight of Keth's debt makes itself undeniable. The job is no longer optional — it is survive or pay.",
             "next_anchor": "resolution_approach",
             "expected_turns": [6, 10],
+            "xp_config": {
+                "base_xp": 25,
+                "bonus_conditions": ["anchor_engagement", "motivation_interaction", "failure_engagement"]
+            },
             "open_threads": []
         },
         {
@@ -56,6 +68,10 @@
             "anchor_description": "Keth finds or creates a path to resolve the job — deliver the cargo, negotiate with Vossk, escape Nar Shaddaa, or some combination. The endgame is in motion.",
             "next_anchor": "campaign_end",
             "expected_turns": [6, 10],
+            "xp_config": {
+                "base_xp": 25,
+                "bonus_conditions": ["anchor_engagement", "skill_breadth", "motivation_interaction", "failure_engagement"]
+            },
             "open_threads": []
         }
     ],

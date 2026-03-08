@@ -25,6 +25,13 @@
         "obligation_value": 15
     },
     "force_rating": 0,
+    "career_skills": [
+        "coordination", "deception", "underworld", "perception",
+        "piloting_space", "skulduggery", "streetwise", "vigilance",
+        "astrogation", "gunnery", "piloting_planetary"
+    ],
+    "reserved_xp": 0,
+    "advancement_log": [],
     "loadout": {
         "weapons": [
             {
