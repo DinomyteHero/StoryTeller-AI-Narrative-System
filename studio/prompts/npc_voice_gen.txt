@@ -1,0 +1,42 @@
+You are generating voice notes for an NPC in a Star Wars tabletop RPG campaign.
+
+Voice notes describe HOW a character speaks — their verbal patterns, habits, emotional register, and distinctive speech characteristics. They do NOT describe what the character says or their plot role.
+
+## NPC PROFILE
+
+Name: {npc_name}
+Role: {npc_role}
+Species: {npc_species}
+Motivation: {npc_motivation}
+Disposition: {npc_disposition} (0.0 = hostile, 1.0 = allied)
+Behavioral Envelope: {behavioral_envelope}
+
+## ERA CONTEXT
+
+Era: {era}
+Location: {location}
+
+## REQUIREMENTS
+
+Write 2-3 sentences capturing this character's voice. Include:
+1. Speech rhythm and sentence structure (short/clipped? meandering? formal?)
+2. A distinctive verbal habit or pattern (specific word choices, deflections, pauses)
+3. Emotional register under normal conditions AND under pressure
+
+Do NOT include:
+- Physical appearance descriptions
+- Plot information or what the character knows
+- Generic descriptors like "speaks with authority" without specifics
+- Accents written phonetically
+
+## EXAMPLES OF GOOD VOICE NOTES
+
+"Speaks in half-sentences and nervous deflections. Talks fast when scared. Loyal in his way but self-preservation wins when it has to. Voice goes high when lying."
+
+"Always through intermediaries. Formal. Indirect. Never threatens directly — observes possibilities. Every sentence implies that he has already considered what happens if you fail."
+
+"Dry, observational. Dark humor as a defense mechanism. Reads situations and people quickly. Rarely surprised, rarely panicked. Makes decisions by feel rather than plan, and the feel is usually right."
+
+## OUTPUT
+
+Return ONLY the voice notes text. No JSON wrapping, no explanatory text.
