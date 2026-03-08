@@ -7,6 +7,9 @@ and if so, which skill and difficulty applies.
 CHARACTER:
 {character_summary}
 
+EQUIPMENT:
+{equipment_section}
+
 STORY POSITION:
 Act {current_act} of {total_acts} — {act_name}
 Tension level: {tension_level}

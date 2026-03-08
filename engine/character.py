@@ -1,6 +1,7 @@
 from pydantic import BaseModel, Field
 from typing import Optional
 from enum import Enum
+from engine.equipment import Loadout
 
 
 class GameLine(Enum):
@@ -164,6 +165,7 @@ class Character(BaseModel):
     motivation:         MotivationTrack = Field(default_factory=MotivationTrack)
     force_rating:       int = 0
     force_committed:    int = 0
+    loadout:              Loadout = Field(default_factory=Loadout)  # Phase 9: equipment (Game Mechanics §18)
     throughline_question: str = ""
     voice_notes:          str = ""
     active_injuries:      list[str] = Field(default_factory=list)  # narrative injury descriptions (Game Mechanics §3)
@@ -177,13 +179,19 @@ class Character(BaseModel):
     def is_incapacitated(self) -> bool:
         return self.current_wounds >= self.wound_threshold
 
+    def effective_soak(self) -> int:
+        """Total soak: base soak (Brawn) + armor soak bonus (§18)."""
+        armor_bonus = self.loadout.armor.soak_bonus if self.loadout.armor else 0
+        return self.soak + armor_bonus
+
     def narrative_status(self) -> str:
         lines = [
             f"{self.name} | "
             f"{self.species.value.title()} "
             f"{self.career.value.replace('_', ' ').title()}",
             f"Wounds: {self.current_wounds}/{self.wound_threshold} | "
-            f"Strain: {self.current_strain}/{self.strain_threshold}",
+            f"Strain: {self.current_strain}/{self.strain_threshold} | "
+            f"Soak: {self.effective_soak()}",
         ]
         if self.active_injuries:
             lines.append(f"Injuries: {'; '.join(self.active_injuries)}")

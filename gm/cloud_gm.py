@@ -14,6 +14,7 @@ from pathlib import Path
 from dataclasses import dataclass
 from typing import Iterator
 from openai import OpenAI
+from engine.equipment import build_equipment_narration_block
 from gm.context import ContextPackage
 
 PROMPT_PATH = Path(__file__).parent / "prompts" / "narration.txt"
@@ -255,6 +256,7 @@ def _build_prompt(ctx: ContextPackage) -> str:
     return template.format(
         character_summary=ctx.character.narrative_status(),
         character_voice=ctx.character.voice_notes,
+        equipment_block=build_equipment_narration_block(ctx.character.loadout),
         campaign_name=ctx.arc.campaign_name,
         story_position=f"Part {ctx.arc.current_act} of {ctx.arc.total_acts} — {ctx.arc.act_name}",
         throughline_question=ctx.arc.throughline_question,

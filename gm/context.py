@@ -197,6 +197,7 @@ class ContextPackage:
     prose_diagnostic:   Optional[dict] = None  # v1.5: reserved for prose diagnostic signal (Game Mechanics v1.1 §13)
     anchor_instruction: Optional[str] = None   # v2.5: set when act_progress >= 1.0 (§26.4)
     expected_turns:     list[int] = field(default_factory=lambda: [8, 12])  # v2.5: [min, max] from spine
+    combat_damage_note: str = ""               # v3.0: Phase 9 — weapon damage context for combat checks (§18)
 
     def build_dice_result_block(self) -> str:
         if self.roll_result is None:
@@ -224,6 +225,14 @@ class ContextPackage:
                 f"  Strong {side} ({abs(self.roll_result.net_advantages)}): "
                 "This should be notably impactful in the narrative"
             )
+        # Phase 9: weapon damage context for combat checks (§18)
+        if self.combat_damage_note:
+            lines.append("")
+            lines.append(self.combat_damage_note)
+        # Soak info for incoming damage narration
+        soak = self.character.effective_soak()
+        if soak > 0:
+            lines.append(f"  Character soak: {soak} (incoming wounds reduced by this amount)")
         return "\n".join(lines)
 
     def build_npc_block(self) -> str:

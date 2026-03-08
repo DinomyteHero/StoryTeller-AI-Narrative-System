@@ -21,6 +21,11 @@ from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 
 from engine.character import Character
+from engine.equipment import (
+    COMBAT_SKILLS,
+    build_combat_damage_block,
+    get_weapon_for_skill,
+)
 from engine.checks import (
     CheckRequest,
     DIFFICULTY_LABELS,
@@ -438,6 +443,15 @@ async def handle_turn(
                     effective_strain_threshold,
                 )
 
+    # Phase 9: Compute combat damage context for narration (§18)
+    combat_damage_note = ""
+    if (roll_result and check_decision.requires_check
+            and check_decision.skill in COMBAT_SKILLS
+            and roll_result.succeeded):
+        weapon = get_weapon_for_skill(character.loadout, check_decision.skill)
+        if weapon:
+            combat_damage_note = build_combat_damage_block(roll_result, weapon)
+
     # ── Step 5: Assemble context package ──────────────────────────────
     story_summary = get_act_summaries(session_id)
     npc_states = load_npc_states(session_id, spine)
@@ -501,6 +515,7 @@ async def handle_turn(
         roll_result=roll_result,
         anchor_instruction=anchor_inst,
         expected_turns=current_act.get("expected_turns", [8, 12]),
+        combat_damage_note=combat_damage_note,
     )
 
     # ── Step 6: Narrate (cloud model — one call) ─────────────────────
@@ -742,6 +757,15 @@ async def handle_turn_stream(
                     effective_strain_threshold,
                 )
 
+    # Phase 9: Compute combat damage context for narration (§18)
+    combat_damage_note = ""
+    if (roll_result and check_decision.requires_check
+            and check_decision.skill in COMBAT_SKILLS
+            and roll_result.succeeded):
+        weapon = get_weapon_for_skill(character.loadout, check_decision.skill)
+        if weapon:
+            combat_damage_note = build_combat_damage_block(roll_result, weapon)
+
     # ── Step 5: Assemble context package ──────────────────────────────
     story_summary = get_act_summaries(session_id)
     npc_states = load_npc_states(session_id, spine)
@@ -805,6 +829,7 @@ async def handle_turn_stream(
         roll_result=roll_result,
         anchor_instruction=anchor_inst,
         expected_turns=current_act.get("expected_turns", [8, 12]),
+        combat_damage_note=combat_damage_note,
     )
 
     # ── Step 6: Stream narration via SSE ──────────────────────────────

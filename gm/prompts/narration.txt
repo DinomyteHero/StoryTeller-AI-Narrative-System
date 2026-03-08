@@ -27,6 +27,9 @@ CHARACTER
 CHARACTER VOICE:
 {character_voice}
 
+LOADOUT:
+{equipment_block}
+
 ═══════════════════════════════════════════
 STORY CONTEXT
 ═══════════════════════════════════════════
