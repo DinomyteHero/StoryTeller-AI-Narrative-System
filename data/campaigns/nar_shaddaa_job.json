@@ -1,9 +1,199 @@
 {
     "name": "The Nar Shaddaa Job",
     "era": "galactic_civil_war",
-    "character_id": "keth_varso",
     "total_acts": 4,
     "throughline_question": "Can a man who has only ever looked out for himself become someone worth following?",
+    "allegiances": [
+        {
+            "id": "independent",
+            "display_name": "Independent Operator",
+            "description": "Freelance smugglers and fixers working the margins of Hutt Space, beholden to no faction but their own debts.",
+            "character_variants": [
+                {
+                    "id": "keth_varso",
+                    "allegiance": "independent",
+                    "pitch": "A Bothan smuggler drowning in Hutt debt, running one last job on the Smuggler's Moon. The cargo is sealed. The contact is gone. The only way out is through.",
+                    "species": "bothan",
+                    "career": "smuggler",
+                    "career_type": "scoundrel",
+                    "specializations": ["pilot"],
+                    "primary_game_line": "edge_of_empire",
+                    "force_sensitive": false,
+                    "motivation_default": {
+                        "track": "obligation",
+                        "possible_types": ["debt", "favor", "criminal"]
+                    },
+                    "starting_situation": "Keth has just dropped out of hyperspace above Nar Shaddaa. His contact Doss has gone dark. A sealed cargo container sits in his hold.",
+                    "voice_baseline": "Dry, observational. Dark humor as a defense mechanism. Reads situations and people quickly. Rarely surprised, rarely panicked.",
+                    "background": "A Bothan smuggler who owes a significant debt to a Hutt crime lord named Vossk the Patient. Operates the ship Mira's Luck on independent contracts, always looking for the job that will finally settle the balance.",
+                    "integration_layer": {
+                        "entry_point": "Keth arrives at Nar Shaddaa with sealed cargo and a missing contact, already in debt to Vossk the Patient.",
+                        "personal_stakes": "This job is supposed to clear his debt to Vossk. If it goes wrong, there is no second chance and nowhere to run.",
+                        "npc_overrides": {
+                            "Vossk the Patient": {
+                                "disposition_start": 0.45,
+                                "relationship": "creditor"
+                            }
+                        },
+                        "anchor_adaptations": {
+                            "arrival_with_hot_cargo": "Keth docks with sealed cargo and begins searching for Doss",
+                            "contact_discovered": "Keth learns the truth about Doss — arrested, hiding, or a betrayer",
+                            "obligation_triggered": "Vossk's patience runs out and the debt becomes inescapable",
+                            "resolution_approach": "Keth finds a path to resolve the job or escape"
+                        }
+                    },
+                    "characteristics_base": {
+                        "brawn": 2,
+                        "agility": 3,
+                        "intellect": 3,
+                        "cunning": 4,
+                        "willpower": 2,
+                        "presence": 3
+                    },
+                    "skills_base": {
+                        "deception": 2,
+                        "piloting_space": 2,
+                        "streetwise": 1,
+                        "skulduggery": 1,
+                        "coordination": 1,
+                        "perception": 1
+                    },
+                    "wound_threshold": 12,
+                    "strain_threshold": 12,
+                    "soak": 2,
+                    "starting_loadout": {
+                        "weapons": [
+                            {
+                                "name": "Modified DL-44 heavy blaster pistol",
+                                "skill": "ranged_light",
+                                "damage_bonus": 7,
+                                "critical_rating": 3,
+                                "qualities": ["stun_setting"],
+                                "narrative_note": "Scratched and reblued twice. The grip is shaped to Keth's hand from years of use."
+                            }
+                        ],
+                        "armor": {
+                            "name": "Spacer's leather jacket (armored liner)",
+                            "soak_bonus": 1,
+                            "defense": 0,
+                            "narrative_note": "Looks like a jacket. Is a jacket. The liner is a pragmatic addition, not a fashion statement."
+                        },
+                        "tools": [
+                            {
+                                "category": "slicing",
+                                "name": "Custom slicing kit",
+                                "mechanical_effect": "Enables Computers checks on secured systems. Removes 1 setback from slicing attempts.",
+                                "narrative_note": "Hidden in the lining of his bag. Three dataspikes, a code cylinder, and a signal scrambler."
+                            },
+                            {
+                                "category": "medical",
+                                "name": "Two stimpacks",
+                                "mechanical_effect": "Can heal 5 wounds per stimpack. Two uses before resupply needed.",
+                                "narrative_note": "Standard Alliance surplus. Functional but not comfortable."
+                            }
+                        ],
+                        "special_items": [
+                            {
+                                "name": "Forged Imperial transit pass",
+                                "mechanical_effect": "Reduces difficulty of checks to pass Imperial customs by 1.",
+                                "narrative_note": "Good enough to fool a bored checkpoint guard. Would not survive an ISB audit."
+                            }
+                        ]
+                    },
+                    "starting_xp": 110
+                }
+            ]
+        },
+        {
+            "id": "fringe",
+            "display_name": "Fringe Element",
+            "description": "Outcasts and opportunists who survive in the cracks between Hutt cartels and Imperial authority on the Smuggler's Moon.",
+            "character_variants": [
+                {
+                    "id": "renn_tavik",
+                    "allegiance": "fringe",
+                    "pitch": "A human fixer who knows every back alley on Nar Shaddaa. Renn brokers deals between people who cannot be seen talking to each other — until one deal goes sideways.",
+                    "species": "human",
+                    "career": "smuggler",
+                    "career_type": "scoundrel",
+                    "specializations": ["scoundrel"],
+                    "primary_game_line": "edge_of_empire",
+                    "force_sensitive": false,
+                    "motivation_default": {
+                        "track": "obligation",
+                        "possible_types": ["favor", "criminal", "betrayal"]
+                    },
+                    "starting_situation": "Renn's latest brokered deal has fallen apart. The buyer has vanished. The seller wants payment. And someone has been asking questions about Renn by name.",
+                    "voice_baseline": "Fast-talking, disarming. Always has an angle. Speaks in half-truths that happen to be fully true.",
+                    "background": "A fixer born on Nar Shaddaa who has never left. Knows the station like a second skin. Owes favors to too many people and collects favors from everyone else.",
+                    "integration_layer": {
+                        "entry_point": "Renn gets pulled into the cargo situation when a contact asks them to find a missing middleman — Doss.",
+                        "personal_stakes": "Renn's reputation is the only currency that matters. If this job burns their network, they have nothing left.",
+                        "npc_overrides": {
+                            "Doss": {
+                                "disposition_start": 0.7,
+                                "relationship": "professional contact"
+                            }
+                        },
+                        "anchor_adaptations": {
+                            "arrival_with_hot_cargo": "Renn is approached about the missing middleman and the orphaned cargo",
+                            "contact_discovered": "Renn discovers what happened to Doss through their network",
+                            "obligation_triggered": "The people Renn owes favors to start calling them in simultaneously",
+                            "resolution_approach": "Renn must broker a final deal or burn every bridge to escape"
+                        }
+                    },
+                    "characteristics_base": {
+                        "brawn": 2,
+                        "agility": 2,
+                        "intellect": 3,
+                        "cunning": 4,
+                        "willpower": 2,
+                        "presence": 4
+                    },
+                    "skills_base": {
+                        "charm": 2,
+                        "deception": 2,
+                        "streetwise": 2,
+                        "negotiation": 1,
+                        "perception": 1,
+                        "cool": 1
+                    },
+                    "wound_threshold": 12,
+                    "strain_threshold": 13,
+                    "soak": 2,
+                    "starting_loadout": {
+                        "weapons": [
+                            {
+                                "name": "Holdout blaster",
+                                "skill": "ranged_light",
+                                "damage_bonus": 5,
+                                "critical_rating": 4,
+                                "qualities": ["stun_setting"],
+                                "narrative_note": "Concealed in a sleeve holster. Renn would rather talk their way out."
+                            }
+                        ],
+                        "armor": null,
+                        "tools": [
+                            {
+                                "category": "communication",
+                                "name": "Encrypted comlink array",
+                                "mechanical_effect": "Can contact any NPC in the roster without interception on a successful Computers check.",
+                                "narrative_note": "Three frequencies, each for a different tier of contact."
+                            }
+                        ],
+                        "special_items": [
+                            {
+                                "name": "Favor ledger datapad",
+                                "mechanical_effect": "Once per act, can call in a minor favor from an NPC for information.",
+                                "narrative_note": "Encrypted. The contacts listed would kill to keep their names off any other list."
+                            }
+                        ]
+                    },
+                    "starting_xp": 100
+                }
+            ]
+        }
+    ],
     "acts": [
         {
             "number": 1,
@@ -13,34 +203,61 @@
             "opening_location": "Aboard Mira's Luck, approaching Nar Shaddaa orbit",
             "galactic_context": "Imperial customs interdiction has tightened across the Y'Toub system following a Rebel supply intercept at Nal Hutta. Hutt Council territorial disputes between Vossk's faction and the Besadii clan have made landing clearances unpredictable — bribes that worked last month now go to the wrong people. An unrelated freighter explosion at Dock 14 yesterday has every security team on the Promenade running nervous.",
             "anchor": "arrival_with_hot_cargo",
-            "anchor_description": "Keth lands on Nar Shaddaa with the cargo and begins navigating the station, establishing his presence and making initial contact attempts to find Doss or an alternative drop point.",
             "next_anchor": "contact_discovered",
-            "expected_turns": [8, 12],
-            "xp_config": {
-                "base_xp": 20,
-                "bonus_conditions": ["anchor_engagement", "skill_breadth", "motivation_interaction"]
-            },
             "open_threads": [
                 "Who is the mysterious comm voice?",
                 "What happened to Doss?",
                 "What is actually in the cargo?"
+            ],
+            "expected_turns": "8-12",
+            "xp_base": 20,
+            "xp_bonus_conditions": [
+                {
+                    "condition_type": "anchor_engagement",
+                    "description": "Player engages meaningfully with the arrival anchor",
+                    "xp_value": 5
+                },
+                {
+                    "condition_type": "skill_breadth",
+                    "description": "Player uses 3+ different skills during the act",
+                    "xp_value": 5
+                },
+                {
+                    "condition_type": "motivation_interaction",
+                    "description": "Player's obligation influences a decision",
+                    "xp_value": 5
+                }
             ]
         },
         {
             "number": 2,
             "name": "The Complication",
             "tension": "critical",
+            "opening_situation": "The search for Doss has led deeper into the mid-level Promenade district. Imperial patrols are increasing. Someone knows Keth is looking.",
             "opening_location": "Nar Shaddaa, mid-level Promenade district",
             "galactic_context": "A Rebel cell has been broken on the Smuggler's Moon — ISB is running sweeps through the mid-levels. Vossk's patience with late deliveries has become a topic of discussion among his intermediaries, and discussions among Hutts have consequences.",
             "anchor": "contact_discovered",
-            "anchor_description": "Keth discovers what happened to Doss — whether arrested, hiding, or having betrayed him. The truth about his contact's fate forces Keth to reassess the job and his next move.",
             "next_anchor": "obligation_triggered",
-            "expected_turns": [8, 12],
-            "xp_config": {
-                "base_xp": 20,
-                "bonus_conditions": ["anchor_engagement", "skill_breadth", "failure_engagement"]
-            },
-            "open_threads": []
+            "open_threads": [],
+            "expected_turns": "8-12",
+            "xp_base": 20,
+            "xp_bonus_conditions": [
+                {
+                    "condition_type": "anchor_engagement",
+                    "description": "Player engages meaningfully with Doss's fate",
+                    "xp_value": 5
+                },
+                {
+                    "condition_type": "skill_breadth",
+                    "description": "Player uses 3+ different skills during the act",
+                    "xp_value": 5
+                },
+                {
+                    "condition_type": "failure_engagement",
+                    "description": "Player meaningfully engages with a failed check",
+                    "xp_value": 5
+                }
+            ]
         },
         {
             "number": 3,
@@ -50,7 +267,6 @@
             "opening_location": "Nar Shaddaa, lower levels near Vossk's territory",
             "galactic_context": "The Besadii clan has moved on one of Vossk's subsidiary operations in the lower levels, pulling his enforcers away from the Promenade. For a narrow window, Vossk's grip on this district is weaker than it has been in years.",
             "anchor": "obligation_triggered",
-            "anchor_description": "Vossk's patience runs out. Through intermediaries, enforcers, or a direct message, the weight of Keth's debt makes itself undeniable. The job is no longer optional — it is survive or pay.",
             "next_anchor": "resolution_approach",
             "expected_turns": [6, 10],
             "xp_config": {
@@ -230,46 +446,182 @@
             "number": 4,
             "name": "The Resolution",
             "tension": "falling",
+            "opening_situation": "The endgame is in motion. Keth has found or created a path to resolve the job. Whether that means delivering the cargo, negotiating with Vossk, or running, the clock is ticking.",
             "opening_location": "Nar Shaddaa, docking ring and departure corridors",
             "galactic_context": "Imperial customs has announced a 48-hour lockdown of all non-essential departures from Nar Shaddaa. Officially, it is a security sweep. Unofficially, someone important lost something valuable, and nobody leaves until it is found.",
             "anchor": "resolution_approach",
-            "anchor_description": "Keth finds or creates a path to resolve the job — deliver the cargo, negotiate with Vossk, escape Nar Shaddaa, or some combination. The endgame is in motion.",
-            "next_anchor": "campaign_end",
-            "expected_turns": [6, 10],
-            "xp_config": {
-                "base_xp": 25,
-                "bonus_conditions": ["anchor_engagement", "skill_breadth", "motivation_interaction", "failure_engagement"]
-            },
-            "open_threads": []
+            "next_anchor": null,
+            "open_threads": [],
+            "expected_turns": "6-10",
+            "xp_base": 25,
+            "xp_bonus_conditions": [
+                {
+                    "condition_type": "anchor_engagement",
+                    "description": "Player drives toward a resolution",
+                    "xp_value": 5
+                },
+                {
+                    "condition_type": "skill_breadth",
+                    "description": "Player uses 3+ different skills during the act",
+                    "xp_value": 5
+                },
+                {
+                    "condition_type": "motivation_interaction",
+                    "description": "Player's obligation influences the resolution",
+                    "xp_value": 5
+                },
+                {
+                    "condition_type": "failure_engagement",
+                    "description": "Player engages with consequences of failure",
+                    "xp_value": 5
+                }
+            ]
         }
     ],
     "npc_roster": [
         {
             "name": "Vossk the Patient",
-            "role": "Hutt crime lord — Keth's creditor",
+            "role": "Hutt crime lord — the player's creditor and primary pressure source",
             "disposition_start": 0.45,
+            "disposition_trajectory": "declining",
             "motivation": "Profit and reputation, in that order.",
-            "voice_notes": "Always through intermediaries. Formal. Indirect. Never threatens directly — observes possibilities.",
+            "voice_notes": "Always through intermediaries. Formal. Indirect. Never threatens directly — observes possibilities. Every sentence implies that he has already considered what happens if you fail.",
             "behavioral_envelope": [
                 "Never appears in person during this campaign",
-                "Never makes direct threats — always frames consequences as observations"
+                "Never makes direct threats — always frames consequences as observations",
+                "Communicates through intermediaries who paraphrase his words",
+                "Patience is genuine but finite — once it ends, action is immediate"
             ],
             "knows_at_start": ["Keth owes him", "The job exists", "It is late"],
-            "doesnt_know_at_start": ["What is actually in the cargo", "That Doss has gone dark"]
+            "doesnt_know_at_start": ["What is actually in the cargo", "That Doss has gone dark"],
+            "per_act_state": [
+                {
+                    "act": 1,
+                    "role_in_act": "Distant pressure — Vossk's name is invoked by NPCs as a reminder of what Keth owes",
+                    "disposition_expected": 0.45
+                },
+                {
+                    "act": 2,
+                    "role_in_act": "Growing impatience — intermediaries deliver increasingly pointed messages",
+                    "disposition_expected": 0.35
+                },
+                {
+                    "act": 3,
+                    "role_in_act": "Patience ends — enforcers or direct consequences deployed as crisis escalates",
+                    "disposition_expected": 0.2
+                },
+                {
+                    "act": 4,
+                    "role_in_act": "Final judgment — Vossk's response depends entirely on whether the job is resolved",
+                    "disposition_expected": "variable"
+                }
+            ],
+            "npc_relationships": [
+                {
+                    "npc": "Doss",
+                    "nature": "disposable asset",
+                    "weight": -0.3
+                }
+            ]
         },
         {
             "name": "Doss",
-            "role": "Keth's contact — status unknown at campaign start",
+            "role": "Keth's contact — status unknown at campaign start, central mystery of Act 1",
             "disposition_start": 0.65,
+            "disposition_trajectory": "variable",
             "motivation": "Survival — Doss is in over his head and knows it.",
-            "voice_notes": "Half-sentences and nervous deflections. Talks fast when scared. Loyal in his way but self-preservation wins when it has to.",
+            "voice_notes": "Half-sentences and nervous deflections. Talks fast when scared. Loyal in his way but self-preservation wins when it has to. Voice goes high when lying.",
             "behavioral_envelope": [
-                "Never confronts anyone directly — always deflects or runs"
+                "Never confronts anyone directly — always deflects or runs",
+                "Will betray if cornered but feels genuine guilt about it",
+                "Information comes out in fragments, never the full picture at once"
             ],
-            "knows_at_start": ["The drop coordinates", "Keth's ship signature"],
-            "doesnt_know_at_start": [],
-            "resolution": "randomly_determined",
-            "options": ["arrested_by_isb", "sold_keth_out", "in_hiding"]
+            "knows_at_start": ["The drop coordinates", "Keth's ship signature", "More about the cargo than he has told anyone"],
+            "doesnt_know_at_start": ["That Vossk is losing patience specifically with Keth"],
+            "per_act_state": [
+                {
+                    "act": 1,
+                    "role_in_act": "Absent — his disappearance is the inciting mystery",
+                    "disposition_expected": "unknown"
+                },
+                {
+                    "act": 2,
+                    "role_in_act": "Discovered — player learns his fate and must decide how to respond",
+                    "disposition_expected": 0.5
+                },
+                {
+                    "act": 3,
+                    "role_in_act": "Complicating factor — Doss's situation creates additional pressure on the player",
+                    "disposition_expected": 0.4
+                },
+                {
+                    "act": 4,
+                    "role_in_act": "Resolution element — Doss's fate is part of the final equation",
+                    "disposition_expected": "variable"
+                }
+            ],
+            "npc_relationships": [
+                {
+                    "npc": "Vossk the Patient",
+                    "nature": "terrified subordinate",
+                    "weight": -0.6
+                }
+            ]
+        }
+    ],
+    "variation_points": [
+        {
+            "id": "doss_fate",
+            "trigger_act": 2,
+            "description": "What happened to Doss — resolved when the player discovers the truth",
+            "selection_method": "random",
+            "options": [
+                {
+                    "id": "arrested_by_isb",
+                    "description": "Doss was picked up in the ISB sweep. He is in an Imperial holding facility.",
+                    "npc_state_changes": {
+                        "Doss": {"disposition_delta": -0.1, "status": "imprisoned"}
+                    }
+                },
+                {
+                    "id": "sold_keth_out",
+                    "description": "Doss sold information about Keth's run to a rival. He is hiding from both sides.",
+                    "npc_state_changes": {
+                        "Doss": {"disposition_delta": -0.3, "status": "hiding_as_traitor"}
+                    }
+                },
+                {
+                    "id": "in_hiding",
+                    "description": "Doss discovered something about the cargo and panicked. He is hiding but still loyal.",
+                    "npc_state_changes": {
+                        "Doss": {"disposition_delta": 0.0, "status": "hiding_scared"}
+                    }
+                }
+            ]
+        }
+    ],
+    "factions": [
+        {
+            "faction_id": "vossk_cartel",
+            "display_name": "Vossk's Cartel",
+            "disposition_start": 0.45,
+            "influence_start": 0.7,
+            "awareness_start": 0.6,
+            "per_act_drift": {
+                "2": {"disposition": -0.05},
+                "3": {"disposition": -0.1, "awareness": 0.1}
+            }
+        },
+        {
+            "faction_id": "imperial_customs",
+            "display_name": "Imperial Customs",
+            "disposition_start": 0.3,
+            "influence_start": 0.8,
+            "awareness_start": 0.2,
+            "per_act_drift": {
+                "3": {"awareness": 0.15},
+                "4": {"awareness": 0.2, "disposition": -0.1}
+            }
         }
     ],
     "vehicle_registry": [
