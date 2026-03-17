@@ -1,7 +1,7 @@
 # Storyteller V3 — Project State Matrix
 
-**Version:** 1.3
-**Date:** March 8, 2026  
+**Version:** 1.4
+**Date:** March 17, 2026
 **Purpose:** Single-page view of every major capability's status.
 Prevents the most common review error: mistaking a designed-but-not-
 built item for a missing design, or mistaking a deferred item for an
@@ -14,7 +14,7 @@ Vision, is it designed, is it part of V1, and when does it get built.
 "Reserved" means V1 includes schema fields or architecture hooks but
 no active functionality.
 
-**Authoritative source for item-level status:** Backlog v3.0.
+**Authoritative source for item-level status:** Backlog v3.2.
 **Authoritative source for design specs:** Game Mechanics v1.8,
 Implementation v2.5, Campaign Studio Design v1.3, Campaign Studio
 Implementation v1.3, Design Gap Analysis v2.0, Deferred Design and
@@ -23,6 +23,9 @@ Logic Analysis v1.0.
 **Implementation status as of this version:** Milestones 0-3 complete.
 Milestone 4 partial (Phase 17 complete, Phases 18-22 not started).
 Campaign Studio CS-1 through CS-4 complete.
+
+**Codebase metrics:** ~15,160 lines application code, ~8,454 lines
+test code, 17 test files, 20 documentation files.
 
 ---
 
@@ -213,6 +216,7 @@ explained by intentional deferral or architecture reservation.
 | Path differentiation proof | Validation / enforcement | No concrete test proves allegiances produce structurally different experiences beyond narrative wrappers | Open — integration coverage audit needed in Campaign Studio validation. Backlog items 3.33 and 3.34 partially address this. |
 | Identity drift surfacing | Experience surfacing | System tracks identity accumulation well at act boundaries but does not guarantee the player feels drift during turn-to-turn play | Open — requires drift surface policy (prompt engineering spec, Phase 7+). |
 | Introspection trigger logic | Experience surfacing | Introspection is supported in prompts and context routing but the trigger for when a turn should become introspective is implicit | Open — requires explicit trigger conditions (Phase 7+). |
+| Missing data directories | Infrastructure | `data/evaluation_pairs/` and `data/canon_profiles/` referenced in design docs but directories do not exist in repo | Future — create when Phase 21 or trained evaluator work begins. No impact on current functionality. |
 
 ---
 
@@ -234,6 +238,13 @@ explained by intentional deferral or architecture reservation.
 
 ## Revision History
 
+**v1.4 — Documentation audit sync (March 17, 2026)**
+
+Added codebase metrics to header. Backlog reference updated to v3.2.
+Added missing data directories gap to Identified Gaps table. Verified
+all capability statuses against actual codebase — no status changes
+needed (all claims from v1.3 are accurate).
+
 **v1.3 — Post-milestone implementation status sync (March 8, 2026)**
 
 Updated all capability rows to reflect actual implementation state
@@ -248,5 +259,5 @@ Initial comprehensive capability matrix.
 
 ---
 
-*Storyteller V3 — Project State Matrix v1.3*
+*Storyteller V3 — Project State Matrix v1.4*
 *What's promised. What's designed. What's built. What's next.*

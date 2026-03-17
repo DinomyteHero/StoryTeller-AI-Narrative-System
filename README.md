@@ -72,7 +72,7 @@ Key settings in `.env`:
 |---|---|---|
 | `NARRATIVE_BACKEND` | `cloud` or `local` | `cloud` |
 | `CLOUD_PROVIDER` | `openai` or `openrouter` | `openai` |
-| `CLOUD_MODEL` | Cloud model for narration | `gpt-4.1` |
+| `CLOUD_MODEL` | Cloud model for narration | `gpt-5.2` |
 | `OPENAI_API_KEY` | Your OpenAI API key | — |
 | `OLLAMA_URL` | Ollama endpoint | `http://localhost:11434` |
 | `LOCAL_MODEL` | Local model for check decisions | `qwen3.5:9b` |
@@ -104,10 +104,11 @@ storyteller-v3/
 ├── data/
 │   ├── campaigns/   # Campaign spine JSON files
 │   ├── characters/  # Character JSON files
-│   ├── talent_trees/ # Specialization trees
-│   └── force_powers/ # Force power definitions
+│   ├── talent_trees/ # 6 specialization trees + talent library
+│   ├── force_powers/ # 5 Force power definitions
+│   └── personas/    # Writer's Room personas (55)
 ├── tests/           # Test suite (17 test files)
-└── docs/            # All project documentation
+└── docs/            # All project documentation (20 files)
 ```
 
 ### Key Design Rules
