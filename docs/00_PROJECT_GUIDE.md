@@ -1,7 +1,7 @@
 # Storyteller V3 — Project Guide
 
-**Version:** 1.2
-**Date:** March 8, 2026  
+**Version:** 1.3
+**Date:** March 17, 2026
 **Purpose:** Front-door orientation for the entire project. Reading
 order, document authority, current state, and navigation.
 
@@ -110,7 +110,13 @@ authoritative.
 
 ---
 
-## Current Project State (March 8, 2026)
+## Current Project State (March 17, 2026)
+
+**Codebase metrics:**
+- ~15,160 lines of application code (Python + HTML) across 40+ files
+- ~8,454 lines of test code across 17 test files
+- 20 documentation files in `docs/`
+- 2 campaign spines, 2 characters, 6 talent trees, 5 Force powers, 55 Writer's Room personas
 
 **Design completeness:** Every item within the current planning horizon
 has been fully designed. Zero items with status NEEDS DESIGN,
@@ -138,8 +144,10 @@ Phase 5 long-term aspirations (5.1–5.6) and open research questions
 Implementation plan for Phase 18 exists at
 `docs/PHASE_18_IMPLEMENTATION_PLAN.md`.
 
-**Verified with:** Cloud LLM: OpenAI gpt-4.1. Local LLM: Ollama
-with Qwen 3.5:9b. Platform: Windows 11, Python 3.14.
+**Verified with:** Cloud LLM: OpenAI (code defaults to `gpt-5.2`,
+configurable via `CLOUD_MODEL` env var; `.env.example` ships with
+`gpt-4.1`). Local LLM: Ollama with Qwen 3.5:9b. Platform: Windows 11,
+Python 3.14.
 
 **Known V1 limitations:**
 
@@ -156,6 +164,9 @@ with Qwen 3.5:9b. Platform: Windows 11, Python 3.14.
 | LLM Evaluation needs Category 6 (behavioral envelope compliance) in test protocol | Flagged | Backlog Document Status Summary |
 | Active cloud model for V1 pending head-to-head test | Open decision D.2 | Backlog Pending Decisions |
 | DeepSeek V4 and Qwen3.5-397B model monitoring | Watching | Backlog 1.40, 1.41 |
+| `data/evaluation_pairs/` directory does not exist yet | Future | Needed for trained local evaluator (post-CS-4) |
+| `data/canon_profiles/` directory does not exist yet | Future | Needed for Phase 21 (Canon Character Profiles) |
+| `.env.example` shows `gpt-4.1` but code defaults to `gpt-5.2` | Inconsistency | May confuse new users; kept as-is since `.env.example` should reflect user's actual API key provider |
 
 ---
 
@@ -255,6 +266,14 @@ character's story, not containers that own characters.
 
 ## Revision History
 
+**v1.3 — Documentation audit sync (March 17, 2026)**
+
+Added codebase metrics section to Current Project State. Corrected
+cloud model reference (code defaults to `gpt-5.2`, not `gpt-4.1`).
+Added known open items for missing directories (`data/evaluation_pairs/`,
+`data/canon_profiles/`) and `.env.example` model inconsistency.
+Updated date references throughout.
+
 **v1.2 — Post-milestone documentation sync (March 8, 2026)**
 
 Updated Current Project State to reflect Milestones 0-3 completion,
@@ -269,5 +288,5 @@ Initial document.
 
 ---
 
-*Storyteller V3 — Project Guide v1.2*
+*Storyteller V3 — Project Guide v1.3*
 *The front door. Start here.*

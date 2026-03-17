@@ -1,6 +1,6 @@
 # Storyteller V3 — Build Roadmap
 
-**Document version:** 1.2
+**Document version:** 1.3
 **Purpose:** Phased build plan from V1 completion to a playable multi-
 era saga. Each milestone produces a testable system. Each phase within
 a milestone has files, a goal, dependencies, and success criteria.
@@ -650,7 +650,7 @@ Success criteria:
 
 ### Phase 21: Canon Character Profiles
 
-**Status: NOT STARTED.** `data/canon_profiles/` directory exists but is empty. Schema fields (CanonVoice, CanonRelationshipDynamics, CanonActOverride) exist in `studio/schema.py`.
+**Status: NOT STARTED.** `data/canon_profiles/` directory does not yet exist (will be created when this phase begins). Schema fields (CanonVoice, CanonRelationshipDynamics, CanonActOverride) exist in `studio/schema.py`.
 
 Files: `data/canon_profiles/` (new — initial profiles for Academy/NJO
 era characters), `gm/context.py` (extend — canon profile injection)
@@ -794,6 +794,15 @@ were built. And the story was theirs.
 
 ## Revision History
 
+**v1.3 — Documentation audit corrections (March 17, 2026)**
+
+1. **Phase 21 directory correction.** `data/canon_profiles/` was
+   incorrectly described as "exists but is empty" — the directory does
+   not yet exist in the repo. Corrected to "does not yet exist."
+
+2. **No phase content changed.** All milestone definitions, phase
+   ordering, success criteria, and dependencies remain as specified.
+
 **v1.2 — Phase status annotations (March 2026)**
 
 1. **Status annotations added to every phase and milestone.** Each
@@ -822,5 +831,5 @@ were built. And the story was theirs.
 
 ---
 
-*Storyteller V3 — Build Roadmap v1.2*
+*Storyteller V3 — Build Roadmap v1.3*
 *The path from first dice roll to the saga.*

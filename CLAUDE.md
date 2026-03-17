@@ -28,10 +28,12 @@ The campaign spine JSON is the interface contract between them.
 - Python 3.11+, FastAPI + Uvicorn
 - Local LLM: Ollama with Qwen3.5:9B (check decisions, structured JSON)
 - Cloud LLM: OpenAI-compatible SDK, provider-configurable via env vars
-  (OpenAI, OpenRouter, or any OpenAI-compatible endpoint)
+  (OpenAI, OpenRouter, or any OpenAI-compatible endpoint). Code
+  defaults to `gpt-5.2`; configure via `CLOUD_MODEL` env var.
 - SQLite with WAL mode
 - Pydantic v2 for all data models
 - Single-file HTML frontend
+- NetworkX (optional, for Campaign Studio graph validation)
 
 ## Documentation
 
@@ -235,14 +237,22 @@ Campaign Studio (parallel track):
 
 **Next work:** Phase 18 (Psychometric Prologue) or Phases 20-22.
 
+## Codebase Metrics (as of March 17, 2026)
+
+- ~15,160 lines of application code (Python + HTML)
+- ~8,454 lines of test code across 17 test files
+- 20 documentation files in `docs/`
+- 2 campaign spines, 2 characters, 6 talent trees, 5 Force powers
+
 ## Repo Structure
 
 ```
 storyteller-v3/
 ├── CLAUDE.md              ← you are here
+├── README.md              # Project overview and getting started
 ├── pyproject.toml
 ├── .env.example
-├── docs/                  # All project documentation
+├── docs/                  # All project documentation (20 files)
 │   ├── 00_PROJECT_GUIDE.md                     # Start here — orientation
 │   ├── PROJECT_STATE_MATRIX.md                 # What's promised/designed/built
 │   ├── STORYTELLER_V3_IMPLEMENTATION.md        # Primary spec
@@ -262,23 +272,23 @@ storyteller-v3/
 │   ├── PHASE_18_IMPLEMENTATION_PLAN.md         # Phase 18 plan
 │   ├── CLAUDE_CODE_INITIAL_PROMPT.md           # Doc sync prompt
 │   └── prose_quality_review_session_1.md       # Playtest notes
-├── engine/                # Pure Python — dice, character, checks
-│   ├── dice.py            # FFG dice system (Phase 1)
-│   ├── character.py       # Character model (Phase 1)
-│   ├── checks.py          # 6-stage pool pipeline (Phase 1)
-│   ├── equipment.py       # Loadout system (Phase 9)
-│   ├── advancement.py     # XP and behavioral inference (Phase 10)
-│   ├── talents.py         # Talent tree engine (Phase 11)
-│   ├── destiny.py         # Destiny Point pool (Phase 11.5)
-│   ├── reconciliation.py  # Post-turn reconciliation (Phase 7/13)
-│   ├── force.py           # Force dice and powers (Phase 14-15)
-│   ├── vehicle.py         # Vehicle/starship system (Phase 16)
-│   └── time_skip.py       # Time skip vignettes (Phase 17)
-├── gm/                    # LLM orchestration — local + cloud GM
-│   ├── local_gm.py        # Check decisions, annotations, diagnostics
-│   ├── cloud_gm.py        # Narration, milestones, time skips
-│   ├── context.py         # Context package assembly
-│   └── prompts/           # Prompt templates
+├── engine/                # Pure Python — dice, character, checks (5,106 lines)
+│   ├── dice.py            # FFG dice system — 7 die types, symbol tables (270 lines)
+│   ├── character.py       # Character model — Pydantic, 33 skills (220 lines)
+│   ├── checks.py          # 6-stage pool pipeline (197 lines)
+│   ├── equipment.py       # Loadout system — weapons, armor, tools (287 lines)
+│   ├── advancement.py     # XP and behavioral inference (462 lines)
+│   ├── talents.py         # Talent tree engine — 5-type taxonomy (797 lines)
+│   ├── destiny.py         # Destiny Point pool — light/dark spending (275 lines)
+│   ├── reconciliation.py  # Post-turn reconciliation + 16-step pipeline (952 lines)
+│   ├── force.py           # Force dice, powers, temptation (732 lines)
+│   ├── vehicle.py         # Vehicle/starship system (303 lines)
+│   └── time_skip.py       # Time skip vignettes (611 lines)
+├── gm/                    # LLM orchestration — local + cloud GM (1,805 lines)
+│   ├── local_gm.py        # Check decisions, annotations, diagnostics (478 lines)
+│   ├── cloud_gm.py        # Narration, milestones, time skips (946 lines)
+│   ├── context.py         # Context package assembly (381 lines)
+│   └── prompts/           # Prompt templates (8 files)
 │       ├── check_decision.txt
 │       ├── narration.txt
 │       ├── choice_annotation.txt
@@ -287,29 +297,29 @@ storyteller-v3/
 │       ├── force_power_milestone.txt
 │       ├── time_skip_opening.txt
 │       └── time_skip_closing.txt
-├── state/                 # SQLite persistence
-│   ├── db.py              # Database schema and connections
-│   ├── session.py         # Turn logging and state queries
-│   └── memory.py          # Episodic compression
-├── api/                   # FastAPI routes
-│   ├── main.py            # App bootstrap and frontend serving
-│   ├── game_routes.py     # Game Engine routes
-│   └── studio_routes.py   # Campaign Studio routes
+├── state/                 # SQLite persistence (547 lines)
+│   ├── db.py              # Database schema and connections (183 lines)
+│   ├── session.py         # Turn logging and state queries (244 lines)
+│   └── memory.py          # Episodic compression (120 lines)
+├── api/                   # FastAPI routes (3,253 lines)
+│   ├── main.py            # App bootstrap and frontend serving (71 lines)
+│   ├── game_routes.py     # Game Engine routes (2,685 lines)
+│   └── studio_routes.py   # Campaign Studio routes (497 lines)
 ├── web/                   # Single-file frontend
-│   └── index.html
-├── studio/                # Campaign Studio
-│   ├── schema.py          # Spine schema — interface contract
-│   ├── validate.py        # Four-gate validation suite
-│   ├── generate.py        # Modes 1, 2, 3 generation
-│   ├── seeding.py         # Deterministic seed derivation
-│   ├── difficulty.py      # Spine difficulty calibration
-│   ├── import_interface.py # Cross-era character import
-│   ├── prompts/           # Studio prompt templates
+│   └── index.html         # Prose reader UI (788 lines)
+├── studio/                # Campaign Studio (3,661 lines)
+│   ├── schema.py          # Spine schema — interface contract (527 lines)
+│   ├── validate.py        # Four-gate validation suite (487 lines)
+│   ├── generate.py        # Modes 1, 2, 3 generation (690 lines)
+│   ├── seeding.py         # Deterministic seed derivation (110 lines)
+│   ├── difficulty.py      # Spine difficulty calibration (353 lines)
+│   ├── import_interface.py # Cross-era character import (404 lines)
+│   ├── prompts/           # Studio prompt templates (4 files)
 │   │   ├── mode1_generate.txt
 │   │   ├── mode2_generate.txt
 │   │   ├── mode3_assist.txt
 │   │   └── npc_voice_gen.txt
-│   └── saga/              # Saga layer pipeline (CS-4)
+│   └── saga/              # Saga layer pipeline — CS-4 (1,090 lines)
 │       ├── pipeline.py    # 5-stage orchestrator
 │       ├── personas.py    # Persona pool management
 │       ├── diverge.py     # Stage 2: direction generation
@@ -323,11 +333,30 @@ storyteller-v3/
 │   ├── campaigns/         # nar_shaddaa_job.json, echoes_of_the_force.json
 │   ├── talent_trees/      # 6 specialization trees + talent_library.json
 │   ├── force_powers/      # 5 powers (enhance, heal_harm, influence, move, sense)
-│   ├── personas/          # writer_room_personas.json (55 personas)
-│   ├── evaluation_pairs/  # Pairwise comparison training data
-│   └── canon_profiles/    # Phase 21: canon character profiles (not yet populated)
-└── tests/                 # 17 test files covering Phases 1-17 + Studio
+│   └── personas/          # writer_room_personas.json (55 personas)
+└── tests/                 # 17 test files (8,454 lines)
+    ├── dice_validation.py
+    ├── studio_schema_test.py
+    ├── test_cs2_mode3.py
+    ├── test_cs3_mode2_import.py
+    ├── test_cs4_saga.py
+    ├── test_e2e_game_loop.py
+    ├── test_phase10_advancement.py
+    ├── test_phase115_destiny.py
+    ├── test_phase11_talents.py
+    ├── test_phase12_milestones.py
+    ├── test_phase13_choice_quality.py
+    ├── test_phase14_force.py
+    ├── test_phase155_fd_trees.py
+    ├── test_phase15_force_powers.py
+    ├── test_phase16_vehicles.py
+    └── test_phase17_time_skips.py
 ```
+
+**Note:** `data/evaluation_pairs/` and `data/canon_profiles/` directories
+are mentioned in design docs for future phases but do not yet exist in
+the repo. They will be created when Phase 21 (canon profiles) and the
+trained local evaluator (post-CS-4) are implemented.
 
 Game Engine scope: `engine/`, `gm/`, `state/`, `api/game_routes.py`,
 `web/`. Do not modify `studio/` when working on the Game Engine

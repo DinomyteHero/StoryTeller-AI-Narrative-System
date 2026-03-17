@@ -1,7 +1,7 @@
 # Storyteller V3 — Comprehensive Project Backlog
 
-**Document version:** 3.1
-**Last updated:** March 8, 2026  
+**Document version:** 3.2
+**Last updated:** March 17, 2026
 **Purpose:** Single source of truth for every planned, in-progress,
 deferred, and tracked item across the entire project. Nothing should
 exist as a "we talked about that" item — it lives here or it doesn't
@@ -37,7 +37,7 @@ Items that needed resolution before implementation could begin.
 | 0.2 | Implementation doc scope statement — add explicit "this covers Game Engine only" to Section 0 | **DONE** (Impl v1.7) | Implementation | Scope statement added. Title changed from "Full Implementation Document" to "Game Engine Implementation Document." |
 | 0.3 | Decision: two standalone implementation docs vs master + children | **RESOLVED** | — | Decision: two standalone documents. Game Engine Implementation (v1.7) and Campaign Studio Implementation (v1.0) now exist as separate companion documents. |
 | 0.4 | Retire superseded research docs — remove RESEARCH_SCOPING.md and SAGA_RESEARCH_FINDINGS.md from project files | **DONE** | Research Catalogue replaces both | Catalogue v1.0 absorbs all content. Files removed from project. |
-| 0.5 | First campaign spine authoring — "The Nar Shaddaa Job" full spine in Campaign Studio JSON format | **IN PROGRESS** | Impl §12, CS Design §4 | A V1-scope test spine exists in Implementation §12. It uses a simplified format (no `character_variants`, `prologue_scenes`, `variation_points`, `expected_turns`, `disposition_trajectory`). This is correct for V1 since those features aren't built. A full Campaign Studio-format spine is a Phase 3 deliverable (3.0c). |
+| 0.5 | First campaign spine authoring — "The Nar Shaddaa Job" full spine in Campaign Studio JSON format | **DONE** (Milestone 1+) | Impl §12, CS Design §4 | Both `nar_shaddaa_job.json` and `echoes_of_the_force.json` now exist as full-format spines with `allegiances` array, `variation_points`, `factions`, and `vehicle_registry`. Original V1-scope simplified format has been superseded. Formal alignment check (3.0c) still not formally executed but spines are de facto aligned with the schema. |
 | 0.6 | Campaign Studio Design Document — version header alignment | **RESOLVED** | CS Design | Resolved by funnel pivot: CS Design is now v1.2, CS Implementation is v1.1. Both aligned. |
 | 0.7 | Campaign Studio Implementation Document — initial creation | **DONE** (CS Impl v1.0) | CS Implementation | Four build phases, Pydantic schema models, validation suite, Mode 3/2/1 paths, cross-era import, saga layer pipeline, database additions, and interaction contract specified. |
 
@@ -441,23 +441,40 @@ Issues identified during the March 5, 2026 cross-document review:
 | Vision | v3.1 | **CURRENT** | Character funnel pivot applied. Consider adding explicit character-centric management principle (Alignment Note 8). |
 | Game Mechanics | v1.8 | **CURRENT** | 27 sections (0-26). Reputation echo delivery and conditional choice availability designed. |
 | Implementation (Game Engine) | v2.5 | **CURRENT** | §14 backlog updated: 2.19, 2.28, 3.28 added to designed items; distillation pipeline moved to designed; Gap Analysis references corrected. |
-| Build Roadmap | v1.2 | **CURRENT** | Phase status annotations added. Milestones 0-3 complete. Phase 17 complete. |
+| Build Roadmap | v1.3 | **CURRENT** | Phase 21 directory reference corrected. Milestones 0-3 complete. Phase 17 complete. |
 | LLM Evaluation | v2.0 | **NEEDS UPDATE** | Add Category 6 (behavioral envelope compliance) to §11 test protocol. Monitor DeepSeek V4 and Qwen3.5-397B. |
 | Campaign Studio Design | v1.3 | **CURRENT** | Game Mechanics v1.5 cross-references applied. |
 | Campaign Studio Implementation | v1.3 | **CURRENT** | FactionSpec and GenerationMetadata schema models added. Gate 1 and Gate 4 validation expanded. CS-2/CS-4 deliverables updated. Saga config, ensemble, and evaluator training infrastructure specified. |
 | Research Catalogue | v1.0 | **CURRENT** | No pending additions. |
 | Design Gap Analysis | v2.0 | **CURRENT** | Full design specs for all project items. v1.1 items applied. v2.0 adds: 2.19, 2.28, 3.26, 3.27, 3.28, 4.9, 4.10, 4.0a, 4.0d. Zero CONCEPT ONLY / FILED / CONSIDER items remain. |
 | Deferred Design and Logic Analysis | v1.0 | **CURRENT** | Turn loop verification, data flow analysis, invariant proofs, token budgets, post-V1 integration points. |
-| Project Guide | v1.2 | **CURRENT** | Front-door orientation. Updated for Milestones 0-3 and CS-1 through CS-4 completion. |
-| Project State Matrix | v1.3 | **CURRENT** | Compact capability status view. Updated to reflect all built capabilities. |
-| Choice Quality Validation Spec | v1.0 | **NEW** | Post-generation choice quality validator. Activation contingent on calibration from initial playtesting. |
-| Prologue Inference Spec | v1.0 | **NEW** | Robustness rules for psychometric prologue. Extends GM §5 core design with edge case handling. |
-| Import Package Quality Spec | v1.0 | **NEW** | Quality standards for narrative compression in cross-campaign import. Extends GM §20 and CS Impl §6. |
-| This Backlog | v3.1 | **CURRENT** | Post-milestone sync. Phase 1 items marked DONE (Milestone 0). Phase 2 mechanical items marked DONE (Milestones 1-3). CS items marked DONE (CS-1 through CS-4). Saga items marked DONE (CS-4). |
+| Project Guide | v1.3 | **CURRENT** | Documentation audit sync. Codebase metrics added. Cloud model reference corrected. Known open items expanded. |
+| Project State Matrix | v1.4 | **CURRENT** | Codebase metrics added. Missing data directories gap noted. |
+| Choice Quality Validation Spec | v1.0 | **CURRENT** | Post-generation choice quality validator. Activation contingent on calibration from initial playtesting. |
+| Prologue Inference Spec | v1.0 | **CURRENT** | Robustness rules for psychometric prologue. Extends GM §5 core design with edge case handling. |
+| Import Package Quality Spec | v1.0 | **CURRENT** | Quality standards for narrative compression in cross-campaign import. Extends GM §20 and CS Impl §6. |
+| This Backlog | v3.2 | **CURRENT** | Documentation audit sync. Item 0.5 marked DONE. Document versions updated. Codebase-documentation discrepancies corrected. |
 
 ---
 
 ## Revision History
+
+**v3.2 — Documentation audit sync (March 17, 2026)**
+
+1. **Item 0.5 marked DONE.** Campaign spines now exist in full
+   CS-format with `allegiances`, `variation_points`, `factions`, and
+   `vehicle_registry`. Both `nar_shaddaa_job.json` and
+   `echoes_of_the_force.json` are active.
+
+2. **Document Status Summary updated.** Project Guide v1.3, Project
+   State Matrix v1.4, Build Roadmap v1.3, this Backlog v3.2. Choice
+   Quality, Prologue Inference, and Import Package specs changed from
+   NEW to CURRENT.
+
+3. **Codebase-documentation discrepancies corrected.** Phase 21
+   `data/canon_profiles/` directory reference corrected (does not exist
+   yet). Cloud model reference clarified (`gpt-5.2` in code, `gpt-4.1`
+   in `.env.example`).
 
 **v3.1 — Post-milestone implementation status sync (March 2026)**
 
