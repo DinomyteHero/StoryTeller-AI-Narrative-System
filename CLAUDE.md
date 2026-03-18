@@ -237,11 +237,11 @@ Campaign Studio (parallel track):
 
 **Next work:** Phase 18 (Psychometric Prologue) or Phases 20-22.
 
-## Codebase Metrics (as of March 17, 2026)
+## Codebase Metrics (as of March 18, 2026)
 
 - ~15,160 lines of application code (Python + HTML)
-- ~8,454 lines of test code across 17 test files
-- 20 documentation files in `docs/`
+- ~8,454 lines of test code across 16 test files
+- 19 documentation files in `docs/`
 - 2 campaign spines, 2 characters, 6 talent trees, 5 Force powers
 
 ## Repo Structure
@@ -252,7 +252,7 @@ storyteller-v3/
 ├── README.md              # Project overview and getting started
 ├── pyproject.toml
 ├── .env.example
-├── docs/                  # All project documentation (20 files)
+├── docs/                  # All project documentation (19 files)
 │   ├── 00_PROJECT_GUIDE.md                     # Start here — orientation
 │   ├── PROJECT_STATE_MATRIX.md                 # What's promised/designed/built
 │   ├── STORYTELLER_V3_IMPLEMENTATION.md        # Primary spec
@@ -334,7 +334,7 @@ storyteller-v3/
 │   ├── talent_trees/      # 6 specialization trees + talent_library.json
 │   ├── force_powers/      # 5 powers (enhance, heal_harm, influence, move, sense)
 │   └── personas/          # writer_room_personas.json (55 personas)
-└── tests/                 # 17 test files (8,454 lines)
+└── tests/                 # 16 test files (8,454 lines)
     ├── dice_validation.py
     ├── studio_schema_test.py
     ├── test_cs2_mode3.py

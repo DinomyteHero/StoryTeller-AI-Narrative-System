@@ -114,8 +114,8 @@ authoritative.
 
 **Codebase metrics:**
 - ~15,160 lines of application code (Python + HTML) across 40+ files
-- ~8,454 lines of test code across 17 test files
-- 20 documentation files in `docs/`
+- ~8,454 lines of test code across 16 test files
+- 19 documentation files in `docs/`
 - 2 campaign spines, 2 characters, 6 talent trees, 5 Force powers, 55 Writer's Room personas
 
 **Design completeness:** Every item within the current planning horizon

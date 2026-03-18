@@ -25,7 +25,7 @@ Milestone 4 partial (Phase 17 complete, Phases 18-22 not started).
 Campaign Studio CS-1 through CS-4 complete.
 
 **Codebase metrics:** ~15,160 lines application code, ~8,454 lines
-test code, 17 test files, 20 documentation files.
+test code, 16 test files, 19 documentation files.
 
 ---
 
