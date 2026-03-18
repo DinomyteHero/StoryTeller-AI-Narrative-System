@@ -107,8 +107,8 @@ storyteller-v3/
 │   ├── talent_trees/ # 6 specialization trees + talent library
 │   ├── force_powers/ # 5 Force power definitions
 │   └── personas/    # Writer's Room personas (55)
-├── tests/           # Test suite (17 test files)
-└── docs/            # All project documentation (20 files)
+├── tests/           # Test suite (16 test files)
+└── docs/            # All project documentation (19 files)
 ```
 
 ### Key Design Rules
