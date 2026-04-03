@@ -207,6 +207,7 @@ def decide_check(
 
 VALID_SCENE_TYPES = {
     "combat", "chase", "infiltration", "social", "exploration", "introspection",
+    "space_combat",
 }
 
 

@@ -222,9 +222,19 @@ def load_campaign_spine(name: str) -> dict:
     path = f"data/campaigns/{filename}.json"
     try:
         with open(path) as f:
-            return json.load(f)
+            spine_data = json.load(f)
     except FileNotFoundError:
         raise HTTPException(404, f"Campaign not found: {name}")
+
+    # Optional diagnostic validation against CampaignSpine schema
+    if os.getenv("VALIDATE_SPINE_ON_LOAD", "").lower() in ("1", "true"):
+        try:
+            from studio.schema import CampaignSpine
+            CampaignSpine(**spine_data)
+        except Exception as e:
+            logging.warning(f"Spine validation warning for '{name}': {e}")
+
+    return spine_data
 
 
 def load_character(character_id: str) -> Character:
@@ -235,6 +245,24 @@ def load_character(character_id: str) -> Character:
             return Character.model_validate_json(f.read())
     except FileNotFoundError:
         raise HTTPException(404, f"Character not found: {character_id}")
+
+
+def load_character_from_variant(spine_data: dict, variant_id: str) -> Character:
+    """Build a Character from a campaign spine variant.
+
+    Uses studio/import_interface.build_default_character() which handles
+    all field name translations (characteristics_base -> characteristics,
+    starting_xp -> total_xp, etc.). Fallback when no standalone character
+    file exists — makes Studio-generated campaigns playable without
+    manual file export.
+    """
+    from studio.schema import CampaignSpine
+    from studio.import_interface import build_default_character
+
+    spine = CampaignSpine(**spine_data)
+    char_dict = build_default_character(spine, variant_id)
+    char_dict["name"] = variant_id.replace("_", " ").title()
+    return Character.model_validate(char_dict)
 
 
 def get_most_recent_turn(session_id: str) -> dict:
@@ -430,7 +458,11 @@ async def create_session_route(
     """
     # ── Load campaign and character data ──────────────────────────────
     spine = load_campaign_spine(req.campaign_name)
-    character = load_character(req.character_id)
+    try:
+        character = load_character(req.character_id)
+    except HTTPException:
+        # No standalone file — build from spine variant
+        character = load_character_from_variant(spine, req.character_id)
     act_1 = spine["acts"][0]
 
     # ── Roll motivation track for Act 1 (§9) ─────────────────────────

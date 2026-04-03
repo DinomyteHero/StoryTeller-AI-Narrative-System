@@ -1,7 +1,7 @@
 # Storyteller V3 — Project State Matrix
 
-**Version:** 1.4
-**Date:** March 17, 2026
+**Version:** 1.5
+**Date:** April 3, 2026
 **Purpose:** Single-page view of every major capability's status.
 Prevents the most common review error: mistaking a designed-but-not-
 built item for a missing design, or mistaking a deferred item for an
@@ -73,7 +73,7 @@ test code, 16 test files, 19 documentation files.
 | 2–4 choices per turn | §7 | ✓ | ✓ Verified | Phase 3 |
 | Skill-tagged choices (invisible to player) | §6, §7 | ✓ | ✓ Verified | Phase 3 |
 | Character-specific choice design (prompt) | §7 | ✓ | ✓ Verified (prompt instruction) | Phase 3 |
-| Conditional choice availability (behavioral) | §7 | ✓ | ✓ Built | Phase 13 |
+| Conditional choice availability (behavioral) | §7 | ✓ | Partial (vignettes/talents only) | Phase 13 |
 | Semantic memory / choice annotation | §16 | ✓ | ✓ Built | Phase 13 |
 | Choice quality validation + repair loop | §7 | **Spec complete** | Not in V1 | Late Phase 3 / Phase 7 |
 
@@ -106,7 +106,7 @@ test code, 16 test files, 19 documentation files.
 | Act boundary detection + transition | §13 | ✓ | ✓ Built | Phase 7 |
 | Within-act pacing arc (hook → turn → cliffhanger) | §13 | ✓ | ✓ Built | Phase 7 |
 | Turn counter / PacingSignal model | — | ✓ | ✓ Built | Phase 7 |
-| Reputation echo delivery | §1, §11 | ✓ | ✓ Built | Phase 7 |
+| Reputation echo delivery | §1, §11 | ✓ | Schema only (runtime pending) | Phase 7 |
 
 ---
 
@@ -170,7 +170,7 @@ test code, 16 test files, 19 documentation files.
 | Schema contract validation | — | ✓ | ✓ Built | CS Phase 1 |
 | NPC coherence validation | — | ✓ | ✓ Built | CS Phase 1 |
 | Relationship network validation | — | ✓ | ✓ Built | CS Phase 1 |
-| Narrative consistency audit (3-dimension LLM) | — | ✓ | ✓ Built | CS Phase 1 |
+| Narrative consistency audit (LLM-assisted, 3 sub-gates) | — | ✓ | ✓ Built | CS Phase 5 |
 | Mode 3 (human-led with AI validation) | — | ✓ | ✓ Built | CS Phase 2 |
 | Mode 2 (collaborative AI + human) | — | ✓ | ✓ Built | CS Phase 3 |
 | Mode 1 (fully autonomous + human review) | — | ✓ | ✓ Built | CS Phase 4 |
@@ -191,7 +191,7 @@ test code, 16 test files, 19 documentation files.
 
 | Capability | Vision | Designed | V1 | Build Phase |
 |------------|--------|----------|-----|-------------|
-| Narration word count enforcement (250–600) | §3 | ✓ | ✓ Verified (retry loop) | Phase 3 |
+| Narration word count enforcement (250–800) | §3 | ✓ | ✓ Verified (retry loop) | Phase 3 |
 | Minimum 2 choices enforcement | §7 | ✓ | ✓ Verified (retry loop) | Phase 3 |
 | JSON schema enforcement (local model) | — | ✓ | ✓ Verified | Phase 2 |
 | Context package pre-submission validation | — | ✓ | ✓ Verified | Phase 3 |
@@ -237,6 +237,19 @@ explained by intentional deferral or architecture reservation.
 ---
 
 ## Revision History
+
+**v1.5 — Audit verification corrections (April 3, 2026)**
+
+Corrected four overclaimed statuses found during code-level audit
+verification:
+- Gate 4 narrative audit: phase corrected from CS-1 to CS-5 (now
+  implemented via studio/narrative_eval.py)
+- Reputation echo delivery: changed from "Built" to "Schema only
+  (runtime pending)" — DB table exists but no runtime injection code
+- Conditional choice availability: changed from "Built" to "Partial
+  (vignettes/talents only)" — regular per-turn choices have no gating
+- Word count enforcement: corrected range from 250-600 to 250-800
+  (matches actual code in gm/cloud_gm.py)
 
 **v1.4 — Documentation audit sync (March 17, 2026)**
 
