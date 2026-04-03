@@ -34,6 +34,16 @@ Generate a complete campaign spine JSON with the following structure. Every fiel
 5. **variation_points** (at least 1) — Each with:
    - id, trigger_act, description, selection_method, options (2+ with id, description, npc_state_changes)
 
+### Story Architecture Requirements:
+
+Each act must include a **dramatic_function** field — the purpose of this act in the dramatic arc. Valid values: setup, destabilization, launch, midpoint_shift, escalation, confrontation, consequence, resolution. Act 1 should be setup or destabilization. The campaign must have a true launch point no later than Act 2.
+
+Each major NPC must include a **thematic_argument** field — what this NPC's existence argues about the campaign's theme. Different NPCs should embody competing answers to the throughline question.
+
+Each character variant must include:
+- **protagonist_contradiction** — what the character believes vs. who they are
+- **pressure_revealed_identity** — who they become under maximum pressure
+
 ## CONSTRAINTS
 
 - Star Wars Legends timeline. Canon events are environmental anchors.

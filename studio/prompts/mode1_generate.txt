@@ -33,6 +33,16 @@ Generate a complete, playable campaign spine JSON. This is Mode 1 — fully auto
 7. **npc_roster** (at least 3) with full profiles including per_act_state
 8. **variation_points** (at least 1)
 
+### Story Architecture Requirements:
+
+Each act must include a **dramatic_function** field — the purpose of this act in the dramatic arc. Valid values: setup, destabilization, launch, midpoint_shift, escalation, confrontation, consequence, resolution. Act 1 should be setup or destabilization. The campaign must have a true launch point (the moment return to normalcy is impossible) no later than Act 2.
+
+Each major NPC must include a **thematic_argument** field — what this NPC's existence and behavior argues about the campaign's theme. Different NPCs should embody competing answers.
+
+Each character variant must include:
+- **protagonist_contradiction** — what the character believes about themselves vs. who they actually are
+- **pressure_revealed_identity** — who they become under maximum pressure
+
 ### Anti-Default Rules (CRITICAL):
 
 Without these constraints, you WILL produce a hero's journey with a Dark Side antagonist and a redemptive climax. This is the default output of LLMs trained on English fiction. You MUST actively resist these patterns.
