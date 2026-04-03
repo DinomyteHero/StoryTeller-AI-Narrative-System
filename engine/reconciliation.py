@@ -765,16 +765,20 @@ def run_between_act_pipeline(
                     "SELECT npc_name, state_json FROM npc_states WHERE session_id = ?",
                     (session_id,),
                 ).fetchall()
-            from gm.context import NPCState as _NPC
+            from gm.context import NPCState as _NPC, EmotionalState as _ES
             npc_states_for_skip = []
             for r in npc_rows:
                 ns = json.loads(r["state_json"])
                 npc_states_for_skip.append(_NPC(
                     name=r["npc_name"],
-                    role=ns.get("role", ""),
                     disposition=ns.get("disposition", 0.5),
                     knows=ns.get("knows", []),
                     doesnt_know=ns.get("doesnt_know", []),
+                    last_seen_turn=ns.get("last_seen_turn", 0),
+                    voice_notes=ns.get("voice_notes", ""),
+                    motivation=ns.get("motivation", ""),
+                    behavioral_envelope=ns.get("behavioral_envelope", []),
+                    emotional_state=_ES.from_dict(ns.get("emotional_state", {})),
                 ))
 
             # Select vignettes based on behavioral fingerprint
