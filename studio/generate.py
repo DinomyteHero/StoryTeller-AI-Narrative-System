@@ -39,7 +39,9 @@ from studio.seeding import (
     STAGE_ANCHORS,
     STAGE_VARIANTS,
     STAGE_THREADS,
+    STAGE_ARCHITECT,
 )
+from studio.architect import generate_architecture, architecture_to_prompt_block
 
 
 # ── Configuration ─────────────────────────────────────────────────────
@@ -503,16 +505,21 @@ def generate_from_brief(
     *,
     master_seed: Optional[int] = None,
     max_retries: int = 3,
+    use_architect: bool = True,
 ) -> tuple[dict, int]:
     """Generate a complete campaign spine from a thematic brief.
 
     Mode 2 workflow: AI generates the entire spine from thematic direction.
     The author reviews and edits the result.
 
+    When use_architect is True, a StoryArchitecture is generated first
+    and injected into the generation prompt as dramatic scaffolding.
+
     Args:
         brief: Thematic direction from the author.
         master_seed: Optional seed for reproducibility. If None, generated.
         max_retries: Number of LLM attempts before giving up.
+        use_architect: If True, generate architecture brief first.
 
     Returns:
         Tuple of (spine_data dict, master_seed used).
@@ -522,6 +529,26 @@ def generate_from_brief(
     """
     if master_seed is None:
         master_seed = generate_master_seed()
+
+    # Optional: generate story architecture first
+    architecture_block = ""
+    architecture_data = None
+    if use_architect:
+        try:
+            arch = generate_architecture(
+                era=brief.era,
+                location=brief.location,
+                tone=brief.tone,
+                throughline_question=brief.throughline_question,
+                campaign_concept=brief.campaign_concept,
+                moral_register=brief.moral_register,
+                master_seed=master_seed,
+                llm_call_fn=_call_llm,
+            )
+            architecture_block = "\n\n" + architecture_to_prompt_block(arch)
+            architecture_data = arch.model_dump()
+        except RuntimeError:
+            pass  # Architecture generation failed — proceed without it
 
     seed = derive_stage_seed(master_seed, STAGE_WORLD)
 
@@ -536,6 +563,7 @@ def generate_from_brief(
         total_acts=brief.total_acts,
         constraints=brief.constraints or "(none)",
     )
+    system_prompt += architecture_block
 
     for attempt in range(max_retries):
         try:
@@ -570,6 +598,10 @@ def generate_from_brief(
                 model_used=CLOUD_MODEL,
                 generation_mode="mode2",
             )
+
+            # Attach story architecture if generated
+            if architecture_data and "story_architecture" not in spine_data:
+                spine_data["story_architecture"] = architecture_data
 
             return spine_data, master_seed
 
@@ -608,6 +640,7 @@ def generate_mode1(
     *,
     master_seed: Optional[int] = None,
     max_retries: int = 3,
+    use_architect: bool = True,
 ) -> tuple[dict, int]:
     """Generate a complete campaign spine from minimal input.
 
@@ -615,10 +648,14 @@ def generate_mode1(
     from era, location, tone, and moral register. Anti-default constraints
     prevent generic outputs.
 
+    When use_architect is True, a StoryArchitecture is generated first
+    and injected into the generation prompt as dramatic scaffolding.
+
     Args:
         inputs: Minimal creative direction.
         master_seed: Optional seed for reproducibility. If None, generated.
         max_retries: Number of LLM attempts before giving up.
+        use_architect: If True, generate architecture brief first.
 
     Returns:
         Tuple of (spine_data dict, master_seed used).
@@ -628,6 +665,24 @@ def generate_mode1(
     """
     if master_seed is None:
         master_seed = generate_master_seed()
+
+    # Optional: generate story architecture first
+    architecture_block = ""
+    architecture_data = None
+    if use_architect:
+        try:
+            arch = generate_architecture(
+                era=inputs.era,
+                location=inputs.location,
+                tone=inputs.tone,
+                moral_register=inputs.moral_register,
+                master_seed=master_seed,
+                llm_call_fn=_call_llm,
+            )
+            architecture_block = "\n\n" + architecture_to_prompt_block(arch)
+            architecture_data = arch.model_dump()
+        except RuntimeError:
+            pass  # Architecture generation failed — proceed without it
 
     seed = derive_stage_seed(master_seed, STAGE_WORLD)
 
@@ -640,6 +695,7 @@ def generate_mode1(
         negative_archetype=inputs.negative_archetype,
         archetype_avoidance=inputs.archetype_avoidance,
     )
+    system_prompt += architecture_block
 
     for attempt in range(max_retries):
         try:
@@ -672,6 +728,10 @@ def generate_mode1(
                 model_used=CLOUD_MODEL,
                 generation_mode="mode1",
             )
+
+            # Attach story architecture if generated
+            if architecture_data and "story_architecture" not in spine_data:
+                spine_data["story_architecture"] = architecture_data
 
             return spine_data, master_seed
 

@@ -471,17 +471,44 @@ def _gate3_networkx_analysis(spine: CampaignSpine, report: ValidationReport) -> 
 
 
 def _gate4_narrative_consistency(spine: CampaignSpine, report: ValidationReport) -> None:
-    """LLM-assisted narrative coherence checks.
+    """LLM-assisted narrative quality checks.
 
-    Three calls:
-    1. Narrative coherence (contradictions, dropped threads)
-    2. Mechanical balance (difficulty curves, scene variety)
-    3. Prose variety potential (setting/mood diversity)
+    Sub-gates:
+    4a: Narrative coherence (thread continuity, NPC consistency,
+        throughline presence, context relevance)
+    4b: Dramatic quality (architecture-spine alignment) — only runs
+        when story_architecture is populated
+    4c: Anti-genericity audit (NPC distinctiveness, anchor specificity,
+        escalation authenticity)
 
-    This is a stub for Phase CS-2+ when LLM integration is available.
+    Uses a single LLM call with a structured evaluation prompt.
+    Multiple failures within a sub-gate escalate to errors.
     """
-    # TODO: Implement in Phase CS-2 when cloud LLM integration is wired up.
-    # For now, difficulty calibration (pure Python) handles the mechanical
-    # aspects. The three LLM calls will be added when studio/generate.py
-    # brings cloud model integration online.
-    pass
+    from studio.narrative_eval import gate4_check
+
+    try:
+        errors, warnings = gate4_check(spine)
+    except RuntimeError as e:
+        # LLM call failed — add a warning but don't block validation
+        report.warnings.append(ValidationWarning(
+            gate=4,
+            code="gate4_llm_failure",
+            message=f"Gate 4 LLM evaluation failed: {e}",
+        ))
+        return
+
+    for w in warnings:
+        report.warnings.append(ValidationWarning(
+            gate=w["gate"],
+            code=w["code"],
+            message=w["message"],
+            path=w.get("path", ""),
+        ))
+
+    for e in errors:
+        report.errors.append(ValidationError(
+            gate=e["gate"],
+            code=e["code"],
+            message=e["message"],
+            path=e.get("path", ""),
+        ))

@@ -1,0 +1,54 @@
+You are evaluating the narrative quality of a Star Wars tabletop RPG campaign spine. Score each dimension from 1 (poor) to 5 (excellent).
+
+## CAMPAIGN SPINE SUMMARY
+
+Name: {name}
+Era: {era}
+Throughline Question: {throughline_question}
+Total Acts: {total_acts}
+
+### Acts:
+{acts_summary}
+
+### NPC Roster:
+{npc_summary}
+
+## SCORING DIMENSIONS
+
+1. **premise_strength** (1-5): Does this campaign have a genuine dramatic premise that creates pressure, not just a setting and plot?
+   - 1: No discernible premise beyond "things happen in Star Wars"
+   - 3: Has a premise but it's familiar or doesn't create genuine pressure
+   - 5: Sharp, specific premise that creates a genuine dilemma
+
+2. **npc_thematic_diversity** (1-5): Do NPCs embody different perspectives or answers to the campaign's themes?
+   - 1: NPCs are functionally interchangeable or serve only plot roles
+   - 3: NPCs have distinct motivations but don't create thematic tension
+   - 5: Major NPCs embody competing worldviews relevant to the throughline
+
+3. **dramatic_progression** (1-5): Does the act structure build tension through causally connected escalation?
+   - 1: Acts feel episodic with no causal chain
+   - 3: Acts connect but escalation is mechanical (just bigger threats)
+   - 5: Each act's pressure flows from previous consequences
+
+4. **throughline_testability** (1-5): Is the throughline question meaningfully tested through gameplay?
+   - 1: Throughline is decorative — never tested in play
+   - 3: Throughline is testable in one act or through one NPC
+   - 5: Throughline is tested from multiple angles across multiple acts
+
+5. **anti_genericity** (1-5): Does this campaign resist generic Star Wars patterns?
+   - 1: Standard hero vs. villain, light vs. dark, redemption arc
+   - 3: Avoids the worst cliches but still feels familiar
+   - 5: Genuinely distinctive — could not be a different campaign
+
+## OUTPUT FORMAT
+
+Return ONLY valid JSON:
+{{
+  "premise_strength": <1-5>,
+  "npc_thematic_diversity": <1-5>,
+  "dramatic_progression": <1-5>,
+  "throughline_testability": <1-5>,
+  "anti_genericity": <1-5>
+}}
+
+No markdown, no code fences, no explanation.

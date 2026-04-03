@@ -132,6 +132,9 @@ start with `docs/00_PROJECT_GUIDE.md`.
 19. **`docs/prose_quality_review_session_1.md`** — Prose quality
     review notes from playtesting session.
 
+20. **`docs/STORY_ARCHITECTURE_SPEC.md`** — Story architecture
+    vocabulary, quality rubrics, and Gate 4 evaluation design (CS-5).
+
 ## The Rule That Overrides Everything
 
 > Do not build the second thing until the first thing works.
@@ -234,14 +237,19 @@ Campaign Studio (parallel track):
 - CS-2 (Mode 3 Collaborative Authoring): COMPLETE
 - CS-3 (Mode 2 Thematic Steering + Import): COMPLETE
 - CS-4 (Saga Layer + Mode 1): COMPLETE
+- CS-5 (Narrative Quality): COMPLETE
+  - StoryArchitecture model + pre-generation planning layer
+  - Gate 4 narrative evaluation (coherence, dramatic quality, anti-genericity)
+  - Enhanced generation prompts with architectural vocabulary
+  - Stage 5 LLM-based narrative quality scoring
 
-**Next work:** Phase 18 (Psychometric Prologue) or Phases 20-22.
+**Next work:** CS-6 (Saga Depth) or Phase 18 (Psychometric Prologue).
 
-## Codebase Metrics (as of March 18, 2026)
+## Codebase Metrics (as of April 3, 2026)
 
-- ~15,160 lines of application code (Python + HTML)
-- ~8,454 lines of test code across 16 test files
-- 19 documentation files in `docs/`
+- ~15,700 lines of application code (Python + HTML)
+- ~9,000 lines of test code across 17 test files
+- 20 documentation files in `docs/`
 - 2 campaign spines, 2 characters, 6 talent trees, 5 Force powers
 
 ## Repo Structure
@@ -252,7 +260,7 @@ storyteller-v3/
 ├── README.md              # Project overview and getting started
 ├── pyproject.toml
 ├── .env.example
-├── docs/                  # All project documentation (19 files)
+├── docs/                  # All project documentation (20 files)
 │   ├── 00_PROJECT_GUIDE.md                     # Start here — orientation
 │   ├── PROJECT_STATE_MATRIX.md                 # What's promised/designed/built
 │   ├── STORYTELLER_V3_IMPLEMENTATION.md        # Primary spec
@@ -271,7 +279,8 @@ storyteller-v3/
 │   ├── IMPORT_PACKAGE_QUALITY_SPEC.md          # Post-V1 quality spec
 │   ├── PHASE_18_IMPLEMENTATION_PLAN.md         # Phase 18 plan
 │   ├── CLAUDE_CODE_INITIAL_PROMPT.md           # Doc sync prompt
-│   └── prose_quality_review_session_1.md       # Playtest notes
+│   ├── prose_quality_review_session_1.md       # Playtest notes
+│   └── STORY_ARCHITECTURE_SPEC.md             # CS-5 narrative quality spec
 ├── engine/                # Pure Python — dice, character, checks (5,106 lines)
 │   ├── dice.py            # FFG dice system — 7 die types, symbol tables (270 lines)
 │   ├── character.py       # Character model — Pydantic, 33 skills (220 lines)
@@ -307,18 +316,23 @@ storyteller-v3/
 │   └── studio_routes.py   # Campaign Studio routes (497 lines)
 ├── web/                   # Single-file frontend
 │   └── index.html         # Prose reader UI (788 lines)
-├── studio/                # Campaign Studio (3,661 lines)
-│   ├── schema.py          # Spine schema — interface contract (527 lines)
-│   ├── validate.py        # Four-gate validation suite (487 lines)
-│   ├── generate.py        # Modes 1, 2, 3 generation (690 lines)
-│   ├── seeding.py         # Deterministic seed derivation (110 lines)
+├── studio/                # Campaign Studio (~4,200 lines)
+│   ├── schema.py          # Spine schema — interface contract (~570 lines)
+│   ├── validate.py        # Four-gate validation suite (~500 lines)
+│   ├── generate.py        # Modes 1, 2, 3 generation (~750 lines)
+│   ├── architect.py       # Pre-generation story architecture (CS-5)
+│   ├── narrative_eval.py  # Gate 4 narrative evaluation (CS-5)
+│   ├── seeding.py         # Deterministic seed derivation (111 lines)
 │   ├── difficulty.py      # Spine difficulty calibration (353 lines)
 │   ├── import_interface.py # Cross-era character import (404 lines)
-│   ├── prompts/           # Studio prompt templates (4 files)
+│   ├── prompts/           # Studio prompt templates (7 files)
 │   │   ├── mode1_generate.txt
 │   │   ├── mode2_generate.txt
 │   │   ├── mode3_assist.txt
-│   │   └── npc_voice_gen.txt
+│   │   ├── npc_voice_gen.txt
+│   │   ├── architect.txt        # CS-5: architecture generation
+│   │   ├── narrative_eval.txt   # CS-5: Gate 4 evaluation
+│   │   └── narrative_score.txt  # CS-5: Stage 5 scoring
 │   └── saga/              # Saga layer pipeline — CS-4 (1,090 lines)
 │       ├── pipeline.py    # 5-stage orchestrator
 │       ├── personas.py    # Persona pool management
@@ -334,12 +348,13 @@ storyteller-v3/
 │   ├── talent_trees/      # 6 specialization trees + talent_library.json
 │   ├── force_powers/      # 5 powers (enhance, heal_harm, influence, move, sense)
 │   └── personas/          # writer_room_personas.json (55 personas)
-└── tests/                 # 16 test files (8,454 lines)
+└── tests/                 # 17 test files (~9,000 lines)
     ├── dice_validation.py
     ├── studio_schema_test.py
     ├── test_cs2_mode3.py
     ├── test_cs3_mode2_import.py
     ├── test_cs4_saga.py
+    ├── test_cs5_narrative_quality.py  # CS-5: 33 tests
     ├── test_e2e_game_loop.py
     ├── test_phase10_advancement.py
     ├── test_phase115_destiny.py

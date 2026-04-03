@@ -25,6 +25,7 @@ def evaluate_spine_pair(
     *,
     llm_call_fn=None,
     evaluator_backend: str = "cloud",
+    use_narrative_scoring: bool = False,
 ) -> dict:
     """Compare two spine drafts head-to-head.
 
@@ -33,14 +34,23 @@ def evaluate_spine_pair(
         spine_b: Second draft spine dict.
         llm_call_fn: Injectable LLM call function.
         evaluator_backend: "cloud", "local", or "ensemble".
+        use_narrative_scoring: If True, include LLM narrative scoring.
 
     Returns:
         Dict with 'winner' ('a' or 'b' or 'tie'), 'scores_a', 'scores_b',
         'reasoning'.
     """
     # Score each spine independently
-    scores_a = _score_spine(spine_a)
-    scores_b = _score_spine(spine_b)
+    scores_a = _score_spine(
+        spine_a,
+        use_narrative_scoring=use_narrative_scoring,
+        llm_call_fn=llm_call_fn,
+    )
+    scores_b = _score_spine(
+        spine_b,
+        use_narrative_scoring=use_narrative_scoring,
+        llm_call_fn=llm_call_fn,
+    )
 
     # Determine winner
     if scores_a["composite"] > scores_b["composite"]:
@@ -61,14 +71,21 @@ def evaluate_spine_pair(
 def select_best(
     drafts: list[dict],
     top_k: int = 1,
+    *,
+    use_narrative_scoring: bool = False,
+    llm_call_fn=None,
 ) -> list[dict]:
     """Select the best spine(s) from a set of drafts.
 
-    Uses structural scoring (pure Python, no LLM) to rank candidates.
+    Uses structural scoring (pure Python) to rank candidates. When
+    use_narrative_scoring is True, adds LLM-based narrative quality
+    assessment and rebalances weights.
 
     Args:
         drafts: List of dicts with 'spine_data' keys.
         top_k: How many to select.
+        use_narrative_scoring: If True, include LLM narrative scoring.
+        llm_call_fn: Injectable LLM call function for narrative scoring.
 
     Returns:
         List of the top-k drafts, sorted by composite score.
@@ -76,7 +93,11 @@ def select_best(
     scored = []
     for draft in drafts:
         spine_data = draft.get("spine_data", {})
-        scores = _score_spine(spine_data)
+        scores = _score_spine(
+            spine_data,
+            use_narrative_scoring=use_narrative_scoring,
+            llm_call_fn=llm_call_fn,
+        )
         scored.append({
             **draft,
             "scores": scores,
@@ -87,19 +108,51 @@ def select_best(
     return scored[:top_k]
 
 
-def _score_spine(spine_data: dict) -> dict:
-    """Score a spine on structural quality, novelty potential, and diversity.
+def _score_spine(
+    spine_data: dict,
+    *,
+    use_narrative_scoring: bool = False,
+    llm_call_fn=None,
+) -> dict:
+    """Score a spine on structural quality, novelty, diversity, and narrative.
 
-    Pure Python scoring — no LLM calls. Measures structural completeness
-    and variety of content.
+    When use_narrative_scoring is False (default), uses the original
+    pure Python scoring with weights: structural 50%, novelty 25%,
+    diversity 25%.
+
+    When use_narrative_scoring is True, adds LLM-assessed narrative
+    quality and rebalances: structural 35%, novelty 15%, diversity 15%,
+    narrative 35%.
 
     Returns:
-        Dict with 'structural_quality', 'novelty', 'diversity_vs_prior',
-        'composite' (all 0.0–1.0).
+        Dict with scoring dimensions and composite (all 0.0–1.0).
     """
     structural = _score_structural(spine_data)
     novelty = _score_novelty(spine_data)
     diversity = _score_diversity(spine_data)
+
+    if use_narrative_scoring:
+        from studio.narrative_eval import score_narrative_quality
+        try:
+            narrative = score_narrative_quality(
+                spine_data, llm_call_fn=llm_call_fn,
+            )
+        except Exception:
+            narrative = 0.5  # Fallback if LLM scoring fails
+
+        composite = (
+            structural * 0.35
+            + novelty * 0.15
+            + diversity * 0.15
+            + narrative * 0.35
+        )
+        return {
+            "structural_quality": round(structural, 3),
+            "novelty": round(novelty, 3),
+            "diversity_vs_prior": round(diversity, 3),
+            "narrative_quality": round(narrative, 3),
+            "composite": round(composite, 3),
+        }
 
     composite = structural * 0.5 + novelty * 0.25 + diversity * 0.25
 
