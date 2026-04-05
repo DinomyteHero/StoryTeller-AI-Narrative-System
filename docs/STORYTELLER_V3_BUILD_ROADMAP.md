@@ -565,7 +565,7 @@ Success criteria:
 
 ### Phase 18: Psychometric Prologue
 
-**Status: NOT STARTED.** Implementation plan exists at `docs/PHASE_18_IMPLEMENTATION_PLAN.md`.
+**Status: NOT STARTED.** Full spec (design robustness + implementation plan) at `docs/PROLOGUE_SYSTEM_SPEC.md`.
 
 Files: `engine/prologue.py` (new), `web/index.html` (extend — funnel
 UI)

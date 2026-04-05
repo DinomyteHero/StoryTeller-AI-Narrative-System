@@ -1,3 +1,7 @@
+> **REFERENCE ONLY** — Playtest transcript from a single session.
+> Useful for prose quality benchmarking and LLM evaluation. Not a
+> specification document.
+
 # Prose Quality Review - Echoes of the Force (Talia Ren)
 
 Session: f2dcfe06 | Campaign: Echoes of the Force | Character: Talia Ren

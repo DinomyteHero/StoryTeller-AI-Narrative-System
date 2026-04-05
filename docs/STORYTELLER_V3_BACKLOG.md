@@ -626,7 +626,7 @@ Issues identified during the March 5, 2026 cross-document review:
 2. **Deferred Design and Logic Analysis document added to project.**
    System logic walkthrough verifying all data flows, integration points,
    invariant preservation, and token budgets. Referenced in CLAUDE.md
-   and CLAUDE_CODE_INITIAL_PROMPT.md.
+   and CLAUDE_CODE_INITIAL_PROMPT.md (now in `docs/reference/`).
 
 **v2.4 — Pre-build audit fixes (March 2026)**
 

@@ -211,7 +211,7 @@ explained by intentional deferral or architecture reservation.
 | Gap | Category | Audit Finding | Recommendation |
 |-----|----------|--------------|----------------|
 | Choice quality validation | Validation / enforcement | No post-generation validator rejects weak choices before player sees them | **Spec complete** — `CHOICE_QUALITY_VALIDATION_SPEC.md` v1.0. Awaits implementation (late Phase 3 or Phase 7, contingent on calibration). |
-| Prologue inference robustness | Validation / enforcement | Contradiction handling, anti-gaming, and per-axis confidence rules were under-specified | **Spec complete** — `PROLOGUE_INFERENCE_SPEC.md` v1.0. Awaits implementation (Phase 18). |
+| Prologue inference robustness | Validation / enforcement | Contradiction handling, anti-gaming, and per-axis confidence rules were under-specified | **Spec complete** — `PROLOGUE_SYSTEM_SPEC.md` v1.0. Awaits implementation (Phase 18). |
 | Import package quality | Validation / enforcement | Format was specified, quality standard was not | **Spec complete** — `IMPORT_PACKAGE_QUALITY_SPEC.md` v1.0. Awaits implementation (Phase 19). |
 | Path differentiation proof | Validation / enforcement | No concrete test proves allegiances produce structurally different experiences beyond narrative wrappers | Open — integration coverage audit needed in Campaign Studio validation. Backlog items 3.33 and 3.34 partially address this. |
 | Identity drift surfacing | Experience surfacing | System tracks identity accumulation well at act boundaries but does not guarantee the player feels drift during turn-to-turn play | Open — requires drift surface policy (prompt engineering spec, Phase 7+). |

@@ -1,7 +1,14 @@
+> **SPECIALIST SPEC** — Quality standards for cross-campaign character
+> import compression.
+> **Build phase:** Phase 19 (Cross-Era Import/Export, not yet started).
+> **Design authority for:** import package quality rubrics, compression
+> validation, narrative preservation requirements.
+> **Depends on:** Game Mechanics §20, CS Implementation §6, Phases 7/12/13.
+
 # Storyteller V3 — Import Package Quality Spec
 
-**Version:** 1.0  
-**Date:** March 6, 2026  
+**Version:** 1.0
+**Date:** March 6, 2026
 **Purpose:** Quality standards for the narrative components of the
 import package. The existing design (Game Mechanics §20, Campaign Studio
 Implementation §6) specifies what gets imported and the format of each

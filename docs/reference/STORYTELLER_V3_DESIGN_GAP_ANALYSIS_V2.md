@@ -1,3 +1,9 @@
+> **REFERENCE ONLY** — This is an archived audit artifact. All nine
+> design specifications in this document have been completed and are
+> referenced by the Backlog. Consult Game Mechanics, Implementation,
+> and Campaign Studio Implementation for current authoritative content.
+> Retained for traceability and implementation reference.
+
 # Storyteller V3 — Design Gap Analysis v2.0
 
 **Document version:** 2.0  
