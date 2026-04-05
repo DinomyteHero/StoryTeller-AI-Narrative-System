@@ -18,7 +18,7 @@ Two independent systems sharing one repo:
   turn maximum.
 - **Campaign Studio** — the authoring tool. Produces campaign spine
   JSON. Author-facing. Multi-pass, no latency pressure. Built in
-  parallel with Game Engine post-V1 milestones (CS-1 through CS-4
+  parallel with Game Engine post-V1 milestones (CS-1 through CS-5
   complete).
 
 The campaign spine JSON is the interface contract between them.
@@ -240,7 +240,7 @@ Campaign Studio (parallel track):
 
 - ~15,700 lines of application code (Python + HTML)
 - ~9,000 lines of test code across 17 test files
-- 15 active documentation files in `docs/` + 4 archived in `docs/reference/`
+- 15 active documentation files in `docs/` + 5 archived in `docs/reference/`
 - 2 campaign spines, 2 characters, 6 talent trees, 5 Force powers
 
 ## Repo Structure
@@ -271,6 +271,7 @@ storyteller-v3/
 │       ├── README.md
 │       ├── STORYTELLER_V3_DESIGN_GAP_ANALYSIS_V2.md
 │       ├── STORYTELLER_V3_DEFERRED_DESIGN_AND_LOGIC_ANALYSIS.md
+│       ├── DOCUMENTATION_CONSOLIDATION_REPORT.md
 │       ├── CLAUDE_CODE_INITIAL_PROMPT.md
 │       └── prose_quality_review_session_1.md
 ├── engine/                # Pure Python — dice, character, checks (5,106 lines)

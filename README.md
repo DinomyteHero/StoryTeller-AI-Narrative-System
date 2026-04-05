@@ -131,7 +131,7 @@ storyteller-v3/
 | Milestone 2 | Force-sensitive campaigns | Complete |
 | Milestone 3 | Vehicles and space combat | Complete |
 | Milestone 4 | Multi-campaign saga (time skips done; prologue & later phases pending) | Partial |
-| Campaign Studio | Spine authoring, validation, collaborative generation, saga pipeline | Complete (CS-1 through CS-4) |
+| Campaign Studio | Spine authoring, validation, collaborative generation, saga pipeline, narrative quality | Complete (CS-1 through CS-5) |
 
 ## Documentation
 

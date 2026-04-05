@@ -14,8 +14,8 @@ extended across the full project.
 - Game Mechanics Document (v1.8) — design for all post-V1 systems
 - Campaign Studio Implementation (v1.3) — spine schema and Studio build
 - LLM Evaluation Document (v2.0) — model selection for all roles
-- Design Gap Analysis (v2.0) — design specs for all items not covered
-  by the Game Mechanics or Implementation documents
+- Design Gap Analysis (v2.0, in `docs/reference/`) — design specs for
+  all items not covered by the Game Mechanics or Implementation documents
 
 ---
 

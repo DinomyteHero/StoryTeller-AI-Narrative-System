@@ -17,15 +17,16 @@ no active functionality.
 **Authoritative source for item-level status:** Backlog v3.2.
 **Authoritative source for design specs:** Game Mechanics v1.8,
 Implementation v2.5, Campaign Studio Design v1.3, Campaign Studio
-Implementation v1.3, Design Gap Analysis v2.0, Deferred Design and
-Logic Analysis v1.0.
+Implementation v1.3, Design Gap Analysis v2.0 (in `docs/reference/`),
+Deferred Design and Logic Analysis v1.0 (in `docs/reference/`).
 
 **Implementation status as of this version:** Milestones 0-3 complete.
 Milestone 4 partial (Phase 17 complete, Phases 18-22 not started).
-Campaign Studio CS-1 through CS-4 complete.
+Campaign Studio CS-1 through CS-5 complete.
 
-**Codebase metrics:** ~15,160 lines application code, ~8,454 lines
-test code, 16 test files, 19 documentation files.
+**Codebase metrics:** ~15,700 lines application code, ~9,000 lines
+test code, 17 test files. Documentation: 15 active files in `docs/`
+plus 5 archived in `docs/reference/`.
 
 ---
 

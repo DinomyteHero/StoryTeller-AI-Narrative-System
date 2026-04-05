@@ -16,6 +16,7 @@ historical artifacts.
 | `STORYTELLER_V3_DEFERRED_DESIGN_AND_LOGIC_ANALYSIS.md` | Design for 2 deferred items + full system logic walkthrough. | Designs applied to Game Mechanics v1.8. Logic analysis (Section 4) remains a useful architecture reference. |
 | `CLAUDE_CODE_INITIAL_PROMPT.md` | Setup prompt for Claude Code sessions. | Superseded by `CLAUDE.md` in the repository root. |
 | `prose_quality_review_session_1.md` | Playtest transcript (Echoes of the Force, Talia Ren). | Historical data artifact. Useful for prose quality benchmarking. |
+| `DOCUMENTATION_CONSOLIDATION_REPORT.md` | Record of the April 2026 documentation consolidation. | One-time artifact documenting the rationale for the current four-tier structure. |
 
 ## When to Consult These
 

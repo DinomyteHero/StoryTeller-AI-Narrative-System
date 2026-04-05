@@ -1,3 +1,7 @@
+> **REFERENCE ONLY** — One-time record of the April 2026 documentation
+> consolidation. Describes the rationale and changes that produced the
+> current four-tier document architecture. Not an active specification.
+
 # Documentation Consolidation Report
 
 **Date:** April 5, 2026
