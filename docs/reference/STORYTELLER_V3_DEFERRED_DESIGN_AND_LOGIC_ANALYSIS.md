@@ -1,3 +1,9 @@
+> **REFERENCE ONLY** — This is an archived audit artifact. Design
+> content from Sections 1-2 has been applied to Game Mechanics v1.8.
+> Issues from Section 4 have been applied to Implementation v2.2 and
+> Build Roadmap. Retained for the logic analysis in Section 4 and
+> for historical traceability.
+
 # Storyteller V3 — Deferred Item Design + System Logic Analysis
 
 **Status:** Design content from Sections 1 and 2 has been applied to

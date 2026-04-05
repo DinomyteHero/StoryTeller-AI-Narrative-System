@@ -18,7 +18,7 @@ Two independent systems sharing one repo:
   turn maximum.
 - **Campaign Studio** — the authoring tool. Produces campaign spine
   JSON. Author-facing. Multi-pass, no latency pressure. Built in
-  parallel with Game Engine post-V1 milestones (CS-1 through CS-4
+  parallel with Game Engine post-V1 milestones (CS-1 through CS-5
   complete).
 
 The campaign spine JSON is the interface contract between them.
@@ -85,55 +85,46 @@ start with `docs/00_PROJECT_GUIDE.md`.
 9. **`docs/STORYTELLER_V3_BACKLOG.md`** — Complete item tracker.
    Reference for status of any feature.
 
-10. **`docs/STORYTELLER_V3_DEFERRED_DESIGN_AND_LOGIC_ANALYSIS.md`** —
-    System logic walkthrough verifying all data flows, integration
-    points, invariants, and token budgets. Reference during
-    implementation to understand how components connect.
-
-11. **`docs/STORYTELLER_V3_DESIGN_GAP_ANALYSIS_V2.md`** — Full design
-    specifications for every item across the project not covered in
-    Game Mechanics or Implementation. Reference when implementing any
-    post-V1 item. v2.0 is the only current source — v1.1 is
-    superseded.
-
 **Orientation and audit documents:**
 
-12. **`docs/00_PROJECT_GUIDE.md`** — Front-door orientation. Document
-    authority map, reading orders, current project state, key
+10. **`docs/00_PROJECT_GUIDE.md`** — Front-door orientation. Document
+    authority map (four-tier architecture), reading orders, key
     invariants, quick-reference lookup.
 
-13. **`docs/PROJECT_STATE_MATRIX.md`** — Single-page view of every
+11. **`docs/PROJECT_STATE_MATRIX.md`** — Single-page view of every
     capability: what's promised, designed, V1-scoped, and deferred.
 
-**Validation and quality specs (post-V1 reference):**
+**Specialist specs (consult when implementing the relevant phase):**
 
-14. **`docs/CHOICE_QUALITY_VALIDATION_SPEC.md`** — Post-generation
+12. **`docs/CHOICE_QUALITY_VALIDATION_SPEC.md`** — Post-generation
     choice quality validator. Rubric, local model evaluator, retry
     integration. Activates late Phase 3 or Phase 7 based on
     calibration.
 
-15. **`docs/PROLOGUE_INFERENCE_SPEC.md`** — Robustness rules for the
-    psychometric prologue: contradiction handling, confidence scoring,
-    anti-gaming, fallback behavior, scene library diversity. Phase 18.
+13. **`docs/PROLOGUE_SYSTEM_SPEC.md`** — Psychometric prologue: design
+    robustness (contradictions, confidence, anti-gaming) +
+    implementation plan. Phase 18.
 
-16. **`docs/IMPORT_PACKAGE_QUALITY_SPEC.md`** — Quality standards for
-    narrative compression in cross-campaign character transfer:
-    relationship summaries, throughline history, voice notes, memory
-    shards. Phase 19.
+14. **`docs/IMPORT_PACKAGE_QUALITY_SPEC.md`** — Quality standards for
+    narrative compression in cross-campaign character transfer. Phase 19.
 
-**Additional documents (generated during development):**
-
-17. **`docs/PHASE_18_IMPLEMENTATION_PLAN.md`** — Implementation plan
-    for the psychometric prologue (Phase 18).
-
-18. **`docs/CLAUDE_CODE_INITIAL_PROMPT.md`** — Post-milestone
-    documentation sync prompt (this audit task).
-
-19. **`docs/prose_quality_review_session_1.md`** — Prose quality
-    review notes from playtesting session.
-
-20. **`docs/STORY_ARCHITECTURE_SPEC.md`** — Story architecture
+15. **`docs/STORY_ARCHITECTURE_SPEC.md`** — Story architecture
     vocabulary, quality rubrics, and Gate 4 evaluation design (CS-5).
+
+**Reference archive (`docs/reference/`):**
+
+16. **`docs/reference/STORYTELLER_V3_DESIGN_GAP_ANALYSIS_V2.md`** —
+    Archived: design specs for 9 items, all applied to canonical docs.
+
+17. **`docs/reference/STORYTELLER_V3_DEFERRED_DESIGN_AND_LOGIC_ANALYSIS.md`** —
+    Archived: system logic walkthrough. Section 4 remains useful for
+    architecture reference.
+
+18. **`docs/reference/CLAUDE_CODE_INITIAL_PROMPT.md`** — Archived:
+    superseded by this CLAUDE.md file.
+
+19. **`docs/reference/prose_quality_review_session_1.md`** — Archived:
+    playtest transcript for prose quality benchmarking.
 
 ## The Rule That Overrides Everything
 
@@ -249,7 +240,7 @@ Campaign Studio (parallel track):
 
 - ~15,700 lines of application code (Python + HTML)
 - ~9,000 lines of test code across 17 test files
-- 20 documentation files in `docs/`
+- 15 active documentation files in `docs/` + 5 archived in `docs/reference/`
 - 2 campaign spines, 2 characters, 6 talent trees, 5 Force powers
 
 ## Repo Structure
@@ -260,27 +251,29 @@ storyteller-v3/
 ├── README.md              # Project overview and getting started
 ├── pyproject.toml
 ├── .env.example
-├── docs/                  # All project documentation (20 files)
+├── docs/                  # Project documentation (15 active + 4 archived)
 │   ├── 00_PROJECT_GUIDE.md                     # Start here — orientation
 │   ├── PROJECT_STATE_MATRIX.md                 # What's promised/designed/built
-│   ├── STORYTELLER_V3_IMPLEMENTATION.md        # Primary spec
+│   ├── STORYTELLER_V3_IMPLEMENTATION.md        # Primary spec — Game Engine
 │   ├── STORYTELLER_V3_BUILD_ROADMAP.md         # Phase plan
-│   ├── STORYTELLER_V3_GAME_MECHANICS.md        # Game design
+│   ├── STORYTELLER_V3_GAME_MECHANICS.md        # Game design (27 sections)
 │   ├── STORYTELLER_V3_VISION.md                # Creative vision
 │   ├── STORYTELLER_V3_CAMPAIGN_STUDIO.md       # Studio design
-│   ├── STORYTELLER_V3_CAMPAIGN_STUDIO_IMPLEMENTATION.md
-│   ├── STORYTELLER_V3_LLM_EVALUATION.md
-│   ├── STORYTELLER_V3_RESEARCH_CATALOGUE.md
-│   ├── STORYTELLER_V3_DEFERRED_DESIGN_AND_LOGIC_ANALYSIS.md
-│   ├── STORYTELLER_V3_DESIGN_GAP_ANALYSIS_V2.md
-│   ├── STORYTELLER_V3_BACKLOG.md
-│   ├── CHOICE_QUALITY_VALIDATION_SPEC.md       # Post-V1 quality spec
-│   ├── PROLOGUE_INFERENCE_SPEC.md              # Post-V1 robustness spec
-│   ├── IMPORT_PACKAGE_QUALITY_SPEC.md          # Post-V1 quality spec
-│   ├── PHASE_18_IMPLEMENTATION_PLAN.md         # Phase 18 plan
-│   ├── CLAUDE_CODE_INITIAL_PROMPT.md           # Doc sync prompt
-│   ├── prose_quality_review_session_1.md       # Playtest notes
-│   └── STORY_ARCHITECTURE_SPEC.md             # CS-5 narrative quality spec
+│   ├── STORYTELLER_V3_CAMPAIGN_STUDIO_IMPLEMENTATION.md  # Studio code spec
+│   ├── STORYTELLER_V3_LLM_EVALUATION.md        # Model selection
+│   ├── STORYTELLER_V3_RESEARCH_CATALOGUE.md    # Research evidence
+│   ├── STORYTELLER_V3_BACKLOG.md               # Item tracker (source of truth)
+│   ├── CHOICE_QUALITY_VALIDATION_SPEC.md       # Specialist: choice quality
+│   ├── PROLOGUE_SYSTEM_SPEC.md                 # Specialist: prologue (Phase 18)
+│   ├── IMPORT_PACKAGE_QUALITY_SPEC.md          # Specialist: import quality
+│   ├── STORY_ARCHITECTURE_SPEC.md              # Specialist: CS-5 narrative quality
+│   └── reference/                              # Archived/reference-only
+│       ├── README.md
+│       ├── STORYTELLER_V3_DESIGN_GAP_ANALYSIS_V2.md
+│       ├── STORYTELLER_V3_DEFERRED_DESIGN_AND_LOGIC_ANALYSIS.md
+│       ├── DOCUMENTATION_CONSOLIDATION_REPORT.md
+│       ├── CLAUDE_CODE_INITIAL_PROMPT.md
+│       └── prose_quality_review_session_1.md
 ├── engine/                # Pure Python — dice, character, checks (5,106 lines)
 │   ├── dice.py            # FFG dice system — 7 die types, symbol tables (270 lines)
 │   ├── character.py       # Character model — Pydantic, 33 skills (220 lines)
@@ -372,6 +365,10 @@ storyteller-v3/
 are mentioned in design docs for future phases but do not yet exist in
 the repo. They will be created when Phase 21 (canon profiles) and the
 trained local evaluator (post-CS-4) are implemented.
+
+**Documentation structure:** Active specs live in `docs/`. Archived
+audit artifacts and historical references live in `docs/reference/`.
+See `docs/00_PROJECT_GUIDE.md` for the four-tier document architecture.
 
 Game Engine scope: `engine/`, `gm/`, `state/`, `api/game_routes.py`,
 `web/`. Do not modify `studio/` when working on the Game Engine

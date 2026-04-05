@@ -446,12 +446,12 @@ Issues identified during the March 5, 2026 cross-document review:
 | Campaign Studio Design | v1.3 | **CURRENT** | Game Mechanics v1.5 cross-references applied. |
 | Campaign Studio Implementation | v1.3 | **CURRENT** | FactionSpec and GenerationMetadata schema models added. Gate 1 and Gate 4 validation expanded. CS-2/CS-4 deliverables updated. Saga config, ensemble, and evaluator training infrastructure specified. |
 | Research Catalogue | v1.0 | **CURRENT** | No pending additions. |
-| Design Gap Analysis | v2.0 | **CURRENT** | Full design specs for all project items. v1.1 items applied. v2.0 adds: 2.19, 2.28, 3.26, 3.27, 3.28, 4.9, 4.10, 4.0a, 4.0d. Zero CONCEPT ONLY / FILED / CONSIDER items remain. |
-| Deferred Design and Logic Analysis | v1.0 | **CURRENT** | Turn loop verification, data flow analysis, invariant proofs, token budgets, post-V1 integration points. |
-| Project Guide | v1.3 | **CURRENT** | Documentation audit sync. Codebase metrics added. Cloud model reference corrected. Known open items expanded. |
-| Project State Matrix | v1.4 | **CURRENT** | Codebase metrics added. Missing data directories gap noted. |
+| Design Gap Analysis | v2.0 | **CURRENT** (in `docs/reference/`) | Full design specs for all project items. v1.1 items applied. v2.0 adds: 2.19, 2.28, 3.26, 3.27, 3.28, 4.9, 4.10, 4.0a, 4.0d. Zero CONCEPT ONLY / FILED / CONSIDER items remain. |
+| Deferred Design and Logic Analysis | v1.0 | **CURRENT** (in `docs/reference/`) | Turn loop verification, data flow analysis, invariant proofs, token budgets, post-V1 integration points. |
+| Project Guide | v2.0 | **CURRENT** | Four-tier document architecture. Reading orders, authority map, invariants, quick reference. |
+| Project State Matrix | v1.5 | **CURRENT** | Capability dashboard. CS-1 through CS-5 completion reflected. |
 | Choice Quality Validation Spec | v1.0 | **CURRENT** | Post-generation choice quality validator. Activation contingent on calibration from initial playtesting. |
-| Prologue Inference Spec | v1.0 | **CURRENT** | Robustness rules for psychometric prologue. Extends GM §5 core design with edge case handling. |
+| Prologue System Spec | v1.0 | **CURRENT** | Merged from Prologue Inference Spec + Phase 18 Implementation Plan. Design robustness + implementation roadmap. |
 | Import Package Quality Spec | v1.0 | **CURRENT** | Quality standards for narrative compression in cross-campaign import. Extends GM §20 and CS Impl §6. |
 | This Backlog | v3.2 | **CURRENT** | Documentation audit sync. Item 0.5 marked DONE. Document versions updated. Codebase-documentation discrepancies corrected. |
 
@@ -626,7 +626,7 @@ Issues identified during the March 5, 2026 cross-document review:
 2. **Deferred Design and Logic Analysis document added to project.**
    System logic walkthrough verifying all data flows, integration points,
    invariant preservation, and token budgets. Referenced in CLAUDE.md
-   and CLAUDE_CODE_INITIAL_PROMPT.md.
+   and CLAUDE_CODE_INITIAL_PROMPT.md (now in `docs/reference/`).
 
 **v2.4 — Pre-build audit fixes (March 2026)**
 

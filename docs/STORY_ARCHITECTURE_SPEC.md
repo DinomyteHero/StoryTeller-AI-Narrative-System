@@ -1,3 +1,10 @@
+> **SPECIALIST SPEC** — Story architecture vocabulary, quality rubrics,
+> and Gate 4 narrative evaluation for the Campaign Studio.
+> **Build phase:** CS-5 (Campaign Studio Narrative Quality) — COMPLETE.
+> **Design authority for:** architectural vocabulary, Gate 4a/4b/4c
+> evaluation, pre-generation planning, narrative quality scoring.
+> **Depends on:** Campaign Studio validation infrastructure.
+
 # Story Architecture Specification
 
 **Version:** 1.0

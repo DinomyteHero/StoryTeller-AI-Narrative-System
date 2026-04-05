@@ -1,7 +1,13 @@
+> **SPECIALIST SPEC** — Post-generation choice quality validator.
+> **Build phase:** Late Phase 3 or Phase 7 (contingent on playtesting).
+> **Design authority for:** choice validation rubric, local evaluator
+> integration, retry policy for low-quality choice sets.
+> **Depends on:** Vision §7, Implementation §7.1/§7.3, Game Mechanics §24.
+
 # Storyteller V3 — Choice Quality Validation Spec
 
-**Version:** 1.0  
-**Date:** March 6, 2026  
+**Version:** 1.0
+**Date:** March 6, 2026
 **Purpose:** Specification for a post-generation validation layer that
 rejects weak, generic, or low-character-expression choice sets before
 they reach the player. Addresses the validation gap identified in the

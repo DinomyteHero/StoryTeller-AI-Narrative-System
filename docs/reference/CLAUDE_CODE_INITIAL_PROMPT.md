@@ -1,3 +1,7 @@
+> **REFERENCE ONLY** — This document is superseded by `CLAUDE.md` in
+> the repository root, which now serves as the authoritative Claude
+> Code orientation. Retained for historical reference.
+
 # Claude Code Initial Prompt — Storyteller V3
 
 Use this as your first message to Claude Code after setting up the repo with CLAUDE.md and all project documentation.
