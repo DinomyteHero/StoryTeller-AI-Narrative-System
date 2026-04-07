@@ -17,7 +17,9 @@ from openai import OpenAI
 from engine.equipment import build_equipment_narration_block
 from gm.context import ContextPackage
 
-PROMPT_PATH = Path(__file__).parent / "prompts" / "narration.txt"
+_PROMPTS_DIR = Path(__file__).parent / "prompts"
+PROMPT_PATH = _PROMPTS_DIR / "narration.txt"
+PROMPT_PATH_LITERARY = _PROMPTS_DIR / "narration_literary.txt"
 MAX_TOKENS  = int(os.getenv("MAX_COMPLETION_TOKENS", "16000"))
 
 # Provider config — all from environment variables
@@ -33,6 +35,7 @@ NARRATIVE_BACKEND = os.getenv("NARRATIVE_BACKEND", "cloud")
 OLLAMA_URL             = os.getenv("OLLAMA_URL", "http://localhost:11434")
 LOCAL_MODEL            = os.getenv("LOCAL_MODEL", "qwen3.5:9b")
 LOCAL_NARRATION_MODEL  = os.getenv("LOCAL_NARRATION_MODEL", LOCAL_MODEL)
+PROSE_VOICE            = os.getenv("PROSE_VOICE", "clean")  # "clean" | "literary"
 
 PROVIDER_BASE_URLS = {
     "openai":     None,
@@ -42,7 +45,7 @@ PROVIDER_BASE_URLS = {
 # ── Scene pacing guidance (Game Mechanics §10, Vision §3) ─────────────
 # Maps scene_type to:
 #   - pacing: word count, sentence rhythm, structural guidance
-#   - voice_exemplar: 1-2 sentences in the target register for style anchoring
+#   - voice_exemplar: 1-2 sentences in the target voice for style anchoring
 #   - craft: 3-4 craft constraints SPECIFIC to this scene type (rotated,
 #     not cumulative — reduces prompt overload per evaluation §2.1)
 #
@@ -52,8 +55,197 @@ PROVIDER_BASE_URLS = {
 #
 # CRAFT CONSTRAINTS rotate per scene type — only the ones relevant to
 # the current scene are injected, reducing cognitive load on the model.
+#
+# Two voice variants: "clean" (default, direct/grounded) and "literary"
+# (original Stover/Luceno blend). Selected via PROSE_VOICE env var.
 
-SCENE_PACING = {
+SCENE_PACING_CLEAN = {
+    "combat": {
+        "pacing": (
+            "PACING: Combat. Short sentences, compressed paragraphs. "
+            "250-350 words. Choices are immediate and action-oriented. "
+            "No worldbuilding, no reflection. The environment is "
+            "obstacles and opportunities."
+        ),
+        "voice_exemplar": (
+            "VOICE TARGET — write like this:\n"
+            "\"The first bolt goes wide. The second doesn't. It catches "
+            "the crate beside your head and the plastic-composite "
+            "shrapnel peppers your cheek — hot, sharp, tiny points of "
+            "pain that your brain files under 'deal with later.' You're "
+            "already moving.\""
+        ),
+        "craft": (
+            "SCENE CRAFT:\n"
+            "- Fast, physical, external. The character reacts. Save "
+            "internal reflection for after the fight.\n"
+            "- NPC disposition determines how they fight — hostile NPCs "
+            "press advantages, wary NPCs look for escape routes.\n"
+            "- Each choice must have a different tactical AND identity "
+            "profile. Not just 'attack/defend/flee' — the METHOD of "
+            "fighting reveals who the character IS."
+        ),
+    },
+    "chase": {
+        "pacing": (
+            "PACING: Chase. Movement and spatial awareness drive the "
+            "prose. Shorter sentences as pressure mounts. 250-400 words. "
+            "The environment is experienced at velocity, not examined."
+        ),
+        "voice_exemplar": (
+            "VOICE TARGET — write like this:\n"
+            "\"Three corridors. Left goes deeper into maintenance — dark, "
+            "tangled, the kind of place you lose people. Right goes up "
+            "toward the Promenade and crowds. Straight ahead is a blast "
+            "door that might or might not be locked, and behind you the "
+            "boots are getting closer.\""
+        ),
+        "craft": (
+            "SCENE CRAFT:\n"
+            "- Spatial relationships matter — the reader must feel the "
+            "geography of the pursuit.\n"
+            "- Each choice represents a different escape philosophy: "
+            "speed vs stealth vs misdirection vs confrontation.\n"
+            "- If a dice check failed, the environment closes in — "
+            "fewer exits, less time, worse options."
+        ),
+    },
+    "infiltration": {
+        "pacing": (
+            "PACING: Infiltration. Precise, controlled prose. The "
+            "character observes in operational terms — angles, timing, "
+            "sight lines. 300-450 words."
+        ),
+        "voice_exemplar": (
+            "VOICE TARGET — write like this:\n"
+            "\"You count the interval. Forty seconds between sweeps. "
+            "The vent cover has two bolts, and one of them is already "
+            "corroded. Forty seconds is enough. Probably.\""
+        ),
+        "craft": (
+            "SCENE CRAFT:\n"
+            "- Tension lives in the gap between the plan and what the "
+            "plan missed. Details that seemed safe should develop edges.\n"
+            "- Choices represent different operational approaches: "
+            "patient observation vs calculated risk vs improvisation.\n"
+            "- Plant one environmental detail that could become a "
+            "complication or advantage in the next turn."
+        ),
+    },
+    "social": {
+        "pacing": (
+            "PACING: Social. Dialogue-forward, NPC voice prominent. "
+            "Subtext matters more than action. Let warmth and humor "
+            "breathe when the relationship supports it. 350-500 words."
+        ),
+        "voice_exemplar": (
+            "VOICE TARGET — write like this:\n"
+            "\"'I'm glad you came,' she says, which in Ryloth "
+            "trade-speak means she considered not being here. The booth "
+            "she's chosen faces the entrance. Old habit or current "
+            "concern — hard to tell with Numa.\""
+        ),
+        "craft": (
+            "SCENE CRAFT:\n"
+            "- NPC interactions MUST reflect their mechanical disposition. "
+            "Disposition below 0.5 = visible friction or reluctance. "
+            "Conflicted states express both dimensions simultaneously.\n"
+            "- What is NOT said carries as much weight as what is. Show "
+            "the subtext through behavior — where someone looks, what "
+            "they do with their hands — not through narrating hidden "
+            "feelings.\n"
+            "- Choices should include at least one dialogue option "
+            "(direct line or conversational approach) that reveals "
+            "character values, not just information goals."
+        ),
+    },
+    "exploration": {
+        "pacing": (
+            "PACING: Exploration. Environmental detail is richest here "
+            "— but through selected specifics, not exposition. One or "
+            "two concrete details that imply a larger world. The "
+            "character is taking in a new place. 350-500 words."
+        ),
+        "voice_exemplar": (
+            "VOICE TARGET — write like this:\n"
+            "\"The temple is older than anything you've seen on this "
+            "continent. The stone is wrong for the region — dark volcanic "
+            "basalt in a landscape of sandstone and clay. Someone moved "
+            "these blocks a very long way, a very long time ago, and the "
+            "why of that is carved into the lintel in a script you don't "
+            "recognize.\""
+        ),
+        "craft": (
+            "SCENE CRAFT:\n"
+            "- When introducing environmental details, prefer details "
+            "that could become relevant later over purely atmospheric "
+            "ones. Plant seeds.\n"
+            "- The character notices what matters to THEM specifically, "
+            "not generic observations. A smuggler notices exits. A "
+            "mechanic notices what's broken.\n"
+            "- Choices should offer different investigative approaches "
+            "that reveal different information based on what the "
+            "character prioritizes."
+        ),
+    },
+    "introspection": {
+        "pacing": (
+            "PACING: Introspection. Slow, internal, honest. This is "
+            "where the character processes what has happened. Minimal "
+            "external action. No dice check this turn. 300-450 words."
+        ),
+        "voice_exemplar": (
+            "VOICE TARGET — write like this:\n"
+            "\"The bunk is too short but the blanket is warm and for "
+            "the first time in three days nobody is trying to kill you. "
+            "That should feel like more of a relief than it does. You "
+            "keep thinking about what Tarev said — not the words, which "
+            "were careful enough, but the way he looked at the door when "
+            "he said them.\""
+        ),
+        "craft": (
+            "SCENE CRAFT:\n"
+            "- At least one choice must be reflective — an internal "
+            "decision about what the moment means, not what to do next.\n"
+            "- Avoid resolving the character's internal conflict FOR "
+            "them. Present the tension and let the player choose which "
+            "direction to lean.\n"
+            "- If a consequence from a prior significant choice has not "
+            "yet surfaced, this is a good scene to show its reach — "
+            "through a thought, a rumor, or a shifted dynamic."
+        ),
+    },
+    "space_combat": {
+        "pacing": (
+            "PACING: Space combat. The ship is the character's body — "
+            "every system response is felt through the deck plates. "
+            "Tactical prose — angles, vectors, power allocation. "
+            "250-400 words. Choices are operational decisions: fly, "
+            "fire, reroute, or command."
+        ),
+        "voice_exemplar": (
+            "VOICE TARGET — write like this:\n"
+            "\"The first bolt cuts across your bow close enough to "
+            "light the cockpit white. You slap the proximity alarm "
+            "silent before the ringing starts. Two contacts, high "
+            "starboard, closing fast — and the Luck was never going "
+            "to outrun a pair of uglies in open space.\""
+        ),
+        "craft": (
+            "SCENE CRAFT:\n"
+            "- The ship has personality — it groans, shudders, responds. "
+            "Write the ship as a character the pilot knows intimately.\n"
+            "- Each choice represents a different tactical philosophy: "
+            "aggressive (weapons), evasive (piloting), technical "
+            "(mechanics/computers), or command (leadership).\n"
+            "- Damage is felt physically — sparks, alarms, the smell "
+            "of burning circuits, the deck lurching. Do not report "
+            "damage in game terms."
+        ),
+    },
+}
+
+SCENE_PACING_LITERARY = {
     "combat": {
         "pacing": (
             "PACING: Combat. Short sentences, compressed paragraphs. "
@@ -244,6 +436,9 @@ SCENE_PACING = {
     },
 }
 
+# Select active pacing dict based on PROSE_VOICE env var
+SCENE_PACING = SCENE_PACING_CLEAN if PROSE_VOICE == "clean" else SCENE_PACING_LITERARY
+
 
 def _get_scene_block(scene_type: str) -> str:
     """Assemble the scene-specific prompt block from SCENE_PACING."""
@@ -281,7 +476,8 @@ def _build_prompt(ctx: ContextPackage) -> str:
     from engine.talents import build_talent_capabilities, build_talent_activations_block
     from engine.force import build_force_capabilities_block
 
-    template       = PROMPT_PATH.read_text(encoding="utf-8")
+    prompt_path    = PROMPT_PATH_LITERARY if PROSE_VOICE == "literary" else PROMPT_PATH
+    template       = prompt_path.read_text(encoding="utf-8")
     recent_summary = _format_recent_turns(ctx.recent_turns)
     full_summary   = f"{ctx.story_summary}\n\nRECENT TURNS:\n{recent_summary}"
     scene_pacing   = _get_scene_block(ctx.scene_type)
@@ -477,10 +673,17 @@ def narrate_turn(
 def _narrate_with_backend(
     ctx: ContextPackage, max_retries: int, used_local: bool,
 ) -> NarrationResult:
-    """Core narration logic — extracted for fallback reuse."""
+    """Core narration logic — extracted for fallback reuse.
+
+    Includes post-parse choice quality validation (spec §5.2).
+    Quality validation is skipped for local backend (spec §10).
+    """
+    from gm.choice_validator import validate_choice_quality, build_quality_correction
+
     client, model = _make_client()
     prompt        = _build_prompt(ctx)
     last_error    = None
+    best_result: NarrationResult | None = None  # best structurally valid result
 
     for attempt in range(max_retries + 1):
         is_qwen = used_local and "qwen" in LOCAL_NARRATION_MODEL.lower()
@@ -518,14 +721,53 @@ def _narrate_with_backend(
         )
 
         try:
-            return _parse_response(raw, used_local=used_local)
+            result = _parse_response(raw, used_local=used_local)
         except CloudGMError as e:
             last_error = str(e)
             if attempt == max_retries:
+                if best_result:
+                    return best_result  # return best structurally valid result
                 raise CloudGMError(
                     f"GM failed after {max_retries + 1} attempts. "
                     f"Last error: {last_error}"
                 )
+            continue
+
+        # Track best structurally valid result for fallback
+        best_result = result
+
+        # Choice quality validation (skip for local backend per spec §10)
+        if used_local or NARRATIVE_BACKEND == "local":
+            return result
+
+        quality = validate_choice_quality(
+            situation=ctx.situation,
+            character_name=ctx.character.name,
+            character_career=ctx.character.career,
+            passage=result.passage,
+            choices=result.choices,
+        )
+
+        if quality.passed:
+            return result  # good or marginal (0-1 failures)
+
+        if quality.fail_count == 1:
+            logging.warning(
+                f"Choice quality marginal (1 dimension failed: "
+                f"{quality.rejection_reason}). Accepting."
+            )
+            return result
+
+        # 2+ dimensions failed — retry if budget remains
+        logging.warning(
+            f"Choice quality rejected ({quality.fail_count} dimensions failed: "
+            f"{quality.rejection_reason}). Attempt {attempt+1}/{max_retries+1}."
+        )
+        last_error = build_quality_correction(quality)
+        if attempt == max_retries:
+            # Exhausted — accept best available (spec §5.4)
+            logging.warning("Retry budget exhausted. Accepting best available result.")
+            return best_result
 
     raise CloudGMError("Unreachable")
 

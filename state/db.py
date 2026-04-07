@@ -111,6 +111,19 @@ CREATE TABLE IF NOT EXISTS ship_states (
     UNIQUE(session_id, ship_id)
 );
 
+CREATE TABLE IF NOT EXISTS choice_quality_log (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    session_id TEXT NOT NULL,
+    turn_number INTEGER NOT NULL,
+    choices_json TEXT NOT NULL,
+    evaluation_json TEXT NOT NULL,
+    passed BOOLEAN NOT NULL,
+    fail_count INTEGER NOT NULL,
+    triggered_retry BOOLEAN NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (session_id) REFERENCES sessions(id)
+);
+
 CREATE TABLE IF NOT EXISTS campaigns (
     id                TEXT PRIMARY KEY,
     name              TEXT NOT NULL,

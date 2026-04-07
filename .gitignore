@@ -7,3 +7,5 @@ dist/
 build/
 .env
 data/storyteller.db
+data/telemetry/*.jsonl
+eval_report.json

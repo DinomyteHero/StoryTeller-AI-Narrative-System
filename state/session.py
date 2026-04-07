@@ -242,3 +242,25 @@ def get_act_turns(session_id: str, count: int) -> list[dict]:
             (session_id, count),
         ).fetchall()
     return [dict(r) for r in reversed(rows)]
+
+
+def log_choice_quality(
+    session_id: str,
+    turn_number: int,
+    choices_json: str,
+    evaluation_json: str,
+    passed: bool,
+    fail_count: int,
+    triggered_retry: bool,
+) -> None:
+    """Log a choice quality evaluation result."""
+    with get_connection() as conn:
+        conn.execute(
+            "INSERT INTO choice_quality_log "
+            "(session_id, turn_number, choices_json, evaluation_json, "
+            "passed, fail_count, triggered_retry) "
+            "VALUES (?, ?, ?, ?, ?, ?, ?)",
+            (session_id, turn_number, choices_json, evaluation_json,
+             passed, fail_count, triggered_retry),
+        )
+        conn.commit()
