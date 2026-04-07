@@ -100,6 +100,47 @@ class BetweenActResult:
     steps_completed: list[str] = field(default_factory=list)
 
 
+def count_state_deltas(recon: ReconciliationResult) -> dict:
+    """Count meaningful state changes from a reconciliation result.
+
+    Returns a dict summarizing what changed this turn. Used by the
+    consequence contract and narrative telemetry.
+    """
+    deltas = {
+        "npc_shifts": 0,
+        "npc_knowledge_changes": 0,
+        "threads_advanced": 0,
+        "threads_resolved": 0,
+        "threads_opened": 0,
+        "progress_delta": 0.0,
+        "total_changes": 0,
+    }
+
+    for npc in recon.npc_updates:
+        shift = abs(npc.get("disposition_shift", 0))
+        knowledge = len(npc.get("knowledge_gained", [])) + len(npc.get("knowledge_lost", []))
+        emotion = 1 if npc.get("emotional_state") else 0
+        if shift > 0:
+            deltas["npc_shifts"] += 1
+        deltas["npc_knowledge_changes"] += knowledge
+        deltas["total_changes"] += (1 if shift > 0 else 0) + knowledge + emotion
+
+    tu = recon.thread_updates
+    deltas["threads_advanced"] = len(tu.get("threads_advanced", []))
+    deltas["threads_resolved"] = len(tu.get("threads_resolved", []))
+    deltas["threads_opened"] = len(tu.get("threads_opened", []))
+    deltas["total_changes"] += (
+        deltas["threads_advanced"] + deltas["threads_resolved"] + deltas["threads_opened"]
+    )
+
+    sp = recon.story_progress
+    deltas["progress_delta"] = sp.get("progress_delta", 0.0)
+    if deltas["progress_delta"] > 0:
+        deltas["total_changes"] += 1
+
+    return deltas
+
+
 def morality_label(morality: int) -> str:
     """Return the GM prompt label for the current Morality value (§9)."""
     if morality >= 71:

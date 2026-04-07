@@ -21,6 +21,11 @@ from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 
 from engine.character import Character
+from engine.reconciliation import count_state_deltas
+from state.telemetry import (
+    emit_choice_made, emit_dice_resolved, emit_state_delta,
+    emit_consequence_gap, emit_npc_disposition_shift, emit_thread_event,
+)
 from engine.equipment import (
     COMBAT_SKILLS,
     build_combat_damage_block,
@@ -1030,6 +1035,56 @@ async def handle_turn(
 
     # Thread updates
     apply_thread_updates(recon_result.thread_updates, arc_state, current_act)
+
+    # ── Step 8.5: Telemetry ──────────────────────────────────────────
+    # Emit structured events for narrative analytics
+    emit_choice_made(
+        session_id, turn_number,
+        choice_index=req.choice_index,
+        choice_text=player_action,
+        skill_tag=(previous_skill_tags[req.choice_index]
+                   if req.choice_index < len(previous_skill_tags) else None),
+    )
+    if roll_result:
+        emit_dice_resolved(
+            session_id, turn_number,
+            pool=asdict(dice_pool) if dice_pool else {},
+            outcome_quadrant=roll_result.outcome_quadrant,
+            succeeded=roll_result.succeeded,
+        )
+
+    # Consequence contract: count state deltas from reconciliation
+    deltas = count_state_deltas(recon_result)
+    emit_state_delta(session_id, turn_number, deltas)
+    if deltas["total_changes"] == 0:
+        emit_consequence_gap(session_id, turn_number)
+
+    # NPC disposition shift events
+    for npc_update in recon_result.npc_updates:
+        shift = npc_update.get("disposition_shift", 0)
+        if abs(shift) > 0:
+            npc_name = npc_update.get("npc_name", "")
+            # Find old disposition from npc_states
+            old_disp = 0.5
+            for npc in npc_states:
+                if npc.name == npc_name:
+                    # Disposition was already applied, so reverse to get old
+                    old_disp = max(0.0, min(1.0, npc.disposition - shift))
+                    break
+            emit_npc_disposition_shift(
+                session_id, turn_number,
+                npc_name=npc_name,
+                old_value=old_disp,
+                new_value=npc.disposition if npc.name == npc_name else old_disp + shift,
+            )
+
+    # Thread events
+    for t in recon_result.thread_updates.get("threads_opened", []):
+        emit_thread_event(session_id, turn_number, "opened", t)
+    for t in recon_result.thread_updates.get("threads_advanced", []):
+        emit_thread_event(session_id, turn_number, "progressed", t)
+    for t in recon_result.thread_updates.get("threads_resolved", []):
+        emit_thread_event(session_id, turn_number, "resolved", t)
 
     # ── Step 9: Check act boundary ───────────────────────────────────
     act_boundary_reached = detect_act_boundary(arc_state)

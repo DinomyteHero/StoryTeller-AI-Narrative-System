@@ -1,0 +1,27 @@
+Evaluate these choices for a Star Wars narrative RPG.
+
+SCENE: {situation}
+CHARACTER: {character_name}, {character_career}
+PASSAGE ENDING: {last_100_words_of_passage}
+
+CHOICES:
+{numbered_choice_list}
+
+Answer each question with YES or NO only.
+
+1. SPECIFIC: Do at least 2 choices contain details that would NOT
+   make sense for a different character in a different scene?
+2. IDENTITY: Do at least 2 choices reveal different things about
+   who the character is (values, priorities, personality), not just
+   different methods?
+3. RISK: Is there a visible difference in risk level between the
+   safest choice and the most dangerous choice?
+4. DIFFERENT: Would at least 2 choices plausibly lead to different
+   narrative outcomes?
+5. GROUNDED: Do at least 2 choices reference specific elements
+   from the scene (named NPCs, specific objects, established
+   threats)?
+
+Respond as JSON:
+{{"specific": true/false, "identity": true/false, "risk": true/false,
+ "different": true/false, "grounded": true/false}}
