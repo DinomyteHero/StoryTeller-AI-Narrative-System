@@ -18,7 +18,7 @@ Two independent systems sharing one repo:
   turn maximum.
 - **Campaign Studio** — the authoring tool. Produces campaign spine
   JSON. Author-facing. Multi-pass, no latency pressure. Built in
-  parallel with Game Engine post-V1 milestones (CS-1 through CS-5
+  parallel with Game Engine post-V1 milestones (CS-1 through CS-6
   complete).
 
 The campaign spine JSON is the interface contract between them.
@@ -37,94 +37,83 @@ The campaign spine JSON is the interface contract between them.
 
 ## Documentation
 
-All project documents live in `docs/`. For full orientation —
-authority map, reading order, current project state, and navigation —
-start with `docs/00_PROJECT_GUIDE.md`.
+All project documents live in `docs/`, organized into tier-based
+subdirectories. Start with `docs/index.md` for full orientation.
 
 **For implementation, read in this order:**
 
-1. **`docs/STORYTELLER_V3_IMPLEMENTATION.md`** — THE PRIMARY SPEC.
+1. **`docs/specs/engine-implementation.md`** — THE PRIMARY SPEC.
    Complete code-level specification for the Game Engine. V1 build
    phases 1-6 with file-by-file code. Read this entire document before
-   writing any code. All code in this document has been carefully
-   designed and reviewed — implement it as specified.
+   writing any code.
 
-2. **`docs/STORYTELLER_V3_BUILD_ROADMAP.md`** — Phased build plan from
-   V1 through the finished product (Milestones 0-4). Each phase has
-   files, goals, dependencies, and success criteria. After V1, follow
-   this.
+2. **`docs/status/roadmap.md`** — Phased build plan from V1 through
+   the finished product (Milestones 0-4). Each phase has files, goals,
+   dependencies, and success criteria.
 
-3. **`docs/STORYTELLER_V3_GAME_MECHANICS.md`** — 27 sections of game
-   design (§0-§26). Sections 0-19 and §23-§26 cover implemented
-   systems (Milestones 0-3 plus time skips). Sections 20-22 cover
-   systems not yet built (large-scale NPC management, canon character
-   profiles, Force discovery). Reference as needed during
-   implementation.
+3. **`docs/specs/game-mechanics.md`** — 27 sections of game design
+   (§0-§26). Sections 0-19 and §23-§26 cover implemented systems.
+   Sections 20-22 cover systems not yet built. Reference as needed.
 
-4. **`docs/STORYTELLER_V3_VISION.md`** — Creative vision. What the
-   game should feel like. Read for context, not for implementation
-   detail.
+4. **`docs/specs/vision.md`** — Creative vision. What the game should
+   feel like. Read for context, not for implementation detail.
 
 **Reference documents (consult when needed):**
 
-5. **`docs/STORYTELLER_V3_CAMPAIGN_STUDIO_IMPLEMENTATION.md`** —
-   Campaign Studio code spec. Contains the Pydantic spine schema
-   (`studio/schema.py`) which is the interface contract. Relevant to
-   Game Engine because the engine loads spines against this schema.
+5. **`docs/specs/studio-implementation.md`** — Campaign Studio code
+   spec (CS-1 through CS-6). Contains the Pydantic spine schema
+   (`studio/schema.py`) which is the interface contract.
 
-6. **`docs/STORYTELLER_V3_LLM_EVALUATION.md`** — Model selection
-   criteria and compliance tests. Reference when configuring LLM
-   providers.
+6. **`docs/research/llm-evaluation.md`** — Model selection criteria
+   and compliance tests.
 
-7. **`docs/STORYTELLER_V3_CAMPAIGN_STUDIO.md`** — Campaign Studio
-   design. Post-V1 reference.
+7. **`docs/specs/studio-design.md`** — Campaign Studio design.
 
-8. **`docs/STORYTELLER_V3_RESEARCH_CATALOGUE.md`** — Research evidence
-   basis. Background reading only.
+8. **`docs/research/research-catalogue.md`** — Research evidence basis.
 
-9. **`docs/STORYTELLER_V3_BACKLOG.md`** — Complete item tracker.
-   Reference for status of any feature.
+9. **`docs/status/backlog.md`** — Complete item tracker. Single source
+   of truth for status of any feature.
 
 **Orientation and audit documents:**
 
-10. **`docs/00_PROJECT_GUIDE.md`** — Front-door orientation. Document
-    authority map (four-tier architecture), reading orders, key
-    invariants, quick-reference lookup.
+10. **`docs/index.md`** — Front-door orientation. Document authority
+    map (four-tier architecture), reading orders, key invariants,
+    quick-reference lookup.
 
-11. **`docs/PROJECT_STATE_MATRIX.md`** — Single-page view of every
+11. **`docs/status/state-matrix.md`** — Single-page view of every
     capability: what's promised, designed, V1-scoped, and deferred.
 
 **Specialist specs (consult when implementing the relevant phase):**
 
-12. **`docs/CHOICE_QUALITY_VALIDATION_SPEC.md`** — Post-generation
+12. **`docs/specialist/choice-quality-validation.md`** — Post-generation
     choice quality validator. Rubric, local model evaluator, retry
-    integration. Activates late Phase 3 or Phase 7 based on
-    calibration.
+    integration. Activates late Phase 3 or Phase 7.
 
-13. **`docs/PROLOGUE_SYSTEM_SPEC.md`** — Psychometric prologue: design
-    robustness (contradictions, confidence, anti-gaming) +
-    implementation plan. Phase 18.
+13. **`docs/specialist/prologue-system.md`** — Psychometric prologue:
+    design robustness + implementation plan. Phase 18.
 
-14. **`docs/IMPORT_PACKAGE_QUALITY_SPEC.md`** — Quality standards for
-    narrative compression in cross-campaign character transfer. Phase 19.
+14. **`docs/specialist/import-package-quality.md`** — Quality standards
+    for narrative compression in cross-campaign transfer. Phase 19.
 
-15. **`docs/STORY_ARCHITECTURE_SPEC.md`** — Story architecture
-    vocabulary, quality rubrics, and Gate 4 evaluation design (CS-5).
+15. **`docs/specialist/story-architecture.md`** — Story architecture
+    vocabulary, quality rubrics, and Gate 4 evaluation design (CS-5/CS-6).
+
+**API reference:**
+
+16. **`docs/api/game-engine-api.md`** — Game Engine HTTP endpoints.
+
+17. **`docs/api/studio-api.md`** — Campaign Studio HTTP endpoints.
 
 **Reference archive (`docs/reference/`):**
 
-16. **`docs/reference/STORYTELLER_V3_DESIGN_GAP_ANALYSIS_V2.md`** —
-    Archived: design specs for 9 items, all applied to canonical docs.
+18. **`docs/reference/design-gap-analysis-v2.md`** — Archived: design
+    specs for 9 items, all applied to canonical docs.
 
-17. **`docs/reference/STORYTELLER_V3_DEFERRED_DESIGN_AND_LOGIC_ANALYSIS.md`** —
-    Archived: system logic walkthrough. Section 4 remains useful for
-    architecture reference.
+19. **`docs/reference/deferred-design-analysis.md`** — Archived:
+    system logic walkthrough.
 
-18. **`docs/reference/CLAUDE_CODE_INITIAL_PROMPT.md`** — Archived:
+20. **`docs/reference/claude-code-initial-prompt.md`** — Archived:
     superseded by this CLAUDE.md file.
-
-19. **`docs/reference/prose_quality_review_session_1.md`** — Archived:
-    playtest transcript for prose quality benchmarking.
 
 ## The Rule That Overrides Everything
 
@@ -213,9 +202,9 @@ outcomes (dice, state transitions, NPC disposition changes) BEFORE the
 narrative model receives the context. The LLM describes outcomes code
 has already determined. It never decides them.
 
-## Post-V1 Milestones — Current Status
+## Post-V1 Milestones — Current Status (last synced: 2026-04-08)
 
-Follow `docs/STORYTELLER_V3_BUILD_ROADMAP.md`. Four milestones:
+Follow `docs/status/roadmap.md`. Four milestones:
 - Milestone 1: Full single-campaign experience (Phases 7-13) — **COMPLETE**
 - Milestone 2: Force-sensitive campaigns (Phases 14-15.5) — **COMPLETE**
 - Milestone 3: Vehicles and space (Phase 16) — **COMPLETE**
@@ -237,12 +226,12 @@ Campaign Studio (parallel track):
 
 **Next work:** Phase 18 (Psychometric Prologue) or CS-7 (Saga Depth).
 
-## Codebase Metrics (as of April 6, 2026)
+## Codebase Metrics (as of April 8, 2026)
 
-- ~16,200 lines of application code (Python + HTML)
-- ~9,800 lines of test code across 19 test files
-- 15 active documentation files in `docs/` + 5 archived in `docs/reference/`
-- 2 campaign spines, 2 characters, 6 talent trees, 5 Force powers
+- ~18,600 lines of application code (Python + HTML)
+- ~10,300 lines of test code across 20 test files
+- 15 active documentation files in `docs/` + 6 archived in `docs/reference/`
+- 3 campaign spines, 2 characters, 6 talent trees, 5 Force powers
 
 ## Repo Structure
 
@@ -252,29 +241,37 @@ storyteller-v3/
 ├── README.md              # Project overview and getting started
 ├── pyproject.toml
 ├── .env.example
-├── docs/                  # Project documentation (15 active + 4 archived)
-│   ├── 00_PROJECT_GUIDE.md                     # Start here — orientation
-│   ├── PROJECT_STATE_MATRIX.md                 # What's promised/designed/built
-│   ├── STORYTELLER_V3_IMPLEMENTATION.md        # Primary spec — Game Engine
-│   ├── STORYTELLER_V3_BUILD_ROADMAP.md         # Phase plan
-│   ├── STORYTELLER_V3_GAME_MECHANICS.md        # Game design (27 sections)
-│   ├── STORYTELLER_V3_VISION.md                # Creative vision
-│   ├── STORYTELLER_V3_CAMPAIGN_STUDIO.md       # Studio design
-│   ├── STORYTELLER_V3_CAMPAIGN_STUDIO_IMPLEMENTATION.md  # Studio code spec
-│   ├── STORYTELLER_V3_LLM_EVALUATION.md        # Model selection
-│   ├── STORYTELLER_V3_RESEARCH_CATALOGUE.md    # Research evidence
-│   ├── STORYTELLER_V3_BACKLOG.md               # Item tracker (source of truth)
-│   ├── CHOICE_QUALITY_VALIDATION_SPEC.md       # Specialist: choice quality
-│   ├── PROLOGUE_SYSTEM_SPEC.md                 # Specialist: prologue (Phase 18)
-│   ├── IMPORT_PACKAGE_QUALITY_SPEC.md          # Specialist: import quality
-│   ├── STORY_ARCHITECTURE_SPEC.md              # Specialist: CS-5 narrative quality
-│   └── reference/                              # Archived/reference-only
+├── docs/                  # Project documentation (24 files across 6 subdirectories)
+│   ├── index.md                               # Start here — orientation
+│   ├── specs/                                 # Tier 1: Core specifications
+│   │   ├── vision.md                          # Creative vision
+│   │   ├── game-mechanics.md                  # Game design (27 sections)
+│   │   ├── engine-implementation.md           # Primary spec — Game Engine
+│   │   ├── studio-design.md                   # Campaign Studio design
+│   │   └── studio-implementation.md           # Campaign Studio code spec (CS-1–CS-6)
+│   ├── status/                                # Tier 2: Planning and tracking
+│   │   ├── roadmap.md                         # Phase plan
+│   │   ├── backlog.md                         # Item tracker (source of truth)
+│   │   ├── state-matrix.md                    # Capability dashboard
+│   │   └── changelog.md                       # Release history
+│   ├── research/                              # Tier 3: Research and evaluation
+│   │   ├── llm-evaluation.md                  # Model selection
+│   │   └── research-catalogue.md              # Research evidence
+│   ├── specialist/                            # Tier 4: Specialist specs
+│   │   ├── choice-quality-validation.md       # Choice quality (Phase 7)
+│   │   ├── prologue-system.md                 # Prologue system (Phase 18)
+│   │   ├── import-package-quality.md          # Import quality (Phase 19)
+│   │   └── story-architecture.md              # Story architecture (CS-5/CS-6)
+│   ├── api/                                   # API reference
+│   │   ├── game-engine-api.md                 # Game Engine endpoints
+│   │   └── studio-api.md                      # Campaign Studio endpoints
+│   └── reference/                             # Archived/reference-only
 │       ├── README.md
-│       ├── STORYTELLER_V3_DESIGN_GAP_ANALYSIS_V2.md
-│       ├── STORYTELLER_V3_DEFERRED_DESIGN_AND_LOGIC_ANALYSIS.md
-│       ├── DOCUMENTATION_CONSOLIDATION_REPORT.md
-│       ├── CLAUDE_CODE_INITIAL_PROMPT.md
-│       └── prose_quality_review_session_1.md
+│       ├── design-gap-analysis-v2.md
+│       ├── deferred-design-analysis.md
+│       ├── consolidation-report.md
+│       ├── claude-code-initial-prompt.md
+│       └── prose-quality-review-1.md
 ├── engine/                # Pure Python — dice, character, checks (~5,500 lines)
 │   ├── dice.py            # FFG dice system — 7 die types, symbol tables (270 lines)
 │   ├── character.py       # Character model — Pydantic, 33 skills (220 lines)
@@ -302,10 +299,11 @@ storyteller-v3/
 │       ├── force_power_milestone.txt
 │       ├── time_skip_opening.txt
 │       └── time_skip_closing.txt
-├── state/                 # SQLite persistence (547 lines)
+├── state/                 # SQLite persistence + telemetry (~710 lines)
 │   ├── db.py              # Database schema and connections (183 lines)
 │   ├── session.py         # Turn logging and state queries (244 lines)
-│   └── memory.py          # Episodic compression (120 lines)
+│   ├── memory.py          # Episodic compression (120 lines)
+│   └── telemetry.py       # Narrative event logging — JSON-lines per session (162 lines)
 ├── api/                   # FastAPI routes (3,253 lines)
 │   ├── main.py            # App bootstrap and frontend serving (71 lines)
 │   ├── game_routes.py     # Game Engine routes (2,685 lines)
@@ -338,13 +336,21 @@ storyteller-v3/
 │       ├── select.py      # Stage 5: pairwise selection
 │       ├── ensemble.py    # Multi-model writer assignment
 │       └── evaluator.py   # Trained local evaluator
+├── eval/                  # Evaluation harness (~1,040 lines)
+│   ├── harness.py         # Scripted play sessions + quality measurement (294 lines)
+│   ├── metrics.py         # Tier 1 (no LLM) + Tier 2 quality metrics (407 lines)
+│   ├── divergence.py      # Cross-session replayability analysis (130 lines)
+│   ├── golden_scenarios.py # Fixed-seed reproducible test scenarios (42 lines)
+│   ├── policies.py        # Automated choice selection strategies (45 lines)
+│   └── reporter.py        # Console + JSON report generation (118 lines)
 ├── data/
 │   ├── characters/        # keth_varso.json, talia_ren.json
-│   ├── campaigns/         # nar_shaddaa_job.json, echoes_of_the_force.json
+│   ├── campaigns/         # nar_shaddaa_job.json, echoes_of_the_force.json, shadows_of_the_praxeum.json
 │   ├── talent_trees/      # 6 specialization trees + talent_library.json
 │   ├── force_powers/      # 5 powers (enhance, heal_harm, influence, move, sense)
 │   └── personas/          # writer_room_personas.json (55 personas)
-└── tests/                 # 19 test files (~9,800 lines)
+└── tests/                 # 20 test files (~10,300 lines)
+    ├── __init__.py
     ├── dice_validation.py
     ├── studio_schema_test.py
     ├── test_cs2_mode3.py
@@ -371,9 +377,16 @@ are mentioned in design docs for future phases but do not yet exist in
 the repo. They will be created when Phase 21 (canon profiles) and the
 trained local evaluator (post-CS-4) are implemented.
 
-**Documentation structure:** Active specs live in `docs/`. Archived
-audit artifacts and historical references live in `docs/reference/`.
-See `docs/00_PROJECT_GUIDE.md` for the four-tier document architecture.
+**Evaluation harness:** `eval/` contains the quality measurement
+framework — scripted play sessions, golden scenarios, divergence
+analysis, and narrative metrics (Tier 1 heuristic + Tier 2
+LLM-assisted). Telemetry data is emitted by `state/telemetry.py` and
+consumed by the eval metrics pipeline.
+
+**Documentation structure:** Docs are organized into tier-based
+subdirectories (`specs/`, `status/`, `research/`, `specialist/`,
+`api/`, `reference/`). See `docs/index.md` for the four-tier document
+architecture.
 
 Game Engine scope: `engine/`, `gm/`, `state/`, `api/game_routes.py`,
 `web/`. Do not modify `studio/` when working on the Game Engine

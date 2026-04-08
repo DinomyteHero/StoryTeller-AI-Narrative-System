@@ -4,6 +4,12 @@
 > **Design authority for:** import package quality rubrics, compression
 > validation, narrative preservation requirements.
 > **Depends on:** Game Mechanics §20, CS Implementation §6, Phases 7/12/13.
+>
+> **Implementation Status: NOT STARTED**
+> The quality standards and validation logic below are the design
+> specification for Phase 19. The mechanical import interface exists
+> (`studio/import_interface.py`) but the narrative quality layer
+> described here has not been implemented.
 
 # Storyteller V3 — Import Package Quality Spec
 

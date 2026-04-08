@@ -209,6 +209,186 @@ ratings. Deploy as drop-in replacement for cloud evaluator in Stage 5
 when calibration threshold (80% agreement) is met. See Gap Analysis
 v2.0, item 4.9.
 
+### Phase CS-5: Narrative Quality — Story Architecture + Gate 4
+
+**Status: COMPLETE — April 2026**
+
+Pre-generation narrative planning layer and LLM-assisted quality
+evaluation. Ensures campaign spines have dramatic DNA — not just
+structural correctness — before reaching the player.
+
+**Deliverables:**
+
+- `studio/architect.py` (155 lines) — Pre-generation story architecture
+  planning. `generate_architecture()` calls cloud LLM with campaign
+  inputs (era, location, tone, optional throughline/concept/moral
+  register) to produce a `StoryArchitecture` model.
+  `architecture_to_prompt_block()` formats the architecture for
+  injection into Mode 1/2 generation prompts. Uses deterministic seed
+  derivation via `STAGE_ARCHITECT` constant.
+
+- `studio/narrative_eval.py` (482 lines) — Gate 4 narrative evaluation
+  with three sub-dimensions:
+  - **4a Narrative Coherence** (LLM-assisted): thread_continuity,
+    npc_trajectory_consistency, throughline_presence,
+    galactic_context_relevance.
+  - **4b Dramatic Quality** (conditional on `story_architecture`
+    presence): premise_manifestation, cdq_testability,
+    antagonistic_force_presence, npc_thematic_diversity,
+    contradiction_testability.
+  - **4c Anti-Genericity** (LLM-assisted): npc_distinctiveness,
+    anchor_specificity, escalation_authenticity.
+  `score_narrative_quality()` returns a normalized 0.0–1.0 score across
+  five rubric dimensions (premise_strength, npc_thematic_diversity,
+  dramatic_progression, throughline_testability, anti_genericity).
+
+- `studio/prompts/architect.txt` (112 lines) — Architecture generation
+  prompt with anti-default rules (no "good vs evil", no "saves the
+  galaxy", villain-as-systemic-not-personal), five pressure types
+  (moral, identity, loyalty, survival, ideological), and JSON output
+  schema.
+
+- `studio/prompts/narrative_eval.txt` (57 lines) — Gate 4 evaluation
+  prompt requesting per-dimension pass/fail with detail explanations.
+
+- `studio/prompts/narrative_score.txt` (54 lines) — Narrative quality
+  scoring prompt with five 1-5 dimension scores.
+
+**Schema additions (`studio/schema.py`):**
+
+- `StoryArchitecture` model: dramatic_premise, central_dramatic_question,
+  story_promise, protagonist_pressure_type (validated enum: moral /
+  identity / loyalty / survival / ideological), antagonistic_force,
+  thematic_throughline, ending_payoff_sketch. Validators enforce CDQ
+  ends with "?" and pressure type is valid.
+
+- `CampaignSpine.story_architecture: Optional[StoryArchitecture]` —
+  Populated by `architect.py` before spine generation.
+
+- `CharacterVariant.protagonist_contradiction` and
+  `CharacterVariant.pressure_revealed_identity` — Character architecture
+  fields for dramatic depth.
+
+- `NPC.thematic_argument` — What this NPC's existence argues about
+  the theme.
+
+- `Act.dramatic_function` — Validated enum: setup, destabilization,
+  launch, midpoint_shift, escalation, confrontation, consequence,
+  resolution.
+
+**Design reference:** `specialist/story-architecture.md` (vocabulary, rubrics,
+Gate 4 design). Game Mechanics §25 (NPC fields). Vision §3 (prose
+quality goals).
+
+**Success criteria:**
+1. `generate_architecture()` produces valid `StoryArchitecture` from
+   era/location/tone input
+2. Architecture is injected into Mode 1/2 generation prompts via
+   `architecture_to_prompt_block()`
+3. Gate 4 evaluates coherence (4a), dramatic quality (4b), and
+   anti-genericity (4c) on generated spines
+4. Gate 4b is conditional — skipped when `story_architecture` is absent
+5. `score_narrative_quality()` returns 0.0–1.0 normalized score
+6. Anti-default rules prevent generic "hero vs villain" architectures
+7. Tests in `test_cs5_narrative_quality.py` pass (33 tests)
+
+### Phase CS-6: Story Engineering Integration
+
+**Status: COMPLETE — April 2026**
+
+Extends the story architecture layer with structural storytelling tools:
+pinch points, milestone beat sheets, protagonist mode progression,
+foreshadow registries, character depth cards, NPC pressure roles, and
+scene-level dramatic mission classification with voice mode guidance.
+
+**Deliverables:**
+
+- `engine/dramatic_mission.py` (260 lines) — Turn-level dramatic
+  mission classification. Pure Python, zero LLM dependencies.
+  - `DramaticMission` enum: 14 mission types across Brooks's four-part
+    model (stake_setup, world_normal, foreshadow, response,
+    false_progress, antagonist_pressure, attack, inner_demon_test,
+    midpoint_reframe, collapse, climactic_execution, aftermath,
+    character_reveal, thread_advance).
+  - `MissionContext` model: valid_missions, selected_mission,
+    mission_instruction, scene_thrust_instruction.
+  - `PART_MISSION_MAP`: dramatic_function → valid missions mapping.
+  - `MISSION_TO_VOICE` + `VOICE_INSTRUCTIONS`: mission → voice mode
+    (action, revelation, emotional, transition, confrontation) with
+    prose style guidance.
+  - `compute_valid_missions()`: returns valid missions for current turn
+    based on dramatic_function and progress.
+  - `check_midpoint_conversion()` / `check_no_new_exposition()`:
+    milestone beat sheet constraint enforcement.
+
+- `engine/scene_validator.py` (122 lines) — Post-narration scene
+  purpose validation. Local model call scoring narration against its
+  dramatic mission on five dimensions (mission_delivery,
+  pressure_progression, antagonist_relevance, character_choices, change).
+  `SceneValidationResult` with composite score (1-5 scale), concern
+  text, and auto-generated corrective instruction if composite <
+  THRESHOLD_OK (3.0). Quality signal only — does not block delivery.
+
+**Schema additions (`studio/schema.py`):**
+
+- `MilestoneBeatSheet` model: concept_question ("What if...?" format),
+  first_plot_point, midpoint, second_plot_point with act numbers,
+  pre_resolution_lull. Brooks's five structural milestones.
+
+- `ProtagonistMode` enum: ORPHAN → WANDERER → WARRIOR → MARTYR
+  (sequential progression, no regression allowed).
+
+- `PinchPoint` model: description, delivery_method (intercepted_comm /
+  npc_report / environmental / direct_witness / consequence_shown),
+  target_progress (0.3–0.7).
+
+- `ForeshadowLink` model: id, setup_act, setup_description, payoff_act,
+  payoff_description, payoff_type (revelation / reversal / callback /
+  irony).
+
+- `CharacterDepthCard` model: inner_demon, secret_yearning,
+  lesson_not_learned, worst_act, social_mask, under_pressure, worldview,
+  moral_line. GM-facing enrichment (never shown to player).
+
+- `Act.pinch_point: Optional[PinchPoint]` — Direct antagonist pressure
+  signal per non-setup act.
+- `Act.protagonist_mode` — Sequential progression through campaign.
+- `CharacterVariant.contradiction_origin` — Why the contradiction exists.
+- `CharacterVariant.depth_card: Optional[CharacterDepthCard]`.
+- `NPC.pressure_role` — Validated: tempter, mirror, skeptic, dependent,
+  betrayer, witness, escalator, false_ally, catalyst.
+- `CampaignSpine.foreshadow_registry: list[ForeshadowLink]`.
+- `StoryArchitecture.milestone_beat_sheet: Optional[MilestoneBeatSheet]`.
+
+**CS-6 deterministic validation checks** (in `narrative_eval.py`,
+`_check_cs6_structural()`):
+- Pinch point coverage: every mid-campaign act with dramatic_function
+  must have pinch_point.
+- Milestone beat sheet sequence: FPP < Midpoint < SPP.
+- Milestone placement percentages: FPP 15-40%, Midpoint 35-65%,
+  SPP 60-85%.
+- Concept question format: starts "What if", ends "?".
+- Protagonist mode progression: modes must not regress.
+- NPC pressure role diversity: warns if all pressure roles identical.
+- Foreshadow registry: setup_act < payoff_act ordering, coverage in
+  final third.
+
+**Design reference:** `specialist/story-architecture.md` (vocabulary extended
+with CS-6 tools). `architect.txt` prompt template (pinch points and
+milestone beat sheet sections).
+
+**Success criteria:**
+1. `compute_valid_missions()` returns correct missions per
+   dramatic_function and Brooks part
+2. Voice modes map missions to appropriate prose guidance
+3. Scene validator scores narration against mission on 5 dimensions
+4. All CS-6 structural checks pass on well-formed spines
+5. MilestoneBeatSheet enforces sequence and placement constraints
+6. Protagonist mode progression is monotonic (no regression)
+7. Foreshadow registry validates setup→payoff ordering
+8. Tests in `test_cs6_story_engineering.py` and
+   `test_story_engineering.py` pass
+
 ---
 
 ## 4. The Interface Contract: Campaign Spine JSON

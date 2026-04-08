@@ -8,6 +8,11 @@
 > **Core design authority:** Game Mechanics §5.
 > **This document extends** GM §5 with robustness rules and provides
 > the implementation roadmap.
+>
+> **Implementation Status: NOT STARTED**
+> The file paths and code structures below are the design specification
+> for Phase 18. No implementation code exists yet. This document
+> describes what WILL be built, not what currently exists.
 
 **Version:** 1.0
 **Date:** April 5, 2026

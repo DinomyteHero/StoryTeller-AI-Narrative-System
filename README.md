@@ -107,8 +107,9 @@ storyteller-v3/
 │   ├── talent_trees/ # 6 specialization trees + talent library
 │   ├── force_powers/ # 5 Force power definitions
 │   └── personas/    # Writer's Room personas (55)
-├── tests/           # Test suite (16 test files)
-└── docs/            # All project documentation (19 files)
+├── eval/            # Evaluation harness (quality metrics, golden scenarios)
+├── tests/           # Test suite (20 test files)
+└── docs/            # All project documentation (21 files)
 ```
 
 ### Key Design Rules
@@ -121,8 +122,9 @@ storyteller-v3/
 
 - **The Nar Shaddaa Job** — a smuggler campaign starring Keth Varso
 - **Echoes of the Force** — a Force-sensitive campaign starring Talia Ren
+- **Shadows of the Praxeum** — a Jedi academy campaign
 
-## Milestone Status
+## Milestone Status (last synced: 2026-04-08)
 
 | Milestone | Scope | Status |
 |---|---|---|
@@ -131,18 +133,22 @@ storyteller-v3/
 | Milestone 2 | Force-sensitive campaigns | Complete |
 | Milestone 3 | Vehicles and space combat | Complete |
 | Milestone 4 | Multi-campaign saga (time skips done; prologue & later phases pending) | Partial |
-| Campaign Studio | Spine authoring, validation, collaborative generation, saga pipeline, narrative quality | Complete (CS-1 through CS-5) |
+| Campaign Studio | Spine authoring, validation, collaborative generation, saga pipeline, narrative quality, story engineering | Complete (CS-1 through CS-6) |
 
 ## Documentation
 
-All docs live in `docs/`. Start with [`docs/00_PROJECT_GUIDE.md`](docs/00_PROJECT_GUIDE.md) for full orientation — authority map, reading order, current state, and navigation.
+All docs live in `docs/`, organized into tier-based subdirectories.
+Start with [`docs/index.md`](docs/index.md) for full orientation —
+authority map, reading order, current state, and navigation.
 
 Key documents:
 
-- [Implementation Spec](docs/STORYTELLER_V3_IMPLEMENTATION.md) — complete code-level specification
-- [Build Roadmap](docs/STORYTELLER_V3_BUILD_ROADMAP.md) — phased build plan
-- [Game Mechanics](docs/STORYTELLER_V3_GAME_MECHANICS.md) — 27 sections of game design
-- [Vision](docs/STORYTELLER_V3_VISION.md) — creative vision and design philosophy
+- [Implementation Spec](docs/specs/engine-implementation.md) — complete code-level specification
+- [Build Roadmap](docs/status/roadmap.md) — phased build plan
+- [Game Mechanics](docs/specs/game-mechanics.md) — 27 sections of game design
+- [Vision](docs/specs/vision.md) — creative vision and design philosophy
+- [Game Engine API](docs/api/game-engine-api.md) — HTTP endpoint reference
+- [Campaign Studio API](docs/api/studio-api.md) — Studio endpoint reference
 
 ## Development
 

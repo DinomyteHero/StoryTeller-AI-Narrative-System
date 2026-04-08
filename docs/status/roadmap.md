@@ -565,7 +565,7 @@ Success criteria:
 
 ### Phase 18: Psychometric Prologue
 
-**Status: NOT STARTED.** Full spec (design robustness + implementation plan) at `docs/PROLOGUE_SYSTEM_SPEC.md`.
+**Status: NOT STARTED.** Full spec (design robustness + implementation plan) at `docs/specialist/prologue-system.md`.
 
 Files: `engine/prologue.py` (new), `web/index.html` (extend — funnel
 UI)
@@ -731,10 +731,11 @@ Chain two campaign spines with one character:
 
 ## Campaign Studio Track (Parallel — starts after V1)
 
-**Status: ALL FOUR PHASES COMPLETE — March 2026**
+**Status: ALL SIX PHASES COMPLETE — CS-1 through CS-4 March 2026,
+CS-5 and CS-6 April 2026**
 
 The Campaign Studio builds in parallel with the Game Engine post-V1
-milestones. Its four phases are specified in Campaign Studio
+milestones. Its six phases are specified in Campaign Studio
 Implementation Document §3.
 
 **Coordination points:**
@@ -754,8 +755,22 @@ Implementation Document §3.
   (cross-era import/export). The import interface is implemented in the
   Game Engine; the Campaign Studio calls it.
 
-- **CS Phase 4 (Saga Layer + Mode 1)** is the final Campaign Studio
-  phase and has no Game Engine dependency beyond CS Phase 3.
+- **CS Phase 4 (Saga Layer + Mode 1)** is the final baseline Campaign
+  Studio phase and has no Game Engine dependency beyond CS Phase 3.
+
+- **CS Phase 5 (Narrative Quality)** adds pre-generation story
+  architecture planning and Gate 4 narrative evaluation. Depends on
+  CS-4 (schema and validation must be established). Produces
+  `studio/architect.py`, `studio/narrative_eval.py`, and three prompt
+  templates.
+
+- **CS Phase 6 (Story Engineering Integration)** extends the
+  architecture layer with structural storytelling tools. Depends on
+  CS-5. Adds `engine/dramatic_mission.py` and `engine/scene_validator.py`
+  (both pure Python) plus schema extensions (MilestoneBeatSheet,
+  PinchPoint, ForeshadowLink, CharacterDepthCard, ProtagonistMode,
+  NPC.pressure_role). Deterministic structural validation checks
+  complement LLM-assisted Gate 4 evaluation.
 
 ---
 
@@ -794,6 +809,13 @@ were built. And the story was theirs.
 
 ## Revision History
 
+**v1.4 — CS-5 and CS-6 additions (April 8, 2026)**
+
+Added Campaign Studio Phase CS-5 (Narrative Quality) and CS-6 (Story
+Engineering Integration) to the Campaign Studio Track section. Both
+phases COMPLETE. Updated header status to "ALL SIX PHASES COMPLETE."
+Added coordination point descriptions for CS-5 and CS-6.
+
 **v1.3 — Documentation audit corrections (March 17, 2026)**
 
 1. **Phase 21 directory correction.** `data/canon_profiles/` was
@@ -831,5 +853,5 @@ were built. And the story was theirs.
 
 ---
 
-*Storyteller V3 — Build Roadmap v1.3*
+*Storyteller V3 — Build Roadmap v1.4*
 *The path from first dice roll to the saga.*
