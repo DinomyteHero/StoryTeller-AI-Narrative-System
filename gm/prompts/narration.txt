@@ -38,6 +38,8 @@ LOADOUT:
 
 {aspiration_echo_block}
 
+{depth_card_block}
+
 ═══════════════════════════════════════════
 STORY CONTEXT
 ═══════════════════════════════════════════
@@ -147,6 +149,18 @@ Then provide 2-4 choices following these rules:
   still work to do."
   "Turn the name over in your mind. You know what it means. You are not
   ready to say it out loud yet."
+
+{pinch_point_instruction}
+
+{foreshadow_instruction}
+
+{closure_heartbeat_instruction}
+
+{dramatic_mission_block}
+
+{contradiction_arc_block}
+
+{voice_mode_instruction}
 
 TONE: {tone_instruction}
 

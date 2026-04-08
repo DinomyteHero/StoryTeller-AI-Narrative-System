@@ -31,6 +31,23 @@ NEGATIVE_MOODS = {"angry", "suspicious", "afraid"}
 # Moods that nudge disposition positively when sustained
 POSITIVE_MOODS = {"grateful"}
 
+# CS-6 Phase 4: Pressure role → dramatic instruction mapping
+PRESSURE_ROLE_INSTRUCTIONS = {
+    "tempter": "offers easy but costly shortcuts",
+    "mirror": "reflects the protagonist's flaws back at them",
+    "skeptic": "challenges the protagonist's assumptions",
+    "dependent": "needs the protagonist, creating obligation pressure",
+    "betrayer": "appears allied but serves a conflicting agenda",
+    "witness": "observes and judges, creating accountability pressure",
+    "escalator": "raises stakes by acting independently, creating time pressure",
+    "false_ally": "genuinely wants to help but makes things worse",
+    "catalyst": "forces decisions by creating time pressure",
+}
+
+
+def _pressure_role_instruction(role: str) -> str:
+    return PRESSURE_ROLE_INSTRUCTIONS.get(role, f"applies dramatic pressure as {role}")
+
 
 @dataclass
 class EmotionalState:
@@ -115,6 +132,9 @@ class NPCState:
         elif es.mood in POSITIVE_MOODS:
             self.disposition = min(1.0, self.disposition + 0.02)
 
+    # CS-6 Phase 4: NPC pressure role
+    pressure_role: str = ""
+
     def to_prompt_block(self) -> str:
         lines = [f"{self.name}:"]
         if self.knows:
@@ -132,6 +152,9 @@ class NPCState:
             lines.append(f"  Wants: {self.motivation}")
         if self.behavioral_envelope:
             lines.append(f"  Never: {'; '.join(self.behavioral_envelope)}")
+        # CS-6 Phase 4: pressure role instruction
+        if self.pressure_role:
+            lines.append(f"  Pressure role: {self.pressure_role.upper()} — {_pressure_role_instruction(self.pressure_role)}")
         return "\n".join(lines)
 
 
@@ -177,6 +200,14 @@ class ArcState:
     duty_active:          bool = False
     duty_type:            str = ""
     morality_label:       str = ""           # "Light side dominant" / "Grey" / "Dark side dominant"
+    # CS-6 Phase 2: Pinch point tracking
+    pinch_point_fired:    bool = False        # Reset at act boundary
+    # CS-6 Phase 5: Foreshadow tracking
+    foreshadow_setups_delivered: list = field(default_factory=list)  # IDs of delivered setups
+    # CS-6 Phase 6: Inner-conflict tracking
+    contradiction_arc: dict = field(default_factory=dict)  # ContradictionArcState accumulation
+    # CS-6 Phase 8: Closure heartbeats
+    turns_since_last_thread_change: int = 0  # Reset when any thread changes
 
 
 @dataclass
@@ -205,6 +236,13 @@ class ContextPackage:
     force_result_block: str = ""              # Phase 14: Force result context for narration (§16)
     force_state_block:  str = ""              # Phase 14: Force state context for narration (§16)
     ship_state_block:   str = ""              # Phase 16: Ship state context for narration (§17)
+    dramatic_mission:   dict = field(default_factory=dict)  # CS-6 Phase 1: mission from reconciliation
+    pinch_point_instruction: str = ""   # CS-6 Phase 2: injected when pinch point fires
+    foreshadow_instruction: str = ""    # CS-6 Phase 5: injected for setup delivery
+    contradiction_arc_block: str = ""   # CS-6 Phase 6: character arc state
+    closure_heartbeat_instruction: str = ""  # CS-6 Phase 8: thread heartbeat
+    depth_card_block: str = ""          # CS-6 Phase 9: character depth card
+    voice_mode_instruction: str = ""    # CS-6 Phase 10: voice mode tag
 
     def build_dice_result_block(self) -> str:
         if self.roll_result is None:
@@ -365,6 +403,28 @@ class ContextPackage:
             "The diagnostic below identifies patterns in recent passages. "
             "Vary your approach to address any flagged issues.\n\n"
             f"{json.dumps(self.prose_diagnostic, indent=2)}"
+        )
+
+    def build_dramatic_mission_block(self) -> str:
+        """Assemble the DRAMATIC MISSION block for the narration prompt (CS-6 Phase 1).
+
+        Returns empty string when no mission is available — the prompt
+        placeholder simply vanishes.
+        """
+        if not self.dramatic_mission:
+            return ""
+        selected = self.dramatic_mission.get("selected_mission", "")
+        sentence = self.dramatic_mission.get("mission_sentence", "")
+        if not selected:
+            return ""
+
+        return (
+            f"DRAMATIC MISSION FOR THIS TURN:\n"
+            f"Mission: {selected}\n"
+            f"Job: {sentence}\n\n"
+            f"End this passage with an unresolved element — a question unanswered, "
+            f"a threat glimpsed, a revelation half-delivered — that makes the player "
+            f"want to see what happens next."
         )
 
     def build_open_threads_block(self) -> str:

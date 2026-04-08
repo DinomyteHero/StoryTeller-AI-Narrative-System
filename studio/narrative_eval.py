@@ -282,7 +282,203 @@ def gate4_check(
             "path": "",
         })
 
+    # ── CS-6 deterministic structural checks ───────────────────────────
+    cs6_warnings = _check_cs6_structural(spine)
+    warnings.extend(cs6_warnings)
+
     return errors, warnings
+
+
+def _check_cs6_structural(spine: CampaignSpine) -> list[dict]:
+    """CS-6 Story Engineering deterministic checks.
+
+    These are structural checks that don't require an LLM — they
+    validate schema-level properties of the spine.
+    """
+    warnings = []
+    acts = spine.acts
+    total_acts = spine.total_acts
+    has_architecture = spine.story_architecture is not None
+
+    # ── Phase 2: Pinch point coverage ────────────────────────────────
+    # Only check when spine has opted into CS-6 features (has architecture
+    # or any act has CS-6 fields populated). Legacy spines skip this.
+    any_pinch_points = any(act.pinch_point for act in acts)
+    any_protagonist_modes = any(act.protagonist_mode for act in acts)
+    # Only check pinch point coverage when at least one act uses CS-6 features
+    if any_pinch_points or any_protagonist_modes:
+        setup_functions = {"setup", "destabilization"}
+        resolution_functions = {"resolution", "consequence"}
+        for act in acts:
+            if act.number == 1:
+                continue  # First act often setup
+            if act.dramatic_function in setup_functions:
+                continue
+            if act.dramatic_function in resolution_functions:
+                continue
+            if not act.pinch_point:
+                warnings.append({
+                    "gate": 4,
+                    "code": "cs6_pinch_point_missing",
+                    "message": (
+                        f"Act {act.number} ({act.name}) has no pinch point. "
+                        f"Mid-campaign acts should have a direct antagonist pressure beat."
+                    ),
+                    "path": f"acts[{act.number - 1}].pinch_point",
+                })
+
+    # ── Phase 3: Milestone beat sheet checks ─────────────────────────
+    if has_architecture and hasattr(spine.story_architecture, "milestone_beat_sheet"):
+        mbs = spine.story_architecture.milestone_beat_sheet
+        if mbs:
+            # Milestone sequence
+            if mbs.first_plot_point_act >= mbs.midpoint_act:
+                warnings.append({
+                    "gate": 4,
+                    "code": "cs6_milestone_sequence",
+                    "message": (
+                        f"First Plot Point (act {mbs.first_plot_point_act}) must come "
+                        f"before Midpoint (act {mbs.midpoint_act})."
+                    ),
+                    "path": "story_architecture.milestone_beat_sheet",
+                })
+            if mbs.midpoint_act >= mbs.second_plot_point_act:
+                warnings.append({
+                    "gate": 4,
+                    "code": "cs6_milestone_sequence",
+                    "message": (
+                        f"Midpoint (act {mbs.midpoint_act}) must come before "
+                        f"Second Plot Point (act {mbs.second_plot_point_act})."
+                    ),
+                    "path": "story_architecture.milestone_beat_sheet",
+                })
+
+            # Milestone placement
+            fpp_pct = mbs.first_plot_point_act / total_acts
+            if fpp_pct < 0.15 or fpp_pct > 0.40:
+                warnings.append({
+                    "gate": 4,
+                    "code": "cs6_milestone_placement",
+                    "message": (
+                        f"First Plot Point at act {mbs.first_plot_point_act} of "
+                        f"{total_acts} ({fpp_pct:.0%}) — should be 20-35% of acts."
+                    ),
+                    "path": "story_architecture.milestone_beat_sheet.first_plot_point_act",
+                })
+            mid_pct = mbs.midpoint_act / total_acts
+            if mid_pct < 0.35 or mid_pct > 0.65:
+                warnings.append({
+                    "gate": 4,
+                    "code": "cs6_milestone_placement",
+                    "message": (
+                        f"Midpoint at act {mbs.midpoint_act} of {total_acts} "
+                        f"({mid_pct:.0%}) — should be 40-60% of acts."
+                    ),
+                    "path": "story_architecture.milestone_beat_sheet.midpoint_act",
+                })
+            spp_pct = mbs.second_plot_point_act / total_acts
+            if spp_pct < 0.60 or spp_pct > 0.85:
+                warnings.append({
+                    "gate": 4,
+                    "code": "cs6_milestone_placement",
+                    "message": (
+                        f"Second Plot Point at act {mbs.second_plot_point_act} of "
+                        f"{total_acts} ({spp_pct:.0%}) — should be 65-80% of acts."
+                    ),
+                    "path": "story_architecture.milestone_beat_sheet.second_plot_point_act",
+                })
+
+            # Concept question format
+            if mbs.concept_question:
+                cq = mbs.concept_question.strip()
+                if not cq.lower().startswith("what if"):
+                    warnings.append({
+                        "gate": 4,
+                        "code": "cs6_concept_question_format",
+                        "message": (
+                            f"Concept question should start with 'What if': "
+                            f"'{cq[:50]}...'"
+                        ),
+                        "path": "story_architecture.milestone_beat_sheet.concept_question",
+                    })
+                if not cq.endswith("?"):
+                    warnings.append({
+                        "gate": 4,
+                        "code": "cs6_concept_question_format",
+                        "message": "Concept question must end with '?'",
+                        "path": "story_architecture.milestone_beat_sheet.concept_question",
+                    })
+
+    # ── Phase 3: Protagonist mode progression ────────────────────────
+    PROTAGONIST_MODE_ORDER = {"orphan": 0, "wanderer": 1, "warrior": 2, "martyr": 3}
+    last_mode_rank = -1
+    for act in acts:
+        if act.protagonist_mode:
+            rank = PROTAGONIST_MODE_ORDER.get(act.protagonist_mode, -1)
+            if rank < last_mode_rank:
+                warnings.append({
+                    "gate": 4,
+                    "code": "cs6_protagonist_mode_regression",
+                    "message": (
+                        f"Act {act.number} protagonist mode '{act.protagonist_mode}' "
+                        f"regresses from a later mode. Modes must progress: "
+                        f"orphan → wanderer → warrior → martyr."
+                    ),
+                    "path": f"acts[{act.number - 1}].protagonist_mode",
+                })
+            if rank >= 0:
+                last_mode_rank = rank
+
+    # ── Phase 4: NPC pressure role diversity ─────────────────────────
+    pressure_roles = [
+        npc.pressure_role for npc in spine.npc_roster
+        if hasattr(npc, "pressure_role") and npc.pressure_role
+    ]
+    if len(pressure_roles) >= 2:
+        unique_roles = set(pressure_roles)
+        if len(unique_roles) == 1:
+            warnings.append({
+                "gate": 4,
+                "code": "cs6_pressure_role_monotonic",
+                "message": (
+                    f"All {len(pressure_roles)} NPCs with pressure roles are "
+                    f"'{pressure_roles[0]}'. Vary dramatic pressure types."
+                ),
+                "path": "npc_roster[*].pressure_role",
+            })
+
+    # ── Phase 5: Foreshadow registry checks ──────────────────────────
+    if hasattr(spine, "foreshadow_registry") and spine.foreshadow_registry:
+        for link in spine.foreshadow_registry:
+            if link.setup_act >= link.payoff_act:
+                warnings.append({
+                    "gate": 4,
+                    "code": "cs6_foreshadow_order",
+                    "message": (
+                        f"Foreshadow '{link.id}': setup_act ({link.setup_act}) must "
+                        f"be before payoff_act ({link.payoff_act})."
+                    ),
+                    "path": f"foreshadow_registry[{link.id}]",
+                })
+
+        # Check for payoff coverage in final third
+        final_third_start = max(1, int(total_acts * 0.67))
+        has_late_payoff = any(
+            link.payoff_act >= final_third_start
+            for link in spine.foreshadow_registry
+        )
+        if not has_late_payoff:
+            warnings.append({
+                "gate": 4,
+                "code": "cs6_foreshadow_no_late_payoff",
+                "message": (
+                    "No foreshadow links pay off in the final third of the "
+                    "campaign. Climactic resolutions may feel arbitrary."
+                ),
+                "path": "foreshadow_registry",
+            })
+
+    return warnings
 
 
 def score_narrative_quality(
