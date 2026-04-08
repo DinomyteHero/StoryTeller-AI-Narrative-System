@@ -1,7 +1,7 @@
 # Storyteller V3 — Comprehensive Project Backlog
 
-**Document version:** 3.2
-**Last updated:** March 17, 2026
+**Document version:** 3.3
+**Last updated:** April 8, 2026
 **Purpose:** Single source of truth for every planned, in-progress,
 deferred, and tracked item across the entire project. Nothing should
 exist as a "we talked about that" item — it lives here or it doesn't
@@ -149,7 +149,7 @@ All 12 must pass:
 | 1.42 | Sustained play quality test (5-turn) | **NOT STARTED** | Beyond §11 structural compliance. 5-turn continuous play evaluating: prose quality degradation turn-over-turn, NPC voice consistency (does Doss still sound like Doss?), choice template repetition (do choice structures start repeating?), thread continuity (are planted seeds remembered?), negative disposition narration (are hostile NPCs written as hostile?). |
 | 1.43 | 13th success criterion — prose quality | **NOT STARTED** | Per independent evaluation: the 12 success criteria are necessary but not sufficient. Criterion 13: "Does the prose make you want to read the next passage?" Evaluated subjectively during first 5-turn playtest. If no, the problem is the cloud model, not the system — swap via provider-agnostic design. |
 | 1.44 | Reconciliation error budget test (Phase 7) | **NOT STARTED** | Test 9B local model on 20 representative narration excerpts for reconciliation accuracy: NPC knowledge inference, disposition shift calibration, anchor proximity judgment. Establish baseline error rate. If >20%, activate selective cloud routing (Impl §9.1 design note). |
-| 1.45 | Choice quality validation | **DESIGNED** | Five-dimension rubric (genericity, character expression, risk spread, tactical differentiation, contextual grounding). Local model evaluator with binary yes/no questions. Two-of-five failure threshold. Shares existing retry budget. Activation contingent on calibration results from initial playtesting — if cloud model consistently produces good choices, defers to Phase 7. See `CHOICE_QUALITY_VALIDATION_SPEC.md` v1.0. |
+| 1.45 | Choice quality validation | **DESIGNED** | Five-dimension rubric (genericity, character expression, risk spread, tactical differentiation, contextual grounding). Local model evaluator with binary yes/no questions. Two-of-five failure threshold. Shares existing retry budget. Activation contingent on calibration results from initial playtesting — if cloud model consistently produces good choices, defers to Phase 7. See `specialist/choice-quality-validation.md` v1.0. |
 
 ---
 
@@ -212,8 +212,9 @@ or implementation can begin. Ordered by estimated dependency chain.
 
 The authoring system. Design documented in Campaign Studio Design
 Document (v1.2). Implementation specified in Campaign Studio
-Implementation Document (v1.1). Four build phases: CS-1 through CS-4.
-**All four CS phases are COMPLETE — March 2026.**
+Implementation Document (v1.3). Six build phases: CS-1 through CS-6.
+**All six CS phases are COMPLETE — CS-1 through CS-4 March 2026,
+CS-5 and CS-6 April 2026.**
 
 ### Pre-Build Requirements
 
@@ -272,6 +273,41 @@ Implementation Document (v1.1). Four build phases: CS-1 through CS-4.
 |---|------|--------------|-----------|-------------|--------|
 | 3.24 | Hub-and-spoke spine structure | **DESIGNED** | CS Design §7.1 | — | Acts tagged with prerequisites, not fixed sequence. Anchors designed around accumulated state rather than specific prior events. |
 | 3.25 | Parallel tracks spine structure | **DESIGNED** | CS Design §7.2 | — | Two simultaneous story threads. `track` field per act. Convergence anchor requires both tracks at specified progress. |
+
+### Phase CS-5: Narrative Quality — Story Architecture + Gate 4
+
+| # | Item | Design Status | Design Doc | Dependencies | Detail |
+|---|------|--------------|-----------|-------------|--------|
+| 3.35 | Pre-generation story architecture (`studio/architect.py`) | **DONE** (CS-5) | Story Architecture Spec, CS Impl §3 (CS-5) | CS-4 complete | `generate_architecture()` produces `StoryArchitecture` model from era/location/tone input. `architecture_to_prompt_block()` injects into Mode 1/2 generation. Anti-default rules prevent generic premises. Five pressure types: moral, identity, loyalty, survival, ideological. |
+| 3.36 | Gate 4 narrative evaluation (`studio/narrative_eval.py`) | **DONE** (CS-5) | Story Architecture Spec, CS Impl §3 (CS-5) | 3.35 | Three sub-gates: 4a coherence (thread_continuity, npc_trajectory, throughline_presence, context_relevance), 4b dramatic quality (conditional on story_architecture — premise, CDQ, antagonist, NPC diversity, contradiction), 4c anti-genericity (NPC distinctiveness, anchor specificity, escalation authenticity). |
+| 3.37 | Narrative quality scoring | **DONE** (CS-5) | Story Architecture Spec | 3.36 | `score_narrative_quality()` returns normalized 0.0–1.0 across five dimensions: premise_strength, npc_thematic_diversity, dramatic_progression, throughline_testability, anti_genericity. |
+| 3.38 | Story architecture prompt templates | **DONE** (CS-5) | — | — | `architect.txt` (112 lines), `narrative_eval.txt` (57 lines), `narrative_score.txt` (54 lines). |
+| 3.39 | StoryArchitecture schema model + related fields | **DONE** (CS-5) | Story Architecture Spec, CS Impl §4.1 | — | StoryArchitecture, CharacterVariant.protagonist_contradiction, CharacterVariant.pressure_revealed_identity, NPC.thematic_argument, Act.dramatic_function. |
+| 3.40 | CS-5 test suite | **DONE** (CS-5) | — | 3.35–3.39 | `test_cs5_narrative_quality.py`: 33 tests covering architecture generation, Gate 4 evaluation, scoring, and schema validation. |
+
+### Phase CS-6: Story Engineering Integration
+
+| # | Item | Design Status | Design Doc | Dependencies | Detail |
+|---|------|--------------|-----------|-------------|--------|
+| 3.41 | Dramatic mission classification (`engine/dramatic_mission.py`) | **DONE** (CS-6) | CS Impl §3 (CS-6) | CS-5 complete | 14 mission types across Brooks's four-part model. PART_MISSION_MAP, MISSION_TO_VOICE, VOICE_INSTRUCTIONS. `compute_valid_missions()`, `check_midpoint_conversion()`, `check_no_new_exposition()`. Pure Python. |
+| 3.42 | Scene purpose validation (`engine/scene_validator.py`) | **DONE** (CS-6) | CS Impl §3 (CS-6) | 3.41 | Post-narration local model call scoring 5 dimensions (mission_delivery, pressure_progression, antagonist_relevance, character_choices, change). Quality signal only. |
+| 3.43 | MilestoneBeatSheet schema model | **DONE** (CS-6) | Story Architecture Spec | — | concept_question, first/second plot points with act numbers, midpoint, pre_resolution_lull. Sequence + placement % validation. |
+| 3.44 | PinchPoint, ForeshadowLink, CharacterDepthCard models | **DONE** (CS-6) | Story Architecture Spec | — | Structural storytelling schemas: antagonist pressure signals, setup→payoff pairs, GM-facing character enrichment. |
+| 3.45 | ProtagonistMode enum + progression validation | **DONE** (CS-6) | CS Impl §3 (CS-6) | — | ORPHAN→WANDERER→WARRIOR→MARTYR. Monotonic progression enforced. |
+| 3.46 | NPC.pressure_role field | **DONE** (CS-6) | CS Impl §3 (CS-6) | — | Nine validated roles: tempter, mirror, skeptic, dependent, betrayer, witness, escalator, false_ally, catalyst. Diversity warning if all roles identical. |
+| 3.47 | CS-6 deterministic structural checks | **DONE** (CS-6) | CS Impl §3 (CS-6) | 3.43–3.46 | Pinch point coverage, beat sheet sequence, placement percentages, concept question format, protagonist regression, pressure role diversity, foreshadow ordering + final-third coverage. |
+| 3.48 | CS-6 test suites | **DONE** (CS-6) | — | 3.41–3.47 | `test_cs6_story_engineering.py` (Campaign Studio tests) + `test_story_engineering.py` (Game Engine tests). |
+
+### Evaluation Harness and Telemetry
+
+| # | Item | Design Status | Design Doc | Dependencies | Detail |
+|---|------|--------------|-----------|-------------|--------|
+| 3.49 | Narrative telemetry event system (`state/telemetry.py`) | **DONE** | — | Phase 4 (state persistence) | Structured JSON-lines event logging per session. Emitters: choice_made, dice_resolved, state_delta, npc_disposition_shift, thread_event, choice_quality_eval, act_transition, session_summary. |
+| 3.50 | Evaluation harness (`eval/harness.py`) | **DONE** | — | 3.49 | Scripted play sessions with golden scenarios and configurable policies. Runs automated turns and collects quality metrics. |
+| 3.51 | Quality metrics (`eval/metrics.py`) | **DONE** | — | 3.49 | Tier 1 (heuristic, no LLM): slop rate, word count, choice distinctness. Tier 2 (LLM-assisted): deeper quality analysis. |
+| 3.52 | Divergence analysis (`eval/divergence.py`) | **DONE** | — | 3.50 | Cross-session structural replayability measurement. Compares narrative outcomes across different policies/seeds. |
+| 3.53 | Golden scenarios + policies (`eval/golden_scenarios.py`, `eval/policies.py`) | **DONE** | — | 3.50 | Fixed-seed reproducible test scenarios with configurable automated choice selection strategies. |
+| 3.54 | Evaluation reporter (`eval/reporter.py`) | **DONE** | — | 3.50–3.52 | Human-readable console + machine-readable JSON report generation. |
 
 ### Campaign Studio Deferred Items (CS §8)
 

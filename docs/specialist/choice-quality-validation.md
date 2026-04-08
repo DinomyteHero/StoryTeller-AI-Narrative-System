@@ -3,6 +3,11 @@
 > **Design authority for:** choice validation rubric, local evaluator
 > integration, retry policy for low-quality choice sets.
 > **Depends on:** Vision §7, Implementation §7.1/§7.3, Game Mechanics §24.
+>
+> **Implementation Status: NOT STARTED**
+> The code structures below are the design specification for a future
+> validation layer. No implementation code exists yet. Activation is
+> contingent on playtesting calibration results.
 
 # Storyteller V3 — Choice Quality Validation Spec
 

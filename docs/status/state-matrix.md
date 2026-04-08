@@ -1,11 +1,12 @@
 # Storyteller V3 — Project State Matrix
 
-**Version:** 1.5
-**Date:** April 3, 2026
-**Purpose:** Single-page view of every major capability's status.
-Prevents the most common review error: mistaking a designed-but-not-
-built item for a missing design, or mistaking a deferred item for an
-oversight.
+**Version:** 1.6
+**Date:** April 8, 2026
+**Purpose:** Single-page snapshot of every major capability's status.
+This is a point-in-time view — for authoritative item-level status,
+see `backlog.md`. Prevents the most common review error: mistaking a
+designed-but-not-built item for a missing design, or mistaking a
+deferred item for an oversight.
 
 **How to read this document:** Each row is a capability. The four
 columns after the capability name tell you: is it promised in the
@@ -22,11 +23,11 @@ Deferred Design and Logic Analysis v1.0 (in `docs/reference/`).
 
 **Implementation status as of this version:** Milestones 0-3 complete.
 Milestone 4 partial (Phase 17 complete, Phases 18-22 not started).
-Campaign Studio CS-1 through CS-5 complete.
+Campaign Studio CS-1 through CS-6 complete.
 
-**Codebase metrics:** ~15,700 lines application code, ~9,000 lines
-test code, 17 test files. Documentation: 15 active files in `docs/`
-plus 5 archived in `docs/reference/`.
+**Codebase metrics:** ~18,600 lines application code, ~10,300 lines
+test code, 20 test files. Documentation: 15 active files in `docs/`
+plus 6 in `docs/reference/`.
 
 ---
 
@@ -184,6 +185,12 @@ plus 5 archived in `docs/reference/`.
 | Campaign rating/feedback system | — | ✓ | Not in V1 | Post-launch |
 | Trained local evaluator (QLoRA) | — | ✓ | Not in V1 | Post-CS Phase 4 |
 | Multi-model ensemble (Writer's Room) | — | ✓ | Not in V1 | Post-CS Phase 4 |
+| Story architecture planning (dramatic premise, CDQ) | — | ✓ | ✓ Built | CS Phase 5 |
+| Gate 4 narrative evaluation (coherence, quality, freshness) | — | ✓ | ✓ Built | CS Phase 5 |
+| Stage 5 LLM-based narrative quality scoring | — | ✓ | ✓ Built | CS Phase 5 |
+| Dramatic mission classification + voice modes | — | ✓ | ✓ Built | CS Phase 6 |
+| Scene purpose validation model | — | ✓ | ✓ Built | CS Phase 6 |
+| Enhanced generation prompts with architectural vocabulary | — | ✓ | ✓ Built | CS Phase 6 |
 | Path differentiation proof (integration audit) | §8 | Partial (3.33, 3.34) | Not in V1 | Campaign Studio |
 
 ---
@@ -211,9 +218,9 @@ explained by intentional deferral or architecture reservation.
 
 | Gap | Category | Audit Finding | Recommendation |
 |-----|----------|--------------|----------------|
-| Choice quality validation | Validation / enforcement | No post-generation validator rejects weak choices before player sees them | **Spec complete** — `CHOICE_QUALITY_VALIDATION_SPEC.md` v1.0. Awaits implementation (late Phase 3 or Phase 7, contingent on calibration). |
-| Prologue inference robustness | Validation / enforcement | Contradiction handling, anti-gaming, and per-axis confidence rules were under-specified | **Spec complete** — `PROLOGUE_SYSTEM_SPEC.md` v1.0. Awaits implementation (Phase 18). |
-| Import package quality | Validation / enforcement | Format was specified, quality standard was not | **Spec complete** — `IMPORT_PACKAGE_QUALITY_SPEC.md` v1.0. Awaits implementation (Phase 19). |
+| Choice quality validation | Validation / enforcement | No post-generation validator rejects weak choices before player sees them | **Spec complete** — `specialist/choice-quality-validation.md` v1.0. Awaits implementation (late Phase 3 or Phase 7, contingent on calibration). |
+| Prologue inference robustness | Validation / enforcement | Contradiction handling, anti-gaming, and per-axis confidence rules were under-specified | **Spec complete** — `specialist/prologue-system.md` v1.0. Awaits implementation (Phase 18). |
+| Import package quality | Validation / enforcement | Format was specified, quality standard was not | **Spec complete** — `specialist/import-package-quality.md` v1.0. Awaits implementation (Phase 19). |
 | Path differentiation proof | Validation / enforcement | No concrete test proves allegiances produce structurally different experiences beyond narrative wrappers | Open — integration coverage audit needed in Campaign Studio validation. Backlog items 3.33 and 3.34 partially address this. |
 | Identity drift surfacing | Experience surfacing | System tracks identity accumulation well at act boundaries but does not guarantee the player feels drift during turn-to-turn play | Open — requires drift surface policy (prompt engineering spec, Phase 7+). |
 | Introspection trigger logic | Experience surfacing | Introspection is supported in prompts and context routing but the trigger for when a turn should become introspective is implicit | Open — requires explicit trigger conditions (Phase 7+). |
@@ -238,6 +245,15 @@ explained by intentional deferral or architecture reservation.
 ---
 
 ## Revision History
+
+**v1.6 — CS-6 and metrics update (April 8, 2026)**
+
+Added CS-5 and CS-6 capability rows to Campaign Studio section (story
+architecture planning, Gate 4 evaluation, Stage 5 scoring, dramatic
+mission classification, scene purpose validation, enhanced generation
+prompts). Updated codebase metrics (18,600 app lines, 10,300 test
+lines, 20 test files). Updated Campaign Studio status to CS-1 through
+CS-6 complete. Added eval harness to metrics awareness.
 
 **v1.5 — Audit verification corrections (April 3, 2026)**
 
@@ -273,5 +289,5 @@ Initial comprehensive capability matrix.
 
 ---
 
-*Storyteller V3 — Project State Matrix v1.4*
+*Storyteller V3 — Project State Matrix v1.6*
 *What's promised. What's designed. What's built. What's next.*
