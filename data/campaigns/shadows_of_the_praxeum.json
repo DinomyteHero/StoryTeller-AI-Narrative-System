@@ -1,0 +1,1028 @@
+{
+    "name": "Shadows of the Praxeum",
+    "era": "new_republic",
+    "total_acts": 5,
+    "throughline_question": "What does loyalty cost when every allegiance demands a different piece of you?",
+    "allegiances": [
+        {
+            "id": "jedi_order",
+            "display_name": "Jedi Order",
+            "description": "Students of Luke Skywalker's newly founded Jedi Praxeum on Yavin 4, learning to wield the Force in a galaxy that has not yet decided whether the Jedi should exist at all.",
+            "character_variants": [
+                {
+                    "id": "praxeum_student",
+                    "allegiance": "jedi_order",
+                    "pitch": "A Mirialan student at Luke Skywalker's Jedi Praxeum, drawn to the Force but haunted by the fear that caring too much makes you weak. Your closest friend at the academy is Kira Denn. You share everything. Or so you thought.",
+                    "species": "mirialan",
+                    "career": "mystic",
+                    "career_type": "seer",
+                    "specializations": ["seer"],
+                    "primary_game_line": "force_and_destiny",
+                    "force_sensitive": true,
+                    "motivation_default": {
+                        "track": "morality",
+                        "possible_types": ["bravery_anger", "compassion_hatred", "justice_cruelty"]
+                    },
+                    "starting_situation": "Three months into training at the Praxeum. The morning meditation session ended with a vision -- Kira's face, overlaid with shadow, a red blade reflected in her eyes. Master Skywalker dismissed it as training noise. It did not feel like noise.",
+                    "voice_baseline": "Earnest, precise, occasionally wry. Speaks in complete sentences. Thinks before responding but sometimes the thinking shows. Uses humor to deflect vulnerability. Deeply observant of others, less honest about themselves.",
+                    "background": "A Mirialan from Mirial who felt the Force as a child but had no name for it until a New Republic recruiter recognized the signs. Arrived at Yavin 4 six months ago. Bonded immediately with Kira Denn over shared loneliness and a mutual distrust of easy answers.",
+                    "integration_layer": {
+                        "entry_point": "The student has been at the Praxeum for six months, deep enough in training to feel invested but early enough to still be uncertain about belonging.",
+                        "personal_stakes": "If the student reports Kira, they lose the only person who makes the academy feel like home. If they protect Kira, they betray Luke's trust and potentially endanger everyone.",
+                        "npc_overrides": {
+                            "Kira Denn": {
+                                "disposition_start": 0.85,
+                                "relationship": "closest friend and training partner"
+                            },
+                            "Luke Skywalker": {
+                                "disposition_start": 0.70,
+                                "relationship": "teacher and mentor"
+                            },
+                            "Tionne": {
+                                "disposition_start": 0.60,
+                                "relationship": "academic mentor"
+                            }
+                        },
+                        "anchor_adaptations": {
+                            "academy_arrival": "Participates in morning meditation, senses something wrong through the Force",
+                            "night_investigation": "Follows Kira into the Massassi ruins using Sense",
+                            "inquisitor_contact": "Confronts Malakai through the Force -- feels his training, his pain, his patience",
+                            "betrayal_crisis": "Must decide what to tell Luke about everything",
+                            "final_convergence": "Faces Kira in the temple as the Imperial Remnant attacks"
+                        }
+                    },
+                    "characteristics_base": {
+                        "brawn": 2,
+                        "agility": 2,
+                        "intellect": 3,
+                        "cunning": 2,
+                        "willpower": 3,
+                        "presence": 3
+                    },
+                    "skills_base": {
+                        "discipline": 2,
+                        "perception": 2,
+                        "vigilance": 1,
+                        "lore": 1,
+                        "cool": 1,
+                        "lightsaber": 1
+                    },
+                    "wound_threshold": 12,
+                    "strain_threshold": 13,
+                    "soak": 2,
+                    "starting_loadout": {
+                        "weapons": [
+                            {
+                                "name": "Training lightsaber (blue crystal)",
+                                "skill": "lightsaber",
+                                "damage_bonus": 6,
+                                "critical_rating": 2,
+                                "qualities": ["breach_1", "sunder"],
+                                "narrative_note": "Built under Luke's guidance from a salvaged crystal. The blade hums low and steady. It feels like an extension of the arm, not a weapon."
+                            }
+                        ],
+                        "armor": {
+                            "name": "Praxeum training robes",
+                            "soak_bonus": 1,
+                            "defense": 0,
+                            "narrative_note": "Simple, undyed fabric. Designed for movement, not protection. Smells like jungle rain and temple stone."
+                        },
+                        "tools": [
+                            {
+                                "category": "medical",
+                                "name": "Two stimpacks",
+                                "mechanical_effect": "Can heal 5 wounds per stimpack. Two uses before resupply needed.",
+                                "narrative_note": "Alliance surplus, stored in a belt pouch."
+                            },
+                            {
+                                "category": "knowledge",
+                                "name": "Jedi archive datapad",
+                                "mechanical_effect": "Adds 1 boost die to Lore checks when consulting the archive.",
+                                "narrative_note": "Preloaded with Tionne's curated fragments of Jedi history. Scratched screen. Borrowed, not owned."
+                            }
+                        ],
+                        "special_items": [
+                            {
+                                "name": "Mirialan prayer beads",
+                                "mechanical_effect": "Once per session, adds 1 boost die to a Discipline check.",
+                                "narrative_note": "Hand-carved from Mirialwood. Each bead represents a lesson learned. Three are blank, waiting."
+                            }
+                        ]
+                    },
+                    "starting_force_powers": [
+                        {
+                            "power_id": "sense",
+                            "name": "Sense",
+                            "category": "perception_knowledge",
+                            "base_pips_required": 1,
+                            "active_upgrades": [],
+                            "narrative_capability": "Can sense the emotions and intentions of nearby beings. With concentration, can detect danger before it arrives.",
+                            "gm_choice_guidance": "Offer sensing choices when the character could read emotions, detect lies, feel danger, or perceive hidden threats. Particularly relevant when interacting with Kira or approaching the Massassi ruins.",
+                            "dark_side_flavor": "Dark side Sense is invasive -- not reading but ripping. The emotions come raw and unfiltered. Using it on Kira would feel like a betrayal of trust."
+                        }
+                    ],
+                    "starting_xp": 110,
+                    "protagonist_contradiction": "Believes the Force is a gift that should be shared freely, but instinctively hoards knowledge and power to protect those they care about -- especially Kira.",
+                    "pressure_revealed_identity": "Under maximum pressure, the student becomes the person who sacrifices their own peace to protect others -- not because it is right, but because they cannot bear to lose anyone else.",
+                    "contradiction_origin": "The student's family on Mirial practiced communal Force traditions where gifts were shared openly. But the student watched their older sibling leave to share those gifts with the wider galaxy and never come back. Sharing became synonymous with loss.",
+                    "depth_card": {
+                        "inner_demon": "Fear of inadequacy -- the conviction that they are not strong enough, wise enough, or brave enough to protect the people they love.",
+                        "secret_yearning": "To belong somewhere permanently. The Praxeum is the first place that felt like home since Mirial.",
+                        "lesson_not_learned": "That you cannot protect people by controlling information. Withholding truth is its own kind of betrayal.",
+                        "worst_act": "On Mirial, sensed that their sibling was in danger before they left. Said nothing. The sibling never returned.",
+                        "social_mask": "Earnest and slightly self-deprecating. Plays the diligent student who asks good questions. Hides the depth of their attachment to Kira.",
+                        "under_pressure": "Becomes controlling -- gathers information, makes plans, tries to manage situations alone.",
+                        "worldview": "The galaxy is full of people who need help and institutions that fail them. The Force is the bridge.",
+                        "moral_line": "Will not sacrifice an innocent to protect a guilty friend. But the line between innocent and guilty is where the real torture lives."
+                    }
+                }
+            ]
+        },
+        {
+            "id": "academy_support",
+            "display_name": "Academy Support",
+            "description": "Non-Jedi personnel who keep the Praxeum running -- mechanics, pilots, administrators. They live among Force users without being one, and their perspective on the academy is clearer for it.",
+            "character_variants": [
+                {
+                    "id": "praxeum_mechanic",
+                    "allegiance": "academy_support",
+                    "pitch": "A Zabrak mechanic who owes Luke Skywalker a debt for shelter after the Empire destroyed their crew. Not Force-sensitive, not a believer -- just fixes things. Claims the academy is a paycheck and a roof. Keeps choosing to stay.",
+                    "species": "zabrak",
+                    "career": "technician",
+                    "career_type": "mechanic",
+                    "specializations": ["mechanic"],
+                    "primary_game_line": "edge_of_empire",
+                    "force_sensitive": false,
+                    "motivation_default": {
+                        "track": "obligation",
+                        "possible_types": ["favor", "debt", "responsibility"]
+                    },
+                    "starting_situation": "Another morning in the Praxeum hangar bay. The Lambda shuttle needs a new motivator. Luke's X-wing needs its targeting computer recalibrated. And the comm array picked up something strange last night -- faint hyperspace signatures at the edge of the system. Probably nothing.",
+                    "voice_baseline": "Laconic, practical. Speaks in declarative sentences and workshop metaphors. Expresses affection through acts of service, not words. Uncomfortable with sincerity but incapable of dishonesty.",
+                    "background": "A Zabrak from Iridonia who ran with a small freighter crew until an Imperial patrol destroyed the ship and scattered the survivors. Luke offered shelter at the Praxeum in exchange for mechanical expertise. That was eight months ago. The debt should be paid by now.",
+                    "integration_layer": {
+                        "entry_point": "The mechanic has been maintaining the Praxeum's infrastructure for eight months. They know every system, every shortcut, every weakness in the temple's aging technology.",
+                        "personal_stakes": "If the academy falls, the mechanic loses the only place that has felt stable since Iridonia. If they stay silent about what they find in the comm traffic, people could die.",
+                        "npc_overrides": {
+                            "Luke Skywalker": {
+                                "disposition_start": 0.60,
+                                "relationship": "employer and reluctant benefactor"
+                            },
+                            "Kira Denn": {
+                                "disposition_start": 0.55,
+                                "relationship": "student who asks too many questions about the shuttle"
+                            }
+                        },
+                        "anchor_adaptations": {
+                            "academy_arrival": "Notices technical anomalies -- unauthorized comm traffic, power fluctuations near the Massassi ruins",
+                            "night_investigation": "Follows the technical trail into the ruins using engineering knowledge and sensor equipment",
+                            "inquisitor_contact": "Encounters Malakai without Force protection, as a baseline person in a room full of danger",
+                            "betrayal_crisis": "Must decide whether to repair academy defenses or help Kira escape",
+                            "final_convergence": "Holds the academy's technical infrastructure together during the Imperial attack"
+                        }
+                    },
+                    "characteristics_base": {
+                        "brawn": 3,
+                        "agility": 3,
+                        "intellect": 4,
+                        "cunning": 2,
+                        "willpower": 2,
+                        "presence": 2
+                    },
+                    "skills_base": {
+                        "mechanics": 2,
+                        "computers": 2,
+                        "piloting_space": 1,
+                        "perception": 1,
+                        "vigilance": 1,
+                        "resilience": 1
+                    },
+                    "wound_threshold": 14,
+                    "strain_threshold": 12,
+                    "soak": 3,
+                    "starting_loadout": {
+                        "weapons": [
+                            {
+                                "name": "Heavy hydrospanner",
+                                "skill": "melee",
+                                "damage_bonus": 3,
+                                "critical_rating": 5,
+                                "qualities": ["disorient_1"],
+                                "narrative_note": "Not a weapon. A tool. The fact that it can crack a skull is incidental."
+                            },
+                            {
+                                "name": "Hold-out blaster",
+                                "skill": "ranged_light",
+                                "damage_bonus": 5,
+                                "critical_rating": 4,
+                                "qualities": ["stun_setting"],
+                                "narrative_note": "Kept in a thigh holster under the coveralls. Luke does not approve. Luke also does not ask."
+                            }
+                        ],
+                        "armor": {
+                            "name": "Reinforced mechanic's coveralls",
+                            "soak_bonus": 1,
+                            "defense": 0,
+                            "narrative_note": "Burn-resistant weave. Oil stains that will never come out. More pockets than strictly necessary."
+                        },
+                        "tools": [
+                            {
+                                "category": "mechanics",
+                                "name": "Comprehensive tool kit",
+                                "mechanical_effect": "Enables Mechanics checks. Removes 1 setback die from repair attempts.",
+                                "narrative_note": "Custom-organized case. Every tool in its place. Touch nothing."
+                            },
+                            {
+                                "category": "slicing",
+                                "name": "Diagnostic scanner with slicer module",
+                                "mechanical_effect": "Adds 1 boost die to Computer checks for system diagnostics.",
+                                "narrative_note": "Modified from Imperial surplus. Can read any standard protocol. The slicer module is not strictly legal."
+                            },
+                            {
+                                "category": "medical",
+                                "name": "Two stimpacks",
+                                "mechanical_effect": "Can heal 5 wounds per stimpack. Two uses before resupply needed.",
+                                "narrative_note": "Stashed in the tool kit. Priorities."
+                            }
+                        ],
+                        "special_items": [
+                            {
+                                "name": "Salvaged Imperial comm scanner",
+                                "mechanical_effect": "Once per act, a Computers check can intercept unencrypted Imperial military communications within system range.",
+                                "narrative_note": "Pulled from the Lambda shuttle's original comm suite before the conversion. The frequencies are still programmed."
+                            }
+                        ]
+                    },
+                    "starting_xp": 100,
+                    "protagonist_contradiction": "Believes in self-reliance and independence, but keeps choosing to stay and serve an institution they claim to have no loyalty to.",
+                    "pressure_revealed_identity": "Under maximum pressure, the mechanic becomes the person who stays -- not out of obligation but because walking away from people who need you is the one thing they cannot do.",
+                    "contradiction_origin": "The mechanic's family clan on Iridonia valued loyalty above all -- and that loyalty trapped them in a cycle of violence. Independence was the escape. But the instinct to belong never died.",
+                    "depth_card": {
+                        "inner_demon": "Fear of commitment -- the terror that caring about something means losing it.",
+                        "secret_yearning": "To have a purpose that is not transactional. To be needed for who they are, not what they can fix.",
+                        "lesson_not_learned": "That staying is not the same as being trapped.",
+                        "worst_act": "Left a crew on Kessel when an Imperial raid hit. Escaped alone. Three captured. Never checked if they survived.",
+                        "social_mask": "The competent cynic. Fixes everything, believes in nothing. The sarcasm is load-bearing.",
+                        "under_pressure": "Retreats to what they can control -- machines, systems, physical problems with physical solutions.",
+                        "worldview": "Institutions fail. People fail. Machines are honest.",
+                        "moral_line": "Will not abandon someone who is counting on them in the moment. The moment passes. The line does not."
+                    }
+                }
+            ]
+        }
+    ],
+    "acts": [
+        {
+            "number": 1,
+            "name": "The New Students",
+            "tension": "low",
+            "opening_situation": "Morning at the Jedi Praxeum on Yavin 4. The Great Temple rises above the jungle canopy, its stones older than the Republic. Twelve students sit in meditation on the upper level. Master Skywalker walks among them, barefoot, his presence in the Force like a quiet river. Somewhere below, a generator coughs and resets. Somewhere outside, Kira Denn is late to meditation again.",
+            "opening_location": "Jedi Praxeum, upper meditation level of the Great Temple, Yavin 4",
+            "galactic_context": "The New Republic is seven years old and still finding its footing. The Imperial Remnant has fractured into warlord fiefdoms competing for scraps of the old Empire. Luke's Praxeum is barely a year old -- twelve students, a handful of support staff, one X-wing. The Senate debates whether the Jedi should exist at all. On Yavin 4, the jungle reclaims the Massassi ruins faster than anyone can explore them.",
+            "anchor": "academy_arrival",
+            "next_anchor": "night_investigation",
+            "open_threads": [
+                "What is the history of the Massassi temples beneath the Praxeum?",
+                "Why does Kira Denn seem distracted during training?",
+                "What does the dark side vergence in the lower ruins mean?",
+                "Can the player build genuine trust with Luke Skywalker?"
+            ],
+            "expected_turns": [8, 12],
+            "dramatic_function": "setup",
+            "xp_base": 15,
+            "xp_bonus_conditions": [
+                {
+                    "condition_type": "anchor_engagement",
+                    "description": "Engaged meaningfully with the academy arrival and orientation",
+                    "xp_value": 5
+                },
+                {
+                    "condition_type": "skill_breadth",
+                    "description": "Used at least 3 different skills during the act",
+                    "xp_value": 5
+                },
+                {
+                    "condition_type": "motivation_interaction",
+                    "description": "Demonstrated morality/obligation in a meaningful choice",
+                    "xp_value": 5
+                }
+            ],
+            "milestone_windows": [
+                {
+                    "act": 1,
+                    "milestone_type": "talent",
+                    "description": "First talent purchase after establishing character approach"
+                }
+            ],
+            "protagonist_mode": "orphan"
+        },
+        {
+            "number": 2,
+            "name": "Night Whispers",
+            "tension": "rising",
+            "opening_situation": "Two weeks since the student first noticed Kira's absences. Tonight, her bunk is empty again. Through the viewport of the dormitory level, a figure moves toward the jungle tree line, quick and certain, heading for the Massassi ruins. The rainy season has begun, and the lower passages are flooding -- revealing corridors sealed for millennia.",
+            "opening_location": "Student quarters, Jedi Praxeum, Yavin 4 -- pre-dawn",
+            "galactic_context": "A New Republic patrol frigate has detected anomalous hyperspace signatures at the edge of the Yavin system. The patrol commander filed a routine report. No one at the Praxeum has been notified. Meanwhile, the rainy season flooding has shifted the stonework in the lower Massassi ruins, revealing passages that Tionne has been cataloguing with growing excitement -- and growing unease.",
+            "anchor": "night_investigation",
+            "next_anchor": "inquisitor_contact",
+            "open_threads": [
+                "Where is Kira going at night?",
+                "What is the dark side vergence in the Massassi ruins?",
+                "Who or what is Kira meeting?",
+                "What are the anomalous hyperspace signatures at the system edge?",
+                "What did the flooding ruins reveal?"
+            ],
+            "expected_turns": [8, 12],
+            "dramatic_function": "destabilization",
+            "xp_base": 15,
+            "xp_bonus_conditions": [
+                {
+                    "condition_type": "anchor_engagement",
+                    "description": "Investigated Kira's nocturnal absences",
+                    "xp_value": 5
+                },
+                {
+                    "condition_type": "skill_breadth",
+                    "description": "Used at least 3 different skills during the act",
+                    "xp_value": 5
+                },
+                {
+                    "condition_type": "failure_engagement",
+                    "description": "Engaged meaningfully with a failed dice check",
+                    "xp_value": 5
+                }
+            ],
+            "milestone_windows": [
+                {
+                    "act": 2,
+                    "milestone_type": "force_power",
+                    "description": "Sense upgrade -- dark side vergence provides context for danger sense development",
+                    "conditions": {"force_sensitive": true}
+                }
+            ],
+            "pinch_point": {
+                "description": "Deep in the Massassi ruins, the student finds carved Sith glyphs that Tionne later translates as a warning: 'The temple remembers those who fed it.' A cold wind moves through the corridor despite no openings. The Force carries a whisper that sounds like the student's own name.",
+                "delivery_method": "environmental",
+                "target_progress": 0.5
+            },
+            "protagonist_mode": "wanderer"
+        },
+        {
+            "number": 3,
+            "name": "The Inquisitor's Offer",
+            "tension": "critical",
+            "opening_situation": "The truth is worse than imagined. Kira has been meeting someone at a hidden landing site beyond the Massassi ruins. The Force around the landing site carries the signature of someone trained in both sides of it -- disciplined, ancient in pain, and very patient. The ship is small, unmarked, and meticulously maintained. Whoever this is, they have been coming here for weeks.",
+            "opening_location": "Jungle clearing beyond the Massassi ruins, Yavin 4 -- concealed landing site",
+            "galactic_context": "Imperial Remnant intelligence networks are consolidating under Grand Admiral Pellaeon's distant authority. Individual surviving Inquisitors who went to ground after Endor have begun resurfacing -- some seeking redemption, most seeking leverage. The anomalous hyperspace signatures at the edge of the Yavin system have increased in frequency.",
+            "anchor": "inquisitor_contact",
+            "next_anchor": "betrayal_crisis",
+            "open_threads": [
+                "What does Malakai actually want from Kira?",
+                "What is the truth about Kira's parent?",
+                "Does Luke know about Kira's parentage?",
+                "What intelligence has Kira already shared with Malakai?",
+                "What is the connection between Malakai and the Imperial Remnant fleet?"
+            ],
+            "expected_turns": [10, 14],
+            "dramatic_function": "escalation",
+            "xp_base": 20,
+            "xp_bonus_conditions": [
+                {
+                    "condition_type": "anchor_engagement",
+                    "description": "Confronted or observed the Inquisitor directly",
+                    "xp_value": 5
+                },
+                {
+                    "condition_type": "motivation_interaction",
+                    "description": "Made a significant moral or loyalty choice regarding Kira",
+                    "xp_value": 5
+                },
+                {
+                    "condition_type": "skill_breadth",
+                    "description": "Used at least 3 different skills during the act",
+                    "xp_value": 5
+                },
+                {
+                    "condition_type": "custom",
+                    "description": "Attempted to resolve the situation independently before seeking help",
+                    "xp_value": 5,
+                    "parameters": {"custom_tag": "independent_resolution_attempt"}
+                }
+            ],
+            "milestone_windows": [
+                {
+                    "act": 3,
+                    "milestone_type": "specialization",
+                    "description": "Moral complexity may prompt specialization considerations"
+                }
+            ],
+            "destiny_dark_trigger": true,
+            "seize_the_moment": true,
+            "pinch_point": {
+                "description": "Malakai shows the student a holographic recording of Kira's parent -- a Jedi named Seren Denn who turned during Order 66, not out of ambition but out of despair. The recording shows Seren surrendering to the Inquisitors to save infant Kira. Malakai says: 'Luke knows. He has always known. Ask him.' The recording is verifiable. The implications are devastating.",
+                "delivery_method": "direct_witness",
+                "target_progress": 0.5
+            },
+            "time_skip_after": {
+                "duration_months": 3,
+                "narrative_framing": "Three months pass at the Praxeum. The student has not told anyone what they learned from Malakai. The knowledge sits like a stone in the chest. Kira has stopped leaving at night, but something has changed between them -- the silences are longer, the laughter rarer. Training continues. Luke adds advanced combat forms to the curriculum without explaining why. The jungle grows. And at the edge of the system, the hyperspace signatures have stopped. Which is worse than when they were there.",
+                "skip_events": [
+                    {"event": "Kira stops nocturnal meetings", "consequence": "Surface calm, underlying tension"},
+                    {"event": "Luke adds advanced combat training to curriculum", "consequence": "Academy prepares for unknown threat"},
+                    {"event": "Hyperspace signatures disappear from system edge", "consequence": "Fleet has moved to staging position"}
+                ],
+                "skill_decay_enabled": false,
+                "vignette_count": 2,
+                "vignette_library": [
+                    {
+                        "vignette_id": "skip_sparring_kira",
+                        "category": "relationship",
+                        "npc_focus": "Kira Denn",
+                        "skill_domain": ["lightsaber", "discipline"],
+                        "time_stamp": "The sixth week",
+                        "passage": "Sparring day. The training circle on the temple's lower level, stone floor worn smooth by decades of practice. Kira draws her blade and the hum fills the chamber. Her stance has changed -- something controlled and precise that was not there three months ago. A form the student does not recognize. Where did she learn it?",
+                        "choices": [
+                            {
+                                "text": "Match her pace. Let the sparring speak. The blades will tell you what words cannot.",
+                                "skill_tag": "lightsaber",
+                                "npc_effects": {"Kira Denn": 0.05},
+                                "moral_weight": 0,
+                                "morality_bonus": 0,
+                                "aspiration_tags": ["patience", "trust"],
+                                "narrative_consequence": "The match is close and honest. Kira smiles afterward -- a real one, brief and unguarded. Whatever she learned, she is still Kira."
+                            },
+                            {
+                                "text": "Push hard. Test the new technique. See where it breaks.",
+                                "skill_tag": "lightsaber",
+                                "npc_effects": {"Kira Denn": -0.05},
+                                "moral_weight": 1,
+                                "morality_bonus": 0,
+                                "aspiration_tags": ["investigation", "control"],
+                                "narrative_consequence": "Kira's guard breaks under sustained aggression. Her eyes flash -- anger, then hurt, then the shuttered blankness of someone who expected this. The new form was Makashi. An Inquisitor's form."
+                            }
+                        ]
+                    },
+                    {
+                        "vignette_id": "skip_temple_repair",
+                        "category": "mundane",
+                        "skill_domain": ["mechanics", "lore"],
+                        "time_stamp": "The ninth week",
+                        "passage": "Water damage in the meditation chamber. The rainy season has loosened the stonework in the eastern wall. Behind a shifted block, a sealed compartment -- dry, untouched, older than anything else in the temple. Inside: a metal cylinder covered in script that predates the Sith Wars. It hums faintly when touched.",
+                        "choices": [
+                            {
+                                "text": "Bring it to Luke immediately. This is exactly the kind of thing that should not be opened alone.",
+                                "skill_tag": "lore",
+                                "npc_effects": {"Luke Skywalker": 0.05},
+                                "moral_weight": 0,
+                                "morality_bonus": 1,
+                                "aspiration_tags": ["duty", "transparency"],
+                                "narrative_consequence": "Luke studies the cylinder for three days. His expression when he returns it to Tionne is unreadable. He thanks the student quietly and does not explain what it contained."
+                            },
+                            {
+                                "text": "Examine it first. Understand what it is before deciding who should know.",
+                                "skill_tag": "mechanics",
+                                "npc_effects": {},
+                                "moral_weight": 1,
+                                "morality_bonus": 0,
+                                "aspiration_tags": ["curiosity", "independence"],
+                                "narrative_consequence": "The cylinder contains a compressed data crystal. The script is Massassi -- a record of what was built here and why. The temple was not a monument. It was a cage."
+                            }
+                        ]
+                    },
+                    {
+                        "vignette_id": "skip_sleepless_doubt",
+                        "category": "solitary",
+                        "skill_domain": ["discipline", "cool"],
+                        "time_stamp": "The eleventh week",
+                        "passage": "Rain on the temple roof. Cannot sleep. The knowledge about Kira sits in the chest like a splinter that has worked its way deeper with every week of silence. Three months of carrying this alone. Three months of watching Kira across the dining hall and wondering if the person across the table is the person who was there six months ago, or someone new wearing the same face.",
+                        "choices": [
+                            {
+                                "text": "Sit with the uncertainty. Not every question needs an answer tonight. Let the doubt exist without feeding it.",
+                                "skill_tag": "discipline",
+                                "npc_effects": {},
+                                "moral_weight": 0,
+                                "morality_bonus": 1,
+                                "aspiration_tags": ["patience", "acceptance"],
+                                "narrative_consequence": "The rain slows. Sleep comes eventually -- not peaceful, but present. Morning brings nothing new except the small mercy of having survived another night without breaking."
+                            },
+                            {
+                                "text": "Write it all down. Every fact, every suspicion, every connection. Analyze the problem. Control what you can.",
+                                "skill_tag": "cool",
+                                "npc_effects": {},
+                                "moral_weight": 0,
+                                "morality_bonus": 0,
+                                "aspiration_tags": ["analysis", "control"],
+                                "narrative_consequence": "The datapad fills with a timeline of Kira's absences, Malakai's claims, Luke's silences. Seeing it written makes it real. The pattern is clear. The next step is not."
+                            }
+                        ]
+                    }
+                ]
+            },
+            "protagonist_mode": "warrior"
+        },
+        {
+            "number": 4,
+            "name": "The Betrayal Price",
+            "tension": "climax",
+            "opening_situation": "The three-month silence breaks all at once. Encrypted Imperial military frequencies intercepted by the academy's comm array -- fleet movement orders for Captain Tannen's task force. Two frigates and a TIE fighter wing have been positioning using intelligence that could only have come from inside the Praxeum. Luke calls emergency assembly. His expression is calm. His eyes are not.",
+            "opening_location": "Jedi Praxeum, main assembly hall of the Great Temple, Yavin 4",
+            "galactic_context": "Captain Ress Tannen's task force -- two Nebulon-B frigates and TIE fighters -- has reached a staging position one hyperspace jump from Yavin. Operating independently from Pellaeon's main fleet, pursuing a personal agenda. The New Republic's nearest patrol is eighteen hours away. The Praxeum has Luke Skywalker, twelve students of varying ability, and one X-wing.",
+            "anchor": "betrayal_crisis",
+            "next_anchor": "final_convergence",
+            "open_threads": [
+                "How much does Luke know about the student's involvement?",
+                "Can Kira be reached before she falls completely?",
+                "How much intelligence has Malakai passed to Tannen?",
+                "Can the academy be defended with available resources?",
+                "What is Malakai's true endgame?"
+            ],
+            "expected_turns": [10, 14],
+            "dramatic_function": "confrontation",
+            "xp_base": 20,
+            "xp_bonus_conditions": [
+                {
+                    "condition_type": "anchor_engagement",
+                    "description": "Actively participated in the betrayal crisis resolution",
+                    "xp_value": 5
+                },
+                {
+                    "condition_type": "motivation_interaction",
+                    "description": "Made a defining loyalty choice under pressure",
+                    "xp_value": 5
+                },
+                {
+                    "condition_type": "failure_engagement",
+                    "description": "Engaged meaningfully with a failed check during the crisis",
+                    "xp_value": 5
+                },
+                {
+                    "condition_type": "custom",
+                    "description": "Attempted direct intervention with Kira",
+                    "xp_value": 5,
+                    "parameters": {"custom_tag": "kira_intervention_attempt"}
+                }
+            ],
+            "milestone_windows": [
+                {
+                    "act": 4,
+                    "milestone_type": "force_power",
+                    "description": "Emotional intensity may unlock new Force capabilities",
+                    "conditions": {"force_sensitive": true}
+                },
+                {
+                    "act": 4,
+                    "milestone_type": "talent",
+                    "description": "Tactical demands of preparing academy defense may unlock practical talents"
+                }
+            ],
+            "destiny_dark_trigger": true,
+            "seize_the_moment": true,
+            "pinch_point": {
+                "description": "Luke takes the student aside and says quietly: 'I know about Kira. I have known since she arrived. Her parent was Jedi Knight Seren Denn, who fell during Order 66 -- not to the dark side, but to despair. Seren surrendered to the Inquisitors to save Kira as an infant. I brought Kira here because everyone deserves a chance to be more than their parent's worst moment. I was wrong not to tell her. I was wrong not to tell you. And now someone has weaponized my silence.'",
+                "delivery_method": "direct_witness",
+                "target_progress": 0.4
+            },
+            "protagonist_mode": "warrior"
+        },
+        {
+            "number": 5,
+            "name": "What Remains",
+            "tension": "falling",
+            "opening_situation": "Dawn on Yavin 4. The jungle holds its breath. Tannen's fleet enters the system -- two Nebulon-B frigates and a wing of TIE fighters burning toward the fourth moon. The Praxeum's single X-wing is fueled and ready. The ancient Massassi temple's stone walls are the only other defense. Luke gathers the students in the main hall -- the same room where the Rebellion planned the assault on the first Death Star. Kira is not among them. She left three hours ago, heading for the Massassi ruins. Malakai's ship is still at the concealed landing site. Everything converges.",
+            "opening_location": "Jedi Praxeum, Great Temple main hall, Yavin 4 -- the same room where the Rebellion briefed Red and Gold squadrons before the Battle of Yavin",
+            "galactic_context": "Tannen operates without formal Remnant authorization. Personal crusade against Luke Skywalker and the symbol he represents. The New Republic patrol has been alerted but is hours away. Whatever happens at the Praxeum happens before help arrives. The outcome depends entirely on twelve students, one Jedi Master, and whatever the player has built over four acts of choices.",
+            "anchor": "final_convergence",
+            "next_anchor": null,
+            "open_threads": [],
+            "expected_turns": [8, 12],
+            "dramatic_function": "resolution",
+            "xp_base": 20,
+            "xp_bonus_conditions": [
+                {
+                    "condition_type": "anchor_engagement",
+                    "description": "Engaged decisively with the final convergence",
+                    "xp_value": 5
+                },
+                {
+                    "condition_type": "motivation_interaction",
+                    "description": "The player's loyalty choices shaped the outcome",
+                    "xp_value": 10
+                },
+                {
+                    "condition_type": "failure_engagement",
+                    "description": "Engaged meaningfully with consequences of earlier choices",
+                    "xp_value": 5
+                }
+            ],
+            "protagonist_mode": "martyr"
+        }
+    ],
+    "npc_roster": [
+        {
+            "name": "Luke Skywalker",
+            "role": "Jedi Master and founder of the Praxeum -- teacher, protector, and the student's moral compass. Carries the weight of rebuilding an Order from nothing.",
+            "disposition_start": 0.70,
+            "disposition_trajectory": "variable",
+            "motivation": "Rebuild the Jedi Order in a way that avoids the old Order's failures. Prove that trust in people is stronger than control over them.",
+            "voice_notes": "Short, declarative sentences. Questions as invitations, not interrogations. Occasional dry humor inherited from Han Solo. Listens with his whole body. When serious, very still.",
+            "behavioral_envelope": [
+                "Never uses the Force to compel or manipulate students",
+                "Never dismisses a student's concern, even when wrong",
+                "Never lies directly but will omit information he believes could cause harm",
+                "Always gives people a chance to do the right thing before intervening"
+            ],
+            "knows_at_start": [
+                "Kira Denn is the daughter of Jedi Knight Seren Denn, who fell during Order 66",
+                "A dark side vergence exists in the lower Massassi ruins",
+                "The Praxeum's defenses are inadequate against a serious military attack"
+            ],
+            "doesnt_know_at_start": [
+                "Kira has been meeting Malakai in the jungle",
+                "A surviving Inquisitor is operating near Yavin 4",
+                "Imperial fleet assets are staging at the edge of the system",
+                "The student has discovered Kira's secret"
+            ],
+            "per_act_state": [
+                {"act": 1, "role_in_act": "Teacher and stabilizing presence. Guides morning meditation. Available for conversation but does not push.", "disposition_expected": 0.70},
+                {"act": 2, "role_in_act": "Background authority. Allows the student space to investigate. Senses something is wrong but trusts the student to come forward.", "disposition_expected": 0.70},
+                {"act": 3, "role_in_act": "Off-world at a New Republic Senate hearing on Jedi oversight. The student faces the Inquisitor without Luke's protection.", "disposition_expected": 0.65},
+                {"act": 4, "role_in_act": "Returns and confronts the crisis directly. Reveals what he knows about Kira. Self-critical about his silence. Prepares defenses.", "disposition_expected": "variable"},
+                {"act": 5, "role_in_act": "Defender and witness. Leads the defense of the Praxeum. Observes the student's choices and accepts them -- whatever they are.", "disposition_expected": "variable"}
+            ],
+            "npc_relationships": [
+                {"npc": "Kira Denn", "nature": "Student he accepted knowing her parentage. His greatest act of faith in the new Order.", "weight": 0.6},
+                {"npc": "Malakai", "nature": "A surviving Inquisitor he failed to detect. Luke's guilt about this failure is real.", "weight": -0.7},
+                {"npc": "Tionne", "nature": "Most trusted colleague at the Praxeum. Defers to her on archival and historical matters.", "weight": 0.8}
+            ],
+            "pressure_role": "witness",
+            "thematic_argument": "Trust, even when it fails, is better than suspicion that succeeds. The old Order fell because it chose control over trust.",
+            "canon": true,
+            "era_profile": "new_jedi_order_founding",
+            "canon_voice": {
+                "speech_patterns": "Short declarative sentences. Uses questions as invitations. Occasional dry humor. Never raises his voice.",
+                "thinking_style": "Intuitive and reflective. Trusts the Force but not as a substitute for human judgment. Second-guesses himself more than others realize.",
+                "emotional_register": "Warm but contained. Grief surfaces as quiet determination. Joy is genuine when it appears."
+            },
+            "era_specific_notes": "11 ABY Luke -- optimistic but carrying the weight of the new Order's fragility. Has not yet faced Exar Kun's spirit. Trust in people is at its peak. This trust is both his greatest strength and the vulnerability Malakai exploits.",
+            "anti_stereotype_notes": "Avoid making Luke a serene sage dispensing wisdom. He is a farm kid from Tatooine who became a legend and is now trying to be a teacher. He makes mistakes. He gets frustrated. He laughs at bad jokes."
+        },
+        {
+            "name": "Kira Denn",
+            "role": "Fellow student and the player's closest friend at the Praxeum. Secretly meeting a surviving Inquisitor who claims to know the truth about her dead parent.",
+            "disposition_start": 0.85,
+            "disposition_trajectory": "declining",
+            "motivation": "Learn the truth about her parent, Seren Denn. Understand why Luke never told her. Decide whether the truth changes who she is.",
+            "voice_notes": "Quick, warm, and sharp. Laughs easily but the laughter has started to thin. When lying, her body goes still -- too controlled, like someone holding a pose. When honest, she moves constantly.",
+            "behavioral_envelope": [
+                "Never deliberately endangers other students",
+                "Never lies to the player without detectable physical tells",
+                "Cannot fully cut emotional ties with the player, even under pressure",
+                "Will not turn to the dark side without a final hesitation -- giving the player one last chance"
+            ],
+            "knows_at_start": [
+                "She was orphaned as an infant",
+                "Something about her past made Luke personally recruit her",
+                "The Massassi ruins contain something that calls to her"
+            ],
+            "doesnt_know_at_start": [
+                "Her parent was Jedi Knight Seren Denn who fell during Order 66",
+                "Luke knows her full parentage",
+                "Malakai is using her to feed intelligence to an Imperial Remnant fleet"
+            ],
+            "per_act_state": [
+                {"act": 1, "role_in_act": "Closest friend. Warm, present, slightly distracted. Moments of staring into the jungle.", "disposition_expected": 0.85},
+                {"act": 2, "role_in_act": "Increasingly secretive. Nocturnal absences. Defensive when questioned. Still warm -- but guarded.", "disposition_expected": 0.70},
+                {"act": 3, "role_in_act": "Exposed. Oscillates between defiance, shame, and justification. Believes Malakai is the only person telling her the truth.", "disposition_expected": 0.50},
+                {"act": 4, "role_in_act": "Desperate. Learns Malakai used her intelligence for the attack. Feels betrayed by everyone -- Malakai, Luke, potentially the player.", "disposition_expected": 0.35},
+                {"act": 5, "role_in_act": "Breaking point. The player's accumulated choices determine whether she falls, holds, or finds a third path.", "disposition_expected": "variable"}
+            ],
+            "npc_relationships": [
+                {"npc": "Malakai", "nature": "The only person offering truth, at a terrible price. She knows it is manipulation. She goes anyway.", "weight": 0.3},
+                {"npc": "Luke Skywalker", "nature": "Mentor who brought her here but lied by omission about the most important thing.", "weight": 0.4},
+                {"npc": "Tionne", "nature": "Respected teacher whose historical knowledge Kira craves but cannot safely access.", "weight": 0.5}
+            ],
+            "pressure_role": "catalyst",
+            "thematic_argument": "Truth is a right, not a privilege. Withholding it -- even to protect someone -- is its own betrayal."
+        },
+        {
+            "name": "Malakai",
+            "role": "A surviving Imperial Inquisitor who has gone to ground near Yavin 4. Offers Kira the truth about her parent in exchange for academy intelligence. The antagonist who is right about the facts and wrong about the conclusions.",
+            "disposition_start": 0.25,
+            "disposition_trajectory": "stable",
+            "motivation": "Prove that the Jedi are built on the same concealment and control that created the Sith. If the new Order can be undermined from within, it validates every choice Malakai made as an Inquisitor.",
+            "voice_notes": "Precise, measured, soft-spoken. Never raises voice. Speaks in statements, not questions. The patience of someone who has been waiting for years. Grief surfaces in unexpected moments -- quickly suppressed.",
+            "behavioral_envelope": [
+                "Never uses overt violence when manipulation serves the same purpose",
+                "Never lies about verifiable facts -- his weapon is truth, selectively deployed",
+                "Never directly attacks Luke -- prefers to let Luke's own choices do the damage",
+                "Will retreat rather than fight a losing battle -- survival above ego"
+            ],
+            "knows_at_start": [
+                "Kira's parent was Jedi Knight Seren Denn",
+                "Seren surrendered to the Inquisitors to save infant Kira",
+                "Luke recruited Kira knowing her full parentage",
+                "The Praxeum's defensive capabilities are minimal"
+            ],
+            "doesnt_know_at_start": [
+                "How much the player knows about Kira's meetings",
+                "The depth of the player's relationship with Kira",
+                "That Tannen's fleet will arrive before Malakai's own timeline"
+            ],
+            "per_act_state": [
+                {"act": 1, "role_in_act": "Absent. Exists only through Kira's behavioral changes -- her distraction, her absences, her new knowledge.", "disposition_expected": 0.25},
+                {"act": 2, "role_in_act": "Indirect presence. Traces of meetings. Ship detected on sensors. A Force signature at the edge of perception.", "disposition_expected": 0.25},
+                {"act": 3, "role_in_act": "Direct contact. Reveals himself and makes his offer. The truth is his currency.", "disposition_expected": 0.20},
+                {"act": 4, "role_in_act": "Puppet master revealed. Intel from Kira has reached Tannen. Malakai's plan is working but the timeline has accelerated beyond his control.", "disposition_expected": 0.15},
+                {"act": 5, "role_in_act": "Cornered. Must choose: flee, fight, or face the consequences of what he set in motion.", "disposition_expected": "variable"}
+            ],
+            "npc_relationships": [
+                {"npc": "Kira Denn", "nature": "A tool -- and uncomfortably, the closest thing to a student he has ever had. The attachment is unwanted and real.", "weight": 0.1},
+                {"npc": "Luke Skywalker", "nature": "The embodiment of everything Malakai destroyed himself to fight. If Luke fails, Malakai was right all along.", "weight": -0.8},
+                {"npc": "Captain Ress Tannen", "nature": "Temporary ally of convenience whose personal ambitions Malakai underestimated.", "weight": -0.4}
+            ],
+            "pressure_role": "tempter",
+            "thematic_argument": "Institutions built on concealment always produce betrayal. The Jedi tendency to hide truth for the greater good is the seed of every fall."
+        },
+        {
+            "name": "Tionne",
+            "role": "Jedi historian and archivist at the Praxeum. Modest Force sensitivity, immense knowledge. The academy's institutional memory and moral mirror.",
+            "disposition_start": 0.60,
+            "disposition_trajectory": "rising",
+            "motivation": "Preserve and rebuild Jedi knowledge. Ensure the new Order learns from the old Order's mistakes, not just its successes.",
+            "voice_notes": "Measured and warm. Speaks with the precision of a researcher who knows that words shape understanding. Tells stories instead of giving advice. The stories always have a point.",
+            "behavioral_envelope": [
+                "Never withholds historical information from sincere students",
+                "Never takes sides in student disputes without being asked directly",
+                "Will not break Luke's confidence except when immediate physical danger demands it",
+                "Always frames lessons as questions rather than answers"
+            ],
+            "knows_at_start": [
+                "The full history of the Massassi temples and their dark side associations",
+                "That Luke carries secrets about some students -- she does not know which ones",
+                "The old Order's pattern of institutional secrecy and its consequences"
+            ],
+            "doesnt_know_at_start": [
+                "Kira's parentage",
+                "Malakai's presence near the Praxeum",
+                "The Imperial fleet staging at the system edge"
+            ],
+            "per_act_state": [
+                {"act": 1, "role_in_act": "Knowledge source. Provides historical context for the Massassi temples. Excited about the flooding revealing new passages.", "disposition_expected": 0.60},
+                {"act": 2, "role_in_act": "Mirror. Tells the student stories of past Jedi who faced similar dark side encounters. The parallels are not accidental.", "disposition_expected": 0.65},
+                {"act": 3, "role_in_act": "Indirect guide. Provides historical parallels about Jedi who kept secrets and the cost of concealment. Does not know the specific context.", "disposition_expected": 0.65},
+                {"act": 4, "role_in_act": "Moral compass. Processes Kira's truth through the lens of the old Order's failures. Neither condemns nor excuses.", "disposition_expected": 0.70},
+                {"act": 5, "role_in_act": "Preserver. Fights to save the archive during the attack. The knowledge must survive even if the temple does not.", "disposition_expected": 0.70}
+            ],
+            "npc_relationships": [
+                {"npc": "Luke Skywalker", "nature": "Trusted colleague. The person she goes to when the archive reveals something troubling.", "weight": 0.8},
+                {"npc": "Kira Denn", "nature": "Student with potential whose intensity sometimes concerns her.", "weight": 0.4}
+            ],
+            "pressure_role": "mirror",
+            "thematic_argument": "Truth matters, but so does timing. The old Order failed not because it kept secrets, but because it could not distinguish between protecting people and controlling them.",
+            "canon": true,
+            "era_profile": "new_jedi_order_founding",
+            "era_specific_notes": "11 ABY Tionne -- building the Jedi archive from fragments. Part researcher, part archaeologist, part storyteller. Her Force sensitivity is modest but her value to the Order is immense."
+        },
+        {
+            "name": "Captain Ress Tannen",
+            "role": "Imperial Remnant naval officer commanding a rogue task force. Pursuing a personal vendetta against the Jedi without official authorization. The dark mirror of the player's loyalty dilemma.",
+            "disposition_start": 0.10,
+            "disposition_trajectory": "declining",
+            "motivation": "Destroy the Jedi Praxeum to prove that the Empire's mission was righteous and its sacrifices meaningful. Not ideology -- grief.",
+            "voice_notes": "Clipped, military precision. Every sentence is an order or a report. No small talk. The grief underneath the discipline surfaces as contempt for anything he considers weakness.",
+            "behavioral_envelope": [
+                "Never negotiates once committed to action",
+                "Will not retreat once the assault begins",
+                "Fundamentally does not understand the Force -- underestimates Force users consistently",
+                "Acts independently of Malakai and will not take orders from him"
+            ],
+            "knows_at_start": [
+                "The Praxeum's location and approximate defensive capability",
+                "That Malakai has an intelligence source inside the academy",
+                "That the New Republic's nearest patrol is hours away"
+            ],
+            "doesnt_know_at_start": [
+                "Luke Skywalker's true combat capability",
+                "The number and skill level of the students",
+                "That his operation has been detected via comm intercepts"
+            ],
+            "per_act_state": [
+                {"act": 1, "role_in_act": "Absent. Exists only as implied threat through faint hyperspace signatures.", "disposition_expected": 0.10},
+                {"act": 2, "role_in_act": "Foreshadowed. Anomalous signatures increase at the system edge.", "disposition_expected": 0.10},
+                {"act": 3, "role_in_act": "Staging. Fleet positions. First intercepted comm fragments.", "disposition_expected": 0.10},
+                {"act": 4, "role_in_act": "Active threat. Intercepted transmissions reveal the full attack plan.", "disposition_expected": 0.05},
+                {"act": 5, "role_in_act": "Direct antagonist. Commands the assault on Yavin 4.", "disposition_expected": 0.00}
+            ],
+            "npc_relationships": [
+                {"npc": "Malakai", "nature": "Intelligence source and useful tool whose personal agenda Tannen neither understands nor cares about.", "weight": -0.2},
+                {"npc": "Luke Skywalker", "nature": "Target and symbol. Destroying Skywalker justifies everything Tannen has lost.", "weight": -0.9}
+            ],
+            "pressure_role": "escalator",
+            "thematic_argument": "Blind allegiance to an institution without moral examination -- the dark mirror of the player's own loyalty dilemma. Tannen is what loyalty becomes when it stops asking questions."
+        }
+    ],
+    "variation_points": [
+        {
+            "id": "kira_meeting_discovery",
+            "trigger_act": 2,
+            "description": "How does the player discover that Kira has been meeting someone in the ruins?",
+            "selection_method": "player_choice",
+            "options": [
+                {
+                    "id": "followed_directly",
+                    "description": "The player followed Kira directly into the jungle -- confrontational discovery.",
+                    "npc_state_changes": {
+                        "Kira Denn": {"disposition_delta": -0.10, "status": "caught_in_act"}
+                    }
+                },
+                {
+                    "id": "technical_detection",
+                    "description": "The player found evidence through comm traffic analysis or sensor anomalies -- indirect discovery.",
+                    "npc_state_changes": {
+                        "Kira Denn": {"disposition_delta": -0.05, "status": "evidence_found"}
+                    }
+                },
+                {
+                    "id": "force_vision",
+                    "description": "The Force showed the player a vision that must be verified -- intuitive discovery.",
+                    "npc_state_changes": {
+                        "Kira Denn": {"disposition_delta": 0.0, "status": "vision_revealed"}
+                    }
+                }
+            ]
+        },
+        {
+            "id": "malakai_endgame",
+            "trigger_act": 5,
+            "description": "What does Malakai do when everything converges?",
+            "selection_method": "narrative",
+            "options": [
+                {
+                    "id": "malakai_fights",
+                    "description": "Malakai chooses violence -- draws his blade and commits to destruction.",
+                    "npc_state_changes": {
+                        "Malakai": {"disposition_delta": -0.20, "status": "hostile"}
+                    }
+                },
+                {
+                    "id": "malakai_flees",
+                    "description": "Survival instinct wins. Malakai runs for his ship. The Inquisitor's oldest reflex.",
+                    "npc_state_changes": {
+                        "Malakai": {"disposition_delta": 0.0, "status": "escaped"}
+                    }
+                },
+                {
+                    "id": "malakai_surrenders",
+                    "description": "Grief breaks through. Exhaustion, not redemption. He stops because he cannot carry it anymore.",
+                    "npc_state_changes": {
+                        "Malakai": {"disposition_delta": 0.15, "status": "surrendered"}
+                    }
+                }
+            ]
+        }
+    ],
+    "vehicle_registry": [
+        {
+            "ship_id": "lukes_xwing",
+            "name": "Red Five",
+            "type": "T-65B X-wing starfighter",
+            "silhouette": 3,
+            "speed": 5,
+            "handling": 1,
+            "hull_threshold": 14,
+            "system_strain_threshold": 12,
+            "armor": 3,
+            "shields": {"fore": 2, "aft": 1},
+            "weapons": [
+                {
+                    "name": "KX9 laser cannons (fire-linked)",
+                    "skill": "gunnery",
+                    "damage": 6,
+                    "arc": "forward",
+                    "qualities": ["linked_3"]
+                },
+                {
+                    "name": "Krupx MG7 proton torpedoes",
+                    "skill": "gunnery",
+                    "damage": 8,
+                    "arc": "forward",
+                    "qualities": ["blast_6", "breach_6", "guided_2", "limited_ammo_6"]
+                }
+            ],
+            "narrative_notes": "The same X-wing that destroyed the Death Star. Maintained by the Praxeum mechanic with obsessive care. R2-D2 serves as permanent astromech. The targeting computer works fine. Luke does not use it."
+        },
+        {
+            "ship_id": "praxeum_shuttle",
+            "name": "The Horizon",
+            "type": "Lambda-class T-4a shuttle (captured)",
+            "silhouette": 4,
+            "speed": 3,
+            "handling": -1,
+            "hull_threshold": 20,
+            "system_strain_threshold": 15,
+            "armor": 3,
+            "shields": {"fore": 1, "aft": 1},
+            "weapons": [
+                {
+                    "name": "Forward laser cannons",
+                    "skill": "gunnery",
+                    "damage": 5,
+                    "arc": "forward",
+                    "qualities": ["linked_1"]
+                }
+            ],
+            "narrative_notes": "Captured Imperial shuttle repurposed for supply runs and student transport. Seats twelve. The mechanic has been improving its reliability for eight months. Imperial IFF transponder still functional but rarely used."
+        }
+    ],
+    "factions": [
+        {
+            "faction_id": "jedi_praxeum",
+            "display_name": "Jedi Praxeum",
+            "disposition_start": 0.80,
+            "influence_start": 0.30,
+            "awareness_start": 0.20,
+            "per_act_drift": {
+                "3": {"awareness": 0.10},
+                "4": {"awareness": 0.20, "influence": -0.10},
+                "5": {"influence": 0.10}
+            }
+        },
+        {
+            "faction_id": "imperial_remnant_tannen",
+            "display_name": "Imperial Remnant (Tannen's Task Force)",
+            "disposition_start": 0.10,
+            "influence_start": 0.60,
+            "awareness_start": 0.10,
+            "per_act_drift": {
+                "2": {"awareness": 0.05},
+                "3": {"awareness": 0.10},
+                "4": {"awareness": 0.30, "influence": 0.10},
+                "5": {"disposition": -0.10, "influence": -0.10}
+            }
+        },
+        {
+            "faction_id": "new_republic",
+            "display_name": "New Republic",
+            "disposition_start": 0.60,
+            "influence_start": 0.70,
+            "awareness_start": 0.10,
+            "per_act_drift": {
+                "4": {"awareness": 0.20},
+                "5": {"awareness": 0.30, "influence": 0.10}
+            }
+        }
+    ],
+    "foreshadow_registry": [
+        {
+            "id": "hyperspace_signatures",
+            "setup_act": 1,
+            "setup_description": "Tionne mentions faint hyperspace echoes detected at the system edge during a casual dinner conversation. She attributes them to New Republic patrols. The mechanic's comm scanner suggests otherwise but the reading is ambiguous.",
+            "payoff_act": 4,
+            "payoff_description": "The signatures were Captain Tannen's task force staging for the assault. The early warning was there all along -- dismissed as routine.",
+            "payoff_type": "revelation"
+        },
+        {
+            "id": "kira_blade_stance",
+            "setup_act": 1,
+            "setup_description": "During a training session, Kira uses an unusual defensive parry -- elegant, precise, unlike anything Luke teaches. She corrects herself quickly. No one else notices.",
+            "payoff_act": 3,
+            "payoff_description": "The parry is recognized as Makashi, a classical lightsaber form favored by the Inquisitors. Kira learned it from Malakai during their secret meetings.",
+            "payoff_type": "callback"
+        },
+        {
+            "id": "seren_denn_name",
+            "setup_act": 2,
+            "setup_description": "In the flooded lower ruins, a damaged datapad is recovered from a sealed compartment. Among the fragmented records is a partial manifest listing 'S. Denn' as a Temple attendee centuries before the Clone Wars. The name means nothing yet.",
+            "payoff_act": 4,
+            "payoff_description": "Luke reveals that Kira's parent was Jedi Knight Seren Denn. The name from the ruins is a different Denn -- but the coincidence is not coincidence. The Force drew Kira to Yavin 4 for reasons deeper than Luke's invitation.",
+            "payoff_type": "revelation"
+        },
+        {
+            "id": "malakai_compassion_flash",
+            "setup_act": 3,
+            "setup_description": "During Malakai's revelation about Kira's parent, his voice breaks once -- just for a moment -- when describing Seren's surrender to save the infant. He recovers instantly. But the grief was real.",
+            "payoff_act": 5,
+            "payoff_description": "If the player confronts Malakai during the final convergence, this moment of genuine grief becomes a leverage point. Malakai cared about Seren Denn. He cared about Kira. The manipulation was real but so was the pain underneath it.",
+            "payoff_type": "irony"
+        }
+    ],
+    "story_architecture": {
+        "dramatic_premise": "A student at a Jedi academy discovers their closest friend is feeding information to a surviving Inquisitor in exchange for the truth about a dead parent, forcing a choice between loyalty to the Order, loyalty to the friend, and loyalty to truth.",
+        "central_dramatic_question": "When every allegiance demands betrayal of another, which loyalty defines who you are?",
+        "story_promise": "A journey from naive trust through shattering discovery to a choice that costs something real -- the player will define what loyalty means by what they sacrifice.",
+        "protagonist_pressure_type": "loyalty",
+        "antagonistic_force": "Malakai, a surviving Inquisitor who weaponizes truth -- offering genuine answers at a price that undermines everything the academy represents. The antagonist who is right about the facts and wrong about the conclusions.",
+        "thematic_throughline": "Loyalty is not a debt. It is a choice you make knowing the cost.",
+        "ending_payoff_sketch": "The player's accumulated choices determine whether Kira falls to the dark side, whether the academy survives the Remnant attack, and what the player's definition of loyalty actually built. No outcome is clean. Every path costs something.",
+        "milestone_beat_sheet": {
+            "concept_question": "What if the person you trust most at the academy is the one person the academy cannot trust?",
+            "first_plot_point": "The player discovers Kira has been leaving the temple at night and follows her into the Massassi ruins, where a dark side vergence reveals the depth of what Kira has been hiding.",
+            "first_plot_point_act": 2,
+            "midpoint": "Malakai reveals that Kira's parent was a Jedi who turned to the dark side during Order 66, and that Luke knows this but has said nothing -- shifting the player from passive investigator to active decision-maker.",
+            "midpoint_act": 3,
+            "second_plot_point": "Captain Tannen's Imperial Remnant fleet mobilizes toward Yavin 4 using intelligence Malakai extracted through Kira, and Luke confronts the player about what they know -- no new information enters after this.",
+            "second_plot_point_act": 4,
+            "pre_resolution_lull": "After Luke's confrontation, a brief night scene in the temple meditation chamber. The player sits alone with the knowledge that tomorrow everything changes, that every path costs something, and that no choice will be clean."
+        }
+    }
+}

@@ -499,6 +499,7 @@ def _build_prompt(ctx: ContextPackage) -> str:
         force_capabilities_block=force_caps,
         talent_capabilities_block=talent_caps,
         aspiration_echo_block=ctx.build_aspiration_echo_block(),
+        depth_card_block=ctx.depth_card_block,
         campaign_name=ctx.arc.campaign_name,
         story_position=f"Part {ctx.arc.current_act} of {ctx.arc.total_acts} — {ctx.arc.act_name}",
         throughline_question=ctx.arc.throughline_question,
@@ -517,6 +518,12 @@ def _build_prompt(ctx: ContextPackage) -> str:
         talent_activations_block=talent_acts,
         prose_diagnostic_block=ctx.build_prose_diagnostic_block(),
         scene_pacing=scene_pacing,
+        pinch_point_instruction=ctx.pinch_point_instruction,
+        foreshadow_instruction=ctx.foreshadow_instruction,
+        closure_heartbeat_instruction=ctx.closure_heartbeat_instruction,
+        dramatic_mission_block=ctx.build_dramatic_mission_block(),
+        contradiction_arc_block=ctx.contradiction_arc_block,
+        voice_mode_instruction=ctx.voice_mode_instruction,
         tone_instruction=ctx.tone_instruction,
     )
 

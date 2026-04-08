@@ -56,6 +56,12 @@ Analyze the narration and produce a JSON object with these sections:
      * Adjust based on pacing: if the player is ahead of expected turn count, use smaller deltas. If behind, use larger deltas.
    - reasoning: brief explanation of your assessment
 
+{dramatic_mission_block}
+
+{contradiction_tracking_block}
+
+{no_new_exposition_block}
+
 Return ONLY valid JSON matching this structure:
 {{
   "npc_updates": [
@@ -76,5 +82,14 @@ Return ONLY valid JSON matching this structure:
     "anchor_proximity": "distant",
     "progress_delta": 0.05,
     "reasoning": "..."
+  }},
+  "dramatic_mission": {{
+    "selected_mission": "response",
+    "mission_sentence": "The character processes the consequences of the previous turn."
+  }},
+  "contradiction_tracking": {{
+    "contradiction_engaged": false,
+    "arc_movement": "none",
+    "arc_evidence": ""
   }}
 }}

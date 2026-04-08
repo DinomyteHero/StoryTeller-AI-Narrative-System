@@ -229,17 +229,18 @@ Campaign Studio (parallel track):
 - CS-3 (Mode 2 Thematic Steering + Import): COMPLETE
 - CS-4 (Saga Layer + Mode 1): COMPLETE
 - CS-5 (Narrative Quality): COMPLETE
+- CS-6 (Story Engineering Integration): COMPLETE
   - StoryArchitecture model + pre-generation planning layer
   - Gate 4 narrative evaluation (coherence, dramatic quality, anti-genericity)
   - Enhanced generation prompts with architectural vocabulary
   - Stage 5 LLM-based narrative quality scoring
 
-**Next work:** CS-6 (Saga Depth) or Phase 18 (Psychometric Prologue).
+**Next work:** Phase 18 (Psychometric Prologue) or CS-7 (Saga Depth).
 
-## Codebase Metrics (as of April 3, 2026)
+## Codebase Metrics (as of April 6, 2026)
 
-- ~15,700 lines of application code (Python + HTML)
-- ~9,000 lines of test code across 17 test files
+- ~16,200 lines of application code (Python + HTML)
+- ~9,800 lines of test code across 19 test files
 - 15 active documentation files in `docs/` + 5 archived in `docs/reference/`
 - 2 campaign spines, 2 characters, 6 talent trees, 5 Force powers
 
@@ -274,7 +275,7 @@ storyteller-v3/
 │       ├── DOCUMENTATION_CONSOLIDATION_REPORT.md
 │       ├── CLAUDE_CODE_INITIAL_PROMPT.md
 │       └── prose_quality_review_session_1.md
-├── engine/                # Pure Python — dice, character, checks (5,106 lines)
+├── engine/                # Pure Python — dice, character, checks (~5,500 lines)
 │   ├── dice.py            # FFG dice system — 7 die types, symbol tables (270 lines)
 │   ├── character.py       # Character model — Pydantic, 33 skills (220 lines)
 │   ├── checks.py          # 6-stage pool pipeline (197 lines)
@@ -282,10 +283,12 @@ storyteller-v3/
 │   ├── advancement.py     # XP and behavioral inference (462 lines)
 │   ├── talents.py         # Talent tree engine — 5-type taxonomy (797 lines)
 │   ├── destiny.py         # Destiny Point pool — light/dark spending (275 lines)
-│   ├── reconciliation.py  # Post-turn reconciliation + 16-step pipeline (952 lines)
+│   ├── reconciliation.py  # Post-turn reconciliation + 16-step pipeline (~1,050 lines)
 │   ├── force.py           # Force dice, powers, temptation (732 lines)
 │   ├── vehicle.py         # Vehicle/starship system (303 lines)
-│   └── time_skip.py       # Time skip vignettes (611 lines)
+│   ├── time_skip.py       # Time skip vignettes (611 lines)
+│   ├── dramatic_mission.py # CS-6: Dramatic mission classification + voice modes (~200 lines)
+│   └── scene_validator.py # CS-6: Scene purpose validation model (~110 lines)
 ├── gm/                    # LLM orchestration — local + cloud GM (1,805 lines)
 │   ├── local_gm.py        # Check decisions, annotations, diagnostics (478 lines)
 │   ├── cloud_gm.py        # Narration, milestones, time skips (946 lines)
@@ -341,13 +344,15 @@ storyteller-v3/
 │   ├── talent_trees/      # 6 specialization trees + talent_library.json
 │   ├── force_powers/      # 5 powers (enhance, heal_harm, influence, move, sense)
 │   └── personas/          # writer_room_personas.json (55 personas)
-└── tests/                 # 17 test files (~9,000 lines)
+└── tests/                 # 19 test files (~9,800 lines)
     ├── dice_validation.py
     ├── studio_schema_test.py
     ├── test_cs2_mode3.py
     ├── test_cs3_mode2_import.py
     ├── test_cs4_saga.py
     ├── test_cs5_narrative_quality.py  # CS-5: 33 tests
+    ├── test_cs6_story_engineering.py  # CS-6: Campaign Studio tests
+    ├── test_story_engineering.py      # CS-6: Game Engine tests
     ├── test_e2e_game_loop.py
     ├── test_phase10_advancement.py
     ├── test_phase115_destiny.py

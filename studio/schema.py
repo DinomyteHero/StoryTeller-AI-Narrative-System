@@ -11,6 +11,7 @@ canon character profiles, milestone windows, and expanded import
 interface.
 """
 
+from enum import Enum
 from pydantic import BaseModel, Field, field_validator
 from typing import Any, Optional, Union
 
@@ -165,6 +166,9 @@ class CharacterVariant(BaseModel):
     # ── Story architecture fields (CS-5) ──
     protagonist_contradiction: str = ""  # what they believe vs who they are
     pressure_revealed_identity: str = ""  # who they become under max pressure
+    # ── CS-6 Story Engineering fields ──
+    contradiction_origin: str = ""  # Phase 6: WHY the contradiction exists
+    depth_card: Optional[CharacterDepthCard] = None  # Phase 9: GM-facing enrichment
 
 
 class Allegiance(BaseModel):
@@ -226,6 +230,9 @@ class NPC(BaseModel):
     npc_relationships: list[NPCRelationship] = []
     # ── Story architecture fields (CS-5) ──
     thematic_argument: str = ""  # what this NPC's existence argues about the theme
+    # ── CS-6 Story Engineering fields ──
+    pressure_role: str = ""  # Phase 4: "tempter", "mirror", "skeptic", "dependent",
+                              # "betrayer", "witness", "escalator", "false_ally", "catalyst"
     # ── Canon character fields (Game Mechanics §22) ──
     canon: bool = False
     era_profile: Optional[str] = None
@@ -339,6 +346,25 @@ class Ship(BaseModel):
     narrative_notes: str = ""
 
 
+# ── Pinch Points (CS-6 Phase 2) ──────────────────────────────────────
+
+
+class PinchPoint(BaseModel):
+    """
+    A direct, unfiltered reminder of the antagonistic force.
+    Not an encounter — a signal. Intercepted comms, a public
+    execution, an NPC being punished, a rival's success shown
+    directly.
+    """
+    description: str = Field(min_length=20)
+    delivery_method: str = ""  # "intercepted_comm", "npc_report",
+                                # "environmental", "direct_witness",
+                                # "consequence_shown"
+    target_progress: float = Field(
+        ge=0.3, le=0.7, default=0.5
+    )  # When in the act it should fire (0.5 = midpoint of the act)
+
+
 # ── Acts ──────────────────────────────────────────────────────────────
 
 
@@ -366,6 +392,9 @@ class Act(BaseModel):
     time_skip_after: Optional[TimeSkip] = None  # skip between this act
                                                  # and the next
     milestone_windows: list[MilestoneWindow] = []
+    # ── CS-6 Story Engineering fields ──
+    pinch_point: Optional[PinchPoint] = None  # Phase 2: antagonist pressure beat
+    protagonist_mode: str = ""  # Phase 3: "orphan"|"wanderer"|"warrior"|"martyr"
 
 
 # ── Import interface (Game Mechanics §20) ─────────────────────────────
@@ -495,6 +524,88 @@ class RunDiversityMetrics(BaseModel):
     run_timestamp: str
 
 
+# ── Story Engineering models (CS-6) ──────────────────────────────────
+
+
+class MilestoneBeatSheet(BaseModel):
+    """
+    Brooks's five structural milestones mapped onto the campaign spine.
+    Each milestone is a one-sentence description of the dramatic moment,
+    NOT a plot summary. It describes what changes and why it matters.
+    """
+    concept_question: str = Field(
+        min_length=10,
+        description=(
+            "The 'what if?' question that makes this campaign a story, "
+            "not just a setting. Format: 'What if [dramatic proposition]?'"
+        )
+    )
+    first_plot_point: str = Field(
+        min_length=20,
+        description=(
+            "The moment that changes everything — the protagonist's "
+            "quest begins in earnest."
+        )
+    )
+    first_plot_point_act: int = Field(ge=1)
+
+    midpoint: str = Field(
+        min_length=20,
+        description=(
+            "A revelation or reversal that shifts the protagonist from "
+            "responder to attacker."
+        )
+    )
+    midpoint_act: int = Field(ge=1)
+
+    second_plot_point: str = Field(
+        min_length=20,
+        description=(
+            "The LAST piece of new information in the story. After "
+            "this, no new expository facts may enter."
+        )
+    )
+    second_plot_point_act: int = Field(ge=1)
+
+    pre_resolution_lull: str = ""  # Optional all-hope-is-lost beat
+
+
+class ProtagonistMode(str, Enum):
+    """Brooks's four-stage character arc mapped to sequential acts."""
+    ORPHAN = "orphan"
+    WANDERER = "wanderer"
+    WARRIOR = "warrior"
+    MARTYR = "martyr"
+
+
+class ForeshadowLink(BaseModel):
+    """
+    A deliberate setup → payoff pair. The setup is planted early;
+    the payoff arrives later.
+    """
+    id: str = Field(min_length=1)
+    setup_act: int = Field(ge=1)
+    setup_description: str = Field(min_length=10)
+    payoff_act: int = Field(ge=1)
+    payoff_description: str = Field(min_length=10)
+    payoff_type: str = ""  # "revelation", "reversal", "callback", "irony"
+
+
+class CharacterDepthCard(BaseModel):
+    """
+    GM-facing character enrichment. Never shown to the player.
+    Injected into the GM context for narration richness.
+    """
+    inner_demon: str = ""
+    secret_yearning: str = ""
+    lesson_not_learned: str = ""
+    worst_act: str = ""
+    social_mask: str = ""
+    under_pressure: str = ""
+    worldview: str = ""
+    moral_line: str = ""
+
+
 # ── Story architecture (CS-5) ────────────────────────────────────────
 
 
@@ -522,6 +633,8 @@ class StoryArchitecture(BaseModel):
     antagonistic_force: str = Field(min_length=20)
     thematic_throughline: str = Field(min_length=10)
     ending_payoff_sketch: str = ""
+    # ── CS-6 Story Engineering fields ──
+    milestone_beat_sheet: Optional[MilestoneBeatSheet] = None  # Phase 3
 
     @field_validator("protagonist_pressure_type")
     @classmethod
@@ -571,6 +684,8 @@ class CampaignSpine(BaseModel):
     generation_metadata: Optional[GenerationMetadata] = None  # item 3.26
     # ── Story architecture (CS-5) ──
     story_architecture: Optional[StoryArchitecture] = None
+    # ── CS-6 Story Engineering fields ──
+    foreshadow_registry: list[ForeshadowLink] = []  # Phase 5
 
     @field_validator("acts")
     @classmethod

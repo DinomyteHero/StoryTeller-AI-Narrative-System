@@ -44,6 +44,58 @@ Choose exactly one protagonist_pressure_type:
 - "survival" — self-preservation vs. what survival costs
 - "ideological" — belief vs. evidence, conviction vs. reality
 
+## PINCH POINTS (CS-6)
+
+For each act after the setup, design a PINCH POINT — a single moment
+where the antagonistic force is shown directly, not through the
+protagonist's perception. A pinch point is not an encounter or a
+battle. It is a signal: intercepted intelligence, a public punishment,
+an NPC reporting what the enemy just did, environmental devastation
+caused by the opposition. It should take one scene or less. Its only
+job is to remind the player what they're up against.
+
+Good pinch point: "Keth sees a fellow smuggler's ship in the
+impound dock, stripped and marked for auction — the same
+fate that awaits him if Vossk's patience runs out."
+
+Bad pinch point: "Keth fights Vossk's enforcers." (That's a
+scene, not a signal.)
+
+## MILESTONE BEAT SHEET (CS-6)
+
+Before generating the full architecture, identify the five structural
+milestones that form this campaign's dramatic skeleton:
+
+1. CONCEPT QUESTION: Frame the campaign as a single "What if...?"
+   question. The answer to this question IS the campaign.
+
+2. FIRST PLOT POINT: The moment (in which act?) that changes
+   everything. After this, the protagonist has a quest and cannot
+   go back. This should appear in the first quarter of the campaign.
+
+3. MIDPOINT: The revelation or reversal (in which act?) that shifts
+   the protagonist from reactive to proactive. After this, the
+   protagonist attacks the problem instead of running from it.
+   This should appear near the campaign's midpoint.
+
+4. SECOND PLOT POINT: The LAST piece of new information (in which
+   act?). After this, no new facts, NPCs, or plot elements may
+   enter the story. The protagonist now has everything they need.
+   This should appear around the 75% mark.
+
+5. PRE-RESOLUTION LULL (optional): An all-hope-is-lost beat just
+   before the resolution. Tension drops. The protagonist faces
+   their lowest moment. Then the final act begins.
+
+Also assign a PROTAGONIST MODE to each act:
+- orphan: Disconnected from their ultimate destiny
+- wanderer: Reacting, investigating, failing, learning
+- warrior: Taking initiative, attacking the problem
+- martyr: Willing to sacrifice everything, applying all learning
+
+Modes must progress sequentially. No act should have a mode that
+precedes the previous act's mode.
+
 ## OUTPUT FORMAT
 
 Return ONLY valid JSON with these fields:

@@ -62,6 +62,45 @@ RECONCILIATION_SCHEMA = {
             },
             "required": ["anchor_proximity", "progress_delta"],
         },
+        "contradiction_tracking": {
+            "type": "object",
+            "properties": {
+                "contradiction_engaged": {
+                    "type": "boolean",
+                    "description": "Was the protagonist's core contradiction relevant to this turn?",
+                },
+                "arc_movement": {
+                    "type": "string",
+                    "enum": ["reinforced", "resisted", "transformed", "cost_paid", "none"],
+                    "description": "How did the character relate to their contradiction?",
+                },
+                "arc_evidence": {
+                    "type": "string",
+                    "description": "One sentence: what specific action or choice showed this?",
+                },
+            },
+            "required": ["contradiction_engaged"],
+        },
+        "dramatic_mission": {
+            "type": "object",
+            "properties": {
+                "selected_mission": {
+                    "type": "string",
+                    "enum": [
+                        "stake_setup", "world_normal", "foreshadow",
+                        "response", "false_progress", "antagonist_pressure",
+                        "attack", "inner_demon_test", "midpoint_reframe",
+                        "collapse", "climactic_execution", "aftermath",
+                        "character_reveal", "thread_advance",
+                    ],
+                },
+                "mission_sentence": {
+                    "type": "string",
+                    "description": "One sentence describing this turn's specific narrative job",
+                },
+            },
+            "required": ["selected_mission", "mission_sentence"],
+        },
     },
     "required": ["npc_updates", "thread_updates", "story_progress"],
 }
@@ -76,6 +115,12 @@ class ReconciliationResult:
     })
     story_progress: dict = field(default_factory=lambda: {
         "anchor_proximity": "distant", "progress_delta": 0.05, "reasoning": "",
+    })
+    dramatic_mission: dict = field(default_factory=lambda: {
+        "selected_mission": "", "mission_sentence": "",
+    })
+    contradiction_tracking: dict = field(default_factory=lambda: {
+        "contradiction_engaged": False, "arc_movement": "none", "arc_evidence": "",
     })
 
 
@@ -239,6 +284,69 @@ def resolve_morality(session_id: str, character, completed_act_number: int) -> d
     }
 
 
+def check_pinch_point(
+    spine_act: dict,
+    act_progress: float,
+    pinch_point_fired: bool,
+) -> Optional[str]:
+    """
+    CS-6 Phase 2: Check if a pinch point should fire this turn.
+
+    Returns a pinch point instruction if conditions are met.
+    Returns None otherwise.
+    """
+    pp_data = spine_act.get("pinch_point")
+    if not pp_data:
+        return None
+    if pinch_point_fired:
+        return None
+
+    target = pp_data.get("target_progress", 0.5)
+    if act_progress < target:
+        return None
+
+    description = pp_data.get("description", "")
+    return (
+        f"ANTAGONIST PRESSURE BEAT: Before or during this turn's "
+        f"narration, show the antagonistic force directly. "
+        f"{description} "
+        f"This should be visceral and immediate — not reported "
+        f"secondhand. The player should feel the weight of what "
+        f"they're up against."
+    )
+
+
+def check_closure_heartbeat(
+    open_threads: list,
+    turns_since_last_thread_change: int,
+    threads_advanced_this_turn: list,
+    threads_resolved_this_turn: list,
+) -> Optional[str]:
+    """
+    CS-6 Phase 8: If no threads have advanced or resolved in the last
+    N turns, inject a thread-progression instruction.
+    """
+    HEARTBEAT_INTERVAL = 4
+
+    if threads_advanced_this_turn or threads_resolved_this_turn:
+        return None
+
+    if turns_since_last_thread_change < HEARTBEAT_INTERVAL:
+        return None
+
+    if not open_threads:
+        return None
+
+    thread_names = [t.name if hasattr(t, "name") else str(t) for t in open_threads[:3]]
+    return (
+        f"THREAD HEARTBEAT: It has been {turns_since_last_thread_change} "
+        f"turns since any narrative thread advanced. The following threads "
+        f"are open: {', '.join(thread_names)}. This turn should "
+        f"escalate, invert, or resolve at least one of them. Stories must "
+        f"progress, not just accumulate."
+    )
+
+
 def reconcile_turn(
     narration: str,
     player_action: str,
@@ -247,6 +355,7 @@ def reconcile_turn(
     arc: ArcState,
     spine_act: dict,
     max_retries: int = 2,
+    spine: Optional[dict] = None,
 ) -> ReconciliationResult:
     """
     Orchestrate the local model reconciliation call and parse the response.
@@ -271,6 +380,76 @@ def reconcile_turn(
         expected_turns = [8, 12]
     expected_mid = sum(expected_turns) // 2
 
+    # CS-6 Phase 1: Compute valid dramatic missions from act context
+    dramatic_mission_block = ""
+    try:
+        from engine.dramatic_mission import compute_valid_missions, MISSION_DEFINITIONS
+        dramatic_function = spine_act.get("dramatic_function", "")
+        total_acts = (spine or {}).get("total_acts", arc.total_acts)
+        overall_progress = (arc.current_act - 1 + arc.act_progress) / max(total_acts, 1)
+        valid_missions = compute_valid_missions(
+            dramatic_function, arc.act_progress, overall_progress,
+        )
+        mission_defs = "\n".join(
+            f"- {m}: {MISSION_DEFINITIONS.get(m, '')}" for m in valid_missions
+        )
+        dramatic_mission_block = (
+            f"\nDRAMATIC MISSION:\n"
+            f"Valid missions for this turn: {', '.join(valid_missions)}\n"
+            f"Select ONE mission that best fits what should happen next in the story.\n"
+            f"Write one sentence describing the specific narrative job of the next turn.\n\n"
+            f"Mission definitions:\n{mission_defs}\n"
+        )
+    except Exception as e:
+        logging.warning(f"Dramatic mission computation skipped: {e}")
+
+    # CS-6 Phase 6: Contradiction tracking block
+    contradiction_tracking_block = ""
+    try:
+        # Get protagonist_contradiction from spine's character variant
+        protagonist_contradiction = ""
+        contradiction_origin = ""
+        allegiances = (spine or {}).get("allegiances", [])
+        for allg in allegiances:
+            for cv in allg.get("character_variants", []):
+                pc = cv.get("protagonist_contradiction", "")
+                co = cv.get("contradiction_origin", "")
+                if pc:
+                    protagonist_contradiction = pc
+                    contradiction_origin = co
+                    break
+            if protagonist_contradiction:
+                break
+
+        if protagonist_contradiction:
+            contradiction_tracking_block = (
+                f'\nPROTAGONIST CONTRADICTION: "{protagonist_contradiction}"\n'
+            )
+            if contradiction_origin:
+                contradiction_tracking_block += f'Origin: "{contradiction_origin}"\n'
+            contradiction_tracking_block += (
+                "\nWas this contradiction relevant to what just happened? If yes:\n"
+                '- "reinforced": The character acted FROM the contradiction\n'
+                '- "resisted": The character actively fought the contradiction\n'
+                '- "transformed": The character found a new relationship with it\n'
+                '- "cost_paid": The contradiction caused a tangible negative consequence\n'
+                '- "none": The contradiction wasn\'t relevant this turn.'
+            )
+    except Exception as e:
+        logging.warning(f"Contradiction tracking block skipped: {e}")
+
+    # CS-6 Phase 3: No-new-exposition warning
+    no_new_exposition_block = ""
+    try:
+        from engine.dramatic_mission import check_no_new_exposition
+        story_arch = (spine or {}).get("story_architecture")
+        mbs = story_arch.get("milestone_beat_sheet") if story_arch else None
+        note = check_no_new_exposition(arc.current_act, mbs)
+        if note:
+            no_new_exposition_block = note
+    except Exception as e:
+        logging.warning(f"No-new-exposition check skipped: {e}")
+
     template = PROMPT_PATH.read_text(encoding="utf-8")
     prompt = template.format(
         player_action=player_action,
@@ -283,6 +462,9 @@ def reconcile_turn(
         turns_this_act=arc.turns_this_act,
         expected_turns=expected_mid,
         open_threads=open_threads_block,
+        dramatic_mission_block=dramatic_mission_block,
+        contradiction_tracking_block=contradiction_tracking_block,
+        no_new_exposition_block=no_new_exposition_block,
     )
 
     last_error = None
@@ -367,10 +549,27 @@ def _validate_result(data: dict) -> ReconciliationResult:
         "reasoning": progress_raw.get("reasoning", ""),
     }
 
+    # CS-6 Phase 1: Parse dramatic mission (graceful degradation if absent)
+    dramatic_mission_raw = data.get("dramatic_mission", {})
+    dramatic_mission = {
+        "selected_mission": dramatic_mission_raw.get("selected_mission", ""),
+        "mission_sentence": dramatic_mission_raw.get("mission_sentence", ""),
+    }
+
+    # CS-6 Phase 6: Parse contradiction tracking (graceful degradation if absent)
+    ct_raw = data.get("contradiction_tracking", {})
+    contradiction_tracking = {
+        "contradiction_engaged": bool(ct_raw.get("contradiction_engaged", False)),
+        "arc_movement": ct_raw.get("arc_movement", "none"),
+        "arc_evidence": ct_raw.get("arc_evidence", ""),
+    }
+
     return ReconciliationResult(
         npc_updates=npc_updates,
         thread_updates=thread_updates,
         story_progress=story_progress,
+        dramatic_mission=dramatic_mission,
+        contradiction_tracking=contradiction_tracking,
     )
 
 
