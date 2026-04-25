@@ -657,6 +657,21 @@ class StoryArchitecture(BaseModel):
 # ── Top-level spine ───────────────────────────────────────────────────
 
 
+class EraVoice(BaseModel):
+    """Star Wars era anchoring for narration prompts.
+
+    Each Star Wars era has its own technology level, political reality,
+    and prose register. When a spine declares an era_voice, the narration
+    GM gets period-specific instructions to keep prose anchored. Optional —
+    the campaign-level Star Wars guidance still applies when omitted.
+    """
+    era:            str = ""        # canonical era name (e.g. "Imperial Era")
+    year:           str = ""        # ABY/BBY date (e.g. "5 BBY")
+    voice_notes:    str = ""        # 1-3 sentences of tone guidance for the era
+    period_details: list[str] = []  # weave-in cues (Empire is ascendant, Rebellion is whispered)
+    period_avoid:   list[str] = []  # anachronisms to avoid (Sequel-era tech in Imperial setting)
+
+
 class CampaignSpine(BaseModel):
     """Top-level campaign spine — the interface contract."""
     name: str
@@ -686,6 +701,8 @@ class CampaignSpine(BaseModel):
     story_architecture: Optional[StoryArchitecture] = None
     # ── CS-6 Story Engineering fields ──
     foreshadow_registry: list[ForeshadowLink] = []  # Phase 5
+    # ── Star Wars era voice anchoring ──
+    era_voice: Optional[EraVoice] = None
 
     @field_validator("acts")
     @classmethod

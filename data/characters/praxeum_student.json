@@ -1,0 +1,135 @@
+{
+  "name": "Praxeum Student",
+  "species": "mirialan",
+  "career": "mystic",
+  "specializations": [
+    "seer"
+  ],
+  "primary_game_line": "edge_of_empire",
+  "background": "",
+  "characteristics": {
+    "brawn": 2,
+    "agility": 2,
+    "intellect": 3,
+    "cunning": 2,
+    "willpower": 3,
+    "presence": 3
+  },
+  "skills": {
+    "astrogation": 0,
+    "athletics": 0,
+    "charm": 0,
+    "coercion": 0,
+    "computers": 0,
+    "cool": 1,
+    "coordination": 0,
+    "deception": 0,
+    "discipline": 2,
+    "leadership": 0,
+    "mechanics": 0,
+    "medicine": 0,
+    "negotiation": 0,
+    "perception": 2,
+    "piloting_planetary": 0,
+    "piloting_space": 0,
+    "resilience": 0,
+    "skulduggery": 0,
+    "stealth": 0,
+    "streetwise": 0,
+    "survival": 0,
+    "vigilance": 1,
+    "brawl": 0,
+    "gunnery": 0,
+    "melee": 0,
+    "ranged_light": 0,
+    "ranged_heavy": 0,
+    "core_worlds": 0,
+    "education": 0,
+    "lore": 1,
+    "outer_rim": 0,
+    "underworld": 0,
+    "warfare": 0,
+    "xenology": 0,
+    "lightsaber": 1
+  },
+  "wound_threshold": 12,
+  "strain_threshold": 13,
+  "current_wounds": 0,
+  "current_strain": 0,
+  "soak": 2,
+  "total_xp": 110,
+  "available_xp": 0,
+  "motivation": {
+    "obligation_type": null,
+    "obligation_value": 0,
+    "duty_type": null,
+    "duty_value": 0,
+    "morality": 50,
+    "conflict": 0
+  },
+  "force_rating": 0,
+  "force_committed": 0,
+  "loadout": {
+    "weapons": [
+      {
+        "name": "Training lightsaber (blue crystal)",
+        "skill": "lightsaber",
+        "damage_bonus": 6,
+        "critical_rating": 2,
+        "qualities": [
+          "breach_1",
+          "sunder"
+        ],
+        "narrative_note": "Built under Luke's guidance from a salvaged crystal. The blade hums low and steady. It feels like an extension of the arm, not a weapon."
+      }
+    ],
+    "armor": {
+      "name": "Praxeum training robes",
+      "soak_bonus": 1,
+      "defense": 0,
+      "narrative_note": "Simple, undyed fabric. Designed for movement, not protection. Smells like jungle rain and temple stone."
+    },
+    "tools": [
+      {
+        "category": "medical",
+        "name": "Two stimpacks",
+        "mechanical_effect": "Can heal 5 wounds per stimpack. Two uses before resupply needed.",
+        "narrative_note": "Alliance surplus, stored in a belt pouch."
+      },
+      {
+        "category": "knowledge",
+        "name": "Jedi archive datapad",
+        "mechanical_effect": "Adds 1 boost die to Lore checks when consulting the archive.",
+        "narrative_note": "Preloaded with Tionne's curated fragments of Jedi history. Scratched screen. Borrowed, not owned."
+      }
+    ],
+    "special_items": [
+      {
+        "name": "Mirialan prayer beads",
+        "mechanical_effect": "Once per session, adds 1 boost die to a Discipline check.",
+        "narrative_note": "Hand-carved from Mirialwood. Each bead represents a lesson learned. Three are blank, waiting."
+      }
+    ]
+  },
+  "career_skills": [],
+  "reserved_xp": 0,
+  "advancement_log": [],
+  "acquired_talents": [],
+  "talent_uses": {},
+  "force_powers": [
+    {
+      "power_id": "sense",
+      "name": "Sense",
+      "category": "perception_knowledge",
+      "base_pips_required": 1,
+      "active_upgrades": [],
+      "narrative_capability": "Can sense the emotions and intentions of nearby beings. With concentration, can detect danger before it arrives.",
+      "gm_choice_guidance": "Offer sensing choices when the character could read emotions, detect lies, feel danger, or perceive hidden threats. Particularly relevant when interacting with Kira or approaching the Massassi ruins.",
+      "dark_side_flavor": "Dark side Sense is invasive -- not reading but ripping. The emotions come raw and unfiltered. Using it on Kira would feel like a betrayal of trust."
+    }
+  ],
+  "active_commitments": [],
+  "throughline_question": "What does loyalty cost when every allegiance demands a different piece of you?",
+  "voice_notes": "Earnest, precise, occasionally wry. Speaks in complete sentences. Thinks before responding but sometimes the thinking shows. Uses humor to deflect vulnerability. Deeply observant of others, less honest about themselves.",
+  "active_injuries": []
+}

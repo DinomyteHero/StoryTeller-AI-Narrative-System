@@ -56,7 +56,14 @@ app.include_router(studio_router)
 
 @app.get("/health")
 async def health():
-    return {"status": "ok"}
+    """Health check + LLM routing summary.
+
+    Confirms the engine is up and surfaces the active fast/quality tier
+    models so deployments can verify the architecture pivot is live without
+    hitting an actual LLM.
+    """
+    from gm.llm_client import describe_routing
+    return {"status": "ok", "routing": describe_routing()}
 
 
 @app.get("/")

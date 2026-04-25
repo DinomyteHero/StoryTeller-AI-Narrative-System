@@ -146,15 +146,18 @@ class TestShipLoading:
         assert restored.weapons[0].damage == ship.weapons[0].damage
 
     def test_campaign_spine_has_vehicle_registry(self):
-        """The Nar Shaddaa Job spine includes Mira's Luck."""
+        """The active spine includes a populated vehicle registry."""
         path = os.path.join(
-            os.path.dirname(__file__), "..", "data", "campaigns", "nar_shaddaa_job.json"
+            os.path.dirname(__file__), "..", "data", "campaigns", "shadows_of_the_praxeum.json"
         )
         with open(path) as f:
             spine = json.load(f)
         assert "vehicle_registry" in spine
         assert len(spine["vehicle_registry"]) >= 1
-        assert spine["vehicle_registry"][0]["ship_id"] == "miras_luck"
+        # Schema check, not specific-ship check — the campaign content can change.
+        first = spine["vehicle_registry"][0]
+        assert first.get("ship_id")
+        assert first.get("class") or first.get("model") or first.get("name")
 
 
 # ═══════════════════════════════════════════════════════════════════════

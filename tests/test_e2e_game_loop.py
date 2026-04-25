@@ -145,7 +145,11 @@ MOCK_ANNOTATION = json.dumps({
 
 
 def _mock_ollama_post(url, **kwargs):
-    """Mock httpx.post for Ollama endpoints."""
+    """Mock httpx.post for the legacy NARRATIVE_BACKEND=local Ollama path.
+
+    Kept for tests that exercise the offline mode. Cloud-tier mocks should
+    patch gm.llm_client.call_chat_json instead.
+    """
     body = kwargs.get("json", {})
 
     # Determine which prompt is being called by the schema format
@@ -164,6 +168,23 @@ def _mock_ollama_post(url, **kwargs):
     mock_resp.json.return_value = {"response": response_text}
     mock_resp.raise_for_status = MagicMock()
     return mock_resp
+
+
+def _mock_call_chat_json(*, tier, user, schema=None, purpose="", **_kwargs):
+    """Mock gm.llm_client.call_chat_json — replaces the legacy httpx mock.
+
+    Routes by purpose (preferred) or by schema-shape sniffing (fallback for
+    callers that don't pass purpose).
+    """
+    if purpose == "decision" or (schema and "requires_check" in str(schema)):
+        return json.loads(MOCK_CHECK_DECISION_WITH_CHECK)
+    if purpose == "reconciliation" or (schema and "npc_updates" in str(schema)):
+        return json.loads(MOCK_RECONCILIATION)
+    if purpose == "annotation" or (schema and "choice_target" in str(schema)):
+        return json.loads(MOCK_ANNOTATION)
+    if purpose == "diagnostic" or (schema and "sensory_channels" in str(schema)):
+        return {"sensory_channels_recent": [], "npc_coherence_flags": []}
+    return json.loads(MOCK_RECONCILIATION)
 
 
 def _make_narration_result(narration_text):
@@ -217,12 +238,16 @@ def mock_llms():
             return _make_narration_result(MOCK_NARRATION_TURN)
 
     with patch("httpx.post", side_effect=_mock_ollama_post) as mock_http, \
+         patch("gm.local_gm.call_chat_json", side_effect=_mock_call_chat_json) as mock_local, \
+         patch("engine.reconciliation.call_chat_json", side_effect=_mock_call_chat_json) as mock_recon, \
          patch("api.game_routes.narrate_turn", side_effect=mock_narrate_turn) as mock_narrate, \
          patch("api.game_routes.narrate_turn_stream") as mock_stream, \
          patch("api.game_routes.run_prose_diagnostic", return_value=None) as mock_diag, \
          patch("api.game_routes.annotate_choice", return_value=None) as mock_annot:
         yield {
             "http": mock_http,
+            "local_llm": mock_local,
+            "reconciliation_llm": mock_recon,
             "narrate": mock_narrate,
             "stream": mock_stream,
             "diagnostic": mock_diag,
@@ -235,11 +260,11 @@ def mock_llms():
 class TestV1SuccessCriteria:
     """Tests validating the 12 V1 success criteria."""
 
-    def test_criterion_1_player_starts_as_keth_varso(self, client, mock_llms):
+    def test_criterion_1_player_starts_as_praxeum_student(self, client, mock_llms):
         """V1.1: Player starts as Keth Varso."""
         res = client.post("/session", json={
-            "campaign_name": "nar_shaddaa_job",
-            "character_id": "keth_varso",
+            "campaign_name": "shadows_of_the_praxeum",
+            "character_id": "praxeum_student",
         })
         assert res.status_code == 200
         data = res.json()
@@ -253,8 +278,8 @@ class TestV1SuccessCriteria:
     def test_criterion_2_opening_passage_appears(self, client, mock_llms):
         """V1.2: Opening passage of The Nar Shaddaa Job appears."""
         res = client.post("/session", json={
-            "campaign_name": "nar_shaddaa_job",
-            "character_id": "keth_varso",
+            "campaign_name": "shadows_of_the_praxeum",
+            "character_id": "praxeum_student",
         })
         data = res.json()
         assert "opening_narration" in data
@@ -265,8 +290,8 @@ class TestV1SuccessCriteria:
     def test_criterion_3_player_selects_choice(self, client, mock_llms):
         """V1.3: Player selects a choice."""
         res = client.post("/session", json={
-            "campaign_name": "nar_shaddaa_job",
-            "character_id": "keth_varso",
+            "campaign_name": "shadows_of_the_praxeum",
+            "character_id": "praxeum_student",
         })
         session_id = res.json()["session_id"]
 
@@ -281,8 +306,8 @@ class TestV1SuccessCriteria:
     def test_criterion_4_check_decision(self, client, mock_llms):
         """V1.4: Local model correctly decides check/no-check."""
         res = client.post("/session", json={
-            "campaign_name": "nar_shaddaa_job",
-            "character_id": "keth_varso",
+            "campaign_name": "shadows_of_the_praxeum",
+            "character_id": "praxeum_student",
         })
         session_id = res.json()["session_id"]
 
@@ -290,14 +315,14 @@ class TestV1SuccessCriteria:
             "choice_index": 0,
         })
         assert turn_res.status_code == 200
-        # The mock LLM was called for check decision via httpx.post
-        assert mock_llms["http"].called
+        # The local LLM client was called for check decision (and reconciliation)
+        assert mock_llms["local_llm"].called or mock_llms["http"].called
 
     def test_criterion_5_and_6_dice_pool_and_roll(self, client, mock_llms):
         """V1.5-6: Dice pool built correctly and rolled with correct symbols."""
         res = client.post("/session", json={
-            "campaign_name": "nar_shaddaa_job",
-            "character_id": "keth_varso",
+            "campaign_name": "shadows_of_the_praxeum",
+            "character_id": "praxeum_student",
         })
         session_id = res.json()["session_id"]
 
@@ -318,8 +343,8 @@ class TestV1SuccessCriteria:
     def test_criterion_7_narration_honors_dice(self, client, mock_llms):
         """V1.7: Cloud GM narrates honoring the dice result."""
         res = client.post("/session", json={
-            "campaign_name": "nar_shaddaa_job",
-            "character_id": "keth_varso",
+            "campaign_name": "shadows_of_the_praxeum",
+            "character_id": "praxeum_student",
         })
         session_id = res.json()["session_id"]
 
@@ -335,8 +360,8 @@ class TestV1SuccessCriteria:
     def test_criterion_8_dice_panel(self, client, mock_llms):
         """V1.8: Dice panel shows actual roll on demand."""
         res = client.post("/session", json={
-            "campaign_name": "nar_shaddaa_job",
-            "character_id": "keth_varso",
+            "campaign_name": "shadows_of_the_praxeum",
+            "character_id": "praxeum_student",
         })
         session_id = res.json()["session_id"]
 
@@ -352,8 +377,8 @@ class TestV1SuccessCriteria:
     def test_criterion_9_choices_scene_specific(self, client, mock_llms):
         """V1.9: New choices are scene-specific."""
         res = client.post("/session", json={
-            "campaign_name": "nar_shaddaa_job",
-            "character_id": "keth_varso",
+            "campaign_name": "shadows_of_the_praxeum",
+            "character_id": "praxeum_student",
         })
         data = res.json()
 
@@ -366,8 +391,8 @@ class TestV1SuccessCriteria:
     def test_criterion_10_five_plus_turns(self, client, mock_llms):
         """V1.10: Loop repeats 5+ turns without errors."""
         res = client.post("/session", json={
-            "campaign_name": "nar_shaddaa_job",
-            "character_id": "keth_varso",
+            "campaign_name": "shadows_of_the_praxeum",
+            "character_id": "praxeum_student",
         })
         session_id = res.json()["session_id"]
         completed_turns = 0
@@ -393,8 +418,8 @@ class TestV1SuccessCriteria:
     def test_criterion_11_session_persists(self, client, mock_llms):
         """V1.11: Session persists across restart."""
         res = client.post("/session", json={
-            "campaign_name": "nar_shaddaa_job",
-            "character_id": "keth_varso",
+            "campaign_name": "shadows_of_the_praxeum",
+            "character_id": "praxeum_student",
         })
         session_id = res.json()["session_id"]
 
@@ -417,8 +442,8 @@ class TestV1SuccessCriteria:
         assert os.environ.get("NARRATIVE_BACKEND") == "local"
 
         res = client.post("/session", json={
-            "campaign_name": "nar_shaddaa_job",
-            "character_id": "keth_varso",
+            "campaign_name": "shadows_of_the_praxeum",
+            "character_id": "praxeum_student",
         })
         assert res.status_code == 200
         session_id = res.json()["session_id"]
@@ -451,45 +476,45 @@ class TestGameMechanics:
         assert isinstance(result.despairs, int)
 
     def test_character_model_loads(self):
-        """Verify Keth Varso character JSON loads correctly."""
+        """Verify the Praxeum student character JSON loads correctly."""
         from engine.character import Character
 
-        with open("data/characters/keth_varso.json") as f:
+        with open("data/characters/praxeum_student.json") as f:
             char = Character.model_validate_json(f.read())
 
-        assert char.name == "Keth Varso"
-        assert char.species.value == "bothan"
-        assert char.career.value == "smuggler"
-        assert char.characteristics.cunning == 4
-        assert char.skills.deception == 2
-        assert char.wound_threshold == 12
-        assert char.strain_threshold == 12
+        assert char.name == "Praxeum Student"
+        assert char.species.value == "mirialan"
+        assert char.career.value == "mystic"
+        assert char.characteristics.willpower == 3
+        assert char.skills.discipline == 2
+        assert char.wound_threshold >= 10
+        assert char.strain_threshold >= 10
 
     def test_check_request_builds_pool(self):
         """Verify pool building follows FFG rules."""
         from engine.character import Character
         from engine.checks import CheckRequest, Difficulty, build_pool
 
-        with open("data/characters/keth_varso.json") as f:
+        with open("data/characters/praxeum_student.json") as f:
             char = Character.model_validate_json(f.read())
 
-        # Deception: Cunning 4, Deception 2
-        # max(4,2) = 4 ability dice, min(4,2) = 2 upgraded to proficiency
-        req = CheckRequest(skill="deception", difficulty=Difficulty.AVERAGE)
+        # Discipline: Willpower 3, Discipline 2
+        # max(3,2) = 3 ability dice, with min(3,2) = 2 upgraded to proficiency
+        req = CheckRequest(skill="discipline", difficulty=Difficulty.AVERAGE)
         pool, _, _ = build_pool(char, req)
 
-        assert pool.proficiency == 2  # min(cunning=4, deception=2) = 2
-        assert pool.ability == 2      # max(4,2) - min(4,2) = 2
+        assert pool.proficiency == 2  # min(willpower=3, discipline=2) = 2
+        assert pool.ability == 1      # max(3,2) - min(3,2) = 1
         assert pool.difficulty == 2   # average difficulty
 
     def test_campaign_spine_loads(self):
-        """Verify Nar Shaddaa Job spine loads correctly."""
-        with open("data/campaigns/nar_shaddaa_job.json") as f:
+        """Verify the Praxeum spine loads correctly."""
+        with open("data/campaigns/shadows_of_the_praxeum.json") as f:
             spine = json.load(f)
 
-        assert spine["name"] == "The Nar Shaddaa Job"
-        assert spine["total_acts"] == 4
-        assert len(spine["acts"]) == 4
+        assert spine["name"] == "Shadows of the Praxeum"
+        assert spine["total_acts"] >= 2
+        assert len(spine["acts"]) == spine["total_acts"]
         assert "throughline_question" in spine
         assert len(spine.get("npc_roster", [])) > 0
 
@@ -513,7 +538,7 @@ class TestGameMechanics:
         """Verify post-V1 fields exist (Rule 11b)."""
         from engine.character import Character
 
-        with open("data/characters/keth_varso.json") as f:
+        with open("data/characters/praxeum_student.json") as f:
             char = Character.model_validate_json(f.read())
 
         assert hasattr(char, "force_rating")
@@ -526,7 +551,7 @@ class TestGameMechanics:
         from engine.checks import build_pool, CheckRequest, Difficulty
         from engine.character import Character
 
-        with open("data/characters/keth_varso.json") as f:
+        with open("data/characters/praxeum_student.json") as f:
             char = Character.model_validate_json(f.read())
 
         req = CheckRequest(skill="deception", difficulty=Difficulty.AVERAGE)
@@ -560,7 +585,7 @@ class TestDatabaseIntegrity:
         from state.session import create_session, get_session
 
         sid = create_session(
-            campaign_name="nar_shaddaa_job",
+            campaign_name="shadows_of_the_praxeum",
             character_json='{"test": true}',
             arc_state_json='{"current_act": 1}',
         )
@@ -568,7 +593,7 @@ class TestDatabaseIntegrity:
 
         session = get_session(sid)
         assert session is not None
-        assert session["campaign_name"] == "nar_shaddaa_job"
+        assert session["campaign_name"] == "shadows_of_the_praxeum"
 
     def test_turn_logging(self, temp_db):
         """Verify turns are logged and retrievable."""
@@ -643,10 +668,14 @@ class TestAPIRoutes:
     """Tests for API route behavior."""
 
     def test_health_endpoint(self, client):
-        """Health check returns ok."""
+        """Health check returns ok and surfaces the LLM routing config."""
         res = client.get("/health")
         assert res.status_code == 200
-        assert res.json() == {"status": "ok"}
+        data = res.json()
+        assert data["status"] == "ok"
+        assert "routing" in data
+        assert "fast_model" in data["routing"]
+        assert "quality_model" in data["routing"]
 
     def test_root_serves_frontend(self, client):
         """Root endpoint serves index.html."""
@@ -662,8 +691,8 @@ class TestAPIRoutes:
     def test_invalid_choice_index_returns_400(self, client, mock_llms):
         """Invalid choice index returns 400."""
         res = client.post("/session", json={
-            "campaign_name": "nar_shaddaa_job",
-            "character_id": "keth_varso",
+            "campaign_name": "shadows_of_the_praxeum",
+            "character_id": "praxeum_student",
         })
         session_id = res.json()["session_id"]
 
@@ -676,14 +705,14 @@ class TestAPIRoutes:
         """Non-existent campaign returns 404."""
         res = client.post("/session", json={
             "campaign_name": "nonexistent_campaign",
-            "character_id": "keth_varso",
+            "character_id": "praxeum_student",
         })
         assert res.status_code == 404
 
     def test_invalid_character_returns_404(self, client, mock_llms):
         """Non-existent character returns 404."""
         res = client.post("/session", json={
-            "campaign_name": "nar_shaddaa_job",
+            "campaign_name": "shadows_of_the_praxeum",
             "character_id": "nonexistent_character",
         })
         assert res.status_code == 404
@@ -695,8 +724,8 @@ class TestFrontendIntegration:
     def test_session_response_contract(self, client, mock_llms):
         """Verify session creation returns expected fields."""
         res = client.post("/session", json={
-            "campaign_name": "nar_shaddaa_job",
-            "character_id": "keth_varso",
+            "campaign_name": "shadows_of_the_praxeum",
+            "character_id": "praxeum_student",
         })
         data = res.json()
         assert "session_id" in data
@@ -707,8 +736,8 @@ class TestFrontendIntegration:
     def test_turn_response_contract(self, client, mock_llms):
         """Verify turn response returns expected fields."""
         res = client.post("/session", json={
-            "campaign_name": "nar_shaddaa_job",
-            "character_id": "keth_varso",
+            "campaign_name": "shadows_of_the_praxeum",
+            "character_id": "praxeum_student",
         })
         session_id = res.json()["session_id"]
 
@@ -728,8 +757,8 @@ class TestFrontendIntegration:
     def test_session_load_response_contract(self, client, mock_llms):
         """Verify session load returns expected fields for resume."""
         res = client.post("/session", json={
-            "campaign_name": "nar_shaddaa_job",
-            "character_id": "keth_varso",
+            "campaign_name": "shadows_of_the_praxeum",
+            "character_id": "praxeum_student",
         })
         session_id = res.json()["session_id"]
 

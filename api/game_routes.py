@@ -87,9 +87,11 @@ from gm.context import (
     NPCState,
     ThreadState,
     TurnMemory,
+    build_era_voice_block,
 )
 from engine.reconciliation import (
     reconcile_turn,
+    reconcile_turn_with_escalation,
     apply_npc_updates,
     apply_story_progress,
     apply_thread_updates,
@@ -104,6 +106,8 @@ from state.db import get_connection
 from state.memory import compress_if_needed, should_compress, compress_act_turns
 from state.session import (
     create_session,
+    derive_behavioral_availability,
+    detect_surfaced_echoes,
     get_act_summaries,
     get_recent_narrations,
     get_recent_turns,
@@ -111,7 +115,10 @@ from state.session import (
     get_turn_count,
     load_ship_state,
     load_ship_states,
+    log_reputation_event,
     log_turn,
+    mark_reputation_echoes_surfaced,
+    select_reputation_echoes,
     save_ship_state,
     update_destiny_pool,
 )
@@ -119,6 +126,175 @@ from state.session import (
 router = APIRouter()
 
 STREAMING_ENABLED = os.getenv("STREAMING_ENABLED", "true").lower() == "true"
+
+
+# ── Dynamic per-turn context helpers ──────────────────────────────────
+# These three hooks plug the reputation echo, behavioral availability, and
+# era voice systems into every turn handler. Call sites:
+#   1. _compute_dynamic_context_fields  — before ContextPackage construction
+#   2. _post_narration_reputation_hook  — after narrate_turn(), before recon
+#   3. _post_reconciliation_reputation_hook — after reconcile_turn()
+# Keeping these as helpers (rather than inlining at each site) ensures the
+# four turn handlers stay in sync as the system evolves.
+
+def _compute_dynamic_context_fields(
+    session_id:   str,
+    turn_number:  int,
+    arc_state:    dict,
+    current_act:  dict,
+    npc_states:   list,
+    spine:        dict,
+    character=None,
+    roll_result=None,
+) -> dict:
+    """Compute the dynamic per-turn context fields:
+      - reputation echoes (cooldown + relevance scoring)
+      - behavioral availability signal (annotation history)
+      - era voice block (period anchoring)
+      - identity drift cue (interior-state change since last surface)
+      - introspection trigger (post-Despair / post-pinch / dry-spell)
+
+    Identity drift and introspection require `character`; when omitted (legacy
+    callers, edge cases) those fields default to empty.
+
+    Returns a dict suitable for unpacking into ContextPackage(...) kwargs.
+    """
+    last_echo_turn = arc_state.get("last_reputation_echo_turn", 0)
+    scene_factions = current_act.get("scene_factions", []) or []
+    npc_factions: list[str] = []
+    for npc in npc_states:
+        npc_fact = getattr(npc, "factions", None) or []
+        if isinstance(npc_fact, list):
+            npc_factions.extend(str(f) for f in npc_fact)
+
+    drift_cue = ""
+    introspection = ""
+    if character is not None:
+        from gm.context import (
+            compute_identity_drift_cue,
+            compute_introspection_trigger,
+        )
+        drift_cue, _ = compute_identity_drift_cue(
+            arc_state=arc_state,
+            character=character,
+            turn_number=turn_number,
+        )
+        this_turn_has_check = (roll_result is not None)
+        consecutive_no_check = int(
+            arc_state.get("consecutive_no_check_turns", 0) or 0
+        )
+        introspection = compute_introspection_trigger(
+            prev_turn_had_despair=bool(
+                arc_state.get("last_turn_had_despair", False)
+            ),
+            prev_turn_pinch_fired=bool(
+                arc_state.get("last_turn_pinch_fired", False)
+            ),
+            this_turn_has_check=this_turn_has_check,
+            turns_this_act=int(arc_state.get("turns_this_act", 0) or 0),
+            consecutive_no_check_turns=consecutive_no_check,
+        )
+
+    # CS-6 runtime wiring (Apr 2026): pinch point firing, depth card,
+    # voice mode mapping. These existed as helpers but were never invoked
+    # from the live turn loop until now.
+    from gm.context import (
+        build_depth_card_block,
+        compute_pinch_point_instruction,
+        compute_voice_mode_instruction,
+    )
+    pinch_inst = compute_pinch_point_instruction(
+        spine_act=current_act,
+        act_progress=float(arc_state.get("act_progress", 0.0) or 0.0),
+        pinch_point_fired=bool(arc_state.get("pinch_point_fired", False)),
+    )
+    depth_card = build_depth_card_block(
+        spine, str(arc_state.get("variant_id", "") or "")
+    )
+    voice_mode = compute_voice_mode_instruction(
+        str(arc_state.get("last_dramatic_mission", "") or "")
+    )
+
+    return {
+        "reputation_entries": select_reputation_echoes(
+            session_id=session_id,
+            current_turn=turn_number,
+            last_echo_turn=last_echo_turn,
+            scene_factions=scene_factions,
+            current_npc_factions=npc_factions,
+        ),
+        "behavioral_availability": derive_behavioral_availability(session_id),
+        "era_voice_block":         build_era_voice_block(spine),
+        "identity_drift_cue":      drift_cue,
+        "introspection_trigger":   introspection,
+        "pinch_point_instruction": pinch_inst,
+        "depth_card_block":        depth_card,
+        "voice_mode_instruction":  voice_mode,
+    }
+
+
+def _post_narration_reputation_hook(
+    turn_number:        int,
+    arc_state:          dict,
+    reputation_entries: list,
+    passage:            str,
+) -> None:
+    """Mark reputation echoes that surfaced in the passage + update cooldown."""
+    if not reputation_entries:
+        return
+    surfaced_ids = detect_surfaced_echoes(passage, reputation_entries)
+    if surfaced_ids:
+        mark_reputation_echoes_surfaced(surfaced_ids)
+        arc_state["last_reputation_echo_turn"] = turn_number
+
+
+def _post_narration_drift_hook(
+    turn_number: int,
+    arc_state:   dict,
+    character,
+    drift_cue:   str,
+    roll_result,
+    pinch_fired_this_turn: bool,
+) -> None:
+    """After narration, refresh the drift baseline if a cue surfaced and
+    capture the post-Despair / post-pinch flags for next turn's introspection
+    trigger.
+    """
+    if drift_cue and character is not None:
+        from gm.context import update_drift_baseline
+        update_drift_baseline(arc_state, character, turn_number)
+
+    arc_state["last_turn_had_despair"] = bool(
+        roll_result is not None and getattr(roll_result, "despairs", 0) > 0
+    )
+    arc_state["last_turn_pinch_fired"] = bool(pinch_fired_this_turn)
+    if pinch_fired_this_turn:
+        arc_state["pinch_point_fired"] = True
+
+
+def _post_reconciliation_cs6_hook(arc_state: dict, recon_result) -> None:
+    """After reconciliation, capture the dramatic mission so the next turn's
+    narration can pick the right voice mode (CS-6 Phase 10).
+    """
+    dm = getattr(recon_result, "dramatic_mission", None) or {}
+    selected = dm.get("selected_mission") if isinstance(dm, dict) else ""
+    if selected:
+        arc_state["last_dramatic_mission"] = selected
+
+
+def _post_reconciliation_reputation_hook(
+    session_id:   str,
+    turn_number:  int,
+    recon_result,
+) -> None:
+    """Persist a reputation event when reconciliation flagged one."""
+    if recon_result.reputation_event:
+        log_reputation_event(
+            session_id=session_id,
+            turn_number=turn_number,
+            summary=recon_result.reputation_event,
+            faction_tags=recon_result.faction_tags or [],
+        )
 
 
 @router.get("/campaigns")
@@ -467,7 +643,10 @@ async def create_session_route(
         character = load_character(req.character_id)
     except HTTPException:
         # No standalone file — build from spine variant
-        character = load_character_from_variant(spine, req.character_id)
+        try:
+            character = load_character_from_variant(spine, req.character_id)
+        except ValueError as e:
+            raise HTTPException(404, str(e))
     act_1 = spine["acts"][0]
 
     # ── Roll motivation track for Act 1 (§9) ─────────────────────────
@@ -488,6 +667,10 @@ async def create_session_route(
         "anchor_proximity": "distant",
         "destiny_light_spent_this_act": 0,
         "destiny_dark_spent_this_act": 0,
+        # CS-6 wiring (Apr 2026): persist the character_id as `variant_id`
+        # so we can resolve depth_card / contradiction / voice modes back
+        # to the spine variant on later turns.
+        "variant_id": req.character_id,
         **motivation_flags,
     }
 
@@ -525,6 +708,15 @@ async def create_session_route(
     # ── Build opening context package ─────────────────────────────────
     npc_states = load_npc_states(session_id, spine)
 
+    # Dynamic per-turn fields. Reputation/behavioral are no-ops on turn 0
+    # (cooldown + empty log); era_voice_block is the meaningful piece — it
+    # anchors the opening prose to the campaign's period from the very first
+    # passage.
+    dyn_fields_opening = _compute_dynamic_context_fields(
+        session_id, 0, arc_state, act_1, npc_states, spine,
+        character=character, roll_result=None,
+    )
+
     ctx = ContextPackage(
         character=character,
         arc=ArcState(
@@ -548,6 +740,7 @@ async def create_session_route(
             duty_active=arc_state.get("duty_active", False),
             duty_type=arc_state.get("duty_type", ""),
             morality_label=arc_state.get("morality_label", ""),
+            last_reputation_echo_turn=arc_state.get("last_reputation_echo_turn", 0),
         ),
         story_summary="",
         recent_turns=[],
@@ -562,10 +755,23 @@ async def create_session_route(
             "the reader in a specific sensory moment."
         ),
         expected_turns=act_1.get("expected_turns", [8, 12]),
+        **dyn_fields_opening,
     )
 
     # ── Generate opening narration (one cloud call) ───────────────────
     narration_result = narrate_turn(ctx)
+    _post_narration_reputation_hook(
+        0, arc_state,
+        dyn_fields_opening["reputation_entries"], narration_result.passage,
+    )
+    _post_narration_drift_hook(
+        turn_number=0,
+        arc_state=arc_state,
+        character=character,
+        drift_cue=dyn_fields_opening["identity_drift_cue"],
+        roll_result=None,
+        pinch_fired_this_turn=False,
+    )
 
     # ── Log Turn 0 ────────────────────────────────────────────────────
     log_turn(
@@ -945,6 +1151,13 @@ async def handle_turn(
         next_act = spine["acts"][next_act_idx] if next_act_idx < spine["total_acts"] else None
         anchor_inst = build_anchor_instruction(current_act, next_act)
 
+    # Dynamic per-turn fields (reputation, behavioral, era voice, identity
+    # drift, introspection trigger).
+    dyn_fields = _compute_dynamic_context_fields(
+        session_id, turn_number, arc_state, current_act, npc_states, spine,
+        character=character, roll_result=roll_result,
+    )
+
     ctx = ContextPackage(
         character=character,
         arc=ArcState(
@@ -976,6 +1189,7 @@ async def handle_turn(
             duty_active=arc_state.get("duty_active", False),
             duty_type=arc_state.get("duty_type", ""),
             morality_label=arc_state.get("morality_label", ""),
+            last_reputation_echo_turn=arc_state.get("last_reputation_echo_turn", 0),
         ),
         story_summary=story_summary,
         recent_turns=recent_turns,
@@ -1001,12 +1215,30 @@ async def handle_turn(
             primary_ship.to_narration_block() if primary_ship
             and check_decision.scene_type == "space_combat" else ""
         ),
+        **dyn_fields,
     )
 
     # ── Step 6: Narrate (cloud model — one call) ─────────────────────
     narration_result = narrate_turn(ctx)
 
-    # ── Step 7: Reconciliation (local model) ─────────────────────────
+    _post_narration_reputation_hook(
+        turn_number, arc_state,
+        dyn_fields["reputation_entries"], narration_result.passage,
+    )
+    _post_narration_drift_hook(
+        turn_number=turn_number,
+        arc_state=arc_state,
+        character=character,
+        drift_cue=dyn_fields["identity_drift_cue"],
+        roll_result=roll_result,
+        pinch_fired_this_turn=bool(dyn_fields["pinch_point_instruction"]),
+    )
+    arc_state["consecutive_no_check_turns"] = (
+        0 if roll_result is not None
+        else int(arc_state.get("consecutive_no_check_turns", 0) or 0) + 1
+    )
+
+    # ── Step 7: Reconciliation (local model, fast tier with escalation) ─
     check_result_str = ""
     if roll_result:
         check_result_str = (
@@ -1014,14 +1246,22 @@ async def handle_turn(
             f"{roll_result.narrative_label()}"
         )
 
-    recon_result = reconcile_turn(
+    recon_result, new_zero_delta_count, _escalated = reconcile_turn_with_escalation(
+        session_id=session_id,
+        turn_number=turn_number,
+        prior_zero_delta_count=arc_state.get("consecutive_zero_delta_turns", 0),
         narration=narration_result.passage,
         player_action=player_action,
         check_result=check_result_str,
         active_npcs=npc_states,
         arc=ctx.arc,
         spine_act=current_act,
+        spine=spine,
     )
+    arc_state["consecutive_zero_delta_turns"] = new_zero_delta_count
+
+    _post_reconciliation_reputation_hook(session_id, turn_number, recon_result)
+    _post_reconciliation_cs6_hook(arc_state, recon_result)
 
     # ── Step 8: Apply state updates ──────────────────────────────────
     # NPC updates (knowledge, disposition)
@@ -1618,6 +1858,11 @@ async def handle_turn_stream(
         next_act = spine["acts"][next_act_idx] if next_act_idx < spine["total_acts"] else None
         anchor_inst = build_anchor_instruction(current_act, next_act)
 
+    dyn_fields_s = _compute_dynamic_context_fields(
+        session_id, turn_number, arc_state, current_act, npc_states, spine,
+        character=character, roll_result=roll_result,
+    )
+
     ctx = ContextPackage(
         character=character,
         arc=ArcState(
@@ -1649,6 +1894,7 @@ async def handle_turn_stream(
             duty_active=arc_state.get("duty_active", False),
             duty_type=arc_state.get("duty_type", ""),
             morality_label=arc_state.get("morality_label", ""),
+            last_reputation_echo_turn=arc_state.get("last_reputation_echo_turn", 0),
         ),
         story_summary=story_summary,
         recent_turns=recent_turns,
@@ -1674,6 +1920,7 @@ async def handle_turn_stream(
             primary_ship_s.to_narration_block() if primary_ship_s
             and check_decision.scene_type == "space_combat" else ""
         ),
+        **dyn_fields_s,
     )
 
     # ── Step 6: Stream narration via SSE ──────────────────────────────
@@ -1729,7 +1976,24 @@ async def handle_turn_stream(
             yield f"event: error\ndata: {json.dumps({'error': str(e)})}\n\n"
             return
 
-        # ── Step 7: Reconciliation (local model) ─────────────────────
+        _post_narration_reputation_hook(
+            turn_number, arc_state,
+            dyn_fields_s["reputation_entries"], narration_result.passage,
+        )
+        _post_narration_drift_hook(
+            turn_number=turn_number,
+            arc_state=arc_state,
+            character=character,
+            drift_cue=dyn_fields_s["identity_drift_cue"],
+            roll_result=roll_result,
+            pinch_fired_this_turn=bool(dyn_fields_s["pinch_point_instruction"]),
+        )
+        arc_state["consecutive_no_check_turns"] = (
+            0 if roll_result is not None
+            else int(arc_state.get("consecutive_no_check_turns", 0) or 0) + 1
+        )
+
+        # ── Step 7: Reconciliation (local model, fast tier with escalation) ─
         check_result_str = ""
         if roll_result:
             check_result_str = (
@@ -1737,14 +2001,22 @@ async def handle_turn_stream(
                 f"{roll_result.narrative_label()}"
             )
 
-        recon_result = reconcile_turn(
+        recon_result, new_zero_delta_count, _escalated = reconcile_turn_with_escalation(
+            session_id=session_id,
+            turn_number=turn_number,
+            prior_zero_delta_count=arc_state.get("consecutive_zero_delta_turns", 0),
             narration=narration_result.passage,
             player_action=player_action,
             check_result=check_result_str,
             active_npcs=npc_states,
             arc=ctx.arc,
             spine_act=current_act,
+            spine=spine,
         )
+        arc_state["consecutive_zero_delta_turns"] = new_zero_delta_count
+
+        _post_reconciliation_reputation_hook(session_id, turn_number, recon_result)
+        _post_reconciliation_cs6_hook(arc_state, recon_result)
 
         # ── Step 8: Apply state updates ───────────────────────────────
         apply_npc_updates(recon_result.npc_updates, npc_states)
@@ -2000,6 +2272,11 @@ async def handle_temptation(
                     if next_act_idx < spine["total_acts"] else None)
         anchor_inst = build_anchor_instruction(current_act, next_act)
 
+    dyn_fields_t = _compute_dynamic_context_fields(
+        session_id, turn_number, arc_state, current_act, npc_states, spine,
+        character=character, roll_result=roll_result,
+    )
+
     ctx = ContextPackage(
         character=character,
         arc=ArcState(
@@ -2031,6 +2308,7 @@ async def handle_temptation(
             duty_active=arc_state.get("duty_active", False),
             duty_type=arc_state.get("duty_type", ""),
             morality_label=arc_state.get("morality_label", ""),
+            last_reputation_echo_turn=arc_state.get("last_reputation_echo_turn", 0),
         ),
         story_summary=story_summary,
         recent_turns=recent_turns,
@@ -2048,11 +2326,29 @@ async def handle_temptation(
         destiny_narrative_note=pending.get("destiny_narrative_note", ""),
         force_state_block=_force_state_block,
         force_result_block=_force_result_block,
+        **dyn_fields_t,
     )
 
     narration_result = narrate_turn(ctx)
 
-    # Reconciliation
+    _post_narration_reputation_hook(
+        turn_number, arc_state,
+        dyn_fields_t["reputation_entries"], narration_result.passage,
+    )
+    _post_narration_drift_hook(
+        turn_number=turn_number,
+        arc_state=arc_state,
+        character=character,
+        drift_cue=dyn_fields_t["identity_drift_cue"],
+        roll_result=roll_result,
+        pinch_fired_this_turn=bool(dyn_fields_t["pinch_point_instruction"]),
+    )
+    arc_state["consecutive_no_check_turns"] = (
+        0 if roll_result is not None
+        else int(arc_state.get("consecutive_no_check_turns", 0) or 0) + 1
+    )
+
+    # Reconciliation (fast tier with escalation)
     check_result_str = ""
     if check_skill:
         check_difficulty = pending.get("check_difficulty", "")
@@ -2061,14 +2357,22 @@ async def handle_temptation(
             f"{roll_result.narrative_label()}"
         )
 
-    recon_result = reconcile_turn(
+    recon_result, new_zero_delta_count, _escalated = reconcile_turn_with_escalation(
+        session_id=session_id,
+        turn_number=turn_number,
+        prior_zero_delta_count=arc_state.get("consecutive_zero_delta_turns", 0),
         narration=narration_result.passage,
         player_action=player_action,
         check_result=check_result_str,
         active_npcs=npc_states,
         arc=ctx.arc,
         spine_act=current_act,
+        spine=spine,
     )
+    arc_state["consecutive_zero_delta_turns"] = new_zero_delta_count
+
+    _post_reconciliation_reputation_hook(session_id, turn_number, recon_result)
+    _post_reconciliation_cs6_hook(arc_state, recon_result)
 
     apply_npc_updates(recon_result.npc_updates, npc_states)
     for npc in npc_states:
@@ -2274,6 +2578,11 @@ async def handle_intervention(
                     if next_act_idx < spine["total_acts"] else None)
         anchor_inst = build_anchor_instruction(current_act, next_act)
 
+    dyn_fields_iv = _compute_dynamic_context_fields(
+        session_id, turn_number, arc_state, current_act, npc_states, spine,
+        character=character, roll_result=roll_result,
+    )
+
     ctx = ContextPackage(
         character=character,
         arc=ArcState(
@@ -2305,6 +2614,7 @@ async def handle_intervention(
             duty_active=arc_state.get("duty_active", False),
             duty_type=arc_state.get("duty_type", ""),
             morality_label=arc_state.get("morality_label", ""),
+            last_reputation_echo_turn=arc_state.get("last_reputation_echo_turn", 0),
         ),
         story_summary=story_summary,
         recent_turns=recent_turns,
@@ -2320,23 +2630,49 @@ async def handle_intervention(
         combat_damage_note=combat_damage_note,
         talent_activations=talent_activations,
         destiny_narrative_note=pending.get("destiny_narrative_note", ""),
+        **dyn_fields_iv,
     )
 
     narration_result = narrate_turn(ctx)
 
-    # Reconciliation
+    _post_narration_reputation_hook(
+        turn_number, arc_state,
+        dyn_fields_iv["reputation_entries"], narration_result.passage,
+    )
+    _post_narration_drift_hook(
+        turn_number=turn_number,
+        arc_state=arc_state,
+        character=character,
+        drift_cue=dyn_fields_iv["identity_drift_cue"],
+        roll_result=roll_result,
+        pinch_fired_this_turn=bool(dyn_fields_iv["pinch_point_instruction"]),
+    )
+    arc_state["consecutive_no_check_turns"] = (
+        0 if roll_result is not None
+        else int(arc_state.get("consecutive_no_check_turns", 0) or 0) + 1
+    )
+
+    # Reconciliation (fast tier with escalation)
     check_result_str = (
         f"{pending['check_skill']} ({pending['check_difficulty']}): "
         f"{roll_result.narrative_label()}"
     )
-    recon_result = reconcile_turn(
+    recon_result, new_zero_delta_count, _escalated = reconcile_turn_with_escalation(
+        session_id=session_id,
+        turn_number=turn_number,
+        prior_zero_delta_count=arc_state.get("consecutive_zero_delta_turns", 0),
         narration=narration_result.passage,
         player_action=player_action,
         check_result=check_result_str,
         active_npcs=npc_states,
         arc=ctx.arc,
         spine_act=current_act,
+        spine=spine,
     )
+    arc_state["consecutive_zero_delta_turns"] = new_zero_delta_count
+
+    _post_reconciliation_reputation_hook(session_id, turn_number, recon_result)
+    _post_reconciliation_cs6_hook(arc_state, recon_result)
 
     apply_npc_updates(recon_result.npc_updates, npc_states)
     for npc in npc_states:

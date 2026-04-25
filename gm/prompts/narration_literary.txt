@@ -38,6 +38,10 @@ LOADOUT:
 
 {aspiration_echo_block}
 
+{identity_drift_block}
+
+{introspection_trigger_block}
+
 ═══════════════════════════════════════════
 STORY CONTEXT
 ═══════════════════════════════════════════
@@ -45,6 +49,8 @@ CAMPAIGN: {campaign_name}
 STORY POSITION: {story_position}
 THROUGHLINE: {throughline_question}
 TENSION LEVEL: {tension_level}
+
+{era_voice_block}
 
 Never use the words "act," "chapter," "session," "turn," or any
 structural game terminology in your prose. The player is reading a
@@ -55,6 +61,8 @@ STORY SO FAR:
 
 OPEN THREADS:
 {open_threads}
+
+{reputation_block}
 
 {pacing_block}
 
@@ -147,6 +155,8 @@ Then provide 2-4 choices following these rules:
   still work to do."
   "Turn the name over in your mind. You know what it means. You are not
   ready to say it out loud yet."
+
+{behavioral_availability_block}
 
 TONE: {tone_instruction}
 

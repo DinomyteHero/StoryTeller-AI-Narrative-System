@@ -398,7 +398,7 @@ def test_seize_the_moment_in_spine():
     """Campaign spine Act 3 has seize_the_moment field."""
     import json
     from pathlib import Path
-    spine_path = Path("data/campaigns/nar_shaddaa_job.json")
+    spine_path = Path("data/campaigns/shadows_of_the_praxeum.json")
     spine = json.loads(spine_path.read_text(encoding="utf-8"))
     act3 = spine["acts"][2]  # 0-indexed
 

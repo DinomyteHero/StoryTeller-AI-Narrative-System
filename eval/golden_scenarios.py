@@ -16,27 +16,27 @@ class GoldenScenario:
 GOLDEN_SCENARIOS = [
     GoldenScenario(
         "nar_shaddaa_cautious_20",
-        "nar_shaddaa_job", "keth_varso",
+        "shadows_of_the_praxeum", "praxeum_student",
         dice_seed=42, max_turns=20, policy="cautious",
     ),
     GoldenScenario(
         "nar_shaddaa_reckless_20",
-        "nar_shaddaa_job", "keth_varso",
+        "shadows_of_the_praxeum", "praxeum_student",
         dice_seed=42, max_turns=20, policy="reckless",
     ),
     GoldenScenario(
         "nar_shaddaa_random_20_a",
-        "nar_shaddaa_job", "keth_varso",
+        "shadows_of_the_praxeum", "praxeum_student",
         dice_seed=42, max_turns=20, policy="random",
     ),
     GoldenScenario(
         "nar_shaddaa_random_20_b",
-        "nar_shaddaa_job", "keth_varso",
+        "shadows_of_the_praxeum", "praxeum_student",
         dice_seed=99, max_turns=20, policy="random",
     ),
     GoldenScenario(
         "nar_shaddaa_first_40",
-        "nar_shaddaa_job", "keth_varso",
+        "shadows_of_the_praxeum", "praxeum_student",
         dice_seed=42, max_turns=40, policy="first",
     ),
 ]

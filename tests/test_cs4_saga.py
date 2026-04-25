@@ -584,7 +584,10 @@ class TestMode1:
         inputs = Mode1Input(era="galactic_civil_war", location="Tatooine")
         # The inner _call_llm is mocked, but generate_mode1 has its own retry.
         # First two calls raise JSONDecodeError, third succeeds.
-        spine_data, _ = generate_mode1(inputs, master_seed=42)
+        # use_architect=False bypasses the architect pre-call, which would
+        # otherwise consume the mocked LLM responses before the spine retry
+        # loop ever runs.
+        spine_data, _ = generate_mode1(inputs, master_seed=42, use_architect=False)
         assert spine_data["name"] == "Test Campaign"
 
 

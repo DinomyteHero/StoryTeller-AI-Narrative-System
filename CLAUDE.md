@@ -231,7 +231,7 @@ Campaign Studio (parallel track):
 - ~18,600 lines of application code (Python + HTML)
 - ~10,300 lines of test code across 20 test files
 - 15 active documentation files in `docs/` + 6 archived in `docs/reference/`
-- 3 campaign spines, 2 characters, 6 talent trees, 5 Force powers
+- 1 campaign spine (Shadows of the Praxeum), 2 characters, 6 talent trees, 5 Force powers
 
 ## Repo Structure
 
@@ -344,8 +344,8 @@ storyteller-v3/
 │   ├── policies.py        # Automated choice selection strategies (45 lines)
 │   └── reporter.py        # Console + JSON report generation (118 lines)
 ├── data/
-│   ├── characters/        # keth_varso.json, talia_ren.json
-│   ├── campaigns/         # nar_shaddaa_job.json, echoes_of_the_force.json, shadows_of_the_praxeum.json
+│   ├── characters/        # praxeum_student.json, praxeum_mechanic.json
+│   ├── campaigns/         # shadows_of_the_praxeum.json (canonical campaign)
 │   ├── talent_trees/      # 6 specialization trees + talent_library.json
 │   ├── force_powers/      # 5 powers (enhance, heal_harm, influence, move, sense)
 │   └── personas/          # writer_room_personas.json (55 personas)

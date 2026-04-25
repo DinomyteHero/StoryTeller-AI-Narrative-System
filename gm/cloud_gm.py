@@ -12,25 +12,27 @@ import re
 import os
 from pathlib import Path
 from dataclasses import dataclass
-from typing import Iterator
+from typing import Iterator, Optional
 from openai import OpenAI
 from engine.equipment import build_equipment_narration_block
 from gm.context import ContextPackage
+from gm.llm_client import (
+    make_client as _make_unified_client,
+    resolve_model,
+    _prepare_kwargs,
+    TIER_QUALITY,
+    is_local_backend,
+)
 
 _PROMPTS_DIR = Path(__file__).parent / "prompts"
 PROMPT_PATH = _PROMPTS_DIR / "narration.txt"
 PROMPT_PATH_LITERARY = _PROMPTS_DIR / "narration_literary.txt"
 MAX_TOKENS  = int(os.getenv("MAX_COMPLETION_TOKENS", "16000"))
 
-# Provider config — all from environment variables
-# CLOUD_PROVIDER:    "openai" | "openrouter"
-# CLOUD_MODEL:
-#   openai      → "gpt-5.2", "gpt-5.2-mini", etc.
-#   openrouter  → "x-ai/grok-4.1-fast", "openai/gpt-5.2", etc. (provider/model format)
-# NARRATIVE_BACKEND: "cloud" | "local"
-
-CLOUD_PROVIDER    = os.getenv("CLOUD_PROVIDER", "openai")
-CLOUD_MODEL       = os.getenv("CLOUD_MODEL", "gpt-5.2")
+# Provider config — read for back-compat. The unified client (gm/llm_client.py)
+# is the authoritative source for routing; these env vars feed into it.
+CLOUD_PROVIDER    = os.getenv("CLOUD_PROVIDER", "openrouter")
+CLOUD_MODEL       = os.getenv("CLOUD_MODEL", "")
 NARRATIVE_BACKEND = os.getenv("NARRATIVE_BACKEND", "cloud")
 OLLAMA_URL             = os.getenv("OLLAMA_URL", "http://localhost:11434")
 LOCAL_MODEL            = os.getenv("LOCAL_MODEL", "qwen3.5:9b")
@@ -41,6 +43,39 @@ PROVIDER_BASE_URLS = {
     "openai":     None,
     "openrouter": "https://openrouter.ai/api/v1",
 }
+
+
+def _make_completion_kwargs(
+    model: str,
+    messages: list,
+    *,
+    is_local: bool,
+    timeout: Optional[float] = None,
+    stream: bool = False,
+) -> dict:
+    """Build chat.completions.create kwargs via the unified provider layer.
+
+    Delegates to gm.llm_client._prepare_kwargs so reasoning config, max_tokens
+    naming, and OpenRouter provider preferences live in exactly one place.
+    """
+    if timeout is None:
+        timeout = 180.0 if is_local else 60.0
+    kwargs = _prepare_kwargs(
+        model=model,
+        messages=messages,
+        temperature=1.0,
+        max_tokens=MAX_TOKENS,
+        timeout=timeout,
+        seed=None,
+        response_format=None,
+        extra=None,
+    )
+    # Narration uses default sampling; remove temperature so models that
+    # require special temperatures (reasoning models) keep their defaults.
+    kwargs.pop("temperature", None)
+    if stream:
+        kwargs["stream"] = True
+    return kwargs
 
 # ── Scene pacing guidance (Game Mechanics §10, Vision §3) ─────────────
 # Maps scene_type to:
@@ -446,17 +481,14 @@ def _get_scene_block(scene_type: str) -> str:
     return f"{entry['pacing']}\n\n{entry['voice_exemplar']}\n\n{entry['craft']}"
 
 
-def _make_client() -> tuple[OpenAI, str]:
-    """Return (client, model_string) based on active backend/provider."""
-    if NARRATIVE_BACKEND == "local":
-        return (
-            OpenAI(api_key="ollama", base_url=f"{OLLAMA_URL}/v1"),
-            LOCAL_NARRATION_MODEL,
-        )
-    api_key  = (os.getenv("OPENAI_API_KEY") if CLOUD_PROVIDER == "openai"
-                else os.getenv("OPENROUTER_API_KEY"))
-    base_url = PROVIDER_BASE_URLS.get(CLOUD_PROVIDER)
-    return OpenAI(api_key=api_key, base_url=base_url), CLOUD_MODEL
+def _make_client(purpose: str = "narration") -> tuple[OpenAI, str]:
+    """Return (client, model_string) for a quality-tier purpose.
+
+    Routes through gm.llm_client so DeepSeek V4 Pro is the default for
+    narration / milestones / time skips, with per-call-site overrides
+    available via NARRATION_MODEL, MILESTONE_MODEL, etc.
+    """
+    return _make_unified_client(), resolve_model(tier=TIER_QUALITY, purpose=purpose)
 
 
 @dataclass
@@ -499,6 +531,8 @@ def _build_prompt(ctx: ContextPackage) -> str:
         force_capabilities_block=force_caps,
         talent_capabilities_block=talent_caps,
         aspiration_echo_block=ctx.build_aspiration_echo_block(),
+        identity_drift_block=ctx.build_identity_drift_block(),
+        introspection_trigger_block=ctx.build_introspection_trigger_block(),
         depth_card_block=ctx.depth_card_block,
         campaign_name=ctx.arc.campaign_name,
         story_position=f"Part {ctx.arc.current_act} of {ctx.arc.total_acts} — {ctx.arc.act_name}",
@@ -506,6 +540,8 @@ def _build_prompt(ctx: ContextPackage) -> str:
         tension_level=ctx.arc.tension_level,
         story_summary=full_summary,
         open_threads=ctx.build_open_threads_block(),
+        reputation_block=ctx.build_reputation_block(),
+        era_voice_block=ctx.era_voice_block,
         pacing_block=ctx.build_pacing_block(),
         motivation_block=ctx.build_motivation_block(),
         ship_state_block=ctx.ship_state_block,
@@ -523,6 +559,7 @@ def _build_prompt(ctx: ContextPackage) -> str:
         closure_heartbeat_instruction=ctx.closure_heartbeat_instruction,
         dramatic_mission_block=ctx.build_dramatic_mission_block(),
         contradiction_arc_block=ctx.contradiction_arc_block,
+        behavioral_availability_block=ctx.build_behavioral_availability_block(),
         voice_mode_instruction=ctx.voice_mode_instruction,
         tone_instruction=ctx.tone_instruction,
     )
@@ -693,7 +730,7 @@ def _narrate_with_backend(
     best_result: NarrationResult | None = None  # best structurally valid result
 
     for attempt in range(max_retries + 1):
-        is_qwen = used_local and "qwen" in LOCAL_NARRATION_MODEL.lower()
+        is_qwen = used_local and "qwen" in model.lower()
         msg_content = f"/no_think\n{prompt}" if is_qwen else prompt
         messages = [{"role": "user", "content": msg_content}]
         if attempt > 0 and last_error:
@@ -705,17 +742,7 @@ def _narrate_with_backend(
                 ),
             })
 
-        timeout = 180.0 if used_local else 60.0
-        kwargs = dict(
-            model=model,
-            max_completion_tokens=MAX_TOKENS,
-            messages=messages,
-            timeout=timeout,
-        )
-        # Reasoning models (gpt-o*, gpt-5*) support reasoning_effort
-        reasoning = os.getenv("REASONING_EFFORT", "low")
-        if not used_local and reasoning:
-            kwargs["reasoning_effort"] = reasoning
+        kwargs = _make_completion_kwargs(model, messages, is_local=used_local)
         response = client.chat.completions.create(**kwargs)
         import logging
         choice = response.choices[0]
@@ -823,15 +850,17 @@ def narrate_turn_stream(ctx: ContextPackage) -> Iterator[str]:
         result = _parse_response(full_text)
     """
     client, model = _make_client()
-    kwargs = dict(
-        model=model,
-        max_completion_tokens=MAX_TOKENS,
-        messages=[{"role": "user", "content": _build_prompt(ctx)}],
+    is_local = is_local_backend()
+    is_qwen = is_local and "qwen" in model.lower()
+    prompt = _build_prompt(ctx)
+    msg_content = f"/no_think\n{prompt}" if is_qwen else prompt
+
+    kwargs = _make_completion_kwargs(
+        model,
+        [{"role": "user", "content": msg_content}],
+        is_local=is_local,
         stream=True,
     )
-    reasoning = os.getenv("REASONING_EFFORT", "low")
-    if NARRATIVE_BACKEND != "local" and reasoning:
-        kwargs["reasoning_effort"] = reasoning
     stream = client.chat.completions.create(**kwargs)
     for chunk in stream:
         delta = chunk.choices[0].delta.content
@@ -882,22 +911,16 @@ def generate_milestone_reflection(
         choices_block="\n\n".join(choices_lines),
     )
 
-    client, model = _make_client()
-    is_local = NARRATIVE_BACKEND == "local"
-    is_qwen = is_local and "qwen" in LOCAL_NARRATION_MODEL.lower()
+    client, model = _make_client(purpose="milestone")
+    is_local = is_local_backend()
+    is_qwen = is_local and "qwen" in model.lower()
     msg_content = f"/no_think\n{prompt}" if is_qwen else prompt
 
-    timeout = 180.0 if is_local else 60.0
-    kwargs = dict(
-        model=model,
-        max_completion_tokens=MAX_TOKENS,
-        messages=[{"role": "user", "content": msg_content}],
-        timeout=timeout,
+    kwargs = _make_completion_kwargs(
+        model,
+        [{"role": "user", "content": msg_content}],
+        is_local=is_local,
     )
-    reasoning = os.getenv("REASONING_EFFORT", "low")
-    if not is_local and reasoning:
-        kwargs["reasoning_effort"] = reasoning
-
     response = client.chat.completions.create(**kwargs)
     raw = response.choices[0].message.content or ""
 
@@ -1011,22 +1034,16 @@ def generate_force_power_milestone_reflection(
         choices_block="\n\n".join(choices_lines),
     )
 
-    client, model = _make_client()
-    is_local = NARRATIVE_BACKEND == "local"
-    is_qwen = is_local and "qwen" in LOCAL_NARRATION_MODEL.lower()
+    client, model = _make_client(purpose="milestone")
+    is_local = is_local_backend()
+    is_qwen = is_local and "qwen" in model.lower()
     msg_content = f"/no_think\n{prompt}" if is_qwen else prompt
 
-    timeout = 180.0 if is_local else 60.0
-    kwargs = dict(
-        model=model,
-        max_completion_tokens=MAX_TOKENS,
-        messages=[{"role": "user", "content": msg_content}],
-        timeout=timeout,
+    kwargs = _make_completion_kwargs(
+        model,
+        [{"role": "user", "content": msg_content}],
+        is_local=is_local,
     )
-    reasoning = os.getenv("REASONING_EFFORT", "low")
-    if not is_local and reasoning:
-        kwargs["reasoning_effort"] = reasoning
-
     response = client.chat.completions.create(**kwargs)
     raw = response.choices[0].message.content or ""
 
@@ -1125,22 +1142,16 @@ def generate_time_skip_opening(
         act_summary=act_summary or "No summary available.",
     )
 
-    client, model = _make_client()
-    is_local = NARRATIVE_BACKEND == "local"
-    is_qwen = is_local and "qwen" in LOCAL_NARRATION_MODEL.lower()
+    client, model = _make_client(purpose="narration")
+    is_local = is_local_backend()
+    is_qwen = is_local and "qwen" in model.lower()
     msg_content = f"/no_think\n{prompt}" if is_qwen else prompt
 
-    timeout = 180.0 if is_local else 60.0
-    kwargs = dict(
-        model=model,
-        max_completion_tokens=MAX_TOKENS,
-        messages=[{"role": "user", "content": msg_content}],
-        timeout=timeout,
+    kwargs = _make_completion_kwargs(
+        model,
+        [{"role": "user", "content": msg_content}],
+        is_local=is_local,
     )
-    reasoning = os.getenv("REASONING_EFFORT", "low")
-    if not is_local and reasoning:
-        kwargs["reasoning_effort"] = reasoning
-
     response = client.chat.completions.create(**kwargs)
     raw = response.choices[0].message.content or ""
 
@@ -1171,22 +1182,16 @@ def generate_time_skip_closing(
         next_act_situation=next_act_situation,
     )
 
-    client, model = _make_client()
-    is_local = NARRATIVE_BACKEND == "local"
-    is_qwen = is_local and "qwen" in LOCAL_NARRATION_MODEL.lower()
+    client, model = _make_client(purpose="narration")
+    is_local = is_local_backend()
+    is_qwen = is_local and "qwen" in model.lower()
     msg_content = f"/no_think\n{prompt}" if is_qwen else prompt
 
-    timeout = 180.0 if is_local else 60.0
-    kwargs = dict(
-        model=model,
-        max_completion_tokens=MAX_TOKENS,
-        messages=[{"role": "user", "content": msg_content}],
-        timeout=timeout,
+    kwargs = _make_completion_kwargs(
+        model,
+        [{"role": "user", "content": msg_content}],
+        is_local=is_local,
     )
-    reasoning = os.getenv("REASONING_EFFORT", "low")
-    if not is_local and reasoning:
-        kwargs["reasoning_effort"] = reasoning
-
     response = client.chat.completions.create(**kwargs)
     raw = response.choices[0].message.content or ""
 

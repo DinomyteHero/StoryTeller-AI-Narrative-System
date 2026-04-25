@@ -264,3 +264,208 @@ def log_choice_quality(
              passed, fail_count, triggered_retry),
         )
         conn.commit()
+
+
+# ── Reputation echo system (Game Mechanics §1, §11, §21.4) ───────────
+#
+# Reputation events are public-visible actions captured during reconciliation.
+# Selected entries surface in later narration as "people in this world have
+# heard about this." Cooldown of 3 turns + relevance scoring prevents the
+# system from feeling systematic.
+
+def log_reputation_event(
+    session_id:    str,
+    turn_number:   int,
+    summary:       str,
+    faction_tags:  list[str],
+) -> None:
+    """Persist a reputation event captured during reconciliation.
+
+    Only call when reconciliation produced a non-null reputation_event —
+    most turns produce none. faction_tags identify where the event travels
+    (e.g. ["smuggler_network", "nar_shaddaa_promenade"]).
+    """
+    if not summary:
+        return
+    now = datetime.now(timezone.utc).isoformat()
+    with get_connection() as conn:
+        conn.execute(
+            "INSERT INTO reputation_log "
+            "(session_id, turn_number, summary, faction_tags, "
+            " surfaced_count, created_at) "
+            "VALUES (?, ?, ?, ?, 0, ?)",
+            (session_id, turn_number, summary, json.dumps(faction_tags or []), now),
+        )
+        conn.commit()
+
+
+def select_reputation_echoes(
+    session_id:           str,
+    current_turn:         int,
+    last_echo_turn:       int,
+    scene_factions:       list[str],
+    current_npc_factions: list[str],
+    cooldown:             int = 3,
+    max_entries:          int = 3,
+    min_score:            int = 4,
+) -> list[dict]:
+    """Pick 0..max_entries reputation entries to inject into narration.
+
+    Scoring:
+      +3 faction match (entry tags overlap scene/NPC factions)
+      +2/+1 recency (< 5 turns / < 15 turns)
+      +2/+1 novelty (surfaced_count == 0 / == 1)
+
+    Returns a list of dicts: {id, summary, turn_number, faction_tags, score}.
+    Returns [] during cooldown — the engine only echoes occasionally to
+    keep the world from feeling like every NPC is talking about the player.
+    """
+    if current_turn - last_echo_turn < cooldown:
+        return []
+
+    with get_connection() as conn:
+        rows = conn.execute(
+            "SELECT id, turn_number, summary, faction_tags, surfaced_count "
+            "FROM reputation_log "
+            "WHERE session_id = ? "
+            "ORDER BY turn_number DESC LIMIT 50",
+            (session_id,),
+        ).fetchall()
+
+    relevant_factions = set(scene_factions) | set(current_npc_factions)
+    scored: list[dict] = []
+    for row in rows:
+        try:
+            tags = json.loads(row["faction_tags"]) if row["faction_tags"] else []
+        except (json.JSONDecodeError, TypeError):
+            tags = []
+
+        score = 0
+        if relevant_factions and (set(tags) & relevant_factions):
+            score += 3
+
+        age = current_turn - row["turn_number"]
+        if age < 5:
+            score += 2
+        elif age < 15:
+            score += 1
+
+        surfaced = row["surfaced_count"] or 0
+        if surfaced == 0:
+            score += 2
+        elif surfaced == 1:
+            score += 1
+
+        if score >= min_score:
+            scored.append({
+                "id":           row["id"],
+                "summary":      row["summary"],
+                "turn_number":  row["turn_number"],
+                "faction_tags": tags,
+                "score":        score,
+            })
+
+    scored.sort(key=lambda e: e["score"], reverse=True)
+    return scored[:max_entries]
+
+
+def mark_reputation_echoes_surfaced(echo_ids: list[int]) -> None:
+    """Increment surfaced_count for entries that the narration referenced."""
+    if not echo_ids:
+        return
+    with get_connection() as conn:
+        for echo_id in echo_ids:
+            conn.execute(
+                "UPDATE reputation_log SET surfaced_count = surfaced_count + 1 "
+                "WHERE id = ?",
+                (echo_id,),
+            )
+        conn.commit()
+
+
+def detect_surfaced_echoes(passage: str, candidates: list[dict]) -> list[int]:
+    """Return ids of echo candidates whose summary keywords appear in the passage.
+
+    Heuristic: extract distinctive nouns (length >= 5, not stopwords) from
+    each candidate summary and check substring presence in the passage.
+    Single match is enough — the world referencing the event in any form
+    counts as surfaced. No LLM call.
+    """
+    if not candidates or not passage:
+        return []
+    passage_lower = passage.lower()
+    stop = {"have", "with", "from", "their", "into", "that", "this", "they",
+            "them", "would", "could", "after", "before", "while", "about"}
+    surfaced: list[int] = []
+    for entry in candidates:
+        summary = (entry.get("summary") or "").lower()
+        keywords = [
+            w.strip(".,;:'\"")
+            for w in summary.split()
+            if len(w) >= 5 and w.strip(".,;:'\"") not in stop
+        ]
+        # Require 2 distinct keyword hits to avoid coincidental matches
+        hits = sum(1 for kw in keywords if kw and kw in passage_lower)
+        if hits >= 2:
+            surfaced.append(entry["id"])
+    return surfaced
+
+
+def derive_behavioral_availability(session_id: str, n_turns: int = 8) -> dict:
+    """Aggregate Phase 13 choice annotations into a behavioral signal.
+
+    Analyzes the most recent `n_turns` of choice_implications (JSON in the
+    turns table) and returns:
+      - dominant_priorities: priorities revealed in 30%+ of recent choices
+      - recurring_tags:      behavioral tags appearing in 40%+ of recent choices
+      - incoherent_priorities: priorities chosen but flagged as throughline-incoherent
+      - pattern_strength:    0.0-1.0; how consistent the protagonist's choices are
+    Returns an empty dict if insufficient annotation history.
+    """
+    with get_connection() as conn:
+        rows = conn.execute(
+            "SELECT choice_implications FROM turns "
+            "WHERE session_id = ? AND choice_implications IS NOT NULL "
+            "ORDER BY turn_number DESC LIMIT ?",
+            (session_id, n_turns),
+        ).fetchall()
+
+    if len(rows) < 3:
+        return {}
+
+    priority_counts: dict[str, int] = {}
+    tag_counts:      dict[str, int] = {}
+    incoherent_set:  set[str] = set()
+
+    for row in rows:
+        try:
+            ann = json.loads(row["choice_implications"])
+        except (json.JSONDecodeError, TypeError):
+            continue
+        priority = (ann.get("priority_revealed") or "").strip()
+        if priority:
+            priority_counts[priority] = priority_counts.get(priority, 0) + 1
+            if ann.get("throughline_relevance") == "low":
+                incoherent_set.add(priority)
+        for tag in ann.get("behavioral_tags", []) or []:
+            t = str(tag).strip()
+            if t:
+                tag_counts[t] = tag_counts.get(t, 0) + 1
+
+    total = len(rows)
+    dominant = [p for p, c in priority_counts.items() if c / total >= 0.30]
+    recurring = [t for t, c in tag_counts.items() if c / total >= 0.40]
+
+    # Pattern strength: how concentrated the priorities are
+    if priority_counts:
+        max_count = max(priority_counts.values())
+        pattern_strength = max_count / total
+    else:
+        pattern_strength = 0.0
+
+    return {
+        "dominant_priorities":   dominant,
+        "recurring_tags":        recurring,
+        "incoherent_priorities": sorted(incoherent_set & set(dominant)),
+        "pattern_strength":      round(pattern_strength, 2),
+    }

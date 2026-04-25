@@ -52,7 +52,7 @@ def _make_character(**overrides) -> Character:
     """Create a minimal test character."""
     path = os.path.join(
         os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
-        "data", "characters", "keth_varso.json",
+        "data", "characters", "praxeum_student.json",
     )
     with open(path) as f:
         return Character.model_validate_json(f.read())
@@ -167,26 +167,20 @@ class TestProseDiagnostic:
         result = run_prose_diagnostic([], "No NPCs.")
         assert result is None
 
-    @patch("gm.local_gm.httpx.post")
-    def test_returns_structured_json(self, mock_post):
-        mock_response = MagicMock()
-        mock_response.status_code = 200
-        mock_response.json.return_value = {
-            "response": json.dumps({
-                "sensory_channels_recent": ["visual", "visual", "auditory"],
-                "rhythm_note": "uniform long-short-long",
-                "opener_similarity": "2 of 3 opened with location",
-                "npc_coherence_flags": [{
-                    "npc": "Vossk",
-                    "described_behavior": "cooperative",
-                    "mechanical_disposition": 0.25,
-                    "flag": "action-emotion inconsistency",
-                }],
-                "polarity_note": "mostly positive despite hostile NPC",
-            }),
+    @patch("gm.local_gm.call_chat_json")
+    def test_returns_structured_json(self, mock_llm):
+        mock_llm.return_value = {
+            "sensory_channels_recent": ["visual", "visual", "auditory"],
+            "rhythm_note": "uniform long-short-long",
+            "opener_similarity": "2 of 3 opened with location",
+            "npc_coherence_flags": [{
+                "npc": "Vossk",
+                "described_behavior": "cooperative",
+                "mechanical_disposition": 0.25,
+                "flag": "action-emotion inconsistency",
+            }],
+            "polarity_note": "mostly positive despite hostile NPC",
         }
-        mock_response.raise_for_status = MagicMock()
-        mock_post.return_value = mock_response
 
         result = run_prose_diagnostic(
             ["Passage 1 text.", "Passage 2 text."],
@@ -197,9 +191,9 @@ class TestProseDiagnostic:
         assert "npc_coherence_flags" in result
         assert len(result["npc_coherence_flags"]) == 1
 
-    @patch("gm.local_gm.httpx.post")
-    def test_graceful_failure(self, mock_post):
-        mock_post.side_effect = Exception("Ollama down")
+    @patch("gm.local_gm.call_chat_json")
+    def test_graceful_failure(self, mock_llm):
+        mock_llm.side_effect = RuntimeError("LLM down")
         result = run_prose_diagnostic(
             ["Passage 1.", "Passage 2."],
             "No NPCs.",
@@ -308,24 +302,18 @@ class TestChoiceAnnotation:
         with pytest.raises(ValueError):
             _validate_annotation({"choice_target": "test"})  # missing priority + tags
 
-    @patch("gm.local_gm.httpx.post")
-    def test_annotate_choice_success(self, mock_post):
-        mock_response = MagicMock()
-        mock_response.status_code = 200
-        mock_response.json.return_value = {
-            "response": json.dumps({
-                "choice_target": "protect_doss",
-                "choice_method": "deception",
-                "sacrifice": "personal_risk",
-                "priority_revealed": "relationship_over_safety",
-                "npc_impact": {"doss": "trust_invested"},
-                "throughline_relevance": "high",
-                "throughline_direction": "loyalty",
-                "behavioral_tags": ["protective", "loyal"],
-            }),
+    @patch("gm.local_gm.call_chat_json")
+    def test_annotate_choice_success(self, mock_llm):
+        mock_llm.return_value = {
+            "choice_target": "protect_doss",
+            "choice_method": "deception",
+            "sacrifice": "personal_risk",
+            "priority_revealed": "relationship_over_safety",
+            "npc_impact": {"doss": "trust_invested"},
+            "throughline_relevance": "high",
+            "throughline_direction": "loyalty",
+            "behavioral_tags": ["protective", "loyal"],
         }
-        mock_response.raise_for_status = MagicMock()
-        mock_post.return_value = mock_response
 
         result = annotate_choice(
             selected_choice="Cover for Doss",
@@ -339,9 +327,9 @@ class TestChoiceAnnotation:
         assert result["priority_revealed"] == "relationship_over_safety"
         assert "protective" in result["behavioral_tags"]
 
-    @patch("gm.local_gm.httpx.post")
-    def test_annotate_choice_graceful_failure(self, mock_post):
-        mock_post.side_effect = Exception("Connection error")
+    @patch("gm.local_gm.call_chat_json")
+    def test_annotate_choice_graceful_failure(self, mock_llm):
+        mock_llm.side_effect = RuntimeError("Connection error")
         result = annotate_choice(
             selected_choice="Test",
             rejected_choices=["Other"],

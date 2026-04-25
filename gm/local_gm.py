@@ -1,15 +1,17 @@
 import json
 import logging
 import os
-import httpx
 from pathlib import Path
 from engine.character import Character
 from engine.equipment import build_equipment_check_summary
 from dataclasses import dataclass
 from typing import Optional
 
+from gm.llm_client import call_chat_json, TIER_FAST
+
 PROMPT_PATH = Path(__file__).parent / "prompts" / "check_decision.txt"
 ANNOTATION_PROMPT_PATH = Path(__file__).parent / "prompts" / "choice_annotation.txt"
+# Retained for back-compat with code that still references these.
 OLLAMA_URL  = os.getenv("OLLAMA_URL", "http://localhost:11434")
 LOCAL_MODEL = os.getenv("LOCAL_MODEL", "qwen3.5:9b")
 
@@ -167,42 +169,24 @@ def decide_check(
         player_action=player_action,
     )
 
-    last_error = None
-    for _ in range(max_retries):
-        try:
-            response = httpx.post(
-                f"{OLLAMA_URL}/api/generate",
-                json={
-                    "model":  LOCAL_MODEL,
-                    "prompt": f"/no_think\n{prompt}",
-                    "stream": False,
-                    "format": CHECK_DECISION_SCHEMA,
-                    "options": {"temperature": 0.1, "num_predict": 200},
-                },
-                timeout=30.0,
-            )
-            response.raise_for_status()
-            resp_json = response.json()
-            raw_text = resp_json["response"].strip()
-            if not raw_text and resp_json.get("thinking", "").strip():
-                raw_text = resp_json["thinking"].strip()
-
-            if raw_text.startswith("```"):
-                raw_text = raw_text.split("```")[1]
-                if raw_text.startswith("json"):
-                    raw_text = raw_text[4:]
-                raw_text = raw_text.strip()
-
-            return _validate_decision(json.loads(raw_text))
-
-        except (json.JSONDecodeError, KeyError, ValueError) as e:
-            last_error = e
-        except httpx.HTTPError as e:
-            raise LocalGMError(f"Ollama connection error: {e}")
-
-    raise LocalGMError(
-        f"Local model failed after {max_retries} attempts. Last error: {last_error}"
-    )
+    try:
+        data = call_chat_json(
+            tier=TIER_FAST,
+            purpose="decision",
+            user=prompt,
+            schema=CHECK_DECISION_SCHEMA,
+            temperature=0.1,
+            max_tokens=600,
+            timeout=30.0,
+            retries=max_retries,
+        )
+        return _validate_decision(data)
+    except RuntimeError as e:
+        raise LocalGMError(
+            f"Check decision failed after {max_retries} attempts: {e}"
+        )
+    except (ValueError, KeyError) as e:
+        raise LocalGMError(f"Check decision validation failed: {e}")
 
 
 VALID_SCENE_TYPES = {
@@ -320,36 +304,18 @@ def annotate_choice(
         throughline_question=throughline_question,
     )
 
-    is_qwen = "qwen" in LOCAL_MODEL.lower()
-    msg = f"/no_think\n{prompt}" if is_qwen else prompt
-
     try:
-        response = httpx.post(
-            f"{OLLAMA_URL}/api/generate",
-            json={
-                "model": LOCAL_MODEL,
-                "prompt": msg,
-                "stream": False,
-                "format": ANNOTATION_SCHEMA,
-                "options": {"temperature": 0.2, "num_predict": 300},
-            },
+        data = call_chat_json(
+            tier=TIER_FAST,
+            purpose="annotation",
+            user=prompt,
+            schema=ANNOTATION_SCHEMA,
+            temperature=0.2,
+            max_tokens=600,
             timeout=30.0,
+            retries=2,
         )
-        response.raise_for_status()
-        resp_json = response.json()
-        raw_text = resp_json["response"].strip()
-
-        if not raw_text and resp_json.get("thinking", "").strip():
-            raw_text = resp_json["thinking"].strip()
-
-        if raw_text.startswith("```"):
-            raw_text = raw_text.split("```")[1]
-            if raw_text.startswith("json"):
-                raw_text = raw_text[4:]
-            raw_text = raw_text.strip()
-
-        return _validate_annotation(json.loads(raw_text))
-
+        return _validate_annotation(data)
     except Exception as e:
         logging.warning(f"Choice annotation failed (non-critical): {e}")
         return None
@@ -444,36 +410,17 @@ def run_prose_diagnostic(
         "Return ONLY valid JSON."
     )
 
-    is_qwen = "qwen" in LOCAL_MODEL.lower()
-    msg = f"/no_think\n{prompt}" if is_qwen else prompt
-
     try:
-        response = httpx.post(
-            f"{OLLAMA_URL}/api/generate",
-            json={
-                "model": LOCAL_MODEL,
-                "prompt": msg,
-                "stream": False,
-                "format": PROSE_DIAGNOSTIC_SCHEMA,
-                "options": {"temperature": 0.1, "num_predict": 400},
-            },
+        return call_chat_json(
+            tier=TIER_FAST,
+            purpose="diagnostic",
+            user=prompt,
+            schema=PROSE_DIAGNOSTIC_SCHEMA,
+            temperature=0.1,
+            max_tokens=800,
             timeout=30.0,
+            retries=2,
         )
-        response.raise_for_status()
-        resp_json = response.json()
-        raw_text = resp_json["response"].strip()
-
-        if not raw_text and resp_json.get("thinking", "").strip():
-            raw_text = resp_json["thinking"].strip()
-
-        if raw_text.startswith("```"):
-            raw_text = raw_text.split("```")[1]
-            if raw_text.startswith("json"):
-                raw_text = raw_text[4:]
-            raw_text = raw_text.strip()
-
-        return json.loads(raw_text)
-
     except Exception as e:
         logging.warning(f"Prose diagnostic failed (non-critical): {e}")
         return None

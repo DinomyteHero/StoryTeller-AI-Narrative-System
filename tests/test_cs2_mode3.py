@@ -36,7 +36,7 @@ CAMPAIGN_DIR = Path(__file__).parent.parent / "data" / "campaigns"
 @pytest.fixture
 def nar_shaddaa_data() -> dict:
     """Load the Nar Shaddaa Job campaign spine JSON."""
-    path = CAMPAIGN_DIR / "nar_shaddaa_job.json"
+    path = CAMPAIGN_DIR / "shadows_of_the_praxeum.json"
     with open(path) as f:
         return json.load(f)
 
@@ -238,7 +238,7 @@ class TestFinalize:
         spine, report = finalize_spine(nar_shaddaa_data)
         assert report.passed
         assert isinstance(spine, CampaignSpine)
-        assert spine.name == "The Nar Shaddaa Job"
+        assert spine.name == "Shadows of the Praxeum"
 
     def test_finalize_with_seed(self, nar_shaddaa_data):
         """Finalize attaches generation metadata when seed provided."""
@@ -359,8 +359,8 @@ class TestStudioRoutes:
         resp = client.get(f"/studio/campaigns/{campaign_id}")
         assert resp.status_code == 200
         data = resp.json()
-        assert data["name"] == "The Nar Shaddaa Job"
-        assert data["spine"]["name"] == "The Nar Shaddaa Job"
+        assert data["name"] == "Shadows of the Praxeum"
+        assert data["spine"]["name"] == "Shadows of the Praxeum"
 
     def test_campaign_not_found(self, client):
         """GET /studio/campaigns/{id} with non-existent ID returns 404."""

@@ -53,10 +53,19 @@ NPC_VOICE_PROMPT_PATH = PROMPT_DIR / "npc_voice_gen.txt"
 
 MODE1_PROMPT_PATH = PROMPT_DIR / "mode1_generate.txt"
 
-CLOUD_PROVIDER = os.getenv("CLOUD_PROVIDER", "openai")
-CLOUD_MODEL = os.getenv("CLOUD_MODEL", "gpt-5.2")
-OLLAMA_URL = os.getenv("OLLAMA_URL", "http://localhost:11434")
-LOCAL_MODEL = os.getenv("LOCAL_MODEL", "qwen3.5:9b")
+from gm.llm_client import (
+    call_chat,
+    make_client as _make_unified_client,
+    resolve_model,
+    TIER_QUALITY,
+    is_local_backend,
+)
+
+# Retained for back-compat with existing telemetry that records model_used.
+CLOUD_PROVIDER = os.getenv("CLOUD_PROVIDER", "openrouter")
+CLOUD_MODEL    = os.getenv("CLOUD_MODEL", "")
+OLLAMA_URL     = os.getenv("OLLAMA_URL", "http://localhost:11434")
+LOCAL_MODEL    = os.getenv("LOCAL_MODEL", "qwen3.5:9b")
 NARRATIVE_BACKEND = os.getenv("NARRATIVE_BACKEND", "cloud")
 
 PROVIDER_BASE_URLS = {
@@ -65,25 +74,27 @@ PROVIDER_BASE_URLS = {
 }
 
 
-# ── LLM Client ───────────────────────────────────────────────────────
+def studio_model() -> str:
+    """Return the model studio is currently using (for telemetry/logging)."""
+    return resolve_model(tier=TIER_QUALITY, purpose="studio")
+
+
+# ── LLM Client (back-compat shims; route through gm.llm_client) ──────
 
 
 def _get_cloud_client() -> OpenAI:
-    """Get an OpenAI-compatible client based on environment config."""
-    base_url = PROVIDER_BASE_URLS.get(CLOUD_PROVIDER)
-    return OpenAI(base_url=base_url)
+    """Back-compat shim — use gm.llm_client.make_client() in new code."""
+    return _make_unified_client()
 
 
 def _get_local_client() -> OpenAI:
-    """Get an Ollama-compatible OpenAI client."""
-    return OpenAI(base_url=f"{OLLAMA_URL}/v1", api_key="ollama")
+    """Back-compat shim — use gm.llm_client.make_client() in new code."""
+    return _make_unified_client()
 
 
 def _get_client() -> tuple[OpenAI, str]:
-    """Get the appropriate client and model based on backend config."""
-    if NARRATIVE_BACKEND == "local":
-        return _get_local_client(), LOCAL_MODEL
-    return _get_cloud_client(), CLOUD_MODEL
+    """Back-compat shim. Returns (client, model) for studio quality tier."""
+    return _make_unified_client(), studio_model()
 
 
 def _call_llm(
@@ -95,6 +106,9 @@ def _call_llm(
     temperature: float = 0.7,
 ) -> str:
     """Make a single LLM call and return the response text.
+
+    Studio runs on the QUALITY tier (DeepSeek V4 Pro by default). The
+    STUDIO_MODEL env var can override per-call-site.
 
     Args:
         system_prompt: System message content.
@@ -109,32 +123,17 @@ def _call_llm(
     Raises:
         RuntimeError: If the LLM call fails after retries.
     """
-    client, model = _get_client()
-
-    kwargs: dict = {
-        "model": model,
-        "messages": [
-            {"role": "system", "content": system_prompt},
-            {"role": "user", "content": user_prompt},
-        ],
-        "max_tokens": max_tokens,
-        "temperature": temperature,
-    }
-    if seed is not None:
-        kwargs["seed"] = seed
-
-    for attempt in range(3):
-        try:
-            response = client.chat.completions.create(**kwargs)
-            content = response.choices[0].message.content
-            if content is None:
-                raise RuntimeError("LLM returned empty content")
-            return content.strip()
-        except Exception as e:
-            if attempt == 2:
-                raise RuntimeError(
-                    f"LLM call failed after 3 attempts: {e}"
-                ) from e
+    return call_chat(
+        tier=TIER_QUALITY,
+        purpose="studio",
+        system=system_prompt,
+        user=user_prompt,
+        seed=seed,
+        max_tokens=max_tokens,
+        temperature=temperature,
+        retries=3,
+        timeout=120.0,
+    )
 
 
 # ── Prompt assembly ───────────────────────────────────────────────────
@@ -595,7 +594,7 @@ def generate_from_brief(
             spine_data["generation_metadata"] = build_generation_metadata(
                 master_seed=master_seed,
                 stage_seeds=stage_seeds,
-                model_used=CLOUD_MODEL,
+                model_used=studio_model(),
                 generation_mode="mode2",
             )
 
@@ -725,7 +724,7 @@ def generate_mode1(
             spine_data["generation_metadata"] = build_generation_metadata(
                 master_seed=master_seed,
                 stage_seeds=stage_seeds,
-                model_used=CLOUD_MODEL,
+                model_used=studio_model(),
                 generation_mode="mode1",
             )
 

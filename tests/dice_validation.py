@@ -130,10 +130,10 @@ def test_die_tables_registry():
 
 # ── Character loading test ───────────────────────────────────────────────────
 
-def test_load_keth_varso():
+def test_load_praxeum_student():
     json_path = os.path.join(
         os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
-        "data", "characters", "keth_varso.json"
+        "data", "characters", "praxeum_student.json"
     )
     with open(json_path) as f:
         data = json.load(f)
@@ -156,7 +156,7 @@ def test_keth_deception_pool():
     """
     json_path = os.path.join(
         os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
-        "data", "characters", "keth_varso.json"
+        "data", "characters", "praxeum_student.json"
     )
     with open(json_path) as f:
         data = json.load(f)

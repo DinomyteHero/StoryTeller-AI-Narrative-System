@@ -56,6 +56,24 @@ Analyze the narration and produce a JSON object with these sections:
      * Adjust based on pacing: if the player is ahead of expected turn count, use smaller deltas. If behind, use larger deltas.
    - reasoning: brief explanation of your assessment
 
+4. REPUTATION EVENT (most turns: null) — Did the player do something this
+   turn that people beyond the immediate scene could plausibly learn about?
+   A reputation event requires BOTH:
+   - At least one witness — an NPC present, a public location, or
+     consequences visible to others.
+   - Significance enough that someone would mention it to someone else
+     (helped, betrayed, fought, impressed, embarrassed, offended).
+   If both conditions are met, set:
+     - reputation_event: a one-sentence summary in third person
+       (e.g. "Helped Reeska's crew through the customs sweep without
+       asking for payment").
+     - faction_tags: list of faction or location identifiers that
+       determine where this travels (e.g. ["smuggler_network",
+       "nar_shaddaa_promenade"]).
+   If either condition is not met, set reputation_event to null.
+   Most turns produce null. Do not invent reputation events to fill
+   the slot.
+
 {dramatic_mission_block}
 
 {contradiction_tracking_block}
@@ -83,6 +101,8 @@ Return ONLY valid JSON matching this structure:
     "progress_delta": 0.05,
     "reasoning": "..."
   }},
+  "reputation_event": null,
+  "faction_tags": [],
   "dramatic_mission": {{
     "selected_mission": "response",
     "mission_sentence": "The character processes the consequences of the previous turn."

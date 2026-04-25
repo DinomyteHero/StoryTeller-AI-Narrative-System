@@ -53,6 +53,10 @@ LOADOUT:
 
 {aspiration_echo_block}
 
+{identity_drift_block}
+
+{introspection_trigger_block}
+
 {depth_card_block}
 
 ═══════════════════════════════════════════
@@ -63,6 +67,8 @@ STORY POSITION: {story_position}
 THROUGHLINE: {throughline_question}
 TENSION LEVEL: {tension_level}
 
+{era_voice_block}
+
 Never use the words "act," "chapter," "session," "turn," or any
 structural game terminology in your prose. The player is reading a
 story, not navigating a game structure.
@@ -72,6 +78,8 @@ STORY SO FAR:
 
 OPEN THREADS:
 {open_threads}
+
+{reputation_block}
 
 {pacing_block}
 
@@ -174,6 +182,8 @@ Then provide 2-4 choices following these rules:
 {dramatic_mission_block}
 
 {contradiction_arc_block}
+
+{behavioral_availability_block}
 
 {voice_mode_instruction}
 

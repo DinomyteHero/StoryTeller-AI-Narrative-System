@@ -16,11 +16,11 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Optional
 
-import httpx
-
 from gm.context import ArcState, NPCState, ThreadState
+from gm.llm_client import call_chat_json, TIER_FAST, TIER_QUALITY
 
 PROMPT_PATH = Path(__file__).resolve().parent.parent / "gm" / "prompts" / "reconciliation.txt"
+# Retained for back-compat with code that still references these constants.
 OLLAMA_URL  = os.getenv("OLLAMA_URL", "http://localhost:11434")
 LOCAL_MODEL = os.getenv("LOCAL_MODEL", "qwen3.5:9b")
 
@@ -61,6 +61,17 @@ RECONCILIATION_SCHEMA = {
                 "reasoning": {"type": "string"},
             },
             "required": ["anchor_proximity", "progress_delta"],
+        },
+        "reputation_event": {
+            "type": ["string", "null"],
+            "description": "One-sentence summary of a publicly-visible "
+                           "notable action this turn, or null. Most turns: null.",
+        },
+        "faction_tags": {
+            "type": "array",
+            "items": {"type": "string"},
+            "description": "Faction/location identifiers determining where "
+                           "the reputation event travels.",
         },
         "contradiction_tracking": {
             "type": "object",
@@ -122,6 +133,10 @@ class ReconciliationResult:
     contradiction_tracking: dict = field(default_factory=lambda: {
         "contradiction_engaged": False, "arc_movement": "none", "arc_evidence": "",
     })
+    # Reputation echo system (Game Mechanics §1, §11). Most turns: empty.
+    # Caller (api/game_routes.py) writes to reputation_log when present.
+    reputation_event: Optional[str] = None
+    faction_tags: list[str] = field(default_factory=list)
 
 
 @dataclass
@@ -143,6 +158,27 @@ class BetweenActResult:
     behavioral_fingerprint: Optional[dict] = None            # Phase 13: aggregated choice annotations (§24)
     time_skip_data: Optional[dict] = None                    # Phase 17: time skip config for API (§19)
     steps_completed: list[str] = field(default_factory=list)
+
+
+def is_silent_reconciliation(recon: ReconciliationResult) -> bool:
+    """Detect a silent reconciliation result — one that the local model
+    returned but provided no actionable signal: no NPC updates, no thread
+    movement, no reputation event.
+
+    Used by the selective escalation pathway. Distinct from
+    `count_state_deltas` because the default `progress_delta=0.05` would
+    otherwise mask a no-op result as a one-delta turn. Two consecutive
+    silent results suggest the local model has stopped reading the prompt;
+    we then rerun through the quality tier.
+    """
+    if recon.npc_updates:
+        return False
+    tu = recon.thread_updates or {}
+    if any(tu.get(k) for k in ("threads_advanced", "threads_resolved", "threads_opened")):
+        return False
+    if recon.reputation_event:
+        return False
+    return True
 
 
 def count_state_deltas(recon: ReconciliationResult) -> dict:
@@ -356,6 +392,7 @@ def reconcile_turn(
     spine_act: dict,
     max_retries: int = 2,
     spine: Optional[dict] = None,
+    tier: str = TIER_FAST,
 ) -> ReconciliationResult:
     """
     Orchestrate the local model reconciliation call and parse the response.
@@ -467,49 +504,114 @@ def reconcile_turn(
         no_new_exposition_block=no_new_exposition_block,
     )
 
-    last_error = None
-    for _ in range(max_retries + 1):
+    try:
+        data = call_chat_json(
+            tier=tier,
+            purpose="reconciliation",
+            user=prompt,
+            schema=RECONCILIATION_SCHEMA,
+            temperature=0.1,
+            max_tokens=1500,
+            timeout=45.0,
+            retries=max_retries + 1,
+        )
+        return _validate_result(data)
+    except Exception as e:
+        # Graceful degradation: state updates are non-critical (mechanical
+        # outcomes are already resolved by code). Returning defaults lets the
+        # turn complete; the next turn re-attempts reconciliation fresh.
+        logging.error(f"Reconciliation failed after {max_retries + 1} attempts: {e}")
+        return ReconciliationResult()
+
+
+def reconcile_turn_with_escalation(
+    *,
+    session_id: str,
+    turn_number: int,
+    prior_zero_delta_count: int,
+    narration: str,
+    player_action: str,
+    check_result: str,
+    active_npcs: list[NPCState],
+    arc: ArcState,
+    spine_act: dict,
+    spine: Optional[dict] = None,
+    max_retries: int = 2,
+) -> tuple[ReconciliationResult, int, bool]:
+    """Reconcile with selective escalation when the fast tier silently
+    returns zero state deltas for two turns in a row.
+
+    Reconciliation is allowed to be sparse — many turns are quiet, and a
+    zero-delta result is legitimate. But two consecutive empty results
+    suggest the local model has drifted away from the prompt, so we rerun
+    once through the quality tier and emit a telemetry event so the eval
+    harness can flag the pattern.
+
+    Returns:
+      (result, new_consecutive_zero_delta_count, escalated)
+    """
+    # First attempt — fast tier (the configured default for reconciliation).
+    result = reconcile_turn(
+        narration=narration,
+        player_action=player_action,
+        check_result=check_result,
+        active_npcs=active_npcs,
+        arc=arc,
+        spine_act=spine_act,
+        max_retries=max_retries,
+        spine=spine,
+        tier=TIER_FAST,
+    )
+    silent = is_silent_reconciliation(result)
+    fast_deltas = count_state_deltas(result)
+
+    # Two-strike escalation: only escalate when the prior turn was also empty.
+    # Single empty results are normal and don't warrant the higher cost.
+    if silent and prior_zero_delta_count >= 1:
         try:
-            is_qwen = "qwen" in LOCAL_MODEL.lower()
-            msg = f"/no_think\n{prompt}" if is_qwen else prompt
+            from state.telemetry import NarrativeEvent, emit_event
+        except Exception:
+            NarrativeEvent = None  # type: ignore
+            emit_event = None      # type: ignore
 
-            response = httpx.post(
-                f"{OLLAMA_URL}/api/generate",
-                json={
-                    "model": LOCAL_MODEL,
-                    "prompt": msg,
-                    "stream": False,
-                    "format": RECONCILIATION_SCHEMA,
-                    "options": {"temperature": 0.1, "num_predict": 500},
-                },
-                timeout=30.0,
-            )
-            response.raise_for_status()
-            resp_json = response.json()
-            raw_text = resp_json["response"].strip()
+        quality_result = reconcile_turn(
+            narration=narration,
+            player_action=player_action,
+            check_result=check_result,
+            active_npcs=active_npcs,
+            arc=arc,
+            spine_act=spine_act,
+            max_retries=max_retries,
+            spine=spine,
+            tier=TIER_QUALITY,
+        )
+        quality_silent = is_silent_reconciliation(quality_result)
 
-            # Handle thinking mode producing empty response
-            if not raw_text and resp_json.get("thinking", "").strip():
-                raw_text = resp_json["thinking"].strip()
+        if NarrativeEvent and emit_event:
+            try:
+                emit_event(NarrativeEvent(
+                    session_id=session_id,
+                    turn_number=turn_number,
+                    event_type="reconciliation_escalated",
+                    event_data={
+                        "prior_zero_delta_count": prior_zero_delta_count,
+                        "fast_silent":            True,
+                        "quality_silent":         quality_silent,
+                        "recovered":              not quality_silent,
+                    },
+                ))
+            except Exception as e:
+                logging.warning(f"reconciliation_escalated telemetry failed: {e}")
 
-            # Strip markdown code fences
-            if raw_text.startswith("```"):
-                raw_text = raw_text.split("```")[1]
-                if raw_text.startswith("json"):
-                    raw_text = raw_text[4:]
-                raw_text = raw_text.strip()
+        # If the quality run found something the fast tier missed, it wins.
+        # Otherwise the streak is real (genuinely quiet turn) — keep the
+        # fast result and reset the counter so we don't escalate every turn.
+        if not quality_silent:
+            return quality_result, 0, True
+        return result, 0, True
 
-            data = json.loads(raw_text)
-            return _validate_result(data)
-
-        except (json.JSONDecodeError, KeyError, ValueError) as e:
-            last_error = e
-        except httpx.HTTPError as e:
-            logging.error(f"Reconciliation Ollama error: {e}")
-            last_error = e
-
-    logging.error(f"Reconciliation failed after {max_retries + 1} attempts: {last_error}")
-    return ReconciliationResult()  # graceful degradation — return defaults
+    new_count = (prior_zero_delta_count + 1) if silent else 0
+    return result, new_count, False
 
 
 def _validate_result(data: dict) -> ReconciliationResult:
@@ -564,12 +666,20 @@ def _validate_result(data: dict) -> ReconciliationResult:
         "arc_evidence": ct_raw.get("arc_evidence", ""),
     }
 
+    # Reputation event — most turns this is null
+    rep_raw = data.get("reputation_event")
+    reputation_event = rep_raw.strip() if isinstance(rep_raw, str) and rep_raw.strip() else None
+    raw_tags = data.get("faction_tags", [])
+    faction_tags = [str(t).strip() for t in raw_tags if isinstance(t, (str, int))] if isinstance(raw_tags, list) else []
+
     return ReconciliationResult(
         npc_updates=npc_updates,
         thread_updates=thread_updates,
         story_progress=story_progress,
         dramatic_mission=dramatic_mission,
         contradiction_tracking=contradiction_tracking,
+        reputation_event=reputation_event,
+        faction_tags=faction_tags,
     )
 
 
@@ -1095,6 +1205,14 @@ def run_between_act_pipeline(
                 arc_state["anchors_completed"].append(
                     spine["acts"][completed_act_number - 1].get("anchor", "")
                 )
+                # CS-6 per-act resets: pinch point can fire once per act,
+                # consecutive_zero_delta is per-act, foreshadow setups
+                # delivered are per-spine but turn counters reset.
+                arc_state["pinch_point_fired"] = False
+                arc_state["consecutive_zero_delta_turns"] = 0
+                arc_state["consecutive_no_check_turns"] = 0
+                arc_state["last_turn_pinch_fired"] = False
+                arc_state["last_turn_had_despair"] = False
                 # Carry forward dynamic threads that weren't resolved
                 # (closed_threads and dynamic_threads persist as-is)
 
