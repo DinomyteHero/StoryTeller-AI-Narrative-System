@@ -1,7 +1,7 @@
 # Storyteller V3 — Project State Matrix
 
-**Version:** 1.6
-**Date:** April 8, 2026
+**Version:** 1.7
+**Date:** April 25, 2026
 **Purpose:** Single-page snapshot of every major capability's status.
 This is a point-in-time view — for authoritative item-level status,
 see `backlog.md`. Prevents the most common review error: mistaking a
@@ -23,11 +23,15 @@ Deferred Design and Logic Analysis v1.0 (in `docs/reference/`).
 
 **Implementation status as of this version:** Milestones 0-3 complete.
 Milestone 4 partial (Phase 17 complete, Phases 18-22 not started).
-Campaign Studio CS-1 through CS-6 complete.
+Campaign Studio CS-1 through CS-6 complete. April 2026 architecture
+pivot collapsed local/cloud split into a fast/quality tier abstraction
+via the unified `gm/llm_client.py` and wired the reputation echo,
+behavioral availability, and era-voice systems end-to-end.
 
-**Codebase metrics:** ~18,600 lines application code, ~10,300 lines
-test code, 20 test files. Documentation: 15 active files in `docs/`
-plus 6 in `docs/reference/`.
+**Codebase metrics:** ~19,000 lines application code, ~10,300 lines
+test code, 20 test files. 653 tests pass + 12 cleanly skip (campaign-
+specific fixtures for the removed Nar Shaddaa / Echoes spines).
+Documentation: 16 active files in `docs/` plus 6 in `docs/reference/`.
 
 ---
 
@@ -108,7 +112,9 @@ plus 6 in `docs/reference/`.
 | Act boundary detection + transition | §13 | ✓ | ✓ Built | Phase 7 |
 | Within-act pacing arc (hook → turn → cliffhanger) | §13 | ✓ | ✓ Built | Phase 7 |
 | Turn counter / PacingSignal model | — | ✓ | ✓ Built | Phase 7 |
-| Reputation echo delivery | §1, §11 | ✓ | Schema only (runtime pending) | Phase 7 |
+| Reputation echo delivery (runtime) | §1, §11 | ✓ | ✓ Built | Architecture pivot (Apr 2026) |
+| Behavioral availability signal (annotation history → choice weighting) | §7, §16 | ✓ | ✓ Built | Architecture pivot (Apr 2026) |
+| Era voice anchoring (period-specific tone + period_avoid) | §4 | ✓ | ✓ Built | Architecture pivot (Apr 2026) |
 
 ---
 
@@ -207,7 +213,28 @@ plus 6 in `docs/reference/`.
 | Behavioral envelope enforcement | §11 | ✓ | Not in V1 | Post-Milestone 1 |
 | Sustained 5-turn play quality test | — | ✓ | Not in V1 | Phase 1 deployment |
 | Reconciliation error budget test | — | ✓ | ✓ Built | Phase 7 |
+| Selective reconciliation escalation (zero-delta detection) | — | ✓ | ✓ Built | Architecture pivot (Apr 2026) |
 | Prologue inference robustness | §8 | **Spec complete** | Not in V1 | Phase 18 |
+
+---
+
+## Infrastructure
+
+| Capability | Vision | Designed | V1 | Build Phase |
+|------------|--------|----------|-----|-------------|
+| Unified LLM client (`gm/llm_client.py`) | — | ✓ | ✓ Built | Architecture pivot (Apr 2026) |
+| Two-tier routing (fast=Flash, quality=Pro) | — | ✓ | ✓ Built | Architecture pivot (Apr 2026) |
+| Provider/model capability registry (reasoning syntax) | — | ✓ | ✓ Built | Architecture pivot (Apr 2026) |
+| OpenRouter `require_parameters` + `data_collection=deny` | — | ✓ | ✓ Built | Architecture pivot (Apr 2026) |
+| Strict `json_schema` response_format with json_object fallback | — | ✓ | ✓ Built | Architecture pivot (Apr 2026) |
+| `/health` endpoint surfacing routing config | — | ✓ | ✓ Built | Architecture pivot (Apr 2026) |
+| Ollama optional offline path | — | ✓ | ✓ Built | Phase 2 (still supported) |
+| Identity drift surfacing policy (turn-to-turn) | §8, §10 | ✓ | ✓ Built | Audit closure (Apr 2026) |
+| Introspection trigger conditions (explicit) | §7 | ✓ | ✓ Built | Audit closure (Apr 2026) |
+| Path differentiation validation (Gate 1/3 extensions) | §8 | ✓ | ✓ Built | Audit closure (Apr 2026) |
+| CS-6 pinch point firing (runtime) | — | ✓ | ✓ Built | Audit closure (Apr 2026) |
+| CS-6 depth card injection (runtime) | — | ✓ | ✓ Built | Audit closure (Apr 2026) |
+| CS-6 voice mode mapping (mission → voice) | — | ✓ | ✓ Built | Audit closure (Apr 2026) |
 
 ---
 
@@ -221,10 +248,13 @@ explained by intentional deferral or architecture reservation.
 | Choice quality validation | Validation / enforcement | No post-generation validator rejects weak choices before player sees them | **Spec complete** — `specialist/choice-quality-validation.md` v1.0. Awaits implementation (late Phase 3 or Phase 7, contingent on calibration). |
 | Prologue inference robustness | Validation / enforcement | Contradiction handling, anti-gaming, and per-axis confidence rules were under-specified | **Spec complete** — `specialist/prologue-system.md` v1.0. Awaits implementation (Phase 18). |
 | Import package quality | Validation / enforcement | Format was specified, quality standard was not | **Spec complete** — `specialist/import-package-quality.md` v1.0. Awaits implementation (Phase 19). |
-| Path differentiation proof | Validation / enforcement | No concrete test proves allegiances produce structurally different experiences beyond narrative wrappers | Open — integration coverage audit needed in Campaign Studio validation. Backlog items 3.33 and 3.34 partially address this. |
-| Identity drift surfacing | Experience surfacing | System tracks identity accumulation well at act boundaries but does not guarantee the player feels drift during turn-to-turn play | Open — requires drift surface policy (prompt engineering spec, Phase 7+). |
-| Introspection trigger logic | Experience surfacing | Introspection is supported in prompts and context routing but the trigger for when a turn should become introspective is implicit | Open — requires explicit trigger conditions (Phase 7+). |
+| Path differentiation proof | Validation / enforcement | No concrete test proves allegiances produce structurally different experiences beyond narrative wrappers | **Closed (Apr 2026)** — backlog 3.33 and 3.34 implemented in `studio/validate.py` (Gate 1 integration layer + Gate 3 allegiance diversity, 8 pure-Python checks via Jaccard token similarity). |
+| Identity drift surfacing | Experience surfacing | System tracks identity accumulation well at act boundaries but does not guarantee the player feels drift during turn-to-turn play | **Closed (Apr 2026)** — `compute_identity_drift_cue` in `gm/context.py` surfaces a one-line interior cue when morality / conflict / motivation deltas cross thresholds (5-turn cooldown). Wired at all 4 turn handlers. |
+| Introspection trigger logic | Experience surfacing | Introspection is supported in prompts and context routing but the trigger for when a turn should become introspective is implicit | **Closed (Apr 2026)** — `compute_introspection_trigger` in `gm/context.py` has three explicit conditions: post-Despair, post-pinch-point, mid-act dry spell. |
 | Missing data directories | Infrastructure | `data/evaluation_pairs/` and `data/canon_profiles/` referenced in design docs but directories do not exist in repo | Future — create when Phase 21 or trained evaluator work begins. No impact on current functionality. |
+| CS-6 closure heartbeat runtime | Runtime wiring | `check_closure_heartbeat` exists with unit tests but is not called from the live turn loop | Open — needs per-thread last-change tracking on `arc_state`. |
+| CS-6 foreshadow setup/payoff runtime | Runtime wiring | `ForeshadowLink` schema + setup/payoff tracking authored but no runtime detector | Open — needs setup-delivery detection + payoff trigger logic. |
+| CS-6 contradiction arc accumulation runtime | Runtime wiring | Reconciliation returns per-turn `contradiction_tracking` but nothing aggregates it into `contradiction_arc_block` | Open — needs a multi-turn aggregator that builds the per-act block. |
 
 ---
 
@@ -245,6 +275,31 @@ explained by intentional deferral or architecture reservation.
 ---
 
 ## Revision History
+
+**v1.7 — Architecture pivot + audit closures (April 25, 2026)**
+
+Synced after the DeepSeek V4 architecture pivot and a follow-up audit
+closure pass. Reputation echo runtime, behavioral availability, and
+era-voice anchoring promoted from "schema only" / unlisted to
+✓ Built across the matrix. New Infrastructure section captures the
+unified LLM client (`gm/llm_client.py`), tier model, provider/model
+capability registry, OpenRouter provider preferences, strict
+`json_schema` response_format, and `/health` routing endpoint.
+
+Three open audit findings closed: identity drift surfacing
+(`compute_identity_drift_cue`), introspection trigger logic
+(`compute_introspection_trigger`), and path differentiation
+(backlog 3.33 + 3.34, eight new pure-Python checks in `studio/validate.py`).
+
+CS-6 runtime wiring discovered as a hidden gap — three features
+(pinch point, depth card, voice mode) had unit tests but were never
+invoked from `api/game_routes.py`. Now wired and tested. Three more
+CS-6 features (closure heartbeat, foreshadow, contradiction arc
+accumulation) remain unwired and are tracked as new audit findings.
+
+Selective reconciliation escalation added to the validation table.
+Test counts updated: 704 pass + 12 cleanly skip + 0 fail (was 653 +
+12 + 0 immediately post-pivot; +51 tests across four new files).
 
 **v1.6 — CS-6 and metrics update (April 8, 2026)**
 
@@ -289,5 +344,5 @@ Initial comprehensive capability matrix.
 
 ---
 
-*Storyteller V3 — Project State Matrix v1.6*
+*Storyteller V3 — Project State Matrix v1.7*
 *What's promised. What's designed. What's built. What's next.*
