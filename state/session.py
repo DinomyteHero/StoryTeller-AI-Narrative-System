@@ -5,6 +5,7 @@ Provides everything needed to rebuild a ContextPackage from the database.
 """
 
 import json
+import re
 import sqlite3
 import uuid
 from datetime import datetime, timezone
@@ -108,22 +109,90 @@ def get_recent_turns(session_id: str, limit: int = 5) -> list[TurnMemory]:
     for row in reversed(rows):
         result_data = (json.loads(row["roll_result_json"])
                        if row["roll_result_json"] else {})
-        # Extract first 2-3 sentences as narration excerpt
         narration = row["narration"] or ""
-        sentences = narration.split(". ")
-        excerpt = ". ".join(sentences[:3]).strip()
-        if excerpt and not excerpt.endswith("."):
-            excerpt += "."
+        excerpt = _build_narration_excerpt(narration)
         turns.append(TurnMemory(
             turn_number=row["turn_number"],
             player_action=row["player_action"],
             narration_excerpt=excerpt,
             check_made=row["check_skill"],
-            dice_result=result_data.get("narrative_label"),
+            dice_result=_dice_label_from_roll_json(result_data),
             outcome_quadrant=result_data.get("outcome_quadrant"),
             meaningful_choice_note=row["meaningful_note"] or "",
         ))
     return turns
+
+
+def _split_sentences(text: str) -> list[str]:
+    normalized = " ".join((text or "").split())
+    if not normalized:
+        return []
+    return [
+        sentence.strip()
+        for sentence in re.split(r"(?<=[.!?])\s+", normalized)
+        if sentence.strip()
+    ]
+
+
+def _build_narration_excerpt(
+    narration: str,
+    *,
+    head_sentences: int = 2,
+    tail_sentences: int = 4,
+    max_chars: int = 1100,
+) -> str:
+    """Preserve both setup and final state from a generated passage."""
+    sentences = _split_sentences(narration)
+    if not sentences:
+        return ""
+    if len(sentences) <= head_sentences + tail_sentences:
+        excerpt = " ".join(sentences)
+    else:
+        head = " ".join(sentences[:head_sentences])
+        tail = " ".join(sentences[-tail_sentences:])
+        excerpt = f"{head} ... FINAL BEAT: {tail}"
+
+    if len(excerpt) <= max_chars:
+        return excerpt
+
+    tail = " ".join(sentences[-tail_sentences:])
+    head_budget = max(120, max_chars - len(tail) - len(" ... FINAL BEAT: "))
+    head = " ".join(sentences[:head_sentences])[:head_budget].rstrip()
+    return f"{head} ... FINAL BEAT: {tail}"
+
+
+def _dice_label_from_roll_json(result_data: dict) -> str | None:
+    if not result_data:
+        return None
+    net_successes = int(result_data.get("net_successes", 0) or 0)
+    net_advantages = int(result_data.get("net_advantages", 0) or 0)
+    triumphs = int(result_data.get("triumphs", 0) or 0)
+    despairs = int(result_data.get("despairs", 0) or 0)
+
+    parts = []
+    if net_successes > 0:
+        suffix = "es" if net_successes != 1 else ""
+        parts.append(f"SUCCEEDED ({net_successes} net success{suffix})")
+    elif net_successes < 0:
+        failures = abs(net_successes)
+        suffix = "s" if failures != 1 else ""
+        parts.append(f"FAILED ({failures} net failure{suffix})")
+    else:
+        parts.append("FAILED (tied)")
+
+    if net_advantages > 0:
+        suffix = "s" if net_advantages != 1 else ""
+        parts.append(f"with {net_advantages} Advantage{suffix}")
+    elif net_advantages < 0:
+        threats = abs(net_advantages)
+        suffix = "s" if threats != 1 else ""
+        parts.append(f"with {threats} Threat{suffix}")
+
+    if triumphs:
+        parts.append(f"and {triumphs} TRIUMPH")
+    if despairs:
+        parts.append(f"and {despairs} DESPAIR")
+    return " ".join(parts)
 
 
 def get_act_summaries(session_id: str) -> str:

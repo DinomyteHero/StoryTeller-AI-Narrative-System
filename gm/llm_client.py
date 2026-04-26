@@ -21,7 +21,8 @@ Primary (preferred):
 
 Per-call-site overrides (optional, named by purpose):
   NARRATION_MODEL, DECISION_MODEL, ANNOTATION_MODEL, RECONCILIATION_MODEL,
-  DIAGNOSTIC_MODEL, MILESTONE_MODEL, STUDIO_MODEL
+  DIAGNOSTIC_MODEL, MILESTONE_MODEL, STUDIO_MODEL, MEMORY_MODEL,
+  CHOICE_QUALITY_MODEL, DRIFT_MODEL
 
 Legacy (still honored for backwards compatibility):
   CLOUD_MODEL          → if set, used as quality default
@@ -42,6 +43,7 @@ from __future__ import annotations
 import json
 import logging
 import os
+import time
 from typing import Iterator, Optional
 
 import httpx
@@ -84,13 +86,16 @@ LOCAL_QUALITY_MODEL = os.getenv("LOCAL_QUALITY_MODEL", os.getenv("LOCAL_NARRATIO
 
 # Per-call-site overrides — empty string means "fall through to tier default"
 PURPOSE_OVERRIDES = {
-    "narration":      os.getenv("NARRATION_MODEL",      ""),
+    "narration":      os.getenv("NARRATION_MODEL",      FAST_MODEL),
     "decision":       os.getenv("DECISION_MODEL",       ""),
     "annotation":     os.getenv("ANNOTATION_MODEL",     ""),
     "reconciliation": os.getenv("RECONCILIATION_MODEL", ""),
     "diagnostic":     os.getenv("DIAGNOSTIC_MODEL",     ""),
     "milestone":      os.getenv("MILESTONE_MODEL",      ""),
     "studio":         os.getenv("STUDIO_MODEL",         ""),
+    "memory":         os.getenv("MEMORY_MODEL",         ""),
+    "choice_quality": os.getenv("CHOICE_QUALITY_MODEL", ""),
+    "drift":          os.getenv("DRIFT_MODEL",          ""),
 }
 
 
@@ -110,11 +115,49 @@ OPENROUTER_APP_URL  = os.getenv("OPENROUTER_APP_URL",
 #   "allow" permits them (cheaper). Default to deny for production safety.
 OPENROUTER_REQUIRE_PARAMS = os.getenv("OPENROUTER_REQUIRE_PARAMS", "true").lower() == "true"
 OPENROUTER_DATA_COLLECTION = os.getenv("OPENROUTER_DATA_COLLECTION", "deny")  # deny | allow
+OPENROUTER_PROVIDER_ORDER = [
+    provider.strip()
+    for provider in os.getenv("OPENROUTER_PROVIDER_ORDER", "").split(",")
+    if provider.strip()
+]
+OPENROUTER_PROVIDER_ONLY = [
+    provider.strip()
+    for provider in os.getenv("OPENROUTER_PROVIDER_ONLY", "").split(",")
+    if provider.strip()
+]
+OPENROUTER_PROVIDER_IGNORE = [
+    provider.strip()
+    for provider in os.getenv("OPENROUTER_PROVIDER_IGNORE", "").split(",")
+    if provider.strip()
+]
+OPENROUTER_PROVIDER_SORT = os.getenv("OPENROUTER_PROVIDER_SORT", "").strip()
+_ALLOW_FALLBACKS_RAW = os.getenv("OPENROUTER_ALLOW_FALLBACKS", "").strip().lower()
+OPENROUTER_ALLOW_FALLBACKS = (
+    None if not _ALLOW_FALLBACKS_RAW else _ALLOW_FALLBACKS_RAW == "true"
+)
 
 
 # ── Token budgets ────────────────────────────────────────────────────
 
-MAX_NARRATION_TOKENS = int(os.getenv("MAX_COMPLETION_TOKENS", "16000"))
+MAX_NARRATION_TOKENS = int(os.getenv("NARRATION_MAX_TOKENS", "1200"))
+LLM_TIMING_LOG = os.getenv("LLM_TIMING_LOG", "true").lower() == "true"
+
+
+def _log_llm_timing(
+    *,
+    purpose: str,
+    tier: str,
+    model: str,
+    elapsed: float,
+    ok: bool,
+    kind: str,
+) -> None:
+    if not LLM_TIMING_LOG:
+        return
+    logging.info(
+        "LLM_TIMING kind=%s purpose=%s tier=%s model=%s ok=%s elapsed_sec=%.2f",
+        kind, purpose or "-", tier, model, ok, elapsed,
+    )
 
 
 # ── Model capability registry ────────────────────────────────────────
@@ -126,6 +169,7 @@ MAX_NARRATION_TOKENS = int(os.getenv("MAX_COMPLETION_TOKENS", "16000"))
 # config to be passed:
 #   - "openai_effort":    `reasoning_effort` top-level kwarg + max_completion_tokens
 #   - "openrouter_object": `reasoning: {effort: ...}` inside extra_body
+#   - "openrouter_disabled": `reasoning: {enabled: false}` inside extra_body
 #   - None / "none":      No reasoning support; ignore reasoning hints.
 MODEL_CAPABILITIES: list[tuple[str, dict]] = [
     # OpenAI reasoning models
@@ -136,6 +180,11 @@ MODEL_CAPABILITIES: list[tuple[str, dict]] = [
     # DeepSeek V4 (OpenRouter): Pro accepts effort, Flash uses defaults
     ("deepseek/deepseek-v4-pro",   {"reasoning": "openrouter_object", "max_param": "max_tokens"}),
     ("deepseek/deepseek-v4-flash", {"reasoning": "none",              "max_param": "max_tokens"}),
+    # Interactive narration should not spend latency/budget on hidden thinking.
+    ("moonshotai/kimi-k2.6",         {"reasoning": "openrouter_disabled", "max_param": "max_tokens"}),
+    ("google/gemini-3-flash-preview", {"reasoning": "openrouter_disabled", "max_param": "max_tokens"}),
+    ("x-ai/grok-4.1-fast",          {"reasoning": "openrouter_disabled", "max_param": "max_tokens"}),
+    ("x-ai/grok-4.20",              {"reasoning": "openrouter_disabled", "max_param": "max_tokens"}),
     # Anthropic via OpenRouter
     ("anthropic/", {"reasoning": "none", "max_param": "max_tokens"}),
     # Standard fallback (DeepSeek non-V4, Llama, Mistral, Qwen-cloud, etc.)
@@ -246,6 +295,8 @@ def _prepare_kwargs(
         kwargs["reasoning_effort"] = reasoning_effort
     elif reasoning_effort and caps["reasoning"] == "openrouter_object":
         extra_body["reasoning"] = {"effort": reasoning_effort}
+    elif caps["reasoning"] == "openrouter_disabled":
+        extra_body["reasoning"] = {"enabled": False}
     # else: model doesn't support reasoning — ignore the hint
 
     # OpenRouter provider preferences (require_parameters, data_collection)
@@ -255,6 +306,16 @@ def _prepare_kwargs(
             provider_block["require_parameters"] = True
         if OPENROUTER_DATA_COLLECTION:
             provider_block["data_collection"] = OPENROUTER_DATA_COLLECTION
+        if OPENROUTER_PROVIDER_ORDER:
+            provider_block["order"] = OPENROUTER_PROVIDER_ORDER
+        if OPENROUTER_PROVIDER_ONLY:
+            provider_block["only"] = OPENROUTER_PROVIDER_ONLY
+        if OPENROUTER_PROVIDER_IGNORE:
+            provider_block["ignore"] = OPENROUTER_PROVIDER_IGNORE
+        if OPENROUTER_PROVIDER_SORT:
+            provider_block["sort"] = OPENROUTER_PROVIDER_SORT
+        if OPENROUTER_ALLOW_FALLBACKS is not None:
+            provider_block["allow_fallbacks"] = OPENROUTER_ALLOW_FALLBACKS
         if provider_block:
             extra_body["provider"] = provider_block
 
@@ -310,12 +371,21 @@ def call_chat(
     )
 
     last_error: Optional[Exception] = None
+    started = time.time()
     for attempt in range(retries):
         try:
             response = client.chat.completions.create(**kwargs)
             content  = response.choices[0].message.content
             if content is None or not content.strip():
                 raise RuntimeError(f"Empty content from {model}")
+            _log_llm_timing(
+                purpose=purpose,
+                tier=tier,
+                model=model,
+                elapsed=time.time() - started,
+                ok=True,
+                kind="chat",
+            )
             return content.strip()
         except Exception as e:  # noqa: BLE001 — provider SDK exceptions vary
             last_error = e
@@ -324,9 +394,66 @@ def call_chat(
                 purpose or "-", tier, attempt + 1, retries, model, e,
             )
 
+    _log_llm_timing(
+        purpose=purpose,
+        tier=tier,
+        model=model,
+        elapsed=time.time() - started,
+        ok=False,
+        kind="chat",
+    )
     raise RuntimeError(
         f"LLM call failed after {retries} attempts "
         f"(purpose={purpose} tier={tier} model={model}): {last_error}"
+    )
+
+
+def call_local_chat(
+    *,
+    tier: str,
+    user: str,
+    system: Optional[str] = None,
+    temperature: float = 0.4,
+    max_tokens: int = 1500,
+    timeout: float = 60.0,
+    retries: int = 1,
+) -> str:
+    """Explicit local-Ollama text call for emergency fallbacks."""
+    model = LOCAL_FAST_MODEL if tier == TIER_FAST else LOCAL_QUALITY_MODEL
+    client = OpenAI(base_url=f"{OLLAMA_URL}/v1", api_key="ollama")
+
+    user_content = f"/no_think\n{user}" if _is_qwen_local(model) else user
+    messages: list = []
+    if system:
+        messages.append({"role": "system", "content": system})
+    messages.append({"role": "user", "content": user_content})
+
+    kwargs = {
+        "model": model,
+        "messages": messages,
+        "temperature": temperature,
+        "max_tokens": max_tokens,
+        "timeout": timeout,
+    }
+
+    last_error: Optional[Exception] = None
+    for attempt in range(retries):
+        try:
+            response = client.chat.completions.create(**kwargs)
+            content = response.choices[0].message.content
+            if content is None or not content.strip():
+                raise RuntimeError(f"Empty content from {model}")
+            return content.strip()
+        except Exception as e:  # noqa: BLE001 - provider SDK exceptions vary
+            last_error = e
+            logging.warning(
+                "Local fallback LLM call failed (attempt=%d/%d model=%s): %s",
+                attempt + 1, retries, model, e,
+            )
+
+    raise RuntimeError(
+        f"Local fallback LLM call failed after {retries} attempts "
+        f"(tier={tier} model={model}): {last_error}"
     )
 
 
@@ -530,5 +657,7 @@ def describe_routing() -> dict:
         "provider":      CLOUD_PROVIDER if NARRATIVE_BACKEND == "cloud" else "ollama",
         "fast_model":    resolve_model(tier=TIER_FAST),
         "quality_model": resolve_model(tier=TIER_QUALITY),
+        "narration_model": resolve_model(tier=TIER_QUALITY, purpose="narration"),
+        "narration_max_tokens": MAX_NARRATION_TOKENS,
         "overrides":     {k: v for k, v in PURPOSE_OVERRIDES.items() if v},
     }

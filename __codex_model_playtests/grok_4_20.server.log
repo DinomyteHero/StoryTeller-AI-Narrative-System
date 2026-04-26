@@ -1,0 +1,36 @@
+ERROR:root:Failed to serialize context audit payload
+Traceback (most recent call last):
+  File "C:\Users\lbouw\OneDrive\Documents\Github Repos\StoryTeller-AI-Narrative-System\api\game_routes.py", line 788, in _context_audit_json
+    "knowledge": npc.knowledge,
+                 ^^^^^^^^^^^^^
+AttributeError: 'NPCState' object has no attribute 'knowledge'
+ERROR:root:Failed to serialize context audit payload
+Traceback (most recent call last):
+  File "C:\Users\lbouw\OneDrive\Documents\Github Repos\StoryTeller-AI-Narrative-System\api\game_routes.py", line 788, in _context_audit_json
+    "knowledge": npc.knowledge,
+                 ^^^^^^^^^^^^^
+AttributeError: 'NPCState' object has no attribute 'knowledge'
+ERROR:root:Failed to serialize context audit payload
+Traceback (most recent call last):
+  File "C:\Users\lbouw\OneDrive\Documents\Github Repos\StoryTeller-AI-Narrative-System\api\game_routes.py", line 788, in _context_audit_json
+    "knowledge": npc.knowledge,
+                 ^^^^^^^^^^^^^
+AttributeError: 'NPCState' object has no attribute 'knowledge'
+ERROR:root:Failed to serialize context audit payload
+Traceback (most recent call last):
+  File "C:\Users\lbouw\OneDrive\Documents\Github Repos\StoryTeller-AI-Narrative-System\api\game_routes.py", line 788, in _context_audit_json
+    "knowledge": npc.knowledge,
+                 ^^^^^^^^^^^^^
+AttributeError: 'NPCState' object has no attribute 'knowledge'
+ERROR:root:Failed to serialize context audit payload
+Traceback (most recent call last):
+  File "C:\Users\lbouw\OneDrive\Documents\Github Repos\StoryTeller-AI-Narrative-System\api\game_routes.py", line 788, in _context_audit_json
+    "knowledge": npc.knowledge,
+                 ^^^^^^^^^^^^^
+AttributeError: 'NPCState' object has no attribute 'knowledge'
+ERROR:root:Failed to serialize context audit payload
+Traceback (most recent call last):
+  File "C:\Users\lbouw\OneDrive\Documents\Github Repos\StoryTeller-AI-Narrative-System\api\game_routes.py", line 788, in _context_audit_json
+    "knowledge": npc.knowledge,
+                 ^^^^^^^^^^^^^
+AttributeError: 'NPCState' object has no attribute 'knowledge'

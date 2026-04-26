@@ -205,6 +205,7 @@ def build_default_character(
         "name": "",  # Player sets this
         "species": target_variant.species,
         "career": target_variant.career,
+        "primary_game_line": target_variant.primary_game_line,
         "specializations": list(target_variant.specializations),
         "characteristics": target_variant.characteristics_base.model_dump(),
         "skills": dict(target_variant.skills_base),
@@ -213,7 +214,7 @@ def build_default_character(
         "soak": target_variant.soak,
         "total_xp": target_variant.starting_xp,
         "available_xp": 0,
-        "force_rating": 0,
+        "force_rating": 1 if target_variant.force_sensitive else 0,
         "force_sensitive": target_variant.force_sensitive,
         "acquired_talents": [],
         "force_powers": [],

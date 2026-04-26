@@ -126,6 +126,19 @@ Write a narrative passage that:
 7. OPENS BY REFLECTING THE PLAYER'S SPECIFIC CHOICE — the first sentences
    must show the consequence of what the player chose to do. Do not write
    a passage that could follow from any choice.
+8. Continues from the last established beat. Do not repeat the previous
+   passage's dialogue, discovery, reveal, or environmental beat as if it
+   is happening for the first time.
+9. Makes important threats, locations, clues, and Force phenomena concrete
+   before metaphor. Do not coin opaque shorthand such as "lower dark" or
+   "wrong current" unless the concrete referent was named earlier in the
+   same passage. Say "the dark-side vergence beneath the Great Temple" or
+   "the lower Massassi levels" before poetic labels.
+10. REVEAL PACING: do not leap to a major reveal, fully identify a threat,
+    or make an NPC confess the withheld truth unless the current act,
+    known facts, explicit beat instruction, or a successful dice result has
+    earned it. On failed checks, reveal pressure or consequence, not the
+    answer the player failed to win.
 
 Follow the PACING, VOICE TARGET, and SCENE CRAFT instructions in the
 CURRENT SCENE block above. They are calibrated to this turn's scene type.
@@ -155,6 +168,9 @@ Then provide 2-4 choices following these rules:
 - Choices without a dice check have no tag
 - Do not use generic action types (attack/defend/talk/run)
 - Write choices as actions or words the character would naturally consider
+- Use concrete established terms for important places, threats, and clues.
+  Prefer "lower Massassi levels," "dark-side vergence beneath the temple,"
+  or "sealed stairs" over opaque shorthand like "lower dark."
 - RISK SIGNALING: Write choices that would require a dice check with
   language that conveys uncertainty or risk from the character's perspective
   (doubt, hedging, awareness of difficulty). Write choices that do not
@@ -172,6 +188,28 @@ Then provide 2-4 choices following these rules:
   still work to do."
   "Turn the name over in your mind. You know what it means. You are not
   ready to say it out loud yet."
+
+After the choices, on a new line write exactly: ---STATE_PATCH---
+Then write one compact JSON object for the engine. This JSON is not shown
+to the player. It must describe the actual scene state at the end of the
+passage, not the state at the beginning:
+{{
+  "current_location": "specific place where the player ends the passage",
+  "current_objective": "what the player is immediately trying to do next",
+  "present_npcs": ["NPC names physically present or directly participating"],
+  "scene_type": "combat|chase|infiltration|social|exploration|introspection|space_combat",
+  "immediate_pressure": "the concrete pressure, clue, danger, or question active now",
+  "known_facts": ["new facts the player actually learned this passage"],
+  "threads_advanced": ["open thread names that moved forward"],
+  "threads_resolved": ["open thread names whose central question is answered"],
+  "threads_opened": ["new player-facing questions raised"],
+  "avoid_repeating": ["beats or gestures already used and not to replay next turn"],
+  "next_beat_requirement": "what must materially change or be revealed next turn"
+}}
+Keep secrets out of known_facts until the player has actually learned them.
+On failed checks, do not put the withheld core answer in known_facts; record
+only peripheral pressure, costs, or clues that were actually shown.
+If uncertain, omit the field or use an empty list.
 
 {pinch_point_instruction}
 
@@ -196,6 +234,10 @@ success_advantage: "Yes, and..." — achieved goal + something additional gained
 success_threat:    "Yes, but..." — achieved goal + new problem emerged
 failure_advantage: "No, but..."  — did not achieve goal + something useful emerged
 failure_threat:    "No, and..."  — did not achieve goal + situation now worse
+
+On any failure, the core attempted goal remains denied. Advantage can soften
+the landing or give a peripheral clue, but it must not smuggle in the exact
+information, confession, location, or Force read that the failed action sought.
 
 TRIUMPH adds a critical positive effect on top of the base outcome.
 DESPAIR adds a critical negative effect on top of the base outcome.

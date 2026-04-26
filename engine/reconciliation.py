@@ -17,14 +17,14 @@ from pathlib import Path
 from typing import Optional
 
 from gm.context import ArcState, NPCState, ThreadState
-from gm.llm_client import call_chat_json, TIER_FAST, TIER_QUALITY
+from gm.llm_client import TIER_FAST, TIER_QUALITY, call_chat, call_chat_json
 
 PROMPT_PATH = Path(__file__).resolve().parent.parent / "gm" / "prompts" / "reconciliation.txt"
-# Retained for back-compat with code that still references these constants.
-OLLAMA_URL  = os.getenv("OLLAMA_URL", "http://localhost:11434")
-LOCAL_MODEL = os.getenv("LOCAL_MODEL", "qwen3.5:9b")
+RECONCILIATION_TIMEOUT_SEC = float(os.getenv("RECONCILIATION_TIMEOUT_SEC", "25"))
+RECONCILIATION_MAX_TOKENS = int(os.getenv("RECONCILIATION_MAX_TOKENS", "800"))
+RECONCILIATION_RETRIES = int(os.getenv("RECONCILIATION_RETRIES", "1"))
 
-# JSON schema for structured output from the local model
+# JSON schema for structured output from the fast LLM tier
 RECONCILIATION_SCHEMA = {
     "type": "object",
     "properties": {
@@ -511,9 +511,9 @@ def reconcile_turn(
             user=prompt,
             schema=RECONCILIATION_SCHEMA,
             temperature=0.1,
-            max_tokens=1500,
-            timeout=45.0,
-            retries=max_retries + 1,
+            max_tokens=RECONCILIATION_MAX_TOKENS,
+            timeout=RECONCILIATION_TIMEOUT_SEC,
+            retries=max(1, min(max_retries + 1, RECONCILIATION_RETRIES)),
         )
         return _validate_result(data)
     except Exception as e:
@@ -1260,21 +1260,16 @@ def _generate_character_drift_note(session_id: str, act_number: int) -> str:
         f"ONE SENTENCE:"
     )
 
-    is_qwen = "qwen" in LOCAL_MODEL.lower()
-    msg = f"/no_think\n{prompt}" if is_qwen else prompt
-
-    response = httpx.post(
-        f"{OLLAMA_URL}/api/generate",
-        json={
-            "model": LOCAL_MODEL,
-            "prompt": msg,
-            "stream": False,
-            "options": {"temperature": 0.3, "num_predict": 100},
-        },
+    note = call_chat(
+        tier=TIER_FAST,
+        purpose="drift",
+        user=prompt,
+        temperature=0.3,
+        max_tokens=100,
         timeout=30.0,
+        retries=2,
     )
-    response.raise_for_status()
-    return response.json()["response"].strip()
+    return note.strip()
 
 
 def _apply_npc_relationship_drift(session_id: str, act_number: int) -> None:

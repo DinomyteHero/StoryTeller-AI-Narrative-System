@@ -1,0 +1,13 @@
+{
+  "label": "kimi_k2_6",
+  "model": "moonshotai/kimi-k2.6",
+  "ok": true,
+  "parse_ok": false,
+  "elapsed_sec": 45.03,
+  "error": "parse: GM response missing ---CHOICES--- delimiter",
+  "passage_word_count": null,
+  "choices": [],
+  "skill_tags": [],
+  "raw": "",
+  "finish_reason": "length"
+}

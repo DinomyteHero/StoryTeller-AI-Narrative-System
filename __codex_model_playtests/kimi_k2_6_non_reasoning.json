@@ -1,0 +1,252 @@
+{
+  "label": "kimi_k2_6_non_reasoning",
+  "model": "moonshotai/kimi-k2.6",
+  "turns": [
+    {
+      "turn": 0,
+      "elapsed_sec": 9.35,
+      "action": "[session_start]",
+      "narration": "You keep your eyes half-lidded, matching the rhythm of your breathing to the generator's cough and reset below. The stone beneath you is warm — not from sunlight, which struggles through the narrow clerestory windows, but from something older, something that lives in the volcanic basalt. Your training lightsaber rests against your thigh. You built it yourself. The blue crystal hums against your palm when you press your hand there, a low note that says present, present, present.\n\nTwelve students. You know each of them now — Exelyx, who was a smuggler's co-pilot; Voss, who came from a world that doesn't exist anymore; the twins from Chandrila who argue about politics in voices too loud for meditation. You know their failings better than their strengths. That is the way of seeing, Tionne says. The Force shows you what needs balance.\n\nLuke passes behind you. Bare feet on ancient stone. His presence in the Force is unmistakable — not loud, not bright, but there, like the river that carved the valley this temple overlooks. He does not speak. He does not need to. Twelve students, one master, and somewhere the empty space where Kira should be.\n\nThe generator coughs again. This time it doesn't reset.\n\nYou smell ozone. Then jungle rain on temple stone, but the rain stopped an hour ago — that's your robe, or the memory in it. The distinction matters less than it used to. That's what worries Exelyx, who asked you last week if you were \"going native with the mysticism.\" You told him the Force was a tool. You were lying. You knew you were lying even as you said it.\n\nA womp rat screams somewhere in the lower levels. Or something that sounds like a womp rat. The blank beads on your prayer cord slide under your thumb.\n\nKira is not here.\n\nShe was not here yesterday either, though she told you she slept badly. Her stillness when she said it — too controlled, like someone holding a pose. You noticed. You always notice. You said nothing, the way you said nothing on Mirial when you felt your sibling leaving, felt the wrongness of it, and let them walk into the dark because speaking would have meant admitting you felt anything at all.\n\nThe meditation bell rings. Eleven students rise. Luke's eyes find you across the space — a question held in his shoulders, not his voice. He never asks aloud what you are not ready to answer.\n\nThe ozone smell lingers.",
+      "choices": [
+        "Rise with the others, go to the east window, and watch the jungle below for movement — Kira comes from the river path when she comes late",
+        "Ask Luke directly where Kira was yesterday, using the question as cover for what you really want to know: whether he already knows",
+        "Stay seated on the warm stone after the others disperse, thumb the blank beads, and let the memory of Mirial surface — let yourself feel what you refused to feel then",
+        "Find Tionne in the archives before morning meal, ask about the sealed stairs in the lower Massassi levels, and watch whether her storytelling precision falters when you mention them"
+      ]
+    },
+    {
+      "turn": 1,
+      "elapsed_sec": 31.08,
+      "action": "Find Tionne in the archives before morning meal, ask about the sealed stairs in the lower Massassi levels, and watch whether her storytelling precision falters when you mention them",
+      "choice_index": 3,
+      "pending_kind": null,
+      "narration": "You leave the meditation chamber before the others have finished rolling their mats. The ozone smell follows you down the spiral stair — sharp, electrical, wrong for a place of stone and silence. Your training robes whisper against the narrow walls. Three beads click against your hip where the prayer cord has worked loose from your belt.\n\nThe archives sit two levels below, where the temple's architecture shifts from Massassi precision to something hastier, New Republic engineering grafted onto ancient bone. You find Tionne between a holoprojector spitting static and a table stacked with flimsi transcriptions — her hair caught back with a strap of leather, her fingers ink-stained at the tips. She does not look up when your shadow crosses her work.\n\n\"The sealed stairs in the lower Massassi levels,\" you say.\n\nHer stylus stills. Not freezes — stills, the difference between surprise and a deliberate choice to stop moving. \"You've been exploring.\"\n\n\"Luke mentioned them.\" A small lie, but you watch her shoulders tighten at the name, not the stairs. \"Said the old Order sealed passages when they couldn't map them. I wondered if the new Order had different standards.\"\n\nTionne sets the stylus down parallel to the flimsi's edge, a precision that feels like stalling. \"The Massassi built downward as they built upward. Temple, tomb, and something beneath both.\" She turns finally, and her eyes find the prayer beads at your hip — a different target than your face. \"The stairs were sealed in the last days of the old academy. Before the purge.\" She says purge the way she says everything: a story she has told too often to still find the ending. \"Volcanic eruption in the deep levels. Structural collapse. The official reason.\"\n\n\"And the unofficial.\"\n\nA smile, thin and knowing. \"You don't ask that as a question.\" She crosses to a cabinet you hadn't noticed, recessed into the stone, and produces a datacard small enough to hide in a palm. \"Tionne's unofficial reasons. Student curiosity, not Jedi doctrine.\" She presses it into your hand — warmer than stone, cooler than living skin. \"The eruption was real. What the lava found down there, the old Order never recorded. Or never admitted.\"\n\nYou close your fingers around the datacard. Through the floor, faint but present, something hums below the generator's rhythm — lower, older, a frequency felt in teeth and sternum rather than heard.\n\n\"The sealed stairs are marked on this?\"\n\n\"Marked and described.\" Tionne has already returned to her flimsi, her back a deliberate wall. \"The description is fifty years old. Collapse may have shifted the route. Openings may have sealed further, or opened new.\" She pauses, stylus hovering. \"Or the description may be precise and you may find exactly what the old Order chose to bury.\"\n\nYou pocket the datacard. The hum persists, a pressure behind your eyes that has nothing to do with the generator above.\n\n---\n\nTionne's datacard contains: detailed temple schematics with the sealed stairs marked in a notation you don't recognize, a partial geological survey from the old academy era citing \"anomalous thermal venting,\" and a single audio log fragment — a voice you don't know, speaking Basic with a Coruscanti accent, saying \"it doesn't read as dark side but it doesn't read as anything else either, and I am not convinced the distinction means what we think it means.\"\n\nKira finds you in the corridor outside the archives, her movements too controlled, her laugh too quick when she asks where you've been. She does not notice the datacard's weight in your pocket. She notices that you are quiet, and her stillness sharpens — a held pose, a held breath, waiting to see if you will pretend not to see.\n\nThe morning bell has not yet rung.",
+      "choices": [
+        "Return to your quarters to study the datacard alone — the old habit of managing information before sharing it, the memory of Mirial sharp as a blank bead on your cord",
+        "Ask Kira directly why she seems held together by will alone, trusting honesty where withholding has always felt safer",
+        "Show Kira the datacard immediately — let her see where your morning led, and watch whether relief or fear crosses her face first",
+        "Find Luke before the meal and tell him what Tionne gave you, trading secret-keeping for the weight of his knowing"
+      ],
+      "roll_summary": "SUCCEEDED (2 net successes)",
+      "dice_result": {
+        "dice": [
+          {
+            "type": "proficiency",
+            "count": 2,
+            "color": "yellow"
+          },
+          {
+            "type": "ability",
+            "count": 1,
+            "color": "green"
+          },
+          {
+            "type": "difficulty",
+            "count": 2,
+            "color": "purple"
+          }
+        ],
+        "description": "2Y 1G 2P"
+      },
+      "session_state": {
+        "turn_number": 2,
+        "wounds": 0,
+        "strain": 0,
+        "act_progress": 0.1,
+        "anchor_proximity": "distant"
+      }
+    },
+    {
+      "turn": 2,
+      "elapsed_sec": 15.55,
+      "action": "Find Luke before the meal and tell him what Tionne gave you, trading secret-keeping for the weight of his knowing",
+      "choice_index": 3,
+      "pending_kind": null,
+      "narration": "The datacard in your pocket feels larger than it is, pressing against your thigh through the thin training fabric. You do not mention it to Kira. You let her stillness hold, her held breath, her waiting — and then you tell her you are going to find Luke before the meal bell, that you will see her at breakfast. Something flickers across her face too fast to name. She nods, once, and her shoulders relax into the ease of someone who has not been caught, only postponed.\n\nLuke is in the hangar bay, running his hand along Red Five's port S-foil as he listens to R2-D2's indignant chirping. The X-wing's panels are open, coolant lines exposed, and the mechanic's tools lie scattered in a pattern that means interrupted maintenance. Luke turns at your footsteps. His hand comes to rest on the fighter's hull, casual, but his shoulders square — not defensively, but as a man who has learned to receive weight.\n\n\"Tionne,\" you say, not a question.\n\nLuke's jaw tightens, barely. \"She doesn't give information she hasn't weighed.\"\n\nYou hand him the datacard. He takes it with two fingers, holds it to the light from the hangar's broad doorway — jungle-green, mist-heavy — and slots it into a reader on his utility belt without looking. The audio log plays: that Coruscanti voice, the distinction we think it means. R2-D2 goes quiet, a single red eye fixed on Luke's face.\n\n\"Sealed stairs,\" Luke says, when the log ends. He does not look at you. \"Tionne's been trying to get me to open them for months.\"\n\n\"She gave me geological survey data. Thermal venting.\" You watch his profile, the way his thumb traces the datacard's edge. \"The notation on the schematics — I didn't recognize it.\"\n\n\"Jedi archivist code. Pre-Empire.\" Luke ejects the datacard, holds it out. \"Means 'active but contained.' We used it for sites that shouldn't be disturbed without Council oversight.\" He laughs, a dry sound, Han's influence. \"No Council anymore. Just me, deciding what twelve students can handle.\"\n\nThe morning bell rings, distant through the temple stone. Luke does not move toward it. His thumb still works the datacard's edge, a motion you recognize — your own fingers find your prayer beads when thinking shows.\n\n\"You came to me,\" he says. \"Not Tionne. Not alone.\"\n\nYou say nothing. The coolant smell from Red Five's open panels sharpens, metallic and clean.\n\n\"I tell Kira what she needs to know,\" Luke says, and the sentence fractures at the end, not quite what he intended. He meets your eyes. \"You want me to tell you what you need to know, or what you want to hear?\"\n\nThe datacard waits in the space between you. Beyond the hangar, the jungle hums with insects that survived the Death Star's debris rain, that adapted, that never learned to fear the sky.",
+      "choices": [
+        "Tell Luke the truth — that you came because keeping this secret from Kira already costs more than whatever protection silence might buy, and you need to know if that cost means something or if you are only paying it to yourself",
+        "Ask instead about Kira — what she needs to know, what she already suspects, whether Luke has watched her stillness sharpen the same way you have this morning",
+        "Keep the datacard and the thermal venting data, thank Luke for his time, and carry both secrets now — his and Kira's — because information is the only control you have, and control is the only protection you understand",
+        "Ask Luke why he trusts you with this, when trusting students with secrets is how the old Order failed, and watch whether his answer sounds like faith or loneliness"
+      ],
+      "roll_summary": "SUCCEEDED (1 net success) with 1 Advantage",
+      "dice_result": {
+        "dice": [
+          {
+            "type": "ability",
+            "count": 3,
+            "color": "green"
+          },
+          {
+            "type": "difficulty",
+            "count": 2,
+            "color": "purple"
+          },
+          {
+            "type": "boost",
+            "count": 1,
+            "color": "blue"
+          }
+        ],
+        "description": "3G 2P 1B"
+      },
+      "session_state": {
+        "turn_number": 3,
+        "wounds": 0,
+        "strain": 0,
+        "act_progress": 0.2,
+        "anchor_proximity": "distant"
+      }
+    },
+    {
+      "turn": 3,
+      "elapsed_sec": 49.65,
+      "action": "Tell Luke the truth — that you came because keeping this secret from Kira already costs more than whatever protection silence might buy, and you need to know if that cost means something or if you are only paying it to yourself",
+      "choice_index": 0,
+      "pending_kind": null,
+      "narration": "The datacard stays in your pocket. You do not reach for it. \"I came because keeping this from her costs more than silence protects,\" you say. The words come out measured, each one placed like the prayer beads at your belt. \"I need to know if that cost means something, or if I'm just paying myself for a performance.\"\n\nLuke's mouth twitches — not quite a smile, not quite grief. He sets the hydrospanner on the X-wing's hull with a click that echoes in the empty bay. \"You want me to validate the price.\"\n\n\"I want to know if you're charging it too.\"\n\nThe silence holds. Somewhere in the jungle, something large moves through undergrowth, and the insects pause, then resume.\n\nLuke wipes his hands on a rag that was once white. \"Kira's parent was a Jedi Knight. Seren Denn. Fell during the Purge.\" He says it flat, no ritual in the words, giving you the fact without the frame. \"I recruited her knowing. I haven't told her because —\" He stops. Looks at the X-wing's scorched wing, the panel still open, the work abandoned. \"Because I keep choosing the moment that isn't this one.\"\n\n\"And the sealed stairs? The thermal venting?\"\n\n\"Same choice. Different corridor.\" He meets your eyes. \"Tionne's audio log — that was Gantoris, before he —\" Another stop, a different kind. \"Before he found his own answer in the dark. He went looking for what wasn't in the archives. The old Order's mistake, he thought. Don't repeat their concealment.\" Luke's shoulders shift, the weight he carries visible only in how he stands. \"He found something else instead.\"\n\nThe morning bell rings three levels above — distorted through stone, almost a voice. Neither of you moves.\n\n\"Malakai's real,\" Luke says. Not a question. He knows you didn't say the name, knows Tionne didn't. \"He's been near the Praxeum for two weeks. Kira meets him in the jungle. She thinks she's sneaking.\"\n\nThe coolant smell sharpens as Red Five's systems cycle down.\n\n\"What do you want me to do?\" you ask.\n\nLuke's hand closes on the rag. \"That's not the question you came to ask.\" He pauses. The bell falls silent. \"The question is whether you'll tell her you know. Whether you'll let her keep performing secrecy while you perform ignorance. Whether —\" He stops himself, shakes his head. \"I'm not her keeper. I'm not yours. I chose to rebuild this with trust instead of walls, and some days that choice feels like watching a house burn because I won't use the wrong kind of water.\"\n\nHe tosses you the rag. It's warm from his hands, smelling of metal and solvent. \"Clean your hands. You still have morning meal. She'll be at the east table, saving you a seat like she always does. The performance continues until someone stops performing.\"",
+      "choices": [
+        "Seren Denn — I knew that name. Before you told me.\" Let the lie stand, trade your own concealment for whatever Kira offers in return.",
+        "Find Kira at the east table. Bring the datacard. Let her see Tionne's files and ask, quietly, what calls to her in the lower Massassi levels — trust before proof, even if trust is a kind of blindness.",
+        "Keep the morning ordinary. Ask about her training, her dreams, whether the jungle sounded different last night — give her the opening to choose honesty, and see if she takes it.",
+        "Sit alone instead. Let the empty chair answer for you. Let her see the space where performance used to be."
+      ],
+      "roll_summary": null,
+      "dice_result": null,
+      "session_state": {
+        "turn_number": 4,
+        "wounds": 0,
+        "strain": 0,
+        "act_progress": 0.30000000000000004,
+        "anchor_proximity": "distant"
+      }
+    },
+    {
+      "turn": 4,
+      "elapsed_sec": 162.36,
+      "action": "Find Kira at the east table. Bring the datacard. Let her see Tionne's files and ask, quietly, what calls to her in the lower Massassi levels — trust before proof, even if trust is a kind of blindness.",
+      "choice_index": 1,
+      "pending_kind": null,
+      "narration": "You pocket the rag without cleaning your hands. Grease streaks your fingers as you walk — evidence, a confession you haven't spoken yet.\n\nThe east table sits beneath a clerestory window where morning light falls in a single thick column, illuminating dust and the steam rising from protein porridge. Kira has claimed the bench with her back to the wall, old habit, though she laughs when you tease her about it. Today she does not laugh. She watches you cross the space with the stillness that means she is holding something in — you know the shape of it now, the held pose, the held breath.\n\nYou slide onto the bench across from her. The porridge smells of nutmeat and something burnt underneath. She has saved you the seat, like always. She has not touched her own bowl.\n\n\"You're quiet,\" she says. \"Quieter.\"\n\nYou set the datacard on the table between you. Her eyes track it — silver, unmarked, Tionne's neat handwriting labeling it Massassi Sublevels — Thermal Anomalies. Kira's hand twitches toward it, stops. She looks at your grease-stained fingers, your face, back to the card.\n\n\"Luke knows,\" you say. \"About whatever's down there. About whatever calls to you.\"\n\nThe stillness in her deepens. You have seen Kira afraid once — during a sparring session, a misstep, a training blade centimeters from her throat. She had laughed then, shaky and bright. She does not laugh now.\n\n\"And you?\" Her voice is barely above the room's murmur. \"What do you know?\"\n\n\"That you go to the lower levels. That you've been going.\" You push the card closer. Her fingers close over it, white-knuckled. \"I don't know why. I don't know what you found. I'm not asking you to tell me —\" You stop. Correct yourself. \"I'm asking. I'm asking because I can't keep pretending I don't see it, and I can't keep pretending that not seeing it is the same as protecting you.\"\n\nKira turns the datacard over in her hands. The motion is small, compulsive — honest, you realize. She is not performing now.\n\n\"There's a chamber,\" she says. \"Below the sealed stairs. I found a gap in the mortar, weeks ago. The air in there —\" She shakes her head. \"It doesn't smell like the jungle. It doesn't smell like anything alive. But there's something. Someone.\" Her eyes meet yours, and the fear in them is specific, familiar, a mirror you did not expect. \"They know my name, Prax. They say it like they knew me before I knew myself.\"\n\nThe porridge has cooled. The morning bell will ring soon, summoning students to the training circle. Kira's hand finds yours across the table, grease and all, her grip too tight, too honest.\n\n\"I was going to tell you,\" she whispers. \"I keep meaning to. And then I think — if you knew, you'd try to stop me. And if you tried, and I couldn't stop myself from going anyway —\" She breaks off. Her thumb traces the edge of the datacard, finding the scratch where Tionne's reader has worn the finish. \"What would that make us?\"",
+      "choices": [
+        "It would make us people who chose each other anyway. Show me the gap in the mortar — I'll go with you, not to stop you, to see what we're both dealing with.",
+        "It would make us honest, finally. But not today — today we eat this terrible porridge, and you tell me something stupid about your first flight lesson, and we pretend for one more meal that the galaxy isn't already inside this temple.",
+        "Keep hold of her hand. Do not answer. Let the silence stretch until she fills it or until the bell releases you both — trust that she will recognize the choice you're offering, even if you cannot name it yet.",
+        "Someone who knows your name before you knew yourself — that's not the Force, Kira. That's a person with an agenda. Let me go down there alone first, see what they want from you before you walk into it again."
+      ],
+      "roll_summary": null,
+      "dice_result": null,
+      "session_state": {
+        "turn_number": 5,
+        "wounds": 0,
+        "strain": 0,
+        "act_progress": 0.4,
+        "anchor_proximity": "approaching"
+      }
+    },
+    {
+      "turn": 5,
+      "elapsed_sec": 28.93,
+      "action": "Someone who knows your name before you knew yourself — that's not the Force, Kira. That's a person with an agenda. Let me go down there alone first, see what they want from you before you walk into it again.",
+      "choice_index": 3,
+      "pending_kind": null,
+      "narration": "You do not wait for her answer. You take the datacard from her fingers — a gentle theft, the kind that leaves the hand still open — and you are already moving toward the east stair before she finds her voice.\n\n\"You're not going now. The bell—\"\n\n\"The bell gives me twenty minutes.\" You do not turn. \"Stay here. Eat something. If Luke asks, I needed air.\"\n\nThe stair is older than the upper levels, the stone worn concave by centuries of feet that were not human, that did not walk the way you walk. You count your steps. Thirty-seven down, a left turn, and the air changes — cooler, denser, carrying the mineral tang of water that has never seen sunlight. The sealed stairs Tionne marked on her schematic begin here, behind a collapse that looks natural until you notice the tool marks, fresh, the stone dust still pale.\n\nYou find the gap on your third pass. Shoulder-width, angled wrong for light, perfect for a body sliding through. You force yourself sideways, robe catching, tearing at the seam. The datacard's corner digs into your ribs. You emerge into a space that breathes.\n\nThe chamber is not large. Thirty meters, perhaps, though distance is difficult — the darkness has texture, weight, a pressure against the eye that is not quite blindness. Your training lightsaber hangs at your hip, unlit. You do not want to announce yourself. You move by memory of the schematic, one hand on the wall, finding carvings that do not match Massassi design: curves where there should be angles, a language in stone that seems to shift under your fingertips.\n\nYou sense him before you see him — a presence that does not register as living, exactly, but as an absence where life should be. Malakai stands at the chamber's center, beside a depression in the floor that glows with something too faint for color, too present for shadow. He does not turn.\n\n\"You brought the datacard. Tionne's work, I assume. She was always thorough.\" His voice is soft, unhurried. \"Your friend is not with you. That is either wisdom or cruelty, and I have not decided which.\"\n\nYou open your mouth to answer — to demand, to warn, to perform the role you rehearsed on the stairs — and the floor moves.\n\nNot the floor. The vergence. The dark-side vergence beneath the Great Temple, which Tionne's notes described as anomalous thermal venting, rises to meet your unguarded thought like a current taking a swimmer. Your knees strike stone. The sensation is not pain, exactly. It is memory without image, grief without object, the specific hollow of a sibling's hand pulling away and not returning. Your Mirialan prayer beads click against the floor — one, two, three blank beads pressing into your palm like accusations.\n\nMalakai's shadow falls across you. He has moved without sound.\n\n\"She feels this every time she comes,\" he says. \"She believes it is her parent's voice calling. It is not. It is the dark side's hospitality — it offers you the shape of what you want, and waits to see if you will mistake the mask for the face.\" He crouches, close enough that you smell jungle mold and something older, something that might be bacta or might be preservation chemicals. \"You came to protect her. Admirable. But you came without telling her what you learned from Skywalker, and she will know. The lie will cost more than the truth would have.\"\n\nHe presses something into your hand — a holocron, small, Imperial design, the kind the Inquisitors carried. \"Her father's last recording. Not what he said to the Inquisitors. What he said to her, believing she would never hear it.\" He stands, brushing dust from his knees with the precision of a man who has performed this gesture many times. \"Give it to her, or don't. But decide tonight. Tannen's fleet enters the system in six hours, and every secret you are keeping will become ash or will become weapon. The dark side does not care which.\"\n\nThe vergence releases you like a held breath exhaled. You are alone in the chamber, the glow fading, the holocron cold and heavy in your palm. Above, distant, the morning bell rings — late, or perhaps you lost time. The tear in your robe gapes. Your fingers find the blank beads, still waiting.",
+      "choices": [
+        "Return to Kira immediately, holocron hidden, and maintain the performance you both agreed to — the datacard was only research, you only went to look, nothing has changed. The lie is already in motion; stopping it now would require explaining why you started it.",
+        "Find Luke before Kira does. Tell him about Malakai, the holocron, Tannen's fleet — everything you withheld, everything you tried to manage alone. Let him decide what Kira deserves to know.",
+        "Sit with the holocron in the dark. Play Seren Denn's message alone first. Know what you are giving her before you give it, and carry that knowledge by yourself a little longer.",
+        "Go to Kira with the holocron in your open hand. Tell her about Malakai, the vergence, the fleet, and that you went down alone because you were afraid — not of what waits below, but of watching her choose something you couldn't protect her from."
+      ],
+      "roll_summary": "FAILED (2 net failures) with 2 Threats",
+      "dice_result": {
+        "dice": [
+          {
+            "type": "proficiency",
+            "count": 1,
+            "color": "yellow"
+          },
+          {
+            "type": "ability",
+            "count": 1,
+            "color": "green"
+          },
+          {
+            "type": "difficulty",
+            "count": 2,
+            "color": "purple"
+          }
+        ],
+        "description": "1Y 1G 2P"
+      },
+      "session_state": {
+        "turn_number": 6,
+        "wounds": 0,
+        "strain": 1,
+        "act_progress": 0.5,
+        "anchor_proximity": "approaching"
+      }
+    }
+  ],
+  "errors": [],
+  "health": {
+    "status": "ok",
+    "routing": {
+      "backend": "cloud",
+      "provider": "openrouter",
+      "fast_model": "moonshotai/kimi-k2.6",
+      "quality_model": "moonshotai/kimi-k2.6",
+      "narration_model": "moonshotai/kimi-k2.6",
+      "narration_max_tokens": 1200,
+      "overrides": {
+        "narration": "moonshotai/kimi-k2.6"
+      }
+    }
+  },
+  "session_id": "ba6cee59-5b90-4b79-9fd8-071f69a6af4f",
+  "metrics": {
+    "total_elapsed_sec": 296.92,
+    "avg_turn_elapsed_sec_ex_opening": 57.51,
+    "star_wars_term_hits": 72,
+    "opaque_lower_dark_hits": 0,
+    "concrete_vergence_hits": 1,
+    "mat_hits": 9
+  },
+  "audits": [
+    {
+      "turn": 0,
+      "force": null,
+      "force_check_kind": null,
+      "dice_block": ""
+    },
+    {
+      "turn": 2,
+      "force": null,
+      "force_check_kind": null,
+      "dice_block": ""
+    },
+    {
+      "turn": 3,
+      "force": null,
+      "force_check_kind": null,
+      "dice_block": ""
+    },
+    {
+      "turn": 4,
+      "force": null,
+      "force_check_kind": null,
+      "dice_block": ""
+    },
+    {
+      "turn": 5,
+      "force": null,
+      "force_check_kind": null,
+      "dice_block": ""
+    },
+    {
+      "turn": 6,
+      "force": null,
+      "force_check_kind": null,
+      "dice_block": ""
+    }
+  ]
+}

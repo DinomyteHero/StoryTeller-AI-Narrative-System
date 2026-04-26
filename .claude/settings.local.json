@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(grep -n \"patch\\\\|mock\\\\|gm\\\\\\\\.llm\\\\|gm\\\\\\\\.local_gm\" \"C:\\\\Users\\\\lbouw\\\\OneDrive\\\\Documents\\\\Github Repos\\\\StoryTeller-AI-Narrative-System\\\\tests\\\\test_phase13_choice_quality.py\")",
+      "Bash(grep -n \"patch\\\\|mock\\\\|gm\\\\\\\\.llm\\\\|gm\\\\\\\\.local_gm\" \"C:\\\\Users\\\\lbouw\\\\OneDrive\\\\Documents\\\\Github Repos\\\\StoryTeller-AI-Narrative-System\\\\tests\\\\test_e2e_game_loop.py\")"
+    ]
+  }
+}

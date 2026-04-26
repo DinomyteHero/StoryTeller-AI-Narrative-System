@@ -510,6 +510,7 @@ async function takeTurnStream(choiceIndex) {
   showLoading(true);
   clearError();
   hideDicePanel();
+  renderPendingChoices('Resolving your choice...');
 
   try {
     const res = await fetch(API + '/session/' + sessionId + '/turn/stream', {
@@ -532,6 +533,7 @@ async function takeTurnStream(choiceIndex) {
     let buffer = '';
     let passageText = '';
     let turnComplete = false;
+    let startedStreaming = false;
 
     while (true) {
       const { done, value } = await reader.read();
@@ -586,6 +588,10 @@ async function takeTurnStream(choiceIndex) {
           throw new Error(data.error || 'Stream error');
         } else {
           // Text chunk — append to streamed passage
+          if (!startedStreaming) {
+            startedStreaming = true;
+            renderPendingChoices('Finalizing next choices...');
+          }
           passageText += data.text;
           renderStreamedPassage(passageText);
         }
@@ -597,6 +603,7 @@ async function takeTurnStream(choiceIndex) {
     }
   } catch (e) {
     showError(e.message);
+    renderChoices(currentChoices);
     enableChoices();
     showLoading(false);
   }
@@ -632,6 +639,16 @@ function renderChoices(choices) {
     btn.onclick = () => takeTurn(i);
     el.appendChild(btn);
   });
+}
+
+function renderPendingChoices(message) {
+  const el = document.getElementById('choices');
+  el.innerHTML = '';
+  const btn = document.createElement('button');
+  btn.className = 'choice-btn';
+  btn.disabled = true;
+  btn.textContent = message;
+  el.appendChild(btn);
 }
 
 function disableChoices() {

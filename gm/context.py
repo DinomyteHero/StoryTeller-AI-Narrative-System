@@ -163,11 +163,12 @@ def compute_introspection_trigger(
         and consecutive_no_check_turns >= 2
     ):
         return (
-            "INTROSPECTION TRIGGER (mid-act dry spell): It has been several "
-            "turns since the protagonist faced a real test of skill. Use this "
-            "passage to re-ground them — a moment of stillness, a glance back "
-            "at a thread they've been carrying, or a small physical action "
-            "that registers as character rather than plot."
+            "SCENE MOTION TRIGGER (mid-act dry spell): It has been several "
+            "turns since the protagonist faced a real test of skill. Give the "
+            "protagonist one brief interior beat, then change the external "
+            "situation before the passage ends: an NPC interrupts, a clue "
+            "surfaces, a location opens, a system fails, or pressure arrives. "
+            "Do not leave the scene in the same static posture."
         )
     return ""
 
@@ -533,6 +534,7 @@ class ContextPackage:
     aspiration_echo_instructions: str = ""     # Phase 13: interiority guidance from behavioral inference (§14.5)
     # prose_diagnostic already declared above   # Phase 13: prose quality signal (§13)
     force_result_block: str = ""              # Phase 14: Force result context for narration (§16)
+    force_check_kind:   str = ""              # "pure" for Force-only rolls, "enhanced" for skill+Force
     force_state_block:  str = ""              # Phase 14: Force state context for narration (§16)
     ship_state_block:   str = ""              # Phase 16: Ship state context for narration (§17)
     dramatic_mission:   dict = field(default_factory=dict)  # CS-6 Phase 1: mission from reconciliation
@@ -569,6 +571,44 @@ class ContextPackage:
     def build_dice_result_block(self) -> str:
         if self.roll_result is None:
             return "NO DICE CHECK THIS TURN — narrate the action directly."
+        if self.force_check_kind == "pure":
+            force_failed = (
+                "FORCE OUTCOME: FAILURE" in self.force_result_block.upper()
+                or "FORCE RESULT: FAILED" in self.force_result_block.upper()
+            )
+            lines = [
+                "FORCE DICE RESULT (PURE FORCE ACTION):",
+                f"  Pool: {self.dice_pool.description() if self.dice_pool else 'unknown'}",
+                f"  Light pips: {self.roll_result.light_pips}",
+                f"  Dark pips: {self.roll_result.dark_pips}",
+                "  This is not a normal skill check. Do not interpret zero "
+                "successes as mundane failure.",
+                "  The FORCE RESULT block below is authoritative for whether "
+                "the power worked. If the Force succeeded, narrate success "
+                "with limited or costly information if appropriate, but do "
+                "not describe the Force itself as failing.",
+            ]
+            lines.append("")
+            lines.append("DICE TRUTH CONTRACT:")
+            if force_failed:
+                lines.extend([
+                    "  FORCE FAILURE: The power does not deliver the requested read.",
+                    "  Do not identify hidden intent, truth, lies, exact location,",
+                    "  hidden cause, or a concealed actor. You may show only vague",
+                    "  pressure, unease, sensory static, or danger at the edge of",
+                    "  perception. Do not add the withheld secret to known_facts.",
+                ])
+            else:
+                lines.extend([
+                    "  FORCE SUCCESS: The power may reveal the requested sense-data,",
+                    "  but keep the scope proportional to the power and the current",
+                    "  act. Success can clarify; it should not solve the whole thread",
+                    "  unless an explicit beat or act anchor says so.",
+                ])
+            if self.destiny_narrative_note:
+                lines.append("")
+                lines.append(self.destiny_narrative_note)
+            return "\n".join(lines)
         lines = [
             "DICE CHECK RESULT:",
             f"  Pool: {self.dice_pool.description() if self.dice_pool else 'unknown'}",
@@ -592,6 +632,37 @@ class ContextPackage:
                 f"  Strong {side} ({abs(self.roll_result.net_advantages)}): "
                 "This should be notably impactful in the narrative"
             )
+        lines.append("")
+        lines.append("DICE TRUTH CONTRACT:")
+        if self.roll_result.succeeded:
+            lines.append(
+                "  SUCCESS: The player's stated goal happens. Threat may add "
+                "cost, exposure, delay, or complication, but it cannot erase "
+                "the achieved core outcome."
+            )
+        else:
+            lines.extend([
+                "  FAILURE: The player's stated goal does not happen. Do not",
+                "  grant the core information, concession, access, safety, or",
+                "  positional advantage the player attempted to win.",
+            ])
+            if self.roll_result.outcome_quadrant == "failure_advantage":
+                lines.extend([
+                    "  FAILURE + ADVANTAGE: Give a lesser peripheral benefit only:",
+                    "  a vague clue, safer footing, narrowed suspicion, emotional",
+                    "  tell, or useful delay. The main answer remains withheld.",
+                ])
+            else:
+                lines.extend([
+                    "  FAILURE + THREAT: The attempt fails and the scene gets worse.",
+                    "  Increase pressure without revealing the secret for free.",
+                ])
+            if self.scene_type.lower() == "social":
+                lines.extend([
+                    "  SOCIAL FAILURE: NPCs do not directly answer the asked question",
+                    "  or reveal the withheld secret. They deflect, go guarded, give",
+                    "  an incomplete answer, or demand proof/action before disclosure.",
+                ])
         # Phase 9: weapon damage context for combat checks (§18)
         if self.combat_damage_note:
             lines.append("")
@@ -609,7 +680,77 @@ class ContextPackage:
     def build_npc_block(self) -> str:
         if not self.active_npcs:
             return "No NPCs currently active in scene."
-        return "\n\n".join(npc.to_prompt_block() for npc in self.active_npcs)
+        blocks = [self._redact_future_spoilers(npc.to_prompt_block())
+                  for npc in self.active_npcs]
+        return (
+            "SPOILER CONTROL: NPC private knowledge is behavioral context, "
+            "not permission to reveal it. Do not disclose private facts unless "
+            "the current act, situation, recent turns, or explicit beat "
+            "instruction has already surfaced them to the player.\n\n"
+            + "\n\n".join(blocks)
+        )
+
+    def _redact_future_spoilers(self, block: str) -> str:
+        """Hide campaign-defining future reveals from early-act NPC context.
+
+        The NPC roster stores private knowledge so characters can behave
+        consistently, but live narration must not blurt later-act reveals just
+        because an NPC knows them. This guard keeps the current Star Wars
+        campaign's major secrets behind their act gates while preserving
+        generic behavioral pressure for the narrator.
+        """
+        act = int(self.arc.current_act or 1)
+        redacted_lines: list[str] = []
+        emitted: set[str] = set()
+
+        def add_once(key: str, line: str) -> None:
+            if key not in emitted:
+                redacted_lines.append(line)
+                emitted.add(key)
+
+        for line in block.splitlines():
+            lower = line.lower()
+            if act < 3 and any(
+                token in lower for token in (
+                    "seren denn", "kira's parent", "kira’s parent",
+                    "parentage", "dead parent",
+                )
+            ):
+                add_once(
+                    "kira_parent_secret",
+                    "  Private unresolved secret: Kira has a concealed "
+                    "family-history wound. Before Act 3, imply pressure and "
+                    "avoid naming the person or explaining parentage.",
+                )
+                continue
+            if act < 3 and any(
+                token in lower for token in (
+                    "malakai", "surviving inquisitor", "inquisitor",
+                )
+            ):
+                add_once(
+                    "malakai_secret",
+                    "  Private unresolved secret: An outside manipulator may "
+                    "be involved. Before Act 3, do not name that figure or "
+                    "reveal an Inquisitor connection.",
+                )
+                continue
+            if act < 4 and any(
+                token in lower for token in (
+                    "tannen", "imperial remnant fleet", "task force",
+                    "fleet", "intelligence source", "intelligence to",
+                )
+            ):
+                add_once(
+                    "fleet_secret",
+                    "  Private unresolved secret: A wider Imperial threat may "
+                    "exist. Before Act 4, do not mention the commander, "
+                    "military movement, or leaked academy intelligence.",
+                )
+                continue
+            redacted_lines.append(line)
+
+        return "\n".join(redacted_lines)
 
     def build_pacing_block(self) -> str:
         """Assemble the PACING block for the narration prompt (§26.6)."""
@@ -630,6 +771,17 @@ class ContextPackage:
             f"Next structural beat: {self.arc.anchor_description or self.arc.next_anchor}",
             f"Proximity: {self.arc.anchor_proximity}",
         ]
+
+        if self.arc.turns_this_act >= 3 and self.scene_type in (
+            "introspection", "exploration",
+        ):
+            lines.append(
+                "SCENE MOTION GOVERNOR: This act has enough setup to start "
+                "moving. If the player chose reflection or waiting, honor it "
+                "briefly, then introduce a concrete external development before "
+                "the passage ends. At least two choices should move to a person, "
+                "place, clue, or decision point rather than staying in place."
+            )
 
         if progress_pct <= 30:
             lines.append(

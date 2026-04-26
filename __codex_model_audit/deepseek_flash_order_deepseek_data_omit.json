@@ -1,0 +1,73 @@
+{
+  "label": "deepseek_flash_order_deepseek_data_omit",
+  "model": "deepseek/deepseek-v4-flash",
+  "ok": true,
+  "parse_ok": true,
+  "elapsed_sec": 8.43,
+  "error": null,
+  "passage_word_count": 239,
+  "choices": [
+    "Go look for Kira now, before the rest of the students wake.",
+    "Ask Luke more about the old sealing rituals—knowledge might protect you both.",
+    "Return to your own meditation, trying to sense the vergence’s pull on Kira from afar."
+  ],
+  "skill_tags": [
+    "perception",
+    "discipline",
+    "force:sense"
+  ],
+  "raw": "The Massassi stone is cool beneath your crossed legs, the first pale light of Yavin’s sun bleeding through the high arched windows. Your question hangs in the air like the incense smoke from the meditation braziers. Luke’s eyes—gray and old beyond their years—hold yours.\n\n“There is… a scar.” He speaks slowly, each word chosen. “A place where the dark side pooled after Exar Kun’s fall. The Jedi of old tried to seal it, but stone remembers. The vergence you felt—it is not alive, but it is *aware* in its way.”\n\nHe pauses. A cooling breeze stirs the leaves beyond the open colonnade. You think of Kira’s empty mat, the way she slipped out before dawn.\n\n“Kira is drawn to strong currents,” Luke says, and there is a sadness in his voice. “She does not seek power for its own sake—she seeks *answers*. That longing can open doors best left closed.”\n\nYour chest tightens. You remember the clarity you refused—a false gift. Now you carry the weight of knowing something waits below, and the fear that Kira might walk right into it.\n\n“What would you have me do?” you ask.\n\nLuke’s gaze is steady. “Learn to listen. The vergence will not call you again the same way—but it will call her. If you are patient, you may find the entrance before she does. Or you may find her first.”\n\nHe offers nothing more. The choice, as ever, rests with you.\n\n---CHOICES---\n1. Go look for Kira now, before the rest of the students wake. [Perception]\n2. Ask Luke more about the old sealing rituals—knowledge might protect you both. [Discipline]\n3. Return to your own meditation, trying to sense the vergence’s pull on Kira from afar. [Force:Sense]",
+  "response_shape": {
+    "id": "gen-1777229704-AP8F2uQtqfuNC6nGPoOE",
+    "choices": [
+      {
+        "finish_reason": "stop",
+        "index": 0,
+        "message": {
+          "content": "The Massassi stone is cool beneath your crossed legs, the first pale light of Yavin’s sun bleeding through the high arched windows. Your question hangs in the air like the incense smoke from the meditation braziers. Luke’s eyes—gray and old beyond their years—hold yours.\n\n“There is… a scar.” He speaks slowly, each word chosen. “A place where the dark side pooled after Exar Kun’s fall. The Jedi of old tried to seal it, but stone remembers. The vergence you felt—it is not alive, but it is *aware* in its way.”\n\nHe pauses. A cooling breeze stirs the leaves beyond the open colonnade. You think of Kira’s empty mat, the way she slipped out before dawn.\n\n“Kira is drawn to strong currents,” Luke says, and there is a sadness in his voice. “She does not seek power for its own sake—she seeks *answers*. That longing can open doors best left closed.”\n\nYour chest tightens. You remember the clarity you refused—a false gift. Now you carry the weight of knowing something waits below, and the fear that Kira might walk right into it.\n\n“What would you have me do?” you ask.\n\nLuke’s gaze is steady. “Learn to listen. The vergence will not call you again the same way—but it will call her. If you are patient, you may find the entrance before she does. Or you may find her first.”\n\nHe offers nothing more. The choice, as ever, rests with you.\n\n---CHOICES---\n1. Go look for Kira now, before the rest of the students wake. [Perception]\n2. Ask Luke more about the old sealing rituals—knowledge might protect you both. [Discipline]\n3. Return to your own meditation, trying to sense the vergence’s pull on Kira from afar. [Force:Sense]",
+          "role": "assistant",
+          "reasoning": "We need to write a passage in second person present tense, 170-260 words. The scene: dawn meditation, player asks Luke about what's under temple and if Kira is drawn. Prior result: player sensed heat and pressure, refused dark-side temptation. Luke is compassionate and indirect. Outcome: one actionable lead and one emotional complication. No new check. Write passage then choices.\n\nLet's craft. Start with setting, player's question. Luke's response: he doesn't give full answer, but offers lead: the vergence is old Sith, but also something else. He mentions Kira's restlessness, her seeking something. Emotional complication: player's own fear of power, maybe feeling responsible or worried about Kira. End with Luke's indirect guidance. Keep sensory: dawn light, stone, humidity.\n\nWrite passage.",
+          "reasoning_details": [
+            {
+              "type": "reasoning.text",
+              "text": "We need to write a passage in second person present tense, 170-260 words. The scene: dawn meditation, player asks Luke about what's under temple and if Kira is drawn. Prior result: player sensed heat and pressure, refused dark-side temptation. Luke is compassionate and indirect. Outcome: one actionable lead and one emotional complication. No new check. Write passage then choices.\n\nLet's craft. Start with setting, player's question. Luke's response: he doesn't give full answer, but offers lead: the vergence is old Sith, but also something else. He mentions Kira's restlessness, her seeking something. Emotional complication: player's own fear of power, maybe feeling responsible or worried about Kira. End with Luke's indirect guidance. Keep sensory: dawn light, stone, humidity.\n\nWrite passage.",
+              "format": "unknown",
+              "index": 0
+            }
+          ]
+        },
+        "native_finish_reason": "stop"
+      }
+    ],
+    "created": 1777229704,
+    "model": "deepseek/deepseek-v4-flash-20260423",
+    "object": "chat.completion",
+    "system_fingerprint": "fp_058df29938_prod0820_fp8_kvcache_20260402",
+    "usage": {
+      "completion_tokens": 566,
+      "prompt_tokens": 372,
+      "total_tokens": 938,
+      "completion_tokens_details": {
+        "audio_tokens": 0,
+        "reasoning_tokens": 169,
+        "image_tokens": 0
+      },
+      "prompt_tokens_details": {
+        "audio_tokens": 0,
+        "cached_tokens": 0,
+        "cache_write_tokens": 0,
+        "video_tokens": 0
+      },
+      "cost": 0.00021056,
+      "is_byok": false,
+      "cost_details": {
+        "upstream_inference_cost": 0.00021056,
+        "upstream_inference_prompt_cost": 5.208e-05,
+        "upstream_inference_completions_cost": 0.00015848
+      }
+    },
+    "provider": "DeepSeek"
+  },
+  "finish_reason": "stop",
+  "passage": "The Massassi stone is cool beneath your crossed legs, the first pale light of Yavin’s sun bleeding through the high arched windows. Your question hangs in the air like the incense smoke from the meditation braziers. Luke’s eyes—gray and old beyond their years—hold yours.\n\n“There is… a scar.” He speaks slowly, each word chosen. “A place where the dark side pooled after Exar Kun’s fall. The Jedi of old tried to seal it, but stone remembers. The vergence you felt—it is not alive, but it is aware in its way.”\n\nHe pauses. A cooling breeze stirs the leaves beyond the open colonnade. You think of Kira’s empty mat, the way she slipped out before dawn.\n\n“Kira is drawn to strong currents,” Luke says, and there is a sadness in his voice. “She does not seek power for its own sake—she seeks answers. That longing can open doors best left closed.”\n\nYour chest tightens. You remember the clarity you refused—a false gift. Now you carry the weight of knowing something waits below, and the fear that Kira might walk right into it.\n\n“What would you have me do?” you ask.\n\nLuke’s gaze is steady. “Learn to listen. The vergence will not call you again the same way—but it will call her. If you are patient, you may find the entrance before she does. Or you may find her first.”\n\nHe offers nothing more. The choice, as ever, rests with you."
+}

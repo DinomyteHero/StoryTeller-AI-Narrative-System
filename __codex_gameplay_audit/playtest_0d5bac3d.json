@@ -1,0 +1,197 @@
+{
+  "session_id": "0d5bac3d-e19e-4d34-a1aa-e4200c8a85c9",
+  "opening_sec": 55.3,
+  "turn_report": [
+    {
+      "turn": 1,
+      "status": 200,
+      "sec": 0.0,
+      "choice_index": 2,
+      "choice": "Focus on that pressure below the temple. Push your awareness downward, toward the dark stone, toward whatever is waiting in the old foundations",
+      "tag": "force:sense",
+      "pending": true,
+      "handled_pending": {
+        "kind": "temptation",
+        "status": 200,
+        "sec": 30.946897799964063
+      },
+      "words": 245,
+      "choices_count": 3,
+      "dice": true,
+      "latest_turn": 2,
+      "check_skill": null,
+      "scene_type": null,
+      "force_result": true
+    },
+    {
+      "turn": 2,
+      "status": 200,
+      "sec": 13.5,
+      "choice_index": 1,
+      "choice": "Ask him what's down there instead.\" — Let *him* carry the weight of the answer for now.",
+      "tag": null,
+      "pending": null,
+      "handled_pending": null,
+      "words": 314,
+      "choices_count": 4,
+      "dice": false,
+      "latest_turn": 3,
+      "check_skill": null,
+      "scene_type": null,
+      "force_result": false
+    },
+    {
+      "turn": 3,
+      "status": 200,
+      "sec": 27.9,
+      "choice_index": 2,
+      "choice": "Ask a different question entirely. \"Kira's cushion was empty this morning. She's been gone before. Do you know where she goes?\" The vergence can wait. The friend can't.",
+      "tag": null,
+      "pending": null,
+      "handled_pending": null,
+      "words": 186,
+      "choices_count": 4,
+      "dice": false,
+      "latest_turn": 4,
+      "check_skill": null,
+      "scene_type": null,
+      "force_result": false
+    },
+    {
+      "turn": 4,
+      "status": 500,
+      "error": "Internal Server Error",
+      "sec": 13.939357600000221
+    }
+  ],
+  "arc_state": {
+    "current_act": 1,
+    "act_progress": 0.15000000000000002,
+    "turns_this_act": 3,
+    "anchor_proximity": "distant",
+    "current_location": "Jedi Praxeum, upper meditation level of the Great Temple, Yavin 4",
+    "dynamic_threads": [],
+    "closed_threads": [],
+    "consecutive_zero_delta_turns": 3,
+    "last_dramatic_mission": null
+  },
+  "npc_states": [
+    {
+      "name": "Captain Ress Tannen",
+      "disposition": 0.1,
+      "knows_count": 3,
+      "last_seen_turn": 0,
+      "pressure_role": "escalator"
+    },
+    {
+      "name": "Kira Denn",
+      "disposition": 0.85,
+      "knows_count": 3,
+      "last_seen_turn": 0,
+      "pressure_role": "catalyst"
+    },
+    {
+      "name": "Luke Skywalker",
+      "disposition": 0.7,
+      "knows_count": 3,
+      "last_seen_turn": 0,
+      "pressure_role": "witness"
+    },
+    {
+      "name": "Malakai",
+      "disposition": 0.25,
+      "knows_count": 4,
+      "last_seen_turn": 0,
+      "pressure_role": "tempter"
+    },
+    {
+      "name": "Tionne",
+      "disposition": 0.6,
+      "knows_count": 3,
+      "last_seen_turn": 0,
+      "pressure_role": "mirror"
+    }
+  ],
+  "turns": [
+    {
+      "turn_number": 0,
+      "action": "[session_start]",
+      "scene_type": "exploration",
+      "check_skill": null,
+      "check_difficulty": null,
+      "force": false,
+      "tags": [
+        null,
+        null,
+        "force:sense"
+      ],
+      "narration_excerpt": "The meditation cushion is worn smooth by a year of mornings, but your body has not yet learned to trust it. The stone beneath is cool through the fabric, old enough that the heat of Yavin's jungle never quite reaches it. Master Skywalker passes behind you — you hear the soft drag of his robe hem on stone, feel the ripple of his presence in the Force like a current you can almost ride if you stop trying. Kira's cushion is empty. Third row, left side. You noticed before you sat down, before the me",
+      "choices": [
+        "Keep meditating. Kira is late sometimes. The Force does not mind waiting, and neither should you.",
+        "Get up and find her. Something is wrong, and sitting still while it happens is not something you know how to do.",
+        "Focus on that pressure below the temple. Push your awareness downward, toward the dark stone, toward whatever is waiting in the old foundations"
+      ]
+    },
+    {
+      "turn_number": 2,
+      "action": "Focus on that pressure below the temple. Push your awareness downward, toward the dark stone, toward whatever is waiting in the old foundations",
+      "scene_type": "exploration",
+      "check_skill": null,
+      "check_difficulty": null,
+      "force": true,
+      "tags": [
+        null,
+        null,
+        null
+      ],
+      "narration_excerpt": "You press your awareness down through the stone. The meditation cushion's smooth familiarity falls away. Below your knees, through the layers of temple floor — jungle-heated surface, then cool interior stone, then the dead air of spaces no one has entered in years — you reach for what you felt that morning: the pressure, the weight, the thing in the dark. The Force answers wrong. Heat. Sudden and dry, like opening an oven door onto a fire that's been burning longer than you've been alive. Not th",
+      "choices": [
+        "Tell him what you saw.\" — Direct description, no hedging. Let the Master decide what it means.",
+        "Ask him what's down there instead.\" — Let *him* carry the weight of the answer for now.",
+        "Stand up. Change the subject.\" — You are not ready to talk about what that heat felt like."
+      ]
+    },
+    {
+      "turn_number": 3,
+      "action": "Ask him what's down there instead.\" — Let *him* carry the weight of the answer for now.",
+      "scene_type": "exploration",
+      "check_skill": null,
+      "check_difficulty": null,
+      "force": false,
+      "tags": [
+        null,
+        null,
+        null,
+        null
+      ],
+      "narration_excerpt": "You ask him to carry it. So he does. Luke settles onto the cushion beside yours, folding his legs with the practiced ease of a man who has meditated in worse places—ice caves, asteroid tunnels, the back of a landspeeder. He looks at the stone floor, not at you. \"There are levels beneath this one,\" he says. \"Twelve layers of Massassi construction, then the original Sith foundations. The ones who came before the Massassi—they built into the rock itself.\" He pauses. \"What you felt was a vergence. A",
+      "choices": [
+        "Wait. You want to understand more before you say anything. Ask him what he's learned from the archives—what the old Order wrote about the vergence. Knowledge first, position second.",
+        "Push. \"Then study it. The old Order sealed things—you said it yourself. What they sealed festered. If you leave this untouched, someone else will find it later, with less warning than I just had.\" Let him hear your conviction.",
+        "Ask a different question entirely. \"Kira's cushion was empty this morning. She's been gone before. Do you know where she goes?\" The vergence can wait. The friend can't.",
+        "Let him walk away. Sit here, in the cool stone, and feel what the vergence feels like when you're not reaching for it. Passivity is also a choice."
+      ]
+    },
+    {
+      "turn_number": 4,
+      "action": "Ask a different question entirely. \"Kira's cushion was empty this morning. She's been gone before. Do you know where she goes?\" The vergence can wait. The friend can't.",
+      "scene_type": "exploration",
+      "check_skill": null,
+      "check_difficulty": null,
+      "force": false,
+      "tags": [
+        null,
+        "coordination_to_move_quietly_through_the_jungle",
+        "force:sense",
+        null
+      ],
+      "narration_excerpt": "The question lands like a stone in still water. Luke's hands rest on his knees, palms up. He doesn't flinch, doesn't look at you. The silence stretches long enough that you hear your own breathing, the distant drip of condensation from a stone lintel somewhere below. \"I know she leaves,\" he says. \"I don't know where.\" You wait for more. He gives you the weight of that absence deliberately — a teaching silence, the kind that says I've told you what I know, now decide what it means to you. \"She's ",
+      "choices": [
+        "Push him. \"You trust her. But you don't know everything about what she's doing. That's not the same thing.\" — Let him see that you know more than you've said.",
+        "Let it go for now. Nod, stand, and walk to the edge of the colonnade. Look out at the jungle where the trail heads disappear under the canopy. You can find her yourself.",
+        "Sit in the silence with him. Don't ask anything else. Just be present in the space where the question still hangs, and see what the Force shows you in the waiting.",
+        "Change the subject back to the vergence. \"You said you haven't decided what to do about what's beneath us. What would change your mind?"
+      ]
+    }
+  ]
+}

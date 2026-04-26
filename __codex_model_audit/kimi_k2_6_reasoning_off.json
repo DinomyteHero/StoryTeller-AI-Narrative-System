@@ -1,0 +1,64 @@
+{
+  "label": "kimi_k2_6_reasoning_off",
+  "model": "moonshotai/kimi-k2.6",
+  "ok": true,
+  "parse_ok": true,
+  "elapsed_sec": 10.04,
+  "error": null,
+  "passage_word_count": 249,
+  "choices": [
+    "Seek out Kira directly and tell her what you sensed, offering cautious trust rather than confrontation.",
+    "Return to the meditation chamber alone and open yourself to the Force, trying to locate Kira's presence now.",
+    "Ask Luke why he will not simply go after Kira himself, pressing his reluctance."
+  ],
+  "skill_tags": [
+    null,
+    "force:sense",
+    null
+  ],
+  "raw": "Luke sets down his cup of tarine tea, steam curling in the amber dawn light filtering through the temple's high windows. He does not answer immediately. Outside, jungle birds call to each other across the treetops, and somewhere distant, a training remote hums to life for another student's practice.\n\n\"Under the temple,\" he says finally, \"the Massassi built what they built. The Force moves through stone differently than through living things. Slower. Deeper.\" His fingers rest on the weathered table between you, tracing a grain in the wood. \"Your sensitivity is real. What you felt is real.\"\n\nHe meets your eyes, and you see the weight there—not fear, but the burden of too many students who rushed toward certainty too quickly.\n\n\"Kira has her own path,\" he continues. \"Her own difficulties. I have spoken with her.\" A pause. \"She will not speak with me again about it.\"\n\nThe unspoken hangs in the humid air: *she will speak with someone, though*. The heat you felt beneath the stone, that *noticing* quality—it has a gravity. You refused its pull, but refusal does not erase the memory of how easy the clarity would have been. You wonder now if Kira has found her own refusal, or her own surrender.\n\nLuke stands, his robe brushing the stone floor. \"The temple has stood a long time,\" he says. \"It will stand longer. What matters is who walks inside it.\"\n\nBut you hear what he does not say: *someone is walking where they should not*.\n\n---CHOICES---\n1. Seek out Kira directly and tell her what you sensed, offering cautious trust rather than confrontation.\n2. Return to the meditation chamber alone and open yourself to the Force, trying to locate Kira's presence now. [Force:Sense]\n3. Ask Luke why he will not simply go after Kira himself, pressing his reluctance.",
+  "response_shape": {
+    "id": "gen-1777228954-aFuoHfOnx1EvhR9vI4DH",
+    "choices": [
+      {
+        "finish_reason": "stop",
+        "index": 0,
+        "message": {
+          "content": "Luke sets down his cup of tarine tea, steam curling in the amber dawn light filtering through the temple's high windows. He does not answer immediately. Outside, jungle birds call to each other across the treetops, and somewhere distant, a training remote hums to life for another student's practice.\n\n\"Under the temple,\" he says finally, \"the Massassi built what they built. The Force moves through stone differently than through living things. Slower. Deeper.\" His fingers rest on the weathered table between you, tracing a grain in the wood. \"Your sensitivity is real. What you felt is real.\"\n\nHe meets your eyes, and you see the weight there—not fear, but the burden of too many students who rushed toward certainty too quickly.\n\n\"Kira has her own path,\" he continues. \"Her own difficulties. I have spoken with her.\" A pause. \"She will not speak with me again about it.\"\n\nThe unspoken hangs in the humid air: *she will speak with someone, though*. The heat you felt beneath the stone, that *noticing* quality—it has a gravity. You refused its pull, but refusal does not erase the memory of how easy the clarity would have been. You wonder now if Kira has found her own refusal, or her own surrender.\n\nLuke stands, his robe brushing the stone floor. \"The temple has stood a long time,\" he says. \"It will stand longer. What matters is who walks inside it.\"\n\nBut you hear what he does not say: *someone is walking where they should not*.\n\n---CHOICES---\n1. Seek out Kira directly and tell her what you sensed, offering cautious trust rather than confrontation.\n2. Return to the meditation chamber alone and open yourself to the Force, trying to locate Kira's presence now. [Force:Sense]\n3. Ask Luke why he will not simply go after Kira himself, pressing his reluctance.",
+          "role": "assistant"
+        },
+        "native_finish_reason": "stop"
+      }
+    ],
+    "created": 1777228954,
+    "model": "moonshotai/kimi-k2.6-20260420",
+    "object": "chat.completion",
+    "system_fingerprint": "fpv0_b5e1a00b",
+    "usage": {
+      "completion_tokens": 399,
+      "prompt_tokens": 370,
+      "total_tokens": 769,
+      "completion_tokens_details": {
+        "audio_tokens": 0,
+        "reasoning_tokens": 0,
+        "image_tokens": 0
+      },
+      "prompt_tokens_details": {
+        "audio_tokens": 0,
+        "cached_tokens": 256,
+        "cache_write_tokens": 0,
+        "video_tokens": 0
+      },
+      "cost": 0.00174526,
+      "is_byok": false,
+      "cost_details": {
+        "upstream_inference_cost": 0.00174526,
+        "upstream_inference_prompt_cost": 0.00014926,
+        "upstream_inference_completions_cost": 0.001596
+      }
+    },
+    "provider": "AtlasCloud"
+  },
+  "finish_reason": "stop",
+  "passage": "Luke sets down his cup of tarine tea, steam curling in the amber dawn light filtering through the temple's high windows. He does not answer immediately. Outside, jungle birds call to each other across the treetops, and somewhere distant, a training remote hums to life for another student's practice.\n\n\"Under the temple,\" he says finally, \"the Massassi built what they built. The Force moves through stone differently than through living things. Slower. Deeper.\" His fingers rest on the weathered table between you, tracing a grain in the wood. \"Your sensitivity is real. What you felt is real.\"\n\nHe meets your eyes, and you see the weight there—not fear, but the burden of too many students who rushed toward certainty too quickly.\n\n\"Kira has her own path,\" he continues. \"Her own difficulties. I have spoken with her.\" A pause. \"She will not speak with me again about it.\"\n\nThe unspoken hangs in the humid air: she will speak with someone, though. The heat you felt beneath the stone, that noticing quality—it has a gravity. You refused its pull, but refusal does not erase the memory of how easy the clarity would have been. You wonder now if Kira has found her own refusal, or her own surrender.\n\nLuke stands, his robe brushing the stone floor. \"The temple has stood a long time,\" he says. \"It will stand longer. What matters is who walks inside it.\"\n\nBut you hear what he does not say: someone is walking where they should not."
+}

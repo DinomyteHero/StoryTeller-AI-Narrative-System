@@ -38,6 +38,7 @@ from engine.force import (
     get_available_force_dice,
     resolve_force_pips,
 )
+from gm.context import ArcState, ContextPackage
 from gm.local_gm import CheckDecision, _validate_decision
 
 
@@ -362,6 +363,48 @@ class TestFourResultMatrix:
         force_result = ForceResult(force_succeeded=True, pips_required=1)
         block = build_force_result_block(force_result, skill_succeeded=None, morality=60)
         assert "MATRIX" not in block
+
+    def test_pure_force_context_does_not_emit_skill_failure(self):
+        """Pure Force dice must not look like a failed mundane check."""
+        char = make_force_character(force_rating=1)
+        arc = ArcState(
+            campaign_name="Test",
+            current_act=1,
+            total_acts=4,
+            act_name="Opening",
+            act_progress=0.4,
+            current_anchor="test",
+            next_anchor="next",
+            anchors_completed=[],
+            throughline_question="?",
+            tension_level="rising",
+            open_threads=[],
+            closed_threads=[],
+        )
+        ctx = ContextPackage(
+            character=char,
+            arc=arc,
+            story_summary="",
+            recent_turns=[],
+            active_npcs=[],
+            location="Yavin 4",
+            situation="Reach out with Sense.",
+            dice_pool=DicePool(force=1),
+            roll_result=make_roll_result(light=1, dark=0),
+            force_result_block=build_force_result_block(
+                ForceResult(force_succeeded=True, pips_required=1),
+                skill_succeeded=None,
+                morality=60,
+            ),
+            force_check_kind="pure",
+        )
+
+        block = ctx.build_dice_result_block()
+
+        assert "FORCE DICE RESULT (PURE FORCE ACTION)" in block
+        assert "DICE CHECK RESULT" not in block
+        assert "FAILED" not in block
+        assert "FORCE RESULT block below is authoritative" in block
 
     def test_morality_band_tone_light(self):
         force_result = ForceResult(force_succeeded=True, pips_required=1)

@@ -172,6 +172,8 @@ def test_introspection_dry_spell_fires():
         consecutive_no_check_turns=2,
     )
     assert "dry spell" in cue
+    assert "change the external situation" in cue
+    assert "same static posture" in cue
 
 
 def test_introspection_dry_spell_needs_threshold():
@@ -275,3 +277,28 @@ def test_introspection_block_emits_in_any_scene():
         introspection_trigger="INTROSPECTION TRIGGER (post-Despair): slow down",
     )
     assert "post-Despair" in ctx.build_introspection_trigger_block()
+
+
+def test_pacing_block_adds_scene_motion_governor_for_late_quiet_turns():
+    from gm.context import ContextPackage, ArcState
+    from engine.character import Character
+
+    char = Character(name="Test", career="smuggler", species="human")
+    arc = ArcState(
+        campaign_name="t", current_act=1, total_acts=4, act_name="A",
+        act_progress=0.5, current_anchor="x", next_anchor="y",
+        anchors_completed=[], throughline_question="?", tension_level="medium",
+        open_threads=[], closed_threads=[], turns_this_act=4,
+        anchor_proximity="approaching",
+    )
+    ctx = ContextPackage(
+        character=char, arc=arc,
+        story_summary="", recent_turns=[], active_npcs=[],
+        location="Temple", situation="Wait and think.",
+        scene_type="introspection",
+    )
+
+    block = ctx.build_pacing_block()
+
+    assert "SCENE MOTION GOVERNOR" in block
+    assert "person, place, clue, or decision point" in block

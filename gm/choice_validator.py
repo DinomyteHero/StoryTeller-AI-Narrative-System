@@ -1,22 +1,17 @@
 """Choice quality validator — post-generation gate for generic choices.
 
-Calls the local model to evaluate choice sets against five rubric
-dimensions. Rejects when 2+ dimensions fail. Shares the existing
-retry budget in narrate_turn().
+Calls the fast LLM tier to evaluate choice sets against five rubric
+dimensions. Rejects when 2+ dimensions fail.
 
 See docs/CHOICE_QUALITY_VALIDATION_SPEC.md for the full specification.
 """
 
-import json
 import logging
-import os
 from dataclasses import dataclass
 from pathlib import Path
 
-import httpx
+from gm.llm_client import TIER_FAST, call_chat_json
 
-OLLAMA_URL  = os.getenv("OLLAMA_URL", "http://localhost:11434")
-LOCAL_MODEL = os.getenv("LOCAL_MODEL", "qwen3.5:9b")
 PROMPT_PATH = Path(__file__).parent / "prompts" / "choice_eval.txt"
 
 CHOICE_EVAL_SCHEMA = {
@@ -83,10 +78,10 @@ def validate_choice_quality(
 ) -> ChoiceQualityResult:
     """Evaluate a choice set against the five-dimension quality rubric.
 
-    Calls the local model (Ollama) for structured evaluation.
+    Calls the fast LLM tier for structured evaluation.
     Returns a ChoiceQualityResult with per-dimension pass/fail.
 
-    On local model failure, returns an all-pass result (fail-open)
+    On evaluator failure, returns an all-pass result (fail-open)
     to avoid blocking the turn on evaluator issues.
     """
     template = PROMPT_PATH.read_text(encoding="utf-8")
@@ -108,33 +103,17 @@ def validate_choice_quality(
     )
 
     try:
-        response = httpx.post(
-            f"{OLLAMA_URL}/api/generate",
-            json={
-                "model":  LOCAL_MODEL,
-                "prompt": f"/no_think\n{prompt}",
-                "stream": False,
-                "format": CHOICE_EVAL_SCHEMA,
-                "options": {"temperature": 0.1, "num_predict": 100},
-            },
+        data = call_chat_json(
+            tier=TIER_FAST,
+            purpose="choice_quality",
+            user=prompt,
+            schema=CHOICE_EVAL_SCHEMA,
+            schema_name="choice_quality",
+            temperature=0.1,
+            max_tokens=100,
             timeout=30.0,
+            retries=2,
         )
-        response.raise_for_status()
-        resp_json = response.json()
-        raw_text = resp_json["response"].strip()
-
-        # Handle thinking-mode responses
-        if not raw_text and resp_json.get("thinking", "").strip():
-            raw_text = resp_json["thinking"].strip()
-
-        # Strip code fences if present
-        if raw_text.startswith("```"):
-            raw_text = raw_text.split("```")[1]
-            if raw_text.startswith("json"):
-                raw_text = raw_text[4:]
-            raw_text = raw_text.strip()
-
-        data = json.loads(raw_text)
         return ChoiceQualityResult(
             specific=bool(data.get("specific", True)),
             identity=bool(data.get("identity", True)),
@@ -143,7 +122,7 @@ def validate_choice_quality(
             grounded=bool(data.get("grounded", True)),
         )
 
-    except (httpx.HTTPError, json.JSONDecodeError, KeyError, ValueError) as e:
+    except Exception as e:
         # Fail-open: if the evaluator breaks, don't block the turn
         logger.warning(f"Choice quality validator failed: {e}. Accepting choices.")
         return ChoiceQualityResult(

@@ -1,0 +1,891 @@
+{
+  "schema_version": "era_pack.v0.1",
+  "id": "new_jedi_order",
+  "display_name": "New Jedi Order Era",
+  "continuity": "legends",
+  "status": "content_seed",
+  "date_range": {
+    "overall": "25-37 ABY",
+    "primary_play_window": "25-29 ABY",
+    "postwar_window": "30-37 ABY",
+    "notes": "The era pack supports the Yuuzhan Vong War as the primary campaign engine and the postwar New Jedi Order as a sequel space."
+  },
+  "authoring_intent": "A reusable Legends era pack for campaigns set during the Yuuzhan Vong War and its aftermath. The pack should make NJO campaigns feel different from Imperial, Praxeum, Clone Wars, or Old Republic play: public Jedi under philosophical stress, a collapsing New Republic, refugee-scale stakes, living biotech, and enemies whose worldview is alien rather than merely Imperial.",
+  "core_premise": "The restored Jedi and the New Republic face the Yuuzhan Vong invasion, an extragalactic war that breaks familiar assumptions about the Force, technology, politics, and heroism. Personal loyalties must survive galactic catastrophe.",
+  "design_principles": [
+    "The Yuuzhan Vong are not reskinned Sith or Imperials. Their threat is religious, biological, military, and cultural.",
+    "The war should pressure the player at personal scale before it becomes abstract galactic collapse.",
+    "Canon events create environmental pressure, not a railroad. The player can save a convoy, expose a collaborator, preserve a Jedi cell, or change a local outcome without rewriting the whole war.",
+    "The Jedi are numerous enough to be a community but fragile enough that every loss matters.",
+    "Choices should often test compassion under scarcity: whom to evacuate, whom to trust, what truth to reveal, what violence costs.",
+    "The New Republic should feel strained, bureaucratic, brave, and often too slow for the scale of the threat.",
+    "The Force is present but unsettled. The player should feel that familiar senses sometimes fail, mislead, or arrive too late."
+  ],
+  "era_voice": {
+    "era": "New Jedi Order era",
+    "year": "25-37 ABY",
+    "voice_notes": "Hope has matured into responsibility. The galaxy is no longer fighting the Empire's shadow alone; it is learning that victory did not make it safe. The prose should carry refugee urgency, moral exhaustion, and hard-won tenderness. Jedi scenes should feel less like temple serenity and more like field medicine for the soul.",
+    "period_details": [
+      "The New Republic is politically divided and increasingly overmatched as the Yuuzhan Vong invasion spreads.",
+      "Luke Skywalker's Jedi Order is real but still young, decentralized, and philosophically unsettled.",
+      "Yuuzhan Vong technology is biological: yorik coral, living ships, dovin basals, villips, ooglith masquers, and shaped weapons.",
+      "Refugee traffic, convoy logistics, triage stations, and displaced planetary governments are common war textures.",
+      "The Imperial Remnant is a possible uneasy ally, not the central galactic antagonist.",
+      "Smugglers, privateers, and local defense forces matter because official institutions cannot cover every threatened system.",
+      "The Force does not read the Yuuzhan Vong cleanly at first; this should create uncertainty, not a simple power immunity."
+    ],
+    "period_avoid": [
+      "Treating the Galactic Empire as the primary central authority.",
+      "Using clone trooper battalions, Separatist droid armies, or Clone Wars political framing.",
+      "Assuming the Jedi are extinct or must hide from Imperial Inquisitors as the default premise.",
+      "Making Sith Lords the default explanation for every dark side pressure.",
+      "Using sequel-era First Order, Resistance, Starkiller, or post-Disney canon institutions.",
+      "Portraying the New Republic as fully stable, efficient, and uncontested during the war.",
+      "Using Yuuzhan Vong technology as normal metal machinery with different names."
+    ]
+  },
+  "timeline_bands": [
+    {
+      "id": "pre_invasion_pressure",
+      "range": "22-24 ABY",
+      "summary": "Late peace before the storm. Jedi training, border anomalies, strange scouts, refugee rumors, and political complacency.",
+      "campaign_uses": [
+        "mystery campaigns where the threat is not yet understood",
+        "Jedi academy and young-knight campaigns",
+        "smuggler or scout campaigns that first encounter impossible biology"
+      ]
+    },
+    {
+      "id": "early_invasion",
+      "range": "25 ABY",
+      "summary": "The Yuuzhan Vong become a visible military and cultural threat. Local systems fall faster than the New Republic can explain.",
+      "campaign_uses": [
+        "first-contact survival",
+        "convoy defense",
+        "Jedi reconnaissance",
+        "New Republic intelligence failures"
+      ]
+    },
+    {
+      "id": "war_spread",
+      "range": "26-27 ABY",
+      "summary": "The war becomes systemic. Refugee movement, collaborator networks, desperate alliances, and political fracture dominate.",
+      "campaign_uses": [
+        "refugee corridor campaigns",
+        "Peace Brigade infiltration",
+        "front-line military arcs",
+        "Jedi philosophical crisis"
+      ]
+    },
+    {
+      "id": "occupation_and_resistance",
+      "range": "27-28 ABY",
+      "summary": "Occupied worlds, broken institutions, local resistance cells, and moral triage. The player sees what the war costs after the holocams leave.",
+      "campaign_uses": [
+        "occupied-world resistance",
+        "rescue and evacuation",
+        "collaboration and betrayal stories",
+        "Force crisis and recovery arcs"
+      ]
+    },
+    {
+      "id": "turning_tide",
+      "range": "28-29 ABY",
+      "summary": "The galaxy begins to understand the invaders, but understanding does not erase the cost. Alliances harden, strategies mature, and final choices become irreversible.",
+      "campaign_uses": [
+        "combined fleet operations",
+        "Jedi strike teams",
+        "enemy culture revelation",
+        "campaign finales that decide local survival"
+      ]
+    },
+    {
+      "id": "postwar_reckoning",
+      "range": "30-37 ABY",
+      "summary": "The war is over, but the survivors inherit ruins, political transformation, grief, and unresolved Force questions.",
+      "campaign_uses": [
+        "reconstruction",
+        "war-crime accountability",
+        "Jedi identity after catastrophe",
+        "cross-era import into Legacy of the Force pressure"
+      ]
+    }
+  ],
+  "terminology": {
+    "era_terms": [
+      {
+        "term": "New Jedi Order",
+        "definition": "Luke Skywalker's restored Jedi community after the fall of the Empire. In this era it is active, visible, young, and internally debated.",
+        "usage": "Use for the institution and philosophy, not simply as a synonym for all Jedi everywhere."
+      },
+      {
+        "term": "Yuuzhan Vong",
+        "definition": "Extragalactic invaders with a religious, caste-based society and organic technology. They do not feel like standard dark side villains.",
+        "usage": "Treat their culture as dangerous and coherent. Avoid flattening them into generic monsters."
+      },
+      {
+        "term": "Peace Brigade",
+        "definition": "Collaborators who believe appeasement, opportunism, or survival requires cooperation with the invaders.",
+        "usage": "Use as a personal-scale betrayal engine: neighbors, officials, smugglers, or soldiers selling out others."
+      },
+      {
+        "term": "Dovin basal",
+        "definition": "A living gravity-manipulating organism used by Yuuzhan Vong craft for propulsion, shielding, and attack effects.",
+        "usage": "Use to make space combat strange: missiles vanish, shields buckle, vectors behave wrong."
+      },
+      {
+        "term": "Villip",
+        "definition": "A living Yuuzhan Vong communication organism.",
+        "usage": "Use as unsettling communication texture, especially in infiltration or horror scenes."
+      },
+      {
+        "term": "Yorik coral",
+        "definition": "A living or shaped coral-like material used in Yuuzhan Vong vessels and structures.",
+        "usage": "Use as physical texture: growth, weight, warmth, scar tissue, and alien architecture."
+      },
+      {
+        "term": "Shamed Ones",
+        "definition": "A marginalized Yuuzhan Vong caste whose social position can create heresy, sympathy, or rebellion hooks.",
+        "usage": "Use carefully as an opening for cultural complexity, not as a simple redemption shortcut."
+      },
+      {
+        "term": "Refugee corridor",
+        "definition": "A route, convoy chain, or improvised network moving civilians away from threatened or occupied worlds.",
+        "usage": "A core NJO campaign structure for non-Jedi, military, and smuggler characters."
+      }
+    ],
+    "avoid_or_contextualize": [
+      {
+        "term": "Empire",
+        "guidance": "In NJO, the Imperial Remnant may be present but should not dominate the threat field unless a campaign is specifically Remnant-focused."
+      },
+      {
+        "term": "Sith",
+        "guidance": "Do not default to Sith causality. The era's central crisis is not a Sith plot."
+      },
+      {
+        "term": "Jedi Academy",
+        "guidance": "Use specific academy or praxeum context for early or training stories, but the war should eventually push Jedi into mobile, field-based roles."
+      },
+      {
+        "term": "The Force",
+        "guidance": "The Force remains central, but Yuuzhan Vong perception should be uncertain and evolving rather than an all-purpose detection tool."
+      }
+    ]
+  },
+  "faction_templates": [
+    {
+      "faction_id": "new_jedi_order",
+      "display_name": "New Jedi Order",
+      "description": "Luke Skywalker's restored Jedi community: teachers, knights, apprentices, healers, scouts, philosophers, and field operatives trying to define what Jedi should be after the old Order's fall.",
+      "disposition_start": 0.6,
+      "influence_start": 0.45,
+      "awareness_start": 0.4,
+      "per_act_drift": {},
+      "playable": true,
+      "pressure_vectors": [
+        "compassion versus military necessity",
+        "Jedi restraint versus wartime urgency",
+        "public trust versus political fear",
+        "Force certainty versus Yuuzhan Vong opacity"
+      ],
+      "campaign_uses": [
+        "Jedi training",
+        "reconnaissance",
+        "rescue operations",
+        "philosophical crisis",
+        "canon character proximity"
+      ]
+    },
+    {
+      "faction_id": "new_republic",
+      "display_name": "New Republic",
+      "description": "The legitimate galactic government before and during the early war: brave, compromised, bureaucratic, and often too slow to recognize the scale of the invasion.",
+      "disposition_start": 0.5,
+      "influence_start": 0.85,
+      "awareness_start": 0.35,
+      "per_act_drift": {},
+      "playable": true,
+      "pressure_vectors": [
+        "procedure versus emergency",
+        "public confidence versus military truth",
+        "senate politics versus front-line evidence",
+        "fleet scarcity versus refugee need"
+      ],
+      "campaign_uses": [
+        "military command",
+        "intelligence",
+        "relief logistics",
+        "political obstruction",
+        "front-line collapse"
+      ]
+    },
+    {
+      "faction_id": "galactic_alliance_emergent",
+      "display_name": "Emergent Galactic Alliance",
+      "description": "The wartime successor political order that forms from necessity. Use in late-war and postwar campaigns, not as an early-war default.",
+      "disposition_start": 0.55,
+      "influence_start": 0.65,
+      "awareness_start": 0.45,
+      "per_act_drift": {},
+      "playable": true,
+      "pressure_vectors": [
+        "unity versus centralization",
+        "survival government versus democratic legitimacy",
+        "postwar accountability versus urgent victory"
+      ],
+      "campaign_uses": [
+        "late-war coalition arcs",
+        "postwar reconstruction",
+        "mixed-alliance strike teams"
+      ]
+    },
+    {
+      "faction_id": "yuuzhan_vong",
+      "display_name": "Yuuzhan Vong",
+      "description": "The extragalactic invasion force and culture built around devotion, pain, caste, shaping, conquest, and living technology.",
+      "disposition_start": 0.15,
+      "influence_start": 0.75,
+      "awareness_start": 0.2,
+      "per_act_drift": {},
+      "playable": false,
+      "pressure_vectors": [
+        "alien religious certainty versus galactic pluralism",
+        "biological war technology versus familiar starship logic",
+        "honor and pain versus mercy and negotiation",
+        "caste obedience versus heresy"
+      ],
+      "campaign_uses": [
+        "central antagonist",
+        "occupation pressure",
+        "infiltration horror",
+        "enemy culture revelation",
+        "Shamed One complications"
+      ]
+    },
+    {
+      "faction_id": "peace_brigade",
+      "display_name": "Peace Brigade",
+      "description": "Collaborators, opportunists, frightened officials, smugglers, and true believers who aid the Yuuzhan Vong for survival, profit, ideology, or denial.",
+      "disposition_start": 0.25,
+      "influence_start": 0.35,
+      "awareness_start": 0.45,
+      "per_act_drift": {},
+      "playable": true,
+      "pressure_vectors": [
+        "survival versus betrayal",
+        "appeasement versus resistance",
+        "local fear versus galactic duty"
+      ],
+      "campaign_uses": [
+        "infiltration",
+        "social betrayal",
+        "moral compromise",
+        "defector variants"
+      ]
+    },
+    {
+      "faction_id": "imperial_remnant",
+      "display_name": "Imperial Remnant",
+      "description": "The surviving Imperial state, diminished but disciplined. In NJO it can become an uneasy strategic partner against a worse external threat.",
+      "disposition_start": 0.4,
+      "influence_start": 0.4,
+      "awareness_start": 0.35,
+      "per_act_drift": {},
+      "playable": true,
+      "pressure_vectors": [
+        "old enemy versus necessary ally",
+        "order versus freedom",
+        "pragmatism versus memory of oppression"
+      ],
+      "campaign_uses": [
+        "Remnant liaison",
+        "joint operations",
+        "border defense",
+        "political mistrust"
+      ]
+    },
+    {
+      "faction_id": "refugee_networks",
+      "display_name": "Refugee Networks",
+      "description": "Ad hoc civilian, smuggler, medical, religious, and planetary networks keeping displaced people alive when governments cannot move fast enough.",
+      "disposition_start": 0.55,
+      "influence_start": 0.3,
+      "awareness_start": 0.6,
+      "per_act_drift": {},
+      "playable": true,
+      "pressure_vectors": [
+        "scarcity versus compassion",
+        "local trust versus infiltration risk",
+        "saving many versus saving the known"
+      ],
+      "campaign_uses": [
+        "convoy campaigns",
+        "smuggler heroism",
+        "medical and evacuation play",
+        "ground-level view of galactic war"
+      ]
+    },
+    {
+      "faction_id": "hapes_consortium",
+      "display_name": "Hapes Consortium",
+      "description": "A wealthy, secretive, politically dangerous power bloc whose aid can shift a campaign but always arrives with court politics and conditions.",
+      "disposition_start": 0.45,
+      "influence_start": 0.55,
+      "awareness_start": 0.25,
+      "per_act_drift": {},
+      "playable": true,
+      "pressure_vectors": [
+        "aid versus leverage",
+        "court secrecy versus battlefield urgency",
+        "dynastic interests versus galactic survival"
+      ],
+      "campaign_uses": [
+        "diplomacy",
+        "resource negotiation",
+        "court intrigue",
+        "late-war coalition pressure"
+      ]
+    }
+  ],
+  "allegiance_templates": [
+    {
+      "id": "jedi_order",
+      "display_name": "New Jedi Order",
+      "description": "Force-sensitive protagonists trained or adopted by Luke's restored Jedi community, thrown into a war that challenges what Jedi service means.",
+      "default_motivation_tracks": [
+        "morality",
+        "duty"
+      ],
+      "recommended_careers": [
+        "consular",
+        "guardian",
+        "mystic",
+        "seeker",
+        "sentinel",
+        "warrior"
+      ],
+      "variant_seeds": [
+        {
+          "id": "jedi_scout",
+          "pitch": "A young Jedi scout who keeps finding survivors before the fleet can reach them.",
+          "species_suggestions": [
+            "human",
+            "togruta",
+            "mirialan",
+            "zabrak"
+          ],
+          "career_mapping": {
+            "primary_game_line": "force_and_destiny",
+            "career": "seeker",
+            "specializations": [
+              "hunter",
+              "pathfinder"
+            ]
+          },
+          "core_pressure": "Compassion pulls them toward every distress call; strategy demands they choose."
+        },
+        {
+          "id": "jedi_healer",
+          "pitch": "A Jedi healer moving through refugee stations where the wounds are spiritual as often as physical.",
+          "species_suggestions": [
+            "mirialan",
+            "nautolan",
+            "human",
+            "twi_lek"
+          ],
+          "career_mapping": {
+            "primary_game_line": "force_and_destiny",
+            "career": "consular",
+            "specializations": [
+              "sage",
+              "healer"
+            ]
+          },
+          "core_pressure": "Healing one person can mean abandoning ten others."
+        },
+        {
+          "id": "jedi_ace",
+          "pitch": "A Force-sensitive starfighter pilot who trusts instinct more than doctrine.",
+          "species_suggestions": [
+            "human",
+            "bothan",
+            "zabrak"
+          ],
+          "career_mapping": {
+            "primary_game_line": "age_of_rebellion",
+            "career": "ace",
+            "specializations": [
+              "pilot"
+            ],
+            "force_sensitive": true
+          },
+          "core_pressure": "The Force tells them when to fire; the war asks whether firing is enough."
+        }
+      ]
+    },
+    {
+      "id": "new_republic_service",
+      "display_name": "New Republic Service",
+      "description": "Military, intelligence, diplomatic, and relief personnel trying to keep a failing government useful under impossible pressure.",
+      "default_motivation_tracks": [
+        "duty",
+        "obligation"
+      ],
+      "recommended_careers": [
+        "ace",
+        "commander",
+        "diplomat",
+        "engineer",
+        "soldier",
+        "spy"
+      ],
+      "variant_seeds": [
+        {
+          "id": "fleet_intelligence_officer",
+          "pitch": "An intelligence officer whose early warnings about living ships were filed as panic until a colony vanished.",
+          "species_suggestions": [
+            "bothan",
+            "human",
+            "zabrak"
+          ],
+          "career_mapping": {
+            "primary_game_line": "age_of_rebellion",
+            "career": "spy",
+            "specializations": [
+              "infiltrator",
+              "slicer"
+            ]
+          },
+          "core_pressure": "They know the truth before they have the authority to act on it."
+        },
+        {
+          "id": "convoy_commander",
+          "pitch": "A convoy commander responsible for ships full of civilians and never enough escorts.",
+          "species_suggestions": [
+            "human",
+            "bothan",
+            "wookiee"
+          ],
+          "career_mapping": {
+            "primary_game_line": "age_of_rebellion",
+            "career": "commander",
+            "specializations": [
+              "tactician",
+              "squadron_leader"
+            ]
+          },
+          "core_pressure": "Every hyperspace jump is a vote on whose life weighs most."
+        },
+        {
+          "id": "frontline_medic",
+          "pitch": "A battlefield medic moved from disaster to disaster until triage starts to feel like prophecy.",
+          "species_suggestions": [
+            "human",
+            "mirialan",
+            "zabrak"
+          ],
+          "career_mapping": {
+            "primary_game_line": "age_of_rebellion",
+            "career": "soldier",
+            "specializations": [
+              "medic"
+            ]
+          },
+          "core_pressure": "They cannot save everyone, and the war keeps making them prove it."
+        }
+      ]
+    },
+    {
+      "id": "independent_fringe",
+      "display_name": "Independent Fringe",
+      "description": "Smugglers, scouts, privateers, refugees, and fixers whose routes and favors become lifelines when official maps stop mattering.",
+      "default_motivation_tracks": [
+        "obligation",
+        "duty"
+      ],
+      "recommended_careers": [
+        "smuggler",
+        "explorer",
+        "technician",
+        "colonist"
+      ],
+      "variant_seeds": [
+        {
+          "id": "refugee_runner",
+          "pitch": "A smuggler who used to move contraband and now moves families, medicine, and names of the missing.",
+          "species_suggestions": [
+            "human",
+            "twi_lek",
+            "rodian",
+            "zabrak"
+          ],
+          "career_mapping": {
+            "primary_game_line": "edge_of_empire",
+            "career": "smuggler",
+            "specializations": [
+              "pilot",
+              "thief"
+            ]
+          },
+          "core_pressure": "Profit kept them alive; mercy keeps making them poor."
+        },
+        {
+          "id": "outer_rim_pathfinder",
+          "pitch": "A scout who knows forgotten routes and starts seeing the invasion through empty colonies before anyone calls it war.",
+          "species_suggestions": [
+            "bothan",
+            "human",
+            "togruta"
+          ],
+          "career_mapping": {
+            "primary_game_line": "edge_of_empire",
+            "career": "explorer",
+            "specializations": [
+              "scout",
+              "fringer"
+            ]
+          },
+          "core_pressure": "Knowing the way out makes them responsible for everyone who cannot find it."
+        },
+        {
+          "id": "bio_tech_salvager",
+          "pitch": "A technician trying to understand Yuuzhan Vong organisms before curiosity becomes collaboration.",
+          "species_suggestions": [
+            "zabrak",
+            "human",
+            "bothan"
+          ],
+          "career_mapping": {
+            "primary_game_line": "edge_of_empire",
+            "career": "technician",
+            "specializations": [
+              "mechanic",
+              "slicer"
+            ]
+          },
+          "core_pressure": "The enemy's tools are alive, and learning from them may require crossing lines."
+        }
+      ]
+    },
+    {
+      "id": "collaborator_or_defector",
+      "display_name": "Collaborator or Defector",
+      "description": "Characters connected to collaboration networks, compromised local governments, or enemy-adjacent structures who must decide whether survival still has a moral shape.",
+      "default_motivation_tracks": [
+        "obligation",
+        "morality"
+      ],
+      "recommended_careers": [
+        "spy",
+        "diplomat",
+        "colonist",
+        "smuggler"
+      ],
+      "variant_seeds": [
+        {
+          "id": "peace_brigade_defector",
+          "pitch": "A former collaborator who helped mark safe houses for surrender and now has to get refugees through the same routes.",
+          "species_suggestions": [
+            "human",
+            "bothan",
+            "rodian",
+            "twi_lek"
+          ],
+          "career_mapping": {
+            "primary_game_line": "edge_of_empire",
+            "career": "colonist",
+            "specializations": [
+              "politico",
+              "entrepreneur"
+            ]
+          },
+          "core_pressure": "They know exactly what cowardice costs because other people paid it."
+        },
+        {
+          "id": "remnant_liaison",
+          "pitch": "An Imperial Remnant officer assigned to cooperate with old enemies against an invasion no doctrine prepared for.",
+          "species_suggestions": [
+            "human",
+            "zabrak"
+          ],
+          "career_mapping": {
+            "primary_game_line": "age_of_rebellion",
+            "career": "commander",
+            "specializations": [
+              "tactician"
+            ]
+          },
+          "core_pressure": "They can help save the galaxy without apologizing for the uniform they still wear."
+        },
+        {
+          "id": "shamed_one_witness",
+          "pitch": "A Yuuzhan Vong outcast or witness character for campaigns explicitly designed to explore enemy culture from below.",
+          "species_suggestions": [
+            "custom_yuuzhan_vong"
+          ],
+          "career_mapping": {
+            "primary_game_line": "custom",
+            "career": "custom_survivor",
+            "specializations": [
+              "witness",
+              "heretic"
+            ]
+          },
+          "core_pressure": "They were taught the galaxy was profane; mercy keeps proving more complicated.",
+          "requires_custom_rules": true
+        }
+      ]
+    }
+  ],
+  "force_traditions": [
+    {
+      "id": "new_jedi_order",
+      "display_name": "Luke's New Jedi Order",
+      "stance": "Improvisational, compassionate, less dogmatic than the old Order, still defining itself under wartime pressure.",
+      "mechanical_guidance": "Use Morality, Force powers, and milestone reflections aggressively. Let wartime choices create Conflict even when intentions are good.",
+      "narrative_guidance": "The Jedi should sound like people learning a tradition while already responsible for saving lives."
+    },
+    {
+      "id": "force_uncertainty",
+      "display_name": "Force Uncertainty Around the Yuuzhan Vong",
+      "stance": "The Force does not provide the same clean warning signs the player expects.",
+      "mechanical_guidance": "For Yuuzhan Vong-related Sense or Foresee-like actions, prefer setback dice, incomplete information, or failure-with-advantage rather than flat prohibition.",
+      "narrative_guidance": "Describe absence, static, wrongness, displaced intuition, or secondary clues through fear, pain, ecology, and consequence."
+    },
+    {
+      "id": "wartime_temptation",
+      "display_name": "Wartime Temptation",
+      "stance": "The dark side often arrives as efficiency, not melodrama.",
+      "mechanical_guidance": "Conflict should trigger when the player treats people as resources, uses fear to control civilians, executes helpless enemies, or chooses vengeance under cover of strategy.",
+      "narrative_guidance": "Avoid cackling evil. The temptation is that the hard choice starts feeling clean."
+    }
+  ],
+  "scene_pressures": {
+    "combat": [
+      "Yuuzhan Vong opponents should feel physically committed, pain-tolerant, and tactically unfamiliar.",
+      "Do not turn every fight into lightsaber spectacle; many NJO fights are rescue, holding action, retreat, or protection scenes.",
+      "Environmental stakes should often include civilians, failing ships, biological hazards, or collapsing safe zones."
+    ],
+    "space_combat": [
+      "Dovin basals and living ships should make familiar dogfighting feel uncanny.",
+      "Threat can damage routes, consume missiles, distort shields, or separate convoy elements.",
+      "Triumph can reveal a biological vulnerability or open an evacuation lane."
+    ],
+    "social": [
+      "Pressure often comes from scarcity, fear, and mistrust: who gets transport, who is a collaborator, who is hiding symptoms or intelligence.",
+      "Peace Brigade scenes should be morally sharp but not cartoonish. Many collaborators believe they are preventing worse deaths.",
+      "New Republic officials can be brave and wrong at the same time."
+    ],
+    "infiltration": [
+      "Biological surveillance, villips, shaped disguises, and collaborator records create different infiltration textures than Imperial security.",
+      "The best infiltration scenes should ask whether learning the truth makes the player responsible for people they cannot save."
+    ],
+    "exploration": [
+      "Ruined colonies, evacuated stations, changed ecosystems, and living scars make exploration emotionally loaded.",
+      "Outer Rim routes, refugee caches, abandoned Jedi clues, and alien biotech remains are strong scene anchors."
+    ],
+    "introspection": [
+      "NJO introspection should be about responsibility under catastrophe, not abstract destiny.",
+      "Jedi characters should question what the Force asks when it does not answer clearly.",
+      "Non-Jedi characters should feel the moral weight of becoming heroic by accident."
+    ]
+  },
+  "ffg_outcome_guidance": [
+    {
+      "scene_type": "combat",
+      "advantage": "Protect a bystander, recover footing, expose an unfamiliar enemy tactic, or gain space to evacuate.",
+      "threat": "Collateral damage, strain, separated allies, worsening civilian danger, or enemy adaptation.",
+      "triumph": "Save someone who should have been lost, reveal a tactical vulnerability, or turn an enemy's certainty against them.",
+      "despair": "A safe route closes, a collaborator is exposed too late, a protected NPC is captured, or a victory costs the wrong person."
+    },
+    {
+      "scene_type": "space_combat",
+      "advantage": "Open a vector, draw fire from a transport, identify a dovin basal rhythm, or coordinate escorts.",
+      "threat": "System strain, shield distortion, lost munitions, convoy scatter, or navicomputer corruption.",
+      "triumph": "Break a blockade momentarily, destroy a key living component, or save a ship with impossible timing.",
+      "despair": "A transport is isolated, gravity manipulation catches the ship, or a jump route becomes unusable."
+    },
+    {
+      "scene_type": "social",
+      "advantage": "Earn trust from a frightened witness, reveal a collaborator's tell, or secure partial cooperation.",
+      "threat": "Rumors spread, panic rises, a faction demands proof, or aid comes with a humiliating condition.",
+      "triumph": "Turn an enemy informant, unite rival groups briefly, or expose the truth at the exact right moment.",
+      "despair": "The wrong crowd hears the truth, a collaborator escapes, or someone innocent is blamed."
+    },
+    {
+      "scene_type": "force",
+      "advantage": "Sense secondary emotional evidence, protect an ally from panic, or find the living shape around an absence.",
+      "threat": "Gain incomplete certainty, suffer strain, misread Yuuzhan Vong absence, or expose the character's fear.",
+      "triumph": "Understand the situation through compassion rather than detection, or find a path the Force did not name directly.",
+      "despair": "The character trusts a familiar Force assumption that fails under NJO conditions."
+    }
+  ],
+  "canon_profile_seeds": [
+    {
+      "name": "Luke Skywalker",
+      "era_profile": "NJO Luke, 25-29 ABY",
+      "role": "Jedi leader and moral center under wartime pressure.",
+      "voice_notes": "Calm, plainspoken, practical, sometimes tired. He asks questions that make people choose, but in this era his patience carries grief and responsibility.",
+      "behavioral_envelope": [
+        "Does not treat students as expendable assets.",
+        "Does not confuse certainty with wisdom.",
+        "Will carry guilt privately before he lets it become someone else's burden."
+      ],
+      "anti_stereotype_notes": "Avoid serene invincible grandmaster. He is powerful, but the war can still outpace him."
+    },
+    {
+      "name": "Mara Jade Skywalker",
+      "era_profile": "NJO Mara",
+      "role": "Jedi, former Emperor's Hand, partner to Luke, and sharp-eyed realist.",
+      "voice_notes": "Dry, direct, unsentimental, cutting when needed. Affection shows as precision and protection, not softness.",
+      "behavioral_envelope": [
+        "Does not indulge vague mysticism when a practical threat is present.",
+        "Does not let fear speak for her, even when afraid.",
+        "Will challenge Luke when compassion becomes paralysis."
+      ],
+      "anti_stereotype_notes": "Avoid reducing her to sarcasm. Her directness is discipline, not a personality gimmick."
+    },
+    {
+      "name": "Jacen Solo",
+      "era_profile": "NJO Jacen",
+      "role": "Young Jedi whose moral questions become central to what the Force means during the war.",
+      "voice_notes": "Thoughtful, hesitant, earnest, often more interested in whether action is right than whether it is effective.",
+      "behavioral_envelope": [
+        "Does not take violence lightly.",
+        "Does not stop questioning just because a commander needs certainty.",
+        "Can frustrate allies by refusing simple answers."
+      ],
+      "anti_stereotype_notes": "Avoid writing him as already defined by later eras. In NJO he is still becoming."
+    },
+    {
+      "name": "Jaina Solo",
+      "era_profile": "NJO Jaina",
+      "role": "Pilot, Jedi, daughter of heroes, and young warrior shaped by grief and pressure.",
+      "voice_notes": "Fast, sharp, emotionally guarded. Competence is armor. Vulnerability usually arrives as anger first.",
+      "behavioral_envelope": [
+        "Does not wait passively while others decide the war around her.",
+        "Does not forgive herself quickly.",
+        "Will choose the cockpit when words cannot hold the pressure."
+      ],
+      "anti_stereotype_notes": "Avoid flattening her into ace-pilot bravado. Her aggression often covers loss."
+    },
+    {
+      "name": "Gilad Pellaeon",
+      "era_profile": "NJO Pellaeon",
+      "role": "Imperial Remnant statesman and officer whose pragmatism can make old enemies into temporary allies.",
+      "voice_notes": "Formal, measured, naval, pragmatic. He speaks as someone who remembers defeat and learned from it.",
+      "behavioral_envelope": [
+        "Does not waste ships for vanity.",
+        "Does not pretend the old Empire was innocent.",
+        "Will choose order and survival over ideological purity."
+      ],
+      "anti_stereotype_notes": "Avoid generic Imperial villainy. His danger is competence and memory, not cruelty for its own sake."
+    }
+  ],
+  "campaign_templates": [
+    {
+      "id": "refugee_corridor",
+      "title": "The Refugee Corridor",
+      "pitch": "The player helps keep a route alive as worlds fall behind them and collaborators hunt the convoy from within.",
+      "best_allegiances": [
+        "independent_fringe",
+        "new_republic_service",
+        "jedi_order"
+      ],
+      "core_threads": [
+        "Who gets a berth when there are not enough ships?",
+        "Which distress call is bait?",
+        "Can the convoy survive betrayal without becoming cruel?"
+      ],
+      "recommended_tracks": [
+        "obligation",
+        "duty",
+        "morality"
+      ]
+    },
+    {
+      "id": "jedi_shadow_war",
+      "title": "The Jedi Shadow War",
+      "pitch": "A small Jedi cell investigates missing students, Peace Brigade leaks, and Yuuzhan Vong agents while the Order argues about the shape of resistance.",
+      "best_allegiances": [
+        "jedi_order",
+        "new_republic_service"
+      ],
+      "core_threads": [
+        "What does the Force mean when the enemy cannot be read cleanly?",
+        "Which truths would shatter public trust?",
+        "When is restraint just fear wearing Jedi robes?"
+      ],
+      "recommended_tracks": [
+        "morality",
+        "duty"
+      ]
+    },
+    {
+      "id": "occupied_world",
+      "title": "The Occupied World",
+      "pitch": "The player operates inside a conquered system where survival, collaboration, and resistance have become impossible to separate cleanly.",
+      "best_allegiances": [
+        "collaborator_or_defector",
+        "independent_fringe",
+        "jedi_order"
+      ],
+      "core_threads": [
+        "Who collaborated because they were afraid, and who profited?",
+        "Can mercy survive occupation?",
+        "What must be preserved when liberation is not coming soon?"
+      ],
+      "recommended_tracks": [
+        "obligation",
+        "morality"
+      ]
+    },
+    {
+      "id": "remnant_border",
+      "title": "The Remnant Border",
+      "pitch": "Old enemies coordinate against a new threat in a border sector where the wrong word can reopen the Galactic Civil War inside a larger one.",
+      "best_allegiances": [
+        "imperial_remnant",
+        "new_republic_service",
+        "independent_fringe"
+      ],
+      "core_threads": [
+        "Can enemies cooperate without absolution?",
+        "Who commands when both sides have blood on their hands?",
+        "What does victory mean if it rehabilitates old monsters?"
+      ],
+      "recommended_tracks": [
+        "duty",
+        "obligation"
+      ]
+    }
+  ],
+  "implementation_gaps": [
+    {
+      "gap": "species_breadth",
+      "impact": "The Campaign Studio schema accepts species as strings, but engine.character.Species is still an enum with a limited list. Many NJO-appropriate species and Yuuzhan Vong characters need either enum expansion or a looser species model before direct runtime use.",
+      "suggested_fix": "Add an engine-level Species.UNKNOWN/CUSTOM path or convert Character.species to a validated string with optional species profile data."
+    },
+    {
+      "gap": "specialization_breadth",
+      "impact": "Era pack variant seeds reference common FFG specializations beyond the six data trees currently present. These seeds are useful for authoring but not all are mechanically loadable yet.",
+      "suggested_fix": "Add data/talent_trees entries in career batches, starting with Ace/Pilot, Spy/Slicer, Soldier/Medic, Explorer/Scout, and Seeker/Hunter."
+    },
+    {
+      "gap": "canon_profile_directory",
+      "impact": "Canon profile seeds exist here, but the runtime Phase 21 data/canon_profiles directory is not built yet.",
+      "suggested_fix": "When Phase 21 begins, promote canon_profile_seeds into individual JSON profiles under data/canon_profiles/new_jedi_order/."
+    },
+    {
+      "gap": "yuuzhan_vong_rules",
+      "impact": "Yuuzhan Vong as player characters or detailed adversaries need custom species, gear, Force-perception, and cultural handling. Current engine can represent them narratively as NPCs but not as robust mechanical builds.",
+      "suggested_fix": "Treat Yuuzhan Vong player options as custom campaign variants until a dedicated adversary/species module exists."
+    },
+    {
+      "gap": "era_pack_loader",
+      "impact": "This pack is validated as JSON content but is not yet wired into Campaign Studio generation or runtime spine assembly.",
+      "suggested_fix": "Add a studio era-pack loader that can inject era_voice, faction templates, terminology guardrails, and variant seeds into Mode 2/Mode 1 generation prompts."
+    }
+  ]
+}

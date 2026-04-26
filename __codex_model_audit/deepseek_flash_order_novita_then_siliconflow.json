@@ -1,0 +1,72 @@
+{
+  "label": "deepseek_flash_order_novita_then_siliconflow",
+  "model": "deepseek/deepseek-v4-flash",
+  "ok": true,
+  "parse_ok": true,
+  "elapsed_sec": 10.93,
+  "error": null,
+  "passage_word_count": 226,
+  "choices": [
+    "Head to Kira’s quarters first, hoping to catch her before she leaves for the lower levels.",
+    "Descend directly into the sublevels, using your memory of the pressure and heat to find the vergence—and Kira.",
+    "Seek out another student who might have seen Kira slip away earlier this morning."
+  ],
+  "skill_tags": [
+    "vigilance",
+    "force:sense",
+    "perception"
+  ],
+  "raw": "The dawn light filters through the temple’s high windows, painting amber bars across the stone floor. You stand before Luke, your question hanging in the cool air like the last notes of meditation chants. He folds his hands, gaze distant.\n\n“The Massassi stone is old,” he says, voice low. “Older than the Jedi who built this temple. Older than the Republic. The Sith once seeded this world with hidden places—vergence points where the dark side pooled like groundwater.”\n\nHe pauses, and you catch the faint hum of the jungle waking outside. Kira’s seat remains empty.\n\n“What you sensed is real. A presence. Not a ghost, but a remnant. It waited. And it noticed you. That is dangerous—not because of what it is, but because of what it might offer. Power without cost. Clarity without patience.”\n\nLuke’s eyes meet yours, holding a quiet concern. “Kira has always been drawn to secrets. She seeks answers faster than they can be given. I need you to find her. Not to stop her, but to be a witness. Bring her back before she finds what she’s looking for. You may learn more than you wish to know about yourself.”\n\nThe weight of his request settles in your chest—an actionable lead to track Kira, and a fresh fear: that to follow her is to face the same temptation you just refused.\n\n---CHOICES---\n1. Head to Kira’s quarters first, hoping to catch her before she leaves for the lower levels. [Vigilance]\n2. Descend directly into the sublevels, using your memory of the pressure and heat to find the vergence—and Kira. [Force:Sense]\n3. Seek out another student who might have seen Kira slip away earlier this morning. [Perception]",
+  "response_shape": {
+    "id": "gen-1777229684-xMedZlRB51KqYhMeIT5Y",
+    "choices": [
+      {
+        "finish_reason": "stop",
+        "index": 0,
+        "message": {
+          "content": "The dawn light filters through the temple’s high windows, painting amber bars across the stone floor. You stand before Luke, your question hanging in the cool air like the last notes of meditation chants. He folds his hands, gaze distant.\n\n“The Massassi stone is old,” he says, voice low. “Older than the Jedi who built this temple. Older than the Republic. The Sith once seeded this world with hidden places—vergence points where the dark side pooled like groundwater.”\n\nHe pauses, and you catch the faint hum of the jungle waking outside. Kira’s seat remains empty.\n\n“What you sensed is real. A presence. Not a ghost, but a remnant. It waited. And it noticed you. That is dangerous—not because of what it is, but because of what it might offer. Power without cost. Clarity without patience.”\n\nLuke’s eyes meet yours, holding a quiet concern. “Kira has always been drawn to secrets. She seeks answers faster than they can be given. I need you to find her. Not to stop her, but to be a witness. Bring her back before she finds what she’s looking for. You may learn more than you wish to know about yourself.”\n\nThe weight of his request settles in your chest—an actionable lead to track Kira, and a fresh fear: that to follow her is to face the same temptation you just refused.\n\n---CHOICES---\n1. Head to Kira’s quarters first, hoping to catch her before she leaves for the lower levels. [Vigilance]\n2. Descend directly into the sublevels, using your memory of the pressure and heat to find the vergence—and Kira. [Force:Sense]\n3. Seek out another student who might have seen Kira slip away earlier this morning. [Perception]",
+          "role": "assistant",
+          "reasoning": "We need to write the next passage in second person present tense, following the given constraints. The player asks Luke what is under the temple and whether Kira might be drawn to it. The mechanical outcome: no new check, prior Force result revealed a real buried presence but not full answer, player gains one actionable lead and one emotional complication. Style: Star Wars adventure tone, intimate, concrete sensory details, Luke compassionate and indirect. No lore dump. Then output ---CHOICES--- and three choices with optional mechanical tags.\n\nCraft a response: Luke's response should give an actionable lead (maybe something about Kira's path, or a hint of where to look) and an emotional complication (the player's fear of wanting power, or concern for Kira). Keep it second person present. Use sensory details: dawn light, stone, etc.\n\nWrite the passage.",
+          "reasoning_details": [
+            {
+              "type": "reasoning.text",
+              "text": "We need to write the next passage in second person present tense, following the given constraints. The player asks Luke what is under the temple and whether Kira might be drawn to it. The mechanical outcome: no new check, prior Force result revealed a real buried presence but not full answer, player gains one actionable lead and one emotional complication. Style: Star Wars adventure tone, intimate, concrete sensory details, Luke compassionate and indirect. No lore dump. Then output ---CHOICES--- and three choices with optional mechanical tags.\n\nCraft a response: Luke's response should give an actionable lead (maybe something about Kira's path, or a hint of where to look) and an emotional complication (the player's fear of wanting power, or concern for Kira). Keep it second person present. Use sensory details: dawn light, stone, etc.\n\nWrite the passage.",
+              "format": "unknown",
+              "index": 0
+            }
+          ]
+        },
+        "native_finish_reason": "stop"
+      }
+    ],
+    "created": 1777229684,
+    "model": "deepseek/deepseek-v4-flash-20260423",
+    "object": "chat.completion",
+    "usage": {
+      "completion_tokens": 554,
+      "prompt_tokens": 372,
+      "total_tokens": 926,
+      "completion_tokens_details": {
+        "audio_tokens": 0,
+        "reasoning_tokens": 219,
+        "image_tokens": 0
+      },
+      "prompt_tokens_details": {
+        "audio_tokens": 0,
+        "cached_tokens": 256,
+        "cache_write_tokens": 0,
+        "video_tokens": 0
+      },
+      "cost": 0.000178528,
+      "is_byok": false,
+      "cost_details": {
+        "upstream_inference_cost": 0.000178528,
+        "upstream_inference_prompt_cost": 2.3408e-05,
+        "upstream_inference_completions_cost": 0.00015512
+      }
+    },
+    "provider": "Novita"
+  },
+  "finish_reason": "stop",
+  "passage": "The dawn light filters through the temple’s high windows, painting amber bars across the stone floor. You stand before Luke, your question hanging in the cool air like the last notes of meditation chants. He folds his hands, gaze distant.\n\n“The Massassi stone is old,” he says, voice low. “Older than the Jedi who built this temple. Older than the Republic. The Sith once seeded this world with hidden places—vergence points where the dark side pooled like groundwater.”\n\nHe pauses, and you catch the faint hum of the jungle waking outside. Kira’s seat remains empty.\n\n“What you sensed is real. A presence. Not a ghost, but a remnant. It waited. And it noticed you. That is dangerous—not because of what it is, but because of what it might offer. Power without cost. Clarity without patience.”\n\nLuke’s eyes meet yours, holding a quiet concern. “Kira has always been drawn to secrets. She seeks answers faster than they can be given. I need you to find her. Not to stop her, but to be a witness. Bring her back before she finds what she’s looking for. You may learn more than you wish to know about yourself.”\n\nThe weight of his request settles in your chest—an actionable lead to track Kira, and a fresh fear: that to follow her is to face the same temptation you just refused."
+}

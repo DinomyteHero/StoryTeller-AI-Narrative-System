@@ -15,11 +15,16 @@ import pytest
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from gm.context import (
+    ArcState,
+    ContextPackage,
+    NPCState,
     build_depth_card_block,
     compute_pinch_point_instruction,
     compute_voice_mode_instruction,
     resolve_variant,
 )
+from engine.character import Character
+from api.game_routes import _context_audit_json
 
 
 PRAXEUM_PATH = Path("data/campaigns/shadows_of_the_praxeum.json")
@@ -143,3 +148,152 @@ def test_praxeum_act1_has_pinch_point_data(praxeum_spine):
         act.get("pinch_point") for act in praxeum_spine.get("acts", [])
     )
     assert has_pinch, "Praxeum should have at least one act with a pinch_point"
+
+
+def test_literary_prompt_includes_cs6_runtime_placeholders():
+    """The literary prose voice must not drop CS-6 story-engineering signals."""
+    text = Path("gm/prompts/narration_literary.txt").read_text(encoding="utf-8")
+    for placeholder in (
+        "{depth_card_block}",
+        "{pinch_point_instruction}",
+        "{foreshadow_instruction}",
+        "{closure_heartbeat_instruction}",
+        "{dramatic_mission_block}",
+        "{contradiction_arc_block}",
+        "{voice_mode_instruction}",
+    ):
+        assert placeholder in text
+
+
+def test_game_routes_initializes_npc_pressure_roles():
+    """Both NPC initialization paths must carry pressure_role into NPCState."""
+    text = Path("api/game_routes.py").read_text(encoding="utf-8")
+    expected = 'pressure_role=npc_data.get("pressure_role", "")'
+    assert text.count(expected) >= 2
+
+
+def test_context_audit_serializes_npc_prompt_fields():
+    """Audit snapshots should use NPCState's live knows/doesnt_know fields."""
+    ctx = ContextPackage(
+        character=Character(name="Test", career="mystic", species="mirialan"),
+        arc=ArcState(
+            campaign_name="Test",
+            current_act=1,
+            total_acts=5,
+            act_name="Opening",
+            act_progress=0.25,
+            current_anchor="arrival",
+            next_anchor="investigation",
+            anchors_completed=[],
+            throughline_question="?",
+            tension_level="low",
+            open_threads=[],
+            closed_threads=[],
+        ),
+        story_summary="",
+        recent_turns=[],
+        active_npcs=[
+            NPCState(
+                name="Kira Denn",
+                knows=["The lower Massassi levels are dangerous."],
+                doesnt_know=["Who is calling from below."],
+                pressure_role="mirror",
+            )
+        ],
+        location="Yavin 4",
+        situation="Test",
+    )
+
+    payload = json.loads(_context_audit_json(ctx))
+
+    npc = payload["active_npcs"][0]
+    assert npc["knows"] == ["The lower Massassi levels are dangerous."]
+    assert npc["doesnt_know"] == ["Who is calling from below."]
+    assert npc["pressure_role"] == "mirror"
+
+
+def test_npc_prompt_redacts_future_praxeum_spoilers_before_reveal_acts():
+    """Private NPC knowledge must not spoil later-act Praxeum reveals."""
+    ctx = ContextPackage(
+        character=Character(name="Test", career="mystic", species="mirialan"),
+        arc=ArcState(
+            campaign_name="Shadows of the Praxeum",
+            current_act=1,
+            total_acts=5,
+            act_name="The New Students",
+            act_progress=0.25,
+            current_anchor="academy_arrival",
+            next_anchor="night_investigation",
+            anchors_completed=[],
+            throughline_question="?",
+            tension_level="low",
+            open_threads=[],
+            closed_threads=[],
+        ),
+        story_summary="",
+        recent_turns=[],
+        active_npcs=[
+            NPCState(
+                name="Luke Skywalker",
+                knows=[
+                    "Kira Denn is the daughter of Jedi Knight Seren Denn.",
+                    "A surviving Inquisitor named Malakai is near Yavin 4.",
+                    "Captain Tannen's Imperial Remnant fleet is staging.",
+                ],
+                motivation=(
+                    "Protect Kira's parentage and understand Malakai's "
+                    "connection to Tannen's fleet."
+                ),
+            )
+        ],
+        location="Yavin 4",
+        situation="Opening",
+    )
+
+    block = ctx.build_npc_block()
+
+    assert "Seren Denn" not in block
+    assert "Malakai" not in block
+    assert "Tannen" not in block
+    assert "fleet" not in block.lower()
+    assert "Private unresolved secret" in block
+
+
+def test_npc_prompt_allows_praxeum_spoilers_after_reveal_acts():
+    ctx = ContextPackage(
+        character=Character(name="Test", career="mystic", species="mirialan"),
+        arc=ArcState(
+            campaign_name="Shadows of the Praxeum",
+            current_act=4,
+            total_acts=5,
+            act_name="The Betrayal",
+            act_progress=0.25,
+            current_anchor="betrayal_crisis",
+            next_anchor="final_convergence",
+            anchors_completed=[],
+            throughline_question="?",
+            tension_level="critical",
+            open_threads=[],
+            closed_threads=[],
+        ),
+        story_summary="",
+        recent_turns=[],
+        active_npcs=[
+            NPCState(
+                name="Luke Skywalker",
+                knows=[
+                    "Kira Denn is the daughter of Jedi Knight Seren Denn.",
+                    "A surviving Inquisitor named Malakai is near Yavin 4.",
+                    "Captain Tannen's Imperial Remnant fleet is staging.",
+                ],
+            )
+        ],
+        location="Yavin 4",
+        situation="Act 4",
+    )
+
+    block = ctx.build_npc_block()
+
+    assert "Seren Denn" in block
+    assert "Malakai" in block
+    assert "Tannen" in block

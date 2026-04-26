@@ -1,0 +1,878 @@
+{
+  "schema_version": "era_pack.v0.1",
+  "id": "new_republic_praxeum",
+  "display_name": "New Republic / Jedi Praxeum Era",
+  "continuity": "legends",
+  "status": "content_seed",
+  "date_range": {
+    "overall": "4-24 ABY",
+    "primary_play_window": "11-14 ABY",
+    "praxeum_window": "11-17 ABY",
+    "notes": "The pack covers the New Republic's post-Endor consolidation through the pre-New Jedi Order peace, with special support for Luke Skywalker's early Jedi Praxeum on Yavin 4."
+  },
+  "authoring_intent": "A reusable Legends era pack for campaigns where the Empire has fallen as a central regime, the New Republic is legitimate but overstretched, and Luke Skywalker's Jedi Order is being rebuilt from fragments. It should support academy mysteries, Imperial Remnant pressure, Force discovery, archaeological danger, New Republic politics, and small-group heroics without drifting into Clone Wars, Imperial Dark Times, or later New Jedi Order war textures.",
+  "core_premise": "The Rebellion won, but the victory did not settle the galaxy. The New Republic must govern a wounded civilization while Luke's Jedi Praxeum, Imperial holdouts, warlords, old secrets, and half-understood Force legacies test whether restoration can become something wiser than repetition.",
+  "design_principles": [
+    "The Jedi are returning, but not restored.",
+    "The New Republic should feel legitimate, hopeful, procedural, and frequently too slow for local crises.",
+    "Imperial enemies are fragmented survivors, holdouts, warlords, agents, and Remnant officers rather than the single unquestioned galactic government.",
+    "Luke's Jedi Praxeum should feel intimate and improvised: a real community, not a finished institution.",
+    "Old Jedi knowledge should be useful, incomplete, and sometimes dangerous when copied without context.",
+    "Canon characters create recognition and pressure; they should not solve the campaign's central choices for the player.",
+    "The era's strongest choices test whether trust can survive secrecy, trauma, institutional rebuilding, and old war wounds."
+  ],
+  "era_voice": {
+    "era": "New Republic / Jedi Praxeum era",
+    "year": "4-24 ABY, primary play around 11-14 ABY",
+    "voice_notes": "Hope is real but unarmored. The galaxy is learning how to live after rebellion while discovering that victory left archives, debts, missing people, dark places, and trained enemies behind. Jedi scenes should feel like a tradition being rebuilt by people brave enough to admit how much they do not know.",
+    "period_details": [
+      "The New Republic is the recognized galactic government in much of the known galaxy, but its authority is uneven and still contested.",
+      "Imperial Remnant forces, warlords, rogue task forces, hidden agents, and loyalist cells remain credible local threats.",
+      "Luke Skywalker's Jedi Praxeum on Yavin 4 is small, experimental, personal, and vulnerable.",
+      "Jedi training is shaped by recovered fragments, living intuition, hard experience, and arguments over what the old Order got wrong.",
+      "Yavin 4, Massassi ruins, old temples, forgotten archives, and dark side sites are strong textures for Praxeum-era campaigns.",
+      "New Republic Intelligence, local defense forces, smugglers, scouts, and academy support staff matter because central authority cannot cover every crisis.",
+      "The default villain is not a Sith Lord. The era is full of dangerous survivors who learned from the Empire without needing Sith grandeur."
+    ],
+    "period_avoid": [
+      "Treating the Empire as the unquestioned central galactic state.",
+      "Using clone trooper battalions, Separatist armies, or Clone Wars political framing.",
+      "Using sequel-era First Order, Resistance, Starkiller, or post-Disney canon institutions.",
+      "Assuming the Jedi are extinct, illegal, or hunted by a functioning Imperial Inquisitorius as the default premise.",
+      "Portraying Luke's academy as a prequel-style Jedi Temple with a settled Council, standardized ranks, and centuries of procedure.",
+      "Making Sith Lords the default explanation for every dark side site, vergence, or corrupted relic.",
+      "Making the New Republic fully efficient, stable, and universally trusted."
+    ]
+  },
+  "timeline_bands": [
+    {
+      "id": "post_endor_consolidation",
+      "range": "4-8 ABY",
+      "summary": "The Rebellion becomes a government while Imperial forces fracture, retreat, counterattack, and hide assets.",
+      "campaign_uses": [
+        "liberation aftermath",
+        "New Republic legitimacy campaigns",
+        "Imperial holdout cleanup",
+        "former Rebel cells learning bureaucracy"
+      ]
+    },
+    {
+      "id": "thrawn_era_instability",
+      "range": "9 ABY",
+      "summary": "The New Republic faces disciplined Imperial resurgence, intelligence failures, political strain, and proof that the old war is not over.",
+      "campaign_uses": [
+        "fleet intelligence",
+        "lost Imperial depots",
+        "diplomatic fracture",
+        "local campaigns overshadowed by major canon pressure"
+      ]
+    },
+    {
+      "id": "praxeum_founding",
+      "range": "11-12 ABY",
+      "summary": "Luke gathers students on Yavin 4 and begins building a Jedi school from recovered knowledge, personal judgment, and fragile trust.",
+      "campaign_uses": [
+        "academy mystery",
+        "Force discovery",
+        "student rivalries and loyalties",
+        "Massassi ruins and dark side echoes",
+        "mentor boundary stories"
+      ]
+    },
+    {
+      "id": "remnant_pressure",
+      "range": "12-17 ABY",
+      "summary": "The New Republic is stronger but still vulnerable to Imperial Remnant raids, rogue officers, cultic dark side remnants, and political backlash against Jedi visibility.",
+      "campaign_uses": [
+        "Imperial Remnant strike teams",
+        "Jedi field missions",
+        "New Republic oversight",
+        "academy defense",
+        "hidden war-crime evidence"
+      ]
+    },
+    {
+      "id": "late_new_republic_peace",
+      "range": "18-24 ABY",
+      "summary": "A more settled but complacent New Republic enters a deceptive peace before the Yuuzhan Vong War reshapes the galaxy.",
+      "campaign_uses": [
+        "young Jedi missions",
+        "political complacency",
+        "Outer Rim instability",
+        "pre-NJO mystery hooks",
+        "cross-era character import into wartime campaigns"
+      ]
+    }
+  ],
+  "terminology": {
+    "era_terms": [
+      {
+        "term": "New Republic",
+        "definition": "The successor government built by the Rebel Alliance after Endor. It is legitimate and hopeful, but politically strained and uneven in reach.",
+        "usage": "Use for courts, fleets, Senate politics, intelligence, relief, oversight, and delayed authority."
+      },
+      {
+        "term": "Imperial Remnant",
+        "definition": "Surviving Imperial territories, officers, fleets, agents, and loyalists after the Empire's central power fractures.",
+        "usage": "Use as a disciplined but diminished antagonist or uneasy political reality, not as the whole galaxy's default authority."
+      },
+      {
+        "term": "Jedi Praxeum",
+        "definition": "Luke Skywalker's early Jedi academy on Yavin 4. It is a training community, sanctuary, experiment, and symbol.",
+        "usage": "Use as an intimate institution where every student, teacher, and support worker can matter."
+      },
+      {
+        "term": "Yavin 4",
+        "definition": "The jungle moon that hosts the early Jedi Praxeum and contains Massassi temples with deep historical and Force resonance.",
+        "usage": "Use jungle weather, temple stone, old Rebel memory, and buried danger as recurring physical texture."
+      },
+      {
+        "term": "Massassi ruins",
+        "definition": "Ancient temple structures on Yavin 4 tied to old violence, Force echoes, archaeology, and dark side risk.",
+        "usage": "Use as both adventure space and moral pressure: new hope literally built over old harm."
+      },
+      {
+        "term": "Dark side vergence",
+        "definition": "A location, object, or wound in the Force that intensifies fear, secrecy, anger, control, or obsession.",
+        "usage": "Use to pressure choices and create consequences. Do not make it a simple evil switch."
+      },
+      {
+        "term": "New Republic Intelligence",
+        "definition": "The New Republic's intelligence services, often caught between legitimate oversight, old Rebel tradecraft, and Imperial countermeasures.",
+        "usage": "Use for intercepted signals, political risk, informants, missing files, and delayed warnings."
+      },
+      {
+        "term": "Imperial holdout",
+        "definition": "A local Imperial-aligned force that survives through isolation, loyalty, hidden resources, or refusal to accept defeat.",
+        "usage": "Use for local military pressure without implying the old Empire still controls the era."
+      },
+      {
+        "term": "Warlord",
+        "definition": "A former Imperial commander, regional strongman, or armed opportunist who uses the Empire's collapse to build personal power.",
+        "usage": "Use when the threat is more personal, territorial, or unstable than official Remnant policy."
+      },
+      {
+        "term": "Recovered Jedi lore",
+        "definition": "Holocrons, records, artifacts, oral fragments, and Force traditions used to rebuild Jedi practice.",
+        "usage": "Use as useful but incomplete guidance. Recovered knowledge should raise questions, not close them all."
+      }
+    ],
+    "avoid_or_contextualize": [
+      {
+        "term": "Jedi Council",
+        "guidance": "Avoid implying a stable prequel-style Council governs Luke's academy. If used, contextualize it as historical memory or an aspirational question."
+      },
+      {
+        "term": "Padawan",
+        "guidance": "Can appear informally, but do not make ranks and rituals feel standardized unless a specific campaign has earned that structure."
+      },
+      {
+        "term": "Inquisitor",
+        "guidance": "Use as Imperial survivor history, rogue legacy, or personal antagonist context. Do not imply a fully functioning Imperial Inquisitorius is still the default institution."
+      },
+      {
+        "term": "Sith",
+        "guidance": "Do not use Sith as the default cause of dark side danger. Many threats in this era come from ruins, trauma, ambition, and Imperial survivors."
+      },
+      {
+        "term": "Empire",
+        "guidance": "Prefer Imperial Remnant, holdout, loyalist, warlord, or rogue task force when describing post-Endor threats."
+      }
+    ]
+  },
+  "faction_templates": [
+    {
+      "faction_id": "new_republic",
+      "display_name": "New Republic",
+      "description": "The post-Rebellion galactic government: idealistic, procedural, contested, and stretched thin across systems that need more help than any Senate can provide quickly.",
+      "disposition_start": 0.55,
+      "influence_start": 0.8,
+      "awareness_start": 0.35,
+      "per_act_drift": {},
+      "playable": true,
+      "pressure_vectors": [
+        "procedure versus urgent local need",
+        "public legitimacy versus old Rebel improvisation",
+        "Senate caution versus intelligence warnings",
+        "resources for the Core versus Outer Rim neglect"
+      ],
+      "campaign_uses": [
+        "political oversight",
+        "military support",
+        "intelligence investigations",
+        "delayed reinforcements",
+        "duty-driven protagonists"
+      ]
+    },
+    {
+      "faction_id": "jedi_praxeum",
+      "display_name": "Jedi Praxeum",
+      "description": "Luke Skywalker's early academy on Yavin 4, where students, mentors, historians, technicians, and support staff attempt to rebuild Jedi life before the institution knows what it is.",
+      "disposition_start": 0.65,
+      "influence_start": 0.35,
+      "awareness_start": 0.45,
+      "per_act_drift": {},
+      "playable": true,
+      "pressure_vectors": [
+        "trust versus secrecy",
+        "training versus crisis",
+        "old Jedi fragments versus new Jedi judgment",
+        "mentor compassion versus student agency"
+      ],
+      "campaign_uses": [
+        "Jedi training",
+        "academy mysteries",
+        "student relationships",
+        "Force temptation",
+        "local community stakes"
+      ]
+    },
+    {
+      "faction_id": "imperial_remnant",
+      "display_name": "Imperial Remnant",
+      "description": "Surviving Imperial command structures and loyalist forces, diminished but dangerous because they retain discipline, equipment, intelligence habits, and old grudges.",
+      "disposition_start": 0.3,
+      "influence_start": 0.45,
+      "awareness_start": 0.35,
+      "per_act_drift": {},
+      "playable": true,
+      "pressure_vectors": [
+        "defeat versus denial",
+        "order versus freedom",
+        "old crimes versus new pragmatism",
+        "symbolic strikes against New Republic legitimacy"
+      ],
+      "campaign_uses": [
+        "military antagonists",
+        "defector arcs",
+        "border incidents",
+        "hidden task forces",
+        "later uneasy alliances"
+      ]
+    },
+    {
+      "faction_id": "imperial_holdouts",
+      "display_name": "Imperial Holdouts and Warlords",
+      "description": "Local commanders, fortified bases, rogue fleets, and armed loyalists who survive through secrecy, private ambition, or refusal to accept the Empire's fall.",
+      "disposition_start": 0.2,
+      "influence_start": 0.35,
+      "awareness_start": 0.3,
+      "per_act_drift": {},
+      "playable": false,
+      "pressure_vectors": [
+        "local terror versus galactic recovery",
+        "personal vengeance versus political legitimacy",
+        "military stockpiles versus civilian vulnerability"
+      ],
+      "campaign_uses": [
+        "sample campaign antagonists",
+        "raids",
+        "black sites",
+        "lost weapons",
+        "personal revenge plots"
+      ]
+    },
+    {
+      "faction_id": "new_republic_intelligence",
+      "display_name": "New Republic Intelligence",
+      "description": "Analysts, field agents, slicers, informants, and former Rebel operatives trying to turn wartime tradecraft into accountable public service.",
+      "disposition_start": 0.5,
+      "influence_start": 0.45,
+      "awareness_start": 0.55,
+      "per_act_drift": {},
+      "playable": true,
+      "pressure_vectors": [
+        "truth versus political fallout",
+        "sources versus citizens",
+        "old Rebel secrecy versus New Republic transparency"
+      ],
+      "campaign_uses": [
+        "investigation",
+        "spy protagonists",
+        "intercepted transmissions",
+        "oversight conflicts",
+        "missing files"
+      ]
+    },
+    {
+      "faction_id": "academy_support",
+      "display_name": "Academy Support Staff",
+      "description": "Mechanics, medics, archivists, cooks, scouts, pilots, and liaisons who keep the Praxeum alive and see threats Force users sometimes miss.",
+      "disposition_start": 0.6,
+      "influence_start": 0.25,
+      "awareness_start": 0.5,
+      "per_act_drift": {},
+      "playable": true,
+      "pressure_vectors": [
+        "ordinary competence versus mythic expectations",
+        "duty to students versus deference to Jedi",
+        "practical evidence versus mystical interpretation"
+      ],
+      "campaign_uses": [
+        "non-Force protagonists",
+        "maintenance mysteries",
+        "archive play",
+        "communications failures",
+        "grounded academy relationships"
+      ]
+    },
+    {
+      "faction_id": "outer_rim_communities",
+      "display_name": "Outer Rim Communities",
+      "description": "Settlements, ports, former Rebel sympathizers, local defense groups, and frontier networks that experience New Republic recovery as distant promise rather than daily reality.",
+      "disposition_start": 0.45,
+      "influence_start": 0.3,
+      "awareness_start": 0.45,
+      "per_act_drift": {},
+      "playable": true,
+      "pressure_vectors": [
+        "local survival versus galactic ideals",
+        "trust in New Republic aid versus self-reliance",
+        "smuggling routes versus official relief"
+      ],
+      "campaign_uses": [
+        "frontier missions",
+        "supply disputes",
+        "Imperial holdout victims",
+        "smuggler allies",
+        "Force-sensitive discovery outside the academy"
+      ]
+    }
+  ],
+  "allegiance_templates": [
+    {
+      "id": "jedi_order",
+      "display_name": "Jedi Order",
+      "description": "Force-sensitive students, older recruits, recovering survivors, and young knights learning from Luke's restored Jedi community while the tradition is still unfinished.",
+      "default_motivation_tracks": [
+        "morality",
+        "duty"
+      ],
+      "recommended_careers": [
+        "consular",
+        "guardian",
+        "mystic",
+        "seeker",
+        "sentinel",
+        "warrior"
+      ],
+      "variant_seeds": [
+        {
+          "id": "praxeum_student",
+          "pitch": "A young Force-sensitive student whose loyalty to friends is tested before their training is ready for crisis.",
+          "species_suggestions": [
+            "human",
+            "togruta",
+            "zabrak",
+            "mirialan"
+          ],
+          "career_mapping": {
+            "primary_game_line": "force_and_destiny",
+            "career": "mystic",
+            "specializations": [
+              "seer"
+            ]
+          },
+          "core_pressure": "They can sense something is wrong, but trust determines what they do with the feeling."
+        },
+        {
+          "id": "praxeum_survivor_scholar",
+          "pitch": "A bookish Force-sensitive descended from hidden survivors, more comfortable with old records than Luke's improvisational trust.",
+          "species_suggestions": [
+            "human",
+            "mirialan",
+            "togruta"
+          ],
+          "career_mapping": {
+            "primary_game_line": "force_and_destiny",
+            "career": "consular",
+            "specializations": [
+              "sage",
+              "niman_disciple"
+            ]
+          },
+          "core_pressure": "They believe truth belongs in archives before it belongs in people's hands."
+        },
+        {
+          "id": "praxeum_failed_knight",
+          "pitch": "An older recruit who came to Luke after failing someone badly and needs the Jedi path to mean redemption rather than talent.",
+          "species_suggestions": [
+            "human",
+            "zabrak",
+            "nautolan"
+          ],
+          "career_mapping": {
+            "primary_game_line": "force_and_destiny",
+            "career": "guardian",
+            "specializations": [
+              "protector"
+            ]
+          },
+          "core_pressure": "They protect people so fiercely that protection starts to look like control."
+        }
+      ]
+    },
+    {
+      "id": "academy_support",
+      "display_name": "Academy Support",
+      "description": "Non-Jedi and lightly Force-adjacent characters who make the Praxeum function, notice mundane evidence, and experience Jedi danger from ground level.",
+      "default_motivation_tracks": [
+        "obligation",
+        "duty"
+      ],
+      "recommended_careers": [
+        "technician",
+        "colonist",
+        "explorer",
+        "diplomat",
+        "smuggler"
+      ],
+      "variant_seeds": [
+        {
+          "id": "praxeum_mechanic",
+          "pitch": "A mechanic keeping academy systems alive while strange comm echoes and temple interference point toward a hidden threat.",
+          "species_suggestions": [
+            "human",
+            "zabrak",
+            "twi_lek"
+          ],
+          "career_mapping": {
+            "primary_game_line": "edge_of_empire",
+            "career": "technician",
+            "specializations": [
+              "mechanic"
+            ]
+          },
+          "core_pressure": "They trust tools and evidence in a place where everyone else keeps talking about feelings in the Force."
+        },
+        {
+          "id": "praxeum_archivist_aide",
+          "pitch": "An archivist's aide working with Tionne who sees patterns in broken history before Force users admit what the records imply.",
+          "species_suggestions": [
+            "bothan",
+            "human",
+            "twi_lek"
+          ],
+          "career_mapping": {
+            "primary_game_line": "edge_of_empire",
+            "career": "colonist",
+            "specializations": [
+              "scholar"
+            ]
+          },
+          "core_pressure": "They know knowledge can save lives, but publishing the wrong truth can destroy them."
+        },
+        {
+          "id": "praxeum_new_republic_liaison",
+          "pitch": "A New Republic liaison assigned to observe the Praxeum for the Senate, caught between political oversight and personal loyalty to the students.",
+          "species_suggestions": [
+            "human",
+            "bothan",
+            "mirialan"
+          ],
+          "career_mapping": {
+            "primary_game_line": "age_of_rebellion",
+            "career": "diplomat",
+            "specializations": [
+              "agitator",
+              "ambassador"
+            ]
+          },
+          "core_pressure": "They were sent to report on the Jedi and instead became responsible for them."
+        }
+      ]
+    },
+    {
+      "id": "new_republic_service",
+      "display_name": "New Republic Service",
+      "description": "Diplomats, intelligence officers, pilots, soldiers, and relief personnel trying to make the new government worthy of the hope placed in it.",
+      "default_motivation_tracks": [
+        "duty",
+        "obligation"
+      ],
+      "recommended_careers": [
+        "ace",
+        "commander",
+        "diplomat",
+        "engineer",
+        "soldier",
+        "spy"
+      ],
+      "variant_seeds": [
+        {
+          "id": "senate_field_liaison",
+          "pitch": "A field liaison tasked with translating Senate concern into practical help before local crises become scandals.",
+          "species_suggestions": [
+            "human",
+            "bothan",
+            "twi_lek"
+          ],
+          "career_mapping": {
+            "primary_game_line": "age_of_rebellion",
+            "career": "diplomat",
+            "specializations": [
+              "ambassador",
+              "agitator"
+            ]
+          },
+          "core_pressure": "They believe in procedure until procedure starts arriving after the bodies."
+        },
+        {
+          "id": "republic_intelligence_watcher",
+          "pitch": "An intelligence analyst or field operative tracking Imperial signals that respectable officials would rather call isolated incidents.",
+          "species_suggestions": [
+            "bothan",
+            "human",
+            "zabrak"
+          ],
+          "career_mapping": {
+            "primary_game_line": "age_of_rebellion",
+            "career": "spy",
+            "specializations": [
+              "infiltrator",
+              "slicer"
+            ]
+          },
+          "core_pressure": "They know the pattern is real before they have proof anyone will accept."
+        },
+        {
+          "id": "republic_patrol_pilot",
+          "pitch": "A patrol pilot covering too many systems with too few ships, forced to decide which distress call becomes real.",
+          "species_suggestions": [
+            "human",
+            "zabrak",
+            "bothan"
+          ],
+          "career_mapping": {
+            "primary_game_line": "age_of_rebellion",
+            "career": "ace",
+            "specializations": [
+              "pilot"
+            ]
+          },
+          "core_pressure": "The New Republic promised protection, and their flight plan proves promises need fuel."
+        }
+      ]
+    },
+    {
+      "id": "imperial_survivor",
+      "display_name": "Imperial Survivor",
+      "description": "Defectors, former loyalists, escaped prisoners, black-site witnesses, and Remnant-adjacent characters carrying the Empire's unfinished consequences.",
+      "default_motivation_tracks": [
+        "obligation",
+        "duty",
+        "morality"
+      ],
+      "recommended_careers": [
+        "commander",
+        "soldier",
+        "spy",
+        "technician",
+        "hired_gun"
+      ],
+      "variant_seeds": [
+        {
+          "id": "imperial_defector",
+          "pitch": "A former Imperial specialist who fled with names, codes, and guilt that both sides want to use.",
+          "species_suggestions": [
+            "human",
+            "zabrak",
+            "twi_lek"
+          ],
+          "career_mapping": {
+            "primary_game_line": "age_of_rebellion",
+            "career": "spy",
+            "specializations": [
+              "slicer",
+              "infiltrator"
+            ]
+          },
+          "core_pressure": "Helping the New Republic does not erase who taught them to be useful."
+        },
+        {
+          "id": "black_site_survivor",
+          "pitch": "A survivor of Imperial experimentation or detention whose memories point toward a threat the New Republic filed away.",
+          "species_suggestions": [
+            "human",
+            "mirialan",
+            "zabrak"
+          ],
+          "career_mapping": {
+            "primary_game_line": "edge_of_empire",
+            "career": "colonist",
+            "specializations": [
+              "doctor",
+              "scholar"
+            ]
+          },
+          "core_pressure": "Their testimony can save lives, but being believed means being opened again."
+        },
+        {
+          "id": "remnant_honor_officer",
+          "pitch": "A disciplined Remnant officer who rejects warlord cruelty but cannot honestly claim innocence.",
+          "species_suggestions": [
+            "human",
+            "zabrak"
+          ],
+          "career_mapping": {
+            "primary_game_line": "age_of_rebellion",
+            "career": "commander",
+            "specializations": [
+              "tactician"
+            ]
+          },
+          "core_pressure": "They can help stop a worse crime without being forgiven for the old one."
+        }
+      ]
+    }
+  ],
+  "force_traditions": [
+    {
+      "id": "lukes_new_jedi_order",
+      "display_name": "Luke's New Jedi Order",
+      "stance": "Improvised, compassionate, experimental, and shaped by people rebuilding a discipline they inherited in fragments.",
+      "mechanical_guidance": "Use Morality and Conflict for choices around control, fear, secrecy, and protection. Early students should not be treated as fully trained institutional Jedi.",
+      "narrative_guidance": "Jedi scenes should mix wonder with uncertainty. A lesson can be profound and unfinished at the same time."
+    },
+    {
+      "id": "recovered_jedi_lore",
+      "display_name": "Recovered Jedi Lore",
+      "stance": "Holocrons, ruins, records, and artifacts are valuable but incomplete. The past can guide without being allowed to rule.",
+      "mechanical_guidance": "Lore, Discipline, Vigilance, Knowledge, and Force checks can reveal partial truths. Threat should often complicate interpretation rather than block all information.",
+      "narrative_guidance": "Recovered knowledge should feel like a voice through static: meaningful, biased by survival, and dangerous when treated as final."
+    },
+    {
+      "id": "dark_side_sites",
+      "display_name": "Dark Side Sites and Vergences",
+      "stance": "Dark side danger often appears as fear, secrecy, control, and rationalized protection rather than theatrical evil.",
+      "mechanical_guidance": "Use setback, strain, Conflict, and consequence flags when characters reach too hard, hide truth to control others, or use fear as leverage.",
+      "narrative_guidance": "Temptation should sound like the player's own best argument becoming less compassionate."
+    }
+  ],
+  "scene_pressures": {
+    "combat": [
+      "Combat should often protect people, buy time, defend the academy, or stop an Imperial holdout before it becomes a larger political incident.",
+      "Imperial opponents should feel trained and dangerous, but resources are finite and local commanders may be isolated.",
+      "Lightsaber action should be personal and consequential rather than routine spectacle."
+    ],
+    "space_combat": [
+      "Small starfighter and transport scenes fit the era well: patrol gaps, evacuation lanes, academy shuttles, smugglers, and old Rebel ships.",
+      "Threat can strain shields, split patrol coverage, damage comm arrays, or force a hard landing near civilians.",
+      "Triumph can preserve New Republic legitimacy by saving people before official help arrives."
+    ],
+    "social": [
+      "Social pressure often comes from trust after war: who served the Empire, who hid a truth, who speaks for the New Republic, and who gets to define Jedi authority.",
+      "Luke's academy should create intimate stakes where a rumor, omission, or overheard lesson can change a relationship.",
+      "New Republic officials can be sincere and wrong at the same time."
+    ],
+    "infiltration": [
+      "Imperial holdouts, hidden archives, old Rebel caches, Massassi ruins, and academy comm systems are strong infiltration anchors.",
+      "The best infiltration scenes should ask what the player will do with evidence that could damage someone they love.",
+      "Threat should leave mundane traces: logs, footprints, witnesses, damaged temple stone, or intercepted static."
+    ],
+    "exploration": [
+      "Exploration should make the past physically present: temple chambers, jungle weather, half-translated records, abandoned Imperial sites, and forgotten Rebel paths.",
+      "Discoveries should often be double-edged, useful for protection but dangerous for trust.",
+      "Outer Rim sites should remind the player that the New Republic's map is more complete than its reach."
+    ],
+    "introspection": [
+      "Introspection should focus on what kind of Jedi, citizen, survivor, or friend the character is becoming.",
+      "New Republic-era reflection should carry hope without certainty.",
+      "The strongest inner conflicts ask whether protection without truth is still care."
+    ]
+  },
+  "ffg_outcome_guidance": [
+    {
+      "scene_type": "force",
+      "advantage": "A sensory clue, emotional truth, or warning arrives without solving the whole secret.",
+      "threat": "The Force answers through fear, strain, partial truth, or a temptation to assume too much.",
+      "triumph": "The character sees the compassionate path through facts that could otherwise become weapons.",
+      "despair": "The character reaches too hard and violates trust, awakens a dark echo, or gives an enemy clearer leverage."
+    },
+    {
+      "scene_type": "social",
+      "advantage": "An NPC trusts the player with a narrower confidence, reveals a tell, or grants access without full certainty.",
+      "threat": "A secret becomes harder to contain, an authority notices divided loyalty, or a relationship cools.",
+      "triumph": "The player creates a moment where truth can be spoken without immediately destroying the relationship.",
+      "despair": "The right truth reaches the wrong person first."
+    },
+    {
+      "scene_type": "infiltration",
+      "advantage": "The player finds evidence, timing, or a hidden route while preserving plausible deniability.",
+      "threat": "Sensor logs, footprints, witnesses, Force echoes, or broken stone create a trace back to the player.",
+      "triumph": "The investigation uncovers both the immediate clue and its emotional meaning.",
+      "despair": "Following the trail becomes part of the antagonist's plan."
+    },
+    {
+      "scene_type": "combat",
+      "advantage": "The character protects a student, buys evacuation time, holds a defensive line, or turns terrain into cover.",
+      "threat": "A bystander is endangered, academy infrastructure suffers, or an Imperial force gains a position.",
+      "triumph": "A decisive action preserves people and principle without erasing the personal cost.",
+      "despair": "A tactical mistake forces a loyalty choice before the player is ready."
+    },
+    {
+      "scene_type": "space_combat",
+      "advantage": "A starfighter, shuttle, or patrol craft opens a lane for evacuation, interception, or communication.",
+      "threat": "System strain, shield loss, comm static, hard landing risk, or a separated transport raises pressure.",
+      "triumph": "The player turns an underpowered defense into a symbolic and practical victory.",
+      "despair": "The sky battle spills danger onto vulnerable people or exposes the academy's location."
+    }
+  ],
+  "canon_profile_seeds": [
+    {
+      "name": "Luke Skywalker",
+      "era_profile": "Early Praxeum Luke, 11-14 ABY",
+      "role": "Founder, teacher, moral center, and imperfect guardian of a fragile Jedi community.",
+      "voice_notes": "Plainspoken, warm, patient, occasionally burdened. He asks questions that invite responsibility instead of issuing doctrine.",
+      "behavioral_envelope": [
+        "Does not treat students as soldiers or symbols first.",
+        "Does not solve mysteries the player is meant to face.",
+        "Admits uncertainty more readily than a prequel-era institution would."
+      ],
+      "anti_stereotype_notes": "Avoid serene all-knowing grandmaster. This Luke is powerful, hopeful, and still building the path under his own feet."
+    },
+    {
+      "name": "Tionne",
+      "era_profile": "Praxeum historian and teacher",
+      "role": "Keeper of Jedi history, songs, fragments, and context for students who need the past without being trapped by it.",
+      "voice_notes": "Gentle, precise, patient, observant. Her care often appears as careful wording and respect for what a record cannot prove.",
+      "behavioral_envelope": [
+        "Does not reduce history to trivia.",
+        "Does not use knowledge as control.",
+        "Will warn students when an archive is emotionally dangerous, not just factually incomplete."
+      ],
+      "anti_stereotype_notes": "Avoid walking encyclopedia exposition. Her scenes should make knowledge feel relational and consequential."
+    },
+    {
+      "name": "Mara Jade",
+      "era_profile": "New Republic era Mara before later Jedi centrality",
+      "role": "Independent Force-sensitive, former Imperial agent, sharp-edged ally, and reminder that survival leaves habits behind.",
+      "voice_notes": "Dry, direct, practical, unsentimental. Trust is shown through competence and warning more often than comfort.",
+      "behavioral_envelope": [
+        "Does not indulge mystical vagueness when practical danger is present.",
+        "Does not let former Imperial training define her whole moral life.",
+        "Challenges Luke when compassion becomes naivete."
+      ],
+      "anti_stereotype_notes": "Avoid making sarcasm her only trait. Her edge is discipline and history."
+    },
+    {
+      "name": "Leia Organa Solo",
+      "era_profile": "New Republic stateswoman",
+      "role": "Political leader carrying war memory, family stakes, and the burden of making victory governable.",
+      "voice_notes": "Clear, controlled, compassionate under pressure, capable of steel without performance.",
+      "behavioral_envelope": [
+        "Does not ignore local suffering because it is politically inconvenient.",
+        "Does not have unlimited authority to fix every New Republic delay.",
+        "Understands both symbolic hope and institutional cost."
+      ],
+      "anti_stereotype_notes": "Avoid using her as a simple quest dispenser. Her presence should widen the political meaning of a local crisis."
+    }
+  ],
+  "campaign_templates": [
+    {
+      "id": "academy_mystery",
+      "title": "The Academy Mystery",
+      "pitch": "A trusted member of the Praxeum is hiding a secret tied to Imperial survivors, old Jedi records, or the Massassi ruins.",
+      "best_allegiances": [
+        "jedi_order",
+        "academy_support",
+        "new_republic_service"
+      ],
+      "core_threads": [
+        "Who deserves the truth before it is safe?",
+        "Can the academy survive betrayal without becoming suspicious by default?",
+        "What does the Force reveal when every person is afraid?"
+      ],
+      "recommended_tracks": [
+        "morality",
+        "obligation",
+        "duty"
+      ]
+    },
+    {
+      "id": "remnant_shadow_cell",
+      "title": "The Remnant Shadow Cell",
+      "pitch": "A rogue Imperial unit targets a New Republic symbol, Jedi student, or buried war-crime record to prove the Empire's defeat is not final.",
+      "best_allegiances": [
+        "new_republic_service",
+        "jedi_order",
+        "imperial_survivor"
+      ],
+      "core_threads": [
+        "When is justice different from revenge?",
+        "Who gets protected when the old war returns locally?",
+        "Can a survivor testify without being consumed by the past?"
+      ],
+      "recommended_tracks": [
+        "duty",
+        "morality",
+        "obligation"
+      ]
+    },
+    {
+      "id": "ruins_under_the_school",
+      "title": "The Ruins Under the School",
+      "pitch": "Students and support staff discover that Yavin's ancient temples are not passive history; something below answers to fear, secrecy, or hunger for certainty.",
+      "best_allegiances": [
+        "jedi_order",
+        "academy_support"
+      ],
+      "core_threads": [
+        "Can a place be dangerous without being evil in a simple way?",
+        "What old knowledge should stay buried?",
+        "Does protecting students require hiding the danger or teaching them to face it?"
+      ],
+      "recommended_tracks": [
+        "morality",
+        "obligation"
+      ]
+    },
+    {
+      "id": "outer_rim_reconstruction",
+      "title": "The Outer Rim Reconstruction",
+      "pitch": "A New Republic team, Jedi envoy, or independent crew tries to stabilize a frontier system where Imperial leftovers, local fear, and weak institutions collide.",
+      "best_allegiances": [
+        "new_republic_service",
+        "outer_rim_communities",
+        "jedi_order"
+      ],
+      "core_threads": [
+        "What does the New Republic owe worlds that saved themselves?",
+        "When does order become occupation by a nicer flag?",
+        "Can Jedi help without becoming political weapons?"
+      ],
+      "recommended_tracks": [
+        "duty",
+        "obligation",
+        "morality"
+      ]
+    }
+  ],
+  "implementation_gaps": [
+    {
+      "gap": "specialization_breadth",
+      "impact": "The pack references common FFG specializations beyond the talent trees currently present in data/talent_trees, including several Age of Rebellion and Edge of the Empire options.",
+      "suggested_fix": "Add career batches for Technician/Mechanic, Colonist/Scholar, Diplomat/Ambassador, Spy/Slicer, Ace/Pilot, Guardian/Protector, and Consular/Sage."
+    },
+    {
+      "gap": "canon_profile_directory",
+      "impact": "Canon profile seeds exist here, but Phase 21 data/canon_profiles is not built yet.",
+      "suggested_fix": "When Phase 21 begins, promote Luke, Tionne, Mara, and Leia into reusable JSON profiles under data/canon_profiles/new_republic_praxeum/."
+    },
+    {
+      "gap": "prologue_scene_authoring",
+      "impact": "The era strongly benefits from psychometric prologue scenes around trust, secrecy, authority, and Force curiosity, but sample campaign prologue sets are still only seed content.",
+      "suggested_fix": "Promote the Shadows of the Praxeum content pack's prologue_scene_seeds into authored PrologueSet entries after Phase 18 begins."
+    },
+    {
+      "gap": "dark_side_site_rules",
+      "impact": "The runtime has Force and reconciliation systems, but no dedicated location-state model for dark side vergences, ruins, corruption pressure, or site-specific temptation clocks.",
+      "suggested_fix": "Represent vergences initially as campaign state flags and reconciliation consequences; later add a reusable location pressure model."
+    },
+    {
+      "gap": "era_pack_loader",
+      "impact": "This pack is validated as JSON content but is not yet wired into Campaign Studio generation or runtime spine assembly.",
+      "suggested_fix": "Add a Studio era-pack loader that can inject era_voice, faction templates, terminology guardrails, and variant seeds into Mode 1, Mode 2, and Mode 3 generation."
+    }
+  ]
+}

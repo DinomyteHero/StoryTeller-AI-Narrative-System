@@ -74,6 +74,8 @@ when implementing the relevant phase.
 | **[Prologue System](specialist/prologue-system.md)** | Psychometric prologue: design robustness (contradictions, confidence, anti-gaming) + implementation plan. | Phase 18 |
 | **[Import Package Quality](specialist/import-package-quality.md)** | Cross-campaign character import: narrative compression quality standards. | Phase 19 |
 | **[Story Architecture](specialist/story-architecture.md)** | Campaign spine dramatic quality: vocabulary, rubrics, Gate 4 evaluation. Extended with dramatic mission types and scene purpose validation in CS-6. | CS-5 + CS-6 (complete) |
+| **[Content Packs](specialist/content-packs.md)** | Reusable campaign content packs: sample campaign terminology, NPC usage notes, funnel expansion seeds, prologue seeds, and content gaps. | Content track |
+| **[Era Packs](specialist/era-packs.md)** | Reusable Legends/canon era content packs: era voice, factions, allegiances, variant seeds, canon hooks, and anachronism guardrails. | Content track |
 
 ### API Reference (`docs/api/`)
 
@@ -256,6 +258,8 @@ character's story, not containers that own characters.
 | Choice quality validation? | Choice Quality Validation Spec |
 | Import quality standards? | Import Package Quality Spec |
 | Story architecture rubrics? | Story Architecture Spec |
+| Sample campaign content pack? | Content Packs Spec |
+| Clone Wars / NJO / Old Republic era content? | Era Packs Spec |
 | Game Engine endpoints? | API: Game Engine API reference |
 | Studio endpoints? | API: Campaign Studio API reference |
 

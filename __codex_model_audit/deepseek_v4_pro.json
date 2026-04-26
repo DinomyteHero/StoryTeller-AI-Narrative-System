@@ -1,0 +1,12 @@
+{
+  "label": "deepseek_v4_pro",
+  "model": "deepseek/deepseek-v4-pro",
+  "ok": false,
+  "parse_ok": false,
+  "elapsed_sec": 11.12,
+  "error": "'NoneType' object is not subscriptable",
+  "passage_word_count": null,
+  "choices": [],
+  "skill_tags": [],
+  "raw": null
+}

@@ -1,21 +1,19 @@
 """
-Memory compression — turns are compressed into act summaries via local LLM.
+Memory compression — turns are compressed into act summaries via the LLM router.
 
-No cloud calls. Compression uses Ollama (local model) at low temperature
-for factual summarization. Failed compression logs but never propagates —
-the game continues with slightly larger context rather than breaking.
+Compression uses the configured fast LLM tier at low temperature for factual
+summarization. Failed compression logs but never propagates — the game
+continues with slightly larger context rather than breaking.
 """
 
 import asyncio
 import json
 import logging
-import os
-import httpx
+
+from gm.llm_client import TIER_FAST, call_chat
 from state.db import get_connection
 
 COMPRESSION_THRESHOLD = 8
-OLLAMA_URL  = os.getenv("OLLAMA_URL", "http://localhost:11434")
-LOCAL_MODEL = os.getenv("LOCAL_MODEL", "qwen3.5:9b")
 
 COMPRESSION_PROMPT = """
 You are summarizing turns from a narrative RPG session for long-term memory.
@@ -44,8 +42,8 @@ def should_compress(session_id: str) -> bool:
 
 def compress_act_turns(session_id: str, act_number: int) -> None:
     """
-    Compress uncompressed turns into an act summary using the local model.
-    No cloud call. Marks turns as compressed after writing the summary.
+    Compress uncompressed turns into an act summary using the fast LLM tier.
+    Marks turns as compressed after writing the summary.
     """
     with get_connection() as conn:
         rows = conn.execute(
@@ -70,18 +68,16 @@ def compress_act_turns(session_id: str, act_number: int) -> None:
             line += f" — {row['meaningful_note']}"
         lines.append(line)
 
-    response = httpx.post(
-        f"{OLLAMA_URL}/api/generate",
-        json={
-            "model":  LOCAL_MODEL,
-            "prompt": COMPRESSION_PROMPT.format(turns_text="\n".join(lines)),
-            "stream": False,
-            "options": {"temperature": 0.3, "num_predict": 300},
-        },
+    summary = call_chat(
+        tier=TIER_FAST,
+        purpose="memory",
+        user=COMPRESSION_PROMPT.format(turns_text="\n".join(lines)),
+        temperature=0.3,
+        max_tokens=300,
         timeout=45.0,
+        retries=2,
     )
-    response.raise_for_status()
-    summary = response.json()["response"].strip()
+    summary = summary.strip()
 
     turn_numbers = [row["turn_number"] for row in rows]
     placeholders = ",".join("?" * len(turn_numbers))

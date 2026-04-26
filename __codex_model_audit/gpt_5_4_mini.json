@@ -1,0 +1,22 @@
+{
+  "label": "gpt_5_4_mini",
+  "model": "openai/gpt-5.4-mini",
+  "ok": true,
+  "parse_ok": true,
+  "elapsed_sec": 5.92,
+  "error": null,
+  "passage_word_count": 289,
+  "choices": [
+    "Ask Luke for permission to search the west stair service passages and whether he can tell you anything more about the sealed lower archive.",
+    "Go to find Kira before meditation ends, and try to judge whether she’s hiding something or just restless.",
+    "Head toward the west stair and the old service passages, trusting your sense of the buried presence to guide you."
+  ],
+  "skill_tags": [
+    "persuasion",
+    "vigilance",
+    "force:sense"
+  ],
+  "raw": "Luke lets the silence settle after your question, the dawn light striping the temple stones in pale gold. For a moment, he looks older than you remember—tired, but not uncertain. His hands rest loose in his lap, and when he speaks, his voice is low enough that it feels meant for the stones as much as for you.\n\n“Something is under the temple,” he says. “Not a monster in the ordinary sense. Not a simple ruin, either. The Massassi built over older things, and the old things still have weight.”\n\nA breeze moves through the open chamber, carrying damp jungle earth and the faint metallic scent of rain. Under that, you think you catch it again—that pressure in your chest, like a door half-open in the dark.\n\nLuke’s gaze sharpens on you. “If Kira is drawn to it, it may be because it answers something she hasn’t been able to say aloud. Power does that. So does hurt.”\n\nHe studies you a beat longer, as if measuring how much truth you can bear. “There’s a lower archive shaft beneath the west stair. Old service passages, sealed after the temple was restored. If you want answers, start there. But do not go alone, and do not go looking to be impressed.”\n\nThe warning lands with a sting, because part of you did want more than answers. Part of you wanted the certainty that comes from touching the wrong thing and feeling it bend to you. You push that thought aside, but it leaves an ache behind your ribs.\n\nLuke notices anyway. His expression softens, but he does not rescue you from it. “If Kira is near this presence,” he says, “you may need to reach her before it reaches her.”\n\n---CHOICES---\n1. Ask Luke for permission to search the west stair service passages and whether he can tell you anything more about the sealed lower archive. [Persuasion]\n2. Go to find Kira before meditation ends, and try to judge whether she’s hiding something or just restless. [Vigilance]\n3. Head toward the west stair and the old service passages, trusting your sense of the buried presence to guide you. [Force:Sense]",
+  "finish_reason": "stop",
+  "passage": "Luke lets the silence settle after your question, the dawn light striping the temple stones in pale gold. For a moment, he looks older than you remember—tired, but not uncertain. His hands rest loose in his lap, and when he speaks, his voice is low enough that it feels meant for the stones as much as for you.\n\n“Something is under the temple,” he says. “Not a monster in the ordinary sense. Not a simple ruin, either. The Massassi built over older things, and the old things still have weight.”\n\nA breeze moves through the open chamber, carrying damp jungle earth and the faint metallic scent of rain. Under that, you think you catch it again—that pressure in your chest, like a door half-open in the dark.\n\nLuke’s gaze sharpens on you. “If Kira is drawn to it, it may be because it answers something she hasn’t been able to say aloud. Power does that. So does hurt.”\n\nHe studies you a beat longer, as if measuring how much truth you can bear. “There’s a lower archive shaft beneath the west stair. Old service passages, sealed after the temple was restored. If you want answers, start there. But do not go alone, and do not go looking to be impressed.”\n\nThe warning lands with a sting, because part of you did want more than answers. Part of you wanted the certainty that comes from touching the wrong thing and feeling it bend to you. You push that thought aside, but it leaves an ache behind your ribs.\n\nLuke notices anyway. His expression softens, but he does not rescue you from it. “If Kira is near this presence,” he says, “you may need to reach her before it reaches her.”"
+}

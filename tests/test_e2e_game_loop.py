@@ -620,6 +620,44 @@ class TestDatabaseIntegrity:
         assert len(turns) == 1
         assert turns[0].player_action == "test action"
 
+    def test_recent_turn_memory_preserves_final_beat(self, temp_db):
+        """Recent memory keeps the last scene state, not only the opening."""
+        from state.session import create_session, log_turn, get_recent_turns
+
+        sid = create_session(
+            campaign_name="test",
+            character_json="{}",
+            arc_state_json="{}",
+        )
+        narration = (
+            "You enter the trees. Mist covers the path. "
+            "A branch snaps ahead. Kira has not noticed you yet. "
+            "Your beads click once. Kira turns, kills the comm, and sees you. "
+            "Something heavier than a person moves behind her."
+        )
+        log_turn(
+            session_id=sid,
+            turn_number=1,
+            player_action="follow Kira",
+            choice_index=0,
+            narration=narration,
+            choices=["wait"],
+            check_skill="perception",
+            roll_result_json=json.dumps({
+                "net_successes": 1,
+                "net_advantages": 1,
+                "triumphs": 0,
+                "despairs": 0,
+                "outcome_quadrant": "success_advantage",
+            }),
+        )
+
+        turn = get_recent_turns(sid)[0]
+
+        assert "FINAL BEAT" in turn.narration_excerpt
+        assert "Kira turns, kills the comm, and sees you" in turn.narration_excerpt
+        assert turn.dice_result == "SUCCEEDED (1 net success) with 1 Advantage"
+
     def test_npc_state_persistence(self, temp_db):
         """Verify NPC states persist correctly."""
         from state.session import create_session

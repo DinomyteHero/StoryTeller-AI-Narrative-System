@@ -313,6 +313,9 @@ class TestBuildDefaultCharacter:
         char = build_default_character(nar_shaddaa_spine, "praxeum_student")
         assert char["species"] == "mirialan"
         assert char["career"] == "mystic"
+        assert char["primary_game_line"] == "force_and_destiny"
+        assert char["force_sensitive"] is True
+        assert char["force_rating"] == 1
         assert char["total_xp"] == 110
         assert char["characteristics"]["willpower"] == 3
         assert char["motivation"]["track"] == "morality"
@@ -322,6 +325,9 @@ class TestBuildDefaultCharacter:
         char = build_default_character(nar_shaddaa_spine, "praxeum_mechanic")
         assert char["species"] == "zabrak"
         assert char["career"] == "technician"
+        assert char["primary_game_line"] == "edge_of_empire"
+        assert char["force_sensitive"] is False
+        assert char["force_rating"] == 0
         assert char["total_xp"] == 100
         assert char["characteristics"]["intellect"] == 4
 

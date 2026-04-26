@@ -1,0 +1,195 @@
+{
+  "label": "grok_4_20",
+  "model": "x-ai/grok-4.20",
+  "turns": [
+    {
+      "turn": 0,
+      "elapsed_sec": 8.66,
+      "action": "[session_start]",
+      "narration": "The meditation chamber smells of wet stone and the faint ozone burn from the generator resetting below. You settle onto the smooth basalt floor, knees crossed, the Mirialan prayer beads cool against your wrist, and let the low hum of twelve breathing students settle over the room. Master Skywalker moves between you all without a word, barefoot, his steps precise on the ancient tile. The blue training lightsaber at your belt rests against your thigh like an old promise.\n\nKira's mat remains empty. Again.\n\nYou close your eyes and reach out with the Force the way Luke taught you, not grasping, simply listening. Emotions flicker past—focused calm from most of the students, a thread of unease from the new recruit who still flinches at loud noises, the quiet steady presence of Skywalker himself. No Kira. Not on this level. Not anywhere close.\n\nThe generator coughs once more. A bead of sweat slips down your spine beneath the undyed robes.\n\nSkywalker stops near you. His voice is low, meant for your ears alone. \"She's in the jungle again. Third morning this week. You feel it too.\"\n\nHe does not ask what you intend to do. He never does. The question sits between you like an offered blade.",
+      "choices": [
+        "Sit with the unease and finish the meditation properly—some answers sharpen when you stop chasing them.",
+        "Slip out after the session ends and head straight for the jungle path Kira favors, trusting your sense of her to guide you before the midday heat builds.",
+        "Wait until Skywalker moves on, then quietly ask the student beside you if they've noticed how often Kira disappears lately.",
+        "Go to the archives after meditation and review Tionne's notes on the Massassi temples—Kira's absences started after she began studying the lower levels."
+      ]
+    },
+    {
+      "turn": 1,
+      "elapsed_sec": 6.05,
+      "action": "Go to the archives after meditation and review Tionne's notes on the Massassi temples—Kira's absences started after she began studying the lower levels.",
+      "choice_index": 3,
+      "pending_kind": null,
+      "narration": "You descend the worn steps from the meditation chamber into the archives, the Mirialan prayer beads clicking once against your wrist as you push through the heavy door. Tionne’s datapad rests on the central table exactly where you left it two nights ago, its scratched screen already glowing with the file on the Massassi temples. The lower levels section loads without delay. Notes appear in Tionne’s tidy script: construction dates, ritual chambers, repeated warnings about the dark-side vergence beneath the Great Temple that pulses stronger near the sealed stairs.\n\nYour eyes track the pattern you came for. Kira’s absences began the same week she requested these exact fragments. The correlation sits on the screen in plain green text.\n\nSkywalker’s words from the meditation chamber still rest behind your ribs. She’s in the jungle again.\n\nThe generator’s cough fades behind stone walls. Cool air moves across your damp spine. One of the three blank beads on your wrist feels heavier than the rest, waiting for whatever lesson this morning decides to teach.",
+      "choices": [
+        "Review the sealed-stairs schematics more carefully and cross-reference them against the vergence notes you copied last week.",
+        "Slip the datapad into your robes and head straight for the jungle trail Kira favors, trusting your sense of her to close the distance before midday.",
+        "Find Tionne in the lecture alcove and ask her plainly why the lower Massassi levels began calling to Kira after she studied them.",
+        "Sit alone at the archive table a moment longer. Turn over the possibility that protecting Kira now means becoming the person who withholds truth from everyone else."
+      ],
+      "roll_summary": null,
+      "dice_result": null,
+      "session_state": {
+        "turn_number": 2,
+        "wounds": 0,
+        "strain": 0,
+        "act_progress": 0.1,
+        "anchor_proximity": "distant"
+      }
+    },
+    {
+      "turn": 2,
+      "elapsed_sec": 8.66,
+      "action": "Find Tionne in the lecture alcove and ask her plainly why the lower Massassi levels began calling to Kira after she studied them.",
+      "choice_index": 2,
+      "pending_kind": null,
+      "narration": "You slip through the side passage from the archives and find Tionne in the lecture alcove, the one with the cracked basalt bench facing the shattered viewport. She looks up from a tangle of holoprojector filaments, one scarred eyebrow lifting at the directness of your question about Kira and the lower Massassi levels.\n\nTionne sets the filaments aside with the care of someone who has watched too many artifacts crumble. “Kira asked about the temples the same week the vergence beneath them stirred. The Massassi built those lower halls to contain what they feared would consume them. Some stones remember. Others… reach.” Her fingers trace a faint scar along her own wrist, mirroring the prayer beads on yours. “She studied the fragments. Then she started disappearing into the jungle. Correlation isn’t causation, but it’s rarely coincidence either.”\n\nShe doesn’t volunteer more. The silence stretches just long enough for you to notice the faint scent of ozone still clinging to your training robes.\n\nTionne leans back against the stone. “You’re asking the archivist, not the Master. That tells me something about who you trust with the question.” Her tone carries no judgment, only the weight of someone who has catalogued too many old betrayals. “The vergence doesn’t call everyone the same way. What it says to Kira may not be what it would say to you.”\n\nThe cool air from the broken viewport moves across your damp spine again. One of the blank beads on your wrist feels heavier than the rest.",
+      "choices": [
+        "Press her anyway — ask flat-out whether Luke is withholding the truth about Kira’s parentage because the old Order’s secrecy is already repeating itself.",
+        "Ask what the vergence felt like when she first catalogued it herself, then offer to check the sealed stairs together before the afternoon drills .",
+        "Thank her for the fragments she already gave you and walk the path to the jungle edge alone, trusting your own senses to pick up Kira’s trail without dragging anyone else in.",
+        "Sit on the cracked bench across from her, say nothing for a long moment, and simply let the question of whether you’re becoming the kind of student who gathers secrets sit between you."
+      ],
+      "roll_summary": null,
+      "dice_result": null,
+      "session_state": {
+        "turn_number": 3,
+        "wounds": 0,
+        "strain": 0,
+        "act_progress": 0.2,
+        "anchor_proximity": "distant"
+      }
+    },
+    {
+      "turn": 3,
+      "elapsed_sec": 14.1,
+      "action": "Ask what the vergence felt like when she first catalogued it herself, then offer to check the sealed stairs together before the afternoon drills .",
+      "choice_index": 1,
+      "pending_kind": null,
+      "narration": "You ask Tionne what the dark-side vergence beneath the Great Temple felt like the first time she catalogued it, then tell her you will check the sealed stairs together before the afternoon drills begin. \n\nShe studies you for three quiet heartbeats, scarred eyebrow still raised. “Cold,” she says at last. “Like someone had drawn all the air out and left only the echo of screams that stopped centuries ago. I sealed the stairs the same day.” Her fingers twist a filament until it snaps. “But if you’re offering company, I won’t refuse it. Kira’s name on your tongue makes the offer feel less like curiosity and more like necessity.”\n\nShe sets the projector aside, stands, and lifts a small glowrod from the alcove shelf. The motion is brisk, practical. No thanks, no warnings. Only the faint click of her boot heels on basalt as she leads you toward the narrow service corridor that descends behind the lecture wall.\n\nThe sealed stairs appear around the next bend—ancient Massassi stone fused with a more recent durasteel hatch welded across the passage. Rust already bleeds from the seams where jungle moisture finds purchase. Tionne rests her palm against the metal. For a moment her eyes lose focus, the way they do when she is deciding how much history to give away.\n\n“Luke asked me to keep it closed after the second student started sleepwalking,” she says, voice low. “That was before Kira ever touched the archives. Make of that what you will.”\n\nThe hatch gives a reluctant groan as she keys the override. A breath of warmer, earth-heavy air rolls up from below, carrying the faint mineral tang of old bloodshed baked into temple stone. Tionne glances sideways at you, measuring. “After you, then. But we turn back at the first landing. Drills wait for no one, and I won’t explain to Master Skywalker why two of his students are late because we went looking for ghosts.”\n\nOne of your prayer beads cools against your wrist, as if the wood itself has chosen this exact instant to listen.",
+      "choices": [
+        "Tell her the truth about Kira’s recent absences while you still have the dark stairs in front of you, and ask what Luke is protecting by staying silent.",
+        "Keep the details to yourself for now, descend the first ten steps in silence, and simply see whether the vergence reacts to both of you the same way it reacted to Kira.",
+        "Suggest you each take one stimpack before going down together — better safe than sorry if the vergence decides to push back — and let the offer reveal how much you fear failing to protect her.",
+        "Offer a small, wry smile and say, “Ghosts are easier when you have someone who still owes you a favor from last week’s saber forms,” then step through first, trusting the shared history to steady whatever waits below."
+      ],
+      "roll_summary": null,
+      "dice_result": null,
+      "session_state": {
+        "turn_number": 4,
+        "wounds": 0,
+        "strain": 0,
+        "act_progress": 0.30000000000000004,
+        "anchor_proximity": "distant"
+      }
+    },
+    {
+      "turn": 4,
+      "elapsed_sec": 9.54,
+      "action": "Tell her the truth about Kira’s recent absences while you still have the dark stairs in front of you, and ask what Luke is protecting by staying silent.",
+      "choice_index": 0,
+      "pending_kind": null,
+      "narration": "You tell Tionne the truth while the open stairwell still exhales its mineral breath across the landing: Kira’s absences began after the first temple scans, how she returns quieter each time, the way her laugh thins when anyone asks where she’s been. You ask what Luke protects by saying nothing.\n\nTionne’s scarred fingers still on the override panel. She listens without interrupting, then exhales once through her nose like a researcher setting down a fragile shard. “He protects the chance for her to choose who she becomes before the past chooses for her.” Her voice stays even, scholarly. “Seren Denn surrendered to Inquisitors on Bracca so the infant in her arms would live. Luke brought that infant here knowing the weight she carried and never once laid it on her shoulders.” She meets your eyes directly. “He believes some truths are weapons until the person holding them is ready to wield them. Whether that belief is kindness or control depends on where you stand when the blade finally falls.”\n\nShe gestures toward the stairs with the smallest tilt of her chin, an invitation and a boundary at once. The prayer bead against your wrist has gone from cool to cold, as if the wood itself now weighs the choice you just made.\n\nThe upper temple corridor remains quiet behind you. Morning drills will begin soon; the distant clack of training sabers already echoes from the courtyard.",
+      "choices": [
+        "Ask her outright if withholding the truth about Kira’s mother is the same mistake the old Jedi made, risking that the question exposes how personally you need the answer to be different.",
+        "Tell her you refuse to let Kira walk those lower Massassi levels alone anymore, then start down the sealed stairs yourself right now, trusting Tionne will either follow or sound the alarm.",
+        "Sit with the name Seren Denn a moment longer in silence, letting the mineral air and the cold bead settle what this inheritance could mean for both of you before deciding what to do next.",
+        "Suggest the two of you simply report the absences to Luke together after drills and let him decide how much truth Kira receives, choosing institutional process over personal intervention."
+      ],
+      "roll_summary": null,
+      "dice_result": null,
+      "session_state": {
+        "turn_number": 5,
+        "wounds": 0,
+        "strain": 0,
+        "act_progress": 0.4,
+        "anchor_proximity": "approaching"
+      }
+    },
+    {
+      "turn": 5,
+      "elapsed_sec": 25.61,
+      "action": "Tell her you refuse to let Kira walk those lower Massassi levels alone anymore, then start down the sealed stairs yourself right now, trusting Tionne will either follow or sound the alarm.",
+      "choice_index": 1,
+      "pending_kind": null,
+      "narration": "You tell Tionne you refuse to let Kira walk the lower Massassi levels alone anymore, then start down the sealed stairs yourself right now. The first step accepts your weight with a gritty scrape of displaced dust. Tionne’s sigh is soft, almost amused, but she falls in behind you without sounding any alarm. The stairwell swallows the morning saber-clacks from the courtyard.\n\nThe air grows thick with the mineral tang of old stone and something sharper underneath, like lightning-struck iron. Your training robes brush the rough wall; the Mirialan prayer beads click once against your wrist, the cold one pressing into skin as if reminding you of every blank lesson still unpaid. Tionne’s footsteps stay two paces back, measured, giving you the lead you claimed.\n\nAt the first landing the stairs turn sharply, opening into a wider chamber lit only by faint bioluminescent veins in the rock. Kira stands ten meters ahead beside a half-crumbled Massassi altar, her back to you, shoulders tight. She does not startle. Instead her body goes still in that precise, controlled way you have learned to read too well. A low mechanical chirp cuts off mid-note from the small holoprojector resting on the altar stone.\n\nTionne stops beside you. “Kira,” she says, voice even, “the vergence doesn’t like uninvited cataloguing.” Kira’s fingers flex once at her sides before she turns. Her smile is quick, warm, and paper-thin. The prayer bead against your pulse has gone from cold to aching.",
+      "choices": [
+        "Tell Kira you will not let her carry whatever the lower Massassi levels are whispering to her by herself anymore, and ask her plainly what the holoprojector just showed.",
+        "Follow the cold bead’s warning and reach out through the Force to sense whether fear or relief flickers behind Kira’s too-still smile.",
+        "Admit to both of them that you are terrified one wrong choice down here will cost the only home you have left, then suggest the three of you seal the stairs again and bring the matter to Luke before drills end.",
+        "Step forward alone to examine the altar yourself, trusting that if the dark-side vergence beneath the Great Temple wants to speak, it will have to speak to you directly this time."
+      ],
+      "roll_summary": null,
+      "dice_result": null,
+      "session_state": {
+        "turn_number": 6,
+        "wounds": 0,
+        "strain": 0,
+        "act_progress": 0.5,
+        "anchor_proximity": "approaching"
+      }
+    }
+  ],
+  "errors": [],
+  "health": {
+    "status": "ok",
+    "routing": {
+      "backend": "cloud",
+      "provider": "openrouter",
+      "fast_model": "x-ai/grok-4.20",
+      "quality_model": "x-ai/grok-4.20",
+      "narration_model": "x-ai/grok-4.20",
+      "narration_max_tokens": 1200,
+      "overrides": {
+        "narration": "x-ai/grok-4.20"
+      }
+    }
+  },
+  "session_id": "31e356bc-0911-4071-b1a6-0ae7a8de4061",
+  "metrics": {
+    "total_elapsed_sec": 72.62,
+    "avg_turn_elapsed_sec_ex_opening": 12.79,
+    "star_wars_term_hits": 51,
+    "opaque_lower_dark_hits": 0,
+    "concrete_vergence_hits": 2,
+    "mat_hits": 1
+  },
+  "audits": [
+    {
+      "turn": 0,
+      "force": null,
+      "force_check_kind": null,
+      "dice_block": ""
+    },
+    {
+      "turn": 2,
+      "force": null,
+      "force_check_kind": null,
+      "dice_block": ""
+    },
+    {
+      "turn": 3,
+      "force": null,
+      "force_check_kind": null,
+      "dice_block": ""
+    },
+    {
+      "turn": 4,
+      "force": null,
+      "force_check_kind": null,
+      "dice_block": ""
+    },
+    {
+      "turn": 5,
+      "force": null,
+      "force_check_kind": null,
+      "dice_block": ""
+    },
+    {
+      "turn": 6,
+      "force": null,
+      "force_check_kind": null,
+      "dice_block": ""
+    }
+  ]
+}

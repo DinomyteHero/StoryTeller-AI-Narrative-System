@@ -5,7 +5,7 @@
   "specializations": [
     "seer"
   ],
-  "primary_game_line": "edge_of_empire",
+  "primary_game_line": "force_and_destiny",
   "background": "",
   "characteristics": {
     "brawn": 2,
@@ -67,7 +67,7 @@
     "morality": 50,
     "conflict": 0
   },
-  "force_rating": 0,
+  "force_rating": 1,
   "force_committed": 0,
   "loadout": {
     "weapons": [

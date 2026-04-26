@@ -1,0 +1,22 @@
+{
+  "label": "grok_4_20",
+  "model": "x-ai/grok-4.20",
+  "ok": true,
+  "parse_ok": true,
+  "elapsed_sec": 10.86,
+  "error": null,
+  "passage_word_count": 283,
+  "choices": [
+    "Press Luke for more specifics about the vergence despite his indirect tone.",
+    "Leave the chamber quietly and try to find Kira before the day’s lessons begin.",
+    "Admit your fear of wanting the power you felt beneath the temple and ask for guidance on resisting it."
+  ],
+  "skill_tags": [
+    "force:sense",
+    "perception",
+    "discipline"
+  ],
+  "raw": "The first rays of Yavin’s sun filter through the ancient stone lattice, painting the meditation chamber in shifting amber and gold. You sit cross-legged on the cool floor, the faint scent of jungle mist still clinging to your robes. Luke Skywalker kneels a few meters away, his presence steady as still water, yet you feel the undercurrent of concern in him like a distant tremor in the Force.\n\nYou draw a breath and ask the question that has been burning since the night’s vision: “Master… what is beneath the temple? And could Kira be drawn to it?”\n\nLuke’s eyes open. For a long moment he studies you, compassion softening the lines of his face. “There are places on this moon that remember older wars,” he says quietly. “The Massassi built their temples over wounds in the world. What you sensed is real—an old vergence, half-buried and restless. It isn’t just stone and echo. Something down there noticed you noticing it.” His gaze drifts toward the empty space where Kira usually sits. “As for your friend… the Force flows through all of us differently. Some are pulled toward light. Others hear a different call, especially when they think no one is listening.”\n\nHe does not offer reassurance. Instead his words settle over you like morning dew—cool, heavy, and impossible to ignore. You realize he is waiting for you to decide what kind of student you will be: one who walks away from the dark, or one who must learn how close is too close.\n\nThe pressure you felt last night lingers at the edge of your awareness, patient as a predator. And somewhere beyond the temple walls, the morning birds have gone strangely silent.\n\n---CHOICES---\n1. Press Luke for more specifics about the vergence despite his indirect tone. [Force:Sense]\n2. Leave the chamber quietly and try to find Kira before the day’s lessons begin. [Perception]\n3. Admit your fear of wanting the power you felt beneath the temple and ask for guidance on resisting it. [Discipline]",
+  "finish_reason": "stop",
+  "passage": "The first rays of Yavin’s sun filter through the ancient stone lattice, painting the meditation chamber in shifting amber and gold. You sit cross-legged on the cool floor, the faint scent of jungle mist still clinging to your robes. Luke Skywalker kneels a few meters away, his presence steady as still water, yet you feel the undercurrent of concern in him like a distant tremor in the Force.\n\nYou draw a breath and ask the question that has been burning since the night’s vision: “Master… what is beneath the temple? And could Kira be drawn to it?”\n\nLuke’s eyes open. For a long moment he studies you, compassion softening the lines of his face. “There are places on this moon that remember older wars,” he says quietly. “The Massassi built their temples over wounds in the world. What you sensed is real—an old vergence, half-buried and restless. It isn’t just stone and echo. Something down there noticed you noticing it.” His gaze drifts toward the empty space where Kira usually sits. “As for your friend… the Force flows through all of us differently. Some are pulled toward light. Others hear a different call, especially when they think no one is listening.”\n\nHe does not offer reassurance. Instead his words settle over you like morning dew—cool, heavy, and impossible to ignore. You realize he is waiting for you to decide what kind of student you will be: one who walks away from the dark, or one who must learn how close is too close.\n\nThe pressure you felt last night lingers at the edge of your awareness, patient as a predator. And somewhere beyond the temple walls, the morning birds have gone strangely silent."
+}

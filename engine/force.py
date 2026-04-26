@@ -333,6 +333,15 @@ def build_force_result_block(
     lines.append("")
     lines.append(force_result.narrative_note)
 
+    if skill_succeeded is None and not force_result.force_succeeded:
+        lines.append("")
+        lines.append(
+            "PURE FORCE FAILURE: The requested mystical perception or effect "
+            "does not arrive. Narration may show disturbance, temptation, or "
+            "danger, but must not reveal the exact hidden truth, intent, actor, "
+            "cause, or location the player was trying to sense."
+        )
+
     # Four-result matrix guidance for Force-enhanced skill checks
     if skill_succeeded is not None:
         lines.append("")

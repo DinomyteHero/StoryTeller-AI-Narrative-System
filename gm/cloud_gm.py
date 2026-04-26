@@ -9,9 +9,12 @@ ensures all mechanical outcomes are resolved BEFORE the LLM receives context.
 """
 
 import re
+import json
 import os
+import logging
+import time
 from pathlib import Path
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Iterator, Optional
 from openai import OpenAI
 from engine.equipment import build_equipment_narration_block
@@ -20,6 +23,7 @@ from gm.llm_client import (
     make_client as _make_unified_client,
     resolve_model,
     _prepare_kwargs,
+    call_local_chat,
     TIER_QUALITY,
     is_local_backend,
 )
@@ -28,21 +32,26 @@ _PROMPTS_DIR = Path(__file__).parent / "prompts"
 PROMPT_PATH = _PROMPTS_DIR / "narration.txt"
 PROMPT_PATH_LITERARY = _PROMPTS_DIR / "narration_literary.txt"
 MAX_TOKENS  = int(os.getenv("MAX_COMPLETION_TOKENS", "16000"))
+NARRATION_MAX_TOKENS = int(os.getenv("NARRATION_MAX_TOKENS", "1200"))
+NARRATION_MIN_WORDS = int(os.getenv("NARRATION_MIN_WORDS", "150"))
+NARRATION_MAX_WORDS = int(os.getenv("NARRATION_MAX_WORDS", "750"))
+NARRATION_TIMEOUT_SEC = float(os.getenv("NARRATION_TIMEOUT_SEC", "45"))
+NARRATION_PARSE_RETRIES = int(os.getenv("NARRATION_PARSE_RETRIES", "1"))
+NARRATION_FALLBACK_MODELS = [
+    model.strip()
+    for model in os.getenv("NARRATION_FALLBACK_MODELS", "").split(",")
+    if model.strip()
+]
+CHOICE_QUALITY_INLINE = os.getenv("CHOICE_QUALITY_INLINE", "false").lower() == "true"
+LLM_TIMING_LOG = os.getenv("LLM_TIMING_LOG", "true").lower() == "true"
 
-# Provider config — read for back-compat. The unified client (gm/llm_client.py)
-# is the authoritative source for routing; these env vars feed into it.
-CLOUD_PROVIDER    = os.getenv("CLOUD_PROVIDER", "openrouter")
-CLOUD_MODEL       = os.getenv("CLOUD_MODEL", "")
+# Provider config. The unified client (gm/llm_client.py)
+# is the authoritative source for model/provider routing.
 NARRATIVE_BACKEND = os.getenv("NARRATIVE_BACKEND", "cloud")
-OLLAMA_URL             = os.getenv("OLLAMA_URL", "http://localhost:11434")
-LOCAL_MODEL            = os.getenv("LOCAL_MODEL", "qwen3.5:9b")
-LOCAL_NARRATION_MODEL  = os.getenv("LOCAL_NARRATION_MODEL", LOCAL_MODEL)
-PROSE_VOICE            = os.getenv("PROSE_VOICE", "clean")  # "clean" | "literary"
-
-PROVIDER_BASE_URLS = {
-    "openai":     None,
-    "openrouter": "https://openrouter.ai/api/v1",
-}
+PROSE_VOICE       = os.getenv("PROSE_VOICE", "clean")  # "clean" | "literary"
+CLOUD_FALLBACK_TO_LOCAL = os.getenv(
+    "CLOUD_FALLBACK_TO_LOCAL", "false"
+).lower() == "true"
 
 
 def _make_completion_kwargs(
@@ -51,6 +60,7 @@ def _make_completion_kwargs(
     *,
     is_local: bool,
     timeout: Optional[float] = None,
+    max_tokens: Optional[int] = None,
     stream: bool = False,
 ) -> dict:
     """Build chat.completions.create kwargs via the unified provider layer.
@@ -64,7 +74,7 @@ def _make_completion_kwargs(
         model=model,
         messages=messages,
         temperature=1.0,
-        max_tokens=MAX_TOKENS,
+        max_tokens=max_tokens if max_tokens is not None else MAX_TOKENS,
         timeout=timeout,
         seed=None,
         response_format=None,
@@ -76,6 +86,72 @@ def _make_completion_kwargs(
     if stream:
         kwargs["stream"] = True
     return kwargs
+
+
+def _retry_after_seconds(error: Exception) -> float | None:
+    """Extract OpenRouter retry-after metadata when the provider supplies it."""
+    response = getattr(error, "response", None)
+    if response is None:
+        return None
+    try:
+        data = response.json()
+    except Exception:
+        return None
+    metadata = (data.get("error") or {}).get("metadata") or {}
+    value = metadata.get("retry_after_seconds")
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        return None
+
+
+def _is_transient_provider_error(error: Exception) -> bool:
+    status = getattr(error, "status_code", None)
+    if status in {408, 409, 429, 500, 502, 503, 504}:
+        return True
+    text = str(error).lower()
+    return any(token in text for token in ("rate", "timeout", "temporarily", "overloaded"))
+
+
+def _create_completion_with_retries(client: OpenAI, kwargs: dict, model: str):
+    """Call the configured provider with bounded retry/backoff for transient errors."""
+    attempts = max(1, int(os.getenv("NARRATION_PROVIDER_RETRIES", "3")))
+    base_delay = max(0.0, float(os.getenv("NARRATION_PROVIDER_BACKOFF_SEC", "2.0")))
+    last_error: Exception | None = None
+
+    for attempt in range(attempts):
+        started = time.time()
+        try:
+            response = client.chat.completions.create(**kwargs)
+            if LLM_TIMING_LOG:
+                logging.info(
+                    "LLM_TIMING kind=narration_completion model=%s ok=true "
+                    "attempt=%d/%d elapsed_sec=%.2f",
+                    model, attempt + 1, attempts, time.time() - started,
+                )
+            return response
+        except Exception as e:
+            last_error = e
+            if LLM_TIMING_LOG:
+                logging.info(
+                    "LLM_TIMING kind=narration_completion model=%s ok=false "
+                    "attempt=%d/%d elapsed_sec=%.2f",
+                    model, attempt + 1, attempts, time.time() - started,
+                )
+            if attempt == attempts - 1 or not _is_transient_provider_error(e):
+                raise
+            delay = _retry_after_seconds(e)
+            if delay is None:
+                delay = base_delay * (2 ** attempt)
+            delay = min(max(delay, 0.5), 20.0)
+            logging.warning(
+                "Narration provider call failed transiently "
+                "(model=%s attempt=%d/%d): %s. Retrying in %.1fs.",
+                model, attempt + 1, attempts, e, delay,
+            )
+            time.sleep(delay)
+
+    raise last_error or RuntimeError("Narration provider call failed")
 
 # ── Scene pacing guidance (Game Mechanics §10, Vision §3) ─────────────
 # Maps scene_type to:
@@ -484,11 +560,24 @@ def _get_scene_block(scene_type: str) -> str:
 def _make_client(purpose: str = "narration") -> tuple[OpenAI, str]:
     """Return (client, model_string) for a quality-tier purpose.
 
-    Routes through gm.llm_client so DeepSeek V4 Pro is the default for
-    narration / milestones / time skips, with per-call-site overrides
-    available via NARRATION_MODEL, MILESTONE_MODEL, etc.
+    Routes through gm.llm_client so live narration can use the fast model
+    while milestones/time skips keep the quality tier. Per-call-site overrides
+    are available via NARRATION_MODEL, MILESTONE_MODEL, etc.
     """
     return _make_unified_client(), resolve_model(tier=TIER_QUALITY, purpose=purpose)
+
+
+def _narration_model_candidates(primary_model: str) -> list[str]:
+    """Ordered cloud model candidates for a live narration turn."""
+    candidates = [primary_model]
+    for model in NARRATION_FALLBACK_MODELS:
+        if model not in candidates:
+            candidates.append(model)
+
+    quality_model = resolve_model(tier=TIER_QUALITY)
+    if quality_model and quality_model not in candidates:
+        candidates.append(quality_model)
+    return candidates
 
 
 @dataclass
@@ -498,6 +587,7 @@ class NarrationResult:
     skill_tags:   list[str | None]   # per-choice skill tag or None if no check
     raw_response: str
     used_local:   bool = False
+    state_patch:  dict = field(default_factory=dict)
 
 
 class CloudGMError(Exception):
@@ -511,7 +601,13 @@ def _build_prompt(ctx: ContextPackage) -> str:
     prompt_path    = PROMPT_PATH_LITERARY if PROSE_VOICE == "literary" else PROMPT_PATH
     template       = prompt_path.read_text(encoding="utf-8")
     recent_summary = _format_recent_turns(ctx.recent_turns)
-    full_summary   = f"{ctx.story_summary}\n\nRECENT TURNS:\n{recent_summary}"
+    full_summary   = (
+        f"{ctx.story_summary}\n\nRECENT TURNS:\n{recent_summary}\n\n"
+        "IMMEDIATE CONTINUITY RULE: Continue from the final state of the "
+        "most recent narration excerpt. Do not replay dialogue, discovery "
+        "beats, reveals, or environmental beats that already happened unless "
+        "the player explicitly repeats them."
+    )
     scene_pacing   = _get_scene_block(ctx.scene_type)
 
     # Phase 11: Talent context for narration (§15.5)
@@ -584,10 +680,82 @@ def _format_recent_turns(turns: list) -> str:
     return "\n".join(parts)
 
 
+def _parse_state_patch(raw_patch: str) -> dict:
+    """Parse optional hidden scene-state JSON from narration output.
+
+    The state patch is advisory: malformed or missing JSON must not block a
+    turn. The deterministic scene-state updater in api.game_routes supplies
+    a fallback, so this only strengthens continuity when the model complies.
+    """
+    if not raw_patch:
+        return {}
+
+    match = re.search(r"\{.*\}", raw_patch, flags=re.DOTALL)
+    if not match:
+        return {}
+
+    try:
+        data = json.loads(match.group(0))
+    except Exception:
+        logging.warning("Narration state patch was not valid JSON")
+        return {}
+
+    if not isinstance(data, dict):
+        return {}
+
+    allowed = {
+        "current_location",
+        "current_objective",
+        "present_npcs",
+        "scene_type",
+        "immediate_pressure",
+        "known_facts",
+        "threads_advanced",
+        "threads_resolved",
+        "threads_opened",
+        "avoid_repeating",
+        "next_beat_requirement",
+    }
+    return {k: v for k, v in data.items() if k in allowed}
+
+
+def _strip_wrapped_narration_quotes(passage: str) -> str:
+    """Remove accidental quote wrappers around whole prose paragraphs."""
+    cleaned: list[str] = []
+    for paragraph in re.split(r"\n\s*\n", passage.strip()):
+        text = paragraph.strip()
+        if not text:
+            continue
+        if len(text) > 80:
+            for left, right in (('"', '"'), ("“", "”")):
+                if text.startswith(left) and text.endswith(right):
+                    inner = text[1:-1].strip()
+                    if (
+                        re.search(
+                            r"\b(you|You|Kira|Luke|Tionne|the|The)\s+"
+                            r"(ask|step|feel|hold|move|look|keep|hear|see|"
+                            r"reach|wait|stand|turn|draw|follow|press|let|"
+                            r"try|take|say|says|does|stops|drags|answers|"
+                            r"glances|shakes|goes|freezes|watches)",
+                            inner,
+                        )
+                        or re.search(
+                            r"\b(the|The)\s+\w+\s+"
+                            r"(stops|drags|waits|stays|holds|comes|goes|"
+                            r"answers|moves|echoes|rings|turns|lands|opens|closes)",
+                            inner,
+                        )
+                    ):
+                        text = inner
+                    break
+        cleaned.append(text)
+    return "\n\n".join(cleaned)
+
+
 def _parse_response(raw: str, used_local: bool = False) -> NarrationResult:
     """
     Split GM response into passage and choices.
-    Enforces: delimiter present, 250-600 word count, 2-4 choices.
+    Enforces: delimiter present, configured word count bounds, 2-4 choices.
     Strips skill tags from choice text (e.g., "[Deception]") and stores
     them separately. The player never sees the skill name.
     """
@@ -612,6 +780,23 @@ def _parse_response(raw: str, used_local: bool = False) -> NarrationResult:
                     lines.insert(i, "---CHOICES---")
                     normalized = "\n".join(lines)
                     break
+    # Also recover bare bullet choices at the end of the response.
+    if "---CHOICES---" not in normalized:
+        lines = normalized.split("\n")
+        start = max(len(lines) - 15, 0)
+        for i in range(start, len(lines)):
+            if not re.match(r"^\s*[-*]\s+\S", lines[i]):
+                continue
+            bullet_count = 0
+            for line in lines[i:]:
+                if re.match(r"^\s*[-*]\s+\S", line):
+                    bullet_count += 1
+                elif line.strip():
+                    break
+            if bullet_count >= 2:
+                lines.insert(i, "---CHOICES---")
+                normalized = "\n".join(lines)
+                break
     if "---CHOICES---" not in normalized:
         raise CloudGMError("GM response missing ---CHOICES--- delimiter")
 
@@ -619,20 +804,29 @@ def _parse_response(raw: str, used_local: bool = False) -> NarrationResult:
     passage     = passage.strip()
     choices_raw = choices_raw.strip()
 
+    state_patch = {}
+    for delimiter in ("---STATE_PATCH---", "---STATE PATCH---", "STATE_PATCH:"):
+        if delimiter in choices_raw:
+            choices_raw, patch_raw = choices_raw.split(delimiter, 1)
+            state_patch = _parse_state_patch(patch_raw)
+            choices_raw = choices_raw.strip()
+            break
+
     # Strip markdown emphasis (*italic* and **bold**) — frontend is plain text
     passage = re.sub(r"\*{1,2}(.+?)\*{1,2}", r"\1", passage)
     # Strip stray --- separators from passage edges
     passage = re.sub(r"^-{3,}\s*\n", "", passage)
     passage = re.sub(r"\n\s*-{3,}\s*$", "", passage)
+    passage = _strip_wrapped_narration_quotes(passage)
 
     word_count = len(passage.split())
-    if word_count < 250:
+    if word_count < NARRATION_MIN_WORDS:
         raise CloudGMError(
-            f"Passage too short ({word_count} words, minimum 250). Retrying."
+            f"Passage too short ({word_count} words, minimum {NARRATION_MIN_WORDS}). Retrying."
         )
-    if word_count > 800:
+    if word_count > NARRATION_MAX_WORDS:
         raise CloudGMError(
-            f"Passage too long ({word_count} words, maximum 800). Retrying."
+            f"Passage too long ({word_count} words, maximum {NARRATION_MAX_WORDS}). Retrying."
         )
 
     raw_choices = []
@@ -653,20 +847,23 @@ def _parse_response(raw: str, used_local: bool = False) -> NarrationResult:
             f"GM returned {len(raw_choices)} choice(s). Minimum 2 required. Retrying."
         )
 
-    # Extract and strip skill tags: "[Deception]" or "[Force:Move]" at end of choice text
-    skill_tag_pattern = re.compile(r"\s*\[([A-Za-z_:\s]+)\]\s*$")
+    # Extract and strip skill tags: "[Deception]", "[Force:Move]", or
+    # "[Force:Sense -- why this is risky]". The tag may be embedded inside
+    # a trailing explanatory parenthetical that is also stripped below.
+    skill_tag_pattern = re.compile(r"\[([^\]]+)\]")
     choices = []
     skill_tags = []
     for choice_text in raw_choices[:4]:
-        match = skill_tag_pattern.search(choice_text)
+        matches = list(skill_tag_pattern.finditer(choice_text))
+        match = matches[-1] if matches else None
+        tag = None
         if match:
-            choices.append(skill_tag_pattern.sub("", choice_text).rstrip())
-            tag = match.group(1).strip()
-            # Normalize: "Force:Move" stays as "force:move", regular skills lowercase+underscore
-            skill_tags.append(tag.lower().replace(" ", "_"))
-        else:
-            choices.append(choice_text)
-            skill_tags.append(None)
+            tag = _normalize_choice_tag(match.group(1))
+            choice_text = (
+                choice_text[:match.start()] + choice_text[match.end():]
+            ).strip()
+        choices.append(_clean_choice_text(choice_text))
+        skill_tags.append(tag)
 
     return NarrationResult(
         passage=passage,
@@ -674,37 +871,45 @@ def _parse_response(raw: str, used_local: bool = False) -> NarrationResult:
         skill_tags=skill_tags,
         raw_response=raw,
         used_local=used_local,
+        state_patch=state_patch,
     )
 
 
 def narrate_turn(
     ctx:         ContextPackage,
-    max_retries: int = 2,
+    max_retries: Optional[int] = None,
 ) -> NarrationResult:
     """
     One call to the configured provider for narration + choices.
     This is the ONE cloud call per turn (or local equivalent).
     Retries with a correction note appended on validation failure.
 
-    Cloud failure fallback (v1.5): If the cloud model is unavailable or
+    Cloud failure fallback (v1.5): Disabled unless CLOUD_FALLBACK_TO_LOCAL=true.
+    If enabled and the cloud model is unavailable or
     exceeds the timeout, fall back to the local model for this turn only.
     The next turn reattempts the cloud model. The player never sees an
     error — they get a less polished passage that still honors the dice
     and advances the story. A counter tracks consecutive fallbacks; if 3+
     consecutive turns fall back, the UI surfaces a subtle indicator.
     """
+    if max_retries is None:
+        max_retries = NARRATION_PARSE_RETRIES
+
     # If already configured for local, skip fallback logic
     if NARRATIVE_BACKEND == "local":
         return _narrate_with_backend(ctx, max_retries, used_local=True)
 
-    # Attempt cloud first, fall back to local on failure
+    # Attempt cloud first, optionally fall back to local on failure
     try:
         return _narrate_with_backend(ctx, max_retries, used_local=False)
     except (CloudGMError, Exception) as cloud_err:
-        import logging
         logging.warning(
-            f"Cloud GM failed ({cloud_err}), falling back to local model"
+            f"Cloud GM failed ({cloud_err})"
         )
+        if not CLOUD_FALLBACK_TO_LOCAL:
+            raise CloudGMError(
+                f"Cloud GM failed and local fallback is disabled: {cloud_err}"
+            )
         try:
             return _narrate_with_local_fallback(ctx)
         except Exception as local_err:
@@ -725,6 +930,11 @@ def _narrate_with_backend(
     from gm.choice_validator import validate_choice_quality, build_quality_correction
 
     client, model = _make_client()
+    fallback_models = [] if used_local else [
+        candidate
+        for candidate in _narration_model_candidates(model)
+        if candidate != model
+    ]
     prompt        = _build_prompt(ctx)
     last_error    = None
     best_result: NarrationResult | None = None  # best structurally valid result
@@ -742,12 +952,43 @@ def _narrate_with_backend(
                 ),
             })
 
-        kwargs = _make_completion_kwargs(model, messages, is_local=used_local)
-        response = client.chat.completions.create(**kwargs)
-        import logging
+        model_candidates = [model] + [
+            candidate for candidate in fallback_models if candidate != model
+        ]
+        response = None
+        for candidate_index, candidate_model in enumerate(model_candidates):
+            kwargs = _make_completion_kwargs(
+                candidate_model,
+                messages,
+                is_local=used_local,
+                timeout=NARRATION_TIMEOUT_SEC,
+                max_tokens=NARRATION_MAX_TOKENS,
+            )
+            try:
+                response = _create_completion_with_retries(client, kwargs, candidate_model)
+                if candidate_model != model:
+                    logging.warning(
+                        "Narration recovered with fallback model=%s after failure: %s",
+                        candidate_model,
+                        last_error,
+                    )
+                model = candidate_model
+                break
+            except Exception as e:
+                last_error = str(e)
+                if candidate_index == len(model_candidates) - 1:
+                    raise
+                logging.warning(
+                    "Narration provider failed for model=%s; trying fallback model=%s. Error: %s",
+                    candidate_model,
+                    model_candidates[candidate_index + 1],
+                    e,
+                )
+        if response is None:
+            raise CloudGMError(f"Narration provider failed: {last_error}")
         choice = response.choices[0]
         raw = choice.message.content or ""
-        logging.warning(
+        logging.debug(
             f"=== GM RESPONSE (attempt {attempt+1}) ===\n"
             f"model={model}, finish_reason={choice.finish_reason}, "
             f"content_len={len(raw)}, refusal={getattr(choice.message, 'refusal', None)}\n"
@@ -758,6 +999,10 @@ def _narrate_with_backend(
             result = _parse_response(raw, used_local=used_local)
         except CloudGMError as e:
             last_error = str(e)
+            logging.warning(
+                "Narration parse rejected attempt=%d/%d model=%s reason=%s",
+                attempt + 1, max_retries + 1, model, last_error,
+            )
             if attempt == max_retries:
                 if best_result:
                     return best_result  # return best structurally valid result
@@ -771,7 +1016,7 @@ def _narrate_with_backend(
         best_result = result
 
         # Choice quality validation (skip for local backend per spec §10)
-        if used_local or NARRATIVE_BACKEND == "local":
+        if used_local or NARRATIVE_BACKEND == "local" or not CHOICE_QUALITY_INLINE:
             return result
 
         quality = validate_choice_quality(
@@ -812,10 +1057,8 @@ def _narrate_with_local_fallback(ctx: ContextPackage) -> NarrationResult:
     Uses a simplified prompt optimized for the local model's capability.
     Output quality will be lower but the turn advances.
     """
-    import httpx
-    qwen_prefix = "/no_think\n" if "qwen" in LOCAL_NARRATION_MODEL.lower() else ""
     simplified_prompt = (
-        f"{qwen_prefix}You are the narrator for a Star Wars RPG. Write in second person "
+        f"You are the narrator for a Star Wars RPG. Write in second person "
         f"present tense, 250-400 words.\n\n"
         f"SITUATION: {ctx.situation}\n"
         f"LOCATION: {ctx.location}\n"
@@ -823,19 +1066,61 @@ def _narrate_with_local_fallback(ctx: ContextPackage) -> NarrationResult:
         f"Write the passage, then on a new line write ---CHOICES--- "
         f"followed by 2-3 short choices.\n"
     )
-    response = httpx.post(
-        f"{OLLAMA_URL}/api/generate",
-        json={
-            "model": LOCAL_NARRATION_MODEL,
-            "prompt": simplified_prompt,
-            "stream": False,
-            "options": {"temperature": 0.7, "num_predict": 1200},
-        },
+    raw = call_local_chat(
+        tier=TIER_QUALITY,
+        user=simplified_prompt,
+        temperature=0.7,
+        max_tokens=NARRATION_MAX_TOKENS,
         timeout=60.0,
+        retries=1,
     )
-    response.raise_for_status()
-    raw = response.json()["response"].strip()
     return _parse_response(raw, used_local=True)
+
+
+def _normalize_choice_tag(raw_tag: str) -> str | None:
+    """Normalize bracketed choice metadata into a mechanical tag.
+
+    The narrator sometimes helpfully adds prose inside the brackets
+    ("[Force:Sense -- gauge her fear]"). Keep the mechanical prefix and
+    discard the annotation so the player never sees the bracket text and
+    the turn loop still gets a usable tag.
+    """
+    tag = raw_tag.strip()
+    lower = tag.lower()
+    if lower.startswith("force") and ":" in lower:
+        power_text = lower.split(":", 1)[1].strip().replace(" ", "_")
+        power_match = re.match(r"[a-z]+(?:_[a-z]+)*", power_text)
+        if power_match:
+            return f"force:{power_match.group(0)}"
+
+    tag = re.split(r"\s+(?:--+|\u2014|\u2013|-)\s+|\s+\(", tag, maxsplit=1)[0]
+    tag = tag.strip().strip(":").lower().replace(" ", "_").replace("-", "_")
+    tag = re.sub(r"[^a-z0-9_:]", "", tag)
+    try:
+        from gm.local_gm import SKILL_ALIASES, VALID_SKILLS
+
+        if tag in VALID_SKILLS:
+            return tag
+        if tag in SKILL_ALIASES:
+            return SKILL_ALIASES[tag]
+        for alias, skill in SKILL_ALIASES.items():
+            if tag.startswith(f"{alias}_"):
+                return skill
+        for skill in sorted(VALID_SKILLS, key=len, reverse=True):
+            if tag.startswith(f"{skill}_"):
+                return skill
+    except Exception:
+        pass
+    return tag or None
+
+
+def _clean_choice_text(text: str) -> str:
+    """Remove model-side choice annotations that should not face players."""
+    cleaned = re.sub(r"\*{1,2}", "", text).strip()
+    cleaned = re.sub(r"\s+\([^)]{18,}\)\s*$", "", cleaned).strip()
+    cleaned = re.sub(r"\s+--\s+[^.?!\"]{18,}$", "", cleaned).strip()
+    cleaned = cleaned.strip().strip('"').strip()
+    return cleaned
 
 
 def narrate_turn_stream(ctx: ContextPackage) -> Iterator[str]:
@@ -859,6 +1144,8 @@ def narrate_turn_stream(ctx: ContextPackage) -> Iterator[str]:
         model,
         [{"role": "user", "content": msg_content}],
         is_local=is_local,
+        timeout=NARRATION_TIMEOUT_SEC,
+        max_tokens=NARRATION_MAX_TOKENS,
         stream=True,
     )
     stream = client.chat.completions.create(**kwargs)

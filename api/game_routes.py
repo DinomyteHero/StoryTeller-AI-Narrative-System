@@ -12,6 +12,7 @@ import json
 import logging
 import os
 import random
+import re
 import threading
 from dataclasses import asdict, fields
 from datetime import datetime, timezone
@@ -90,6 +91,7 @@ from gm.context import (
     build_era_voice_block,
 )
 from engine.reconciliation import (
+    ReconciliationResult,
     reconcile_turn,
     reconcile_turn_with_escalation,
     apply_npc_updates,
@@ -101,7 +103,14 @@ from engine.reconciliation import (
     roll_obligation_duty,
     morality_label,
 )
-from gm.local_gm import annotate_choice, decide_check, run_prose_diagnostic
+from gm.local_gm import (
+    CheckDecision,
+    SKILL_ALIASES,
+    VALID_SKILLS,
+    annotate_choice,
+    decide_check,
+    run_prose_diagnostic,
+)
 from state.db import get_connection
 from state.memory import compress_if_needed, should_compress, compress_act_turns
 from state.session import (
@@ -126,6 +135,739 @@ from state.session import (
 router = APIRouter()
 
 STREAMING_ENABLED = os.getenv("STREAMING_ENABLED", "true").lower() == "true"
+PROSE_DIAGNOSTIC_INLINE = os.getenv("PROSE_DIAGNOSTIC_INLINE", "false").lower() == "true"
+CHOICE_ANNOTATION_ENABLED = os.getenv("CHOICE_ANNOTATION_ENABLED", "false").lower() == "true"
+ANNOTATION_JOIN_TIMEOUT_SEC = float(os.getenv("ANNOTATION_JOIN_TIMEOUT_SEC", "0.2"))
+RECONCILIATION_INLINE = os.getenv("RECONCILIATION_INLINE", "false").lower() == "true"
+TAGGED_CHOICE_DECISIONS = os.getenv("TAGGED_CHOICE_DECISIONS", "true").lower() == "true"
+
+
+SOCIAL_TAG_SKILLS = {"charm", "coercion", "deception", "leadership", "negotiation"}
+INTRINSIC_VEHICLE_SKILLS = {
+    "piloting_space", "piloting_planetary", "gunnery", "astrogation",
+}
+INFILTRATION_TAG_SKILLS = {
+    "computers",
+    "coordination",
+    "skulduggery",
+    "stealth",
+    "streetwise",
+}
+EXPLORATION_TAG_SKILLS = {
+    "athletics",
+    "discipline",
+    "lore",
+    "outer_rim",
+    "perception",
+    "resilience",
+    "survival",
+    "underworld",
+    "xenology",
+}
+SOCIAL_ACTION_CUES = (
+    '"', "ask ", "tell ", "say ", "said ", "answer ", "admit ", "confess ",
+    "promise ", "explain ", "truth", "lie ", "listen", "trust", "believe",
+)
+INTROSPECTION_ACTION_CUES = (
+    "sit with", "remember", "think", "feel", "silence", "breathe",
+    "meditate", "let the", "hold the",
+)
+
+
+def _next_turn_number(session_id: str) -> int:
+    """Return the next logged player turn number.
+
+    The opening narration is turn 0. The first player choice should therefore
+    be turn 1, even though COUNT(*) is already 1 after session creation.
+    """
+    with get_connection() as conn:
+        row = conn.execute(
+            "SELECT COALESCE(MAX(turn_number), -1) + 1 FROM turns WHERE session_id = ?",
+            (session_id,),
+        ).fetchone()
+    return int(row[0] if row else 0)
+
+
+def _normalise_choice_skill_tag(tag: str) -> str | None:
+    raw = tag.lower().strip().replace("-", "_").replace(" ", "_")
+    if raw.startswith("skill:"):
+        raw = raw.split(":", 1)[1].strip().replace("-", "_").replace(" ", "_")
+    if raw in VALID_SKILLS:
+        return raw
+    return SKILL_ALIASES.get(raw)
+
+
+def _scene_type_for_tag(skill: str, ship_state: ShipState | None) -> str:
+    if skill in COMBAT_SKILLS:
+        return "combat"
+    if skill in INTRINSIC_VEHICLE_SKILLS:
+        return "space_combat" if ship_state else "chase"
+    if skill in SOCIAL_TAG_SKILLS:
+        return "social"
+    if skill in INFILTRATION_TAG_SKILLS:
+        return "infiltration"
+    if ship_state is not None and is_vehicle_skill(skill):
+        return "space_combat"
+    if skill == "cool":
+        return "introspection"
+    if skill in EXPLORATION_TAG_SKILLS:
+        return "exploration"
+    return "exploration"
+
+
+def _infer_no_check_scene_type(player_action: str) -> str:
+    text = f" {player_action.lower()} "
+    if any(cue in text for cue in SOCIAL_ACTION_CUES):
+        return "social"
+    if any(cue in text for cue in INTROSPECTION_ACTION_CUES):
+        return "introspection"
+    return "exploration"
+
+
+def _tagged_difficulty(
+    tension_level: int | float | str | None,
+    recent_failure_count: int,
+) -> str:
+    try:
+        tension = float(tension_level or 3)
+    except (TypeError, ValueError):
+        tension = 3
+    if recent_failure_count >= 2 or tension <= 2:
+        return "easy"
+    if tension >= 5:
+        return "hard"
+    return "average"
+
+
+def _decision_from_choice_tag(
+    tag: str | None,
+    character: Character,
+    *,
+    player_action: str,
+    recent_failure_count: int,
+    tension_level: int | float | str | None,
+    ship_state: ShipState | None,
+) -> CheckDecision | None:
+    """Use narrator-provided choice tags as a deterministic fast path."""
+    if not TAGGED_CHOICE_DECISIONS:
+        return None
+
+    if not tag:
+        return CheckDecision(
+            requires_check=False,
+            scene_type=_infer_no_check_scene_type(player_action),
+            reasoning="Deterministic no-check choice tag: <empty>",
+        )
+
+    raw = str(tag).strip()
+    normalised = raw.lower()
+    if normalised in {"", "none", "null", "no_check", "no-check"}:
+        return CheckDecision(
+            requires_check=False,
+            scene_type=_infer_no_check_scene_type(player_action),
+            reasoning=f"Deterministic no-check choice tag: {raw}",
+        )
+
+    if normalised.startswith("force"):
+        power = "sense"
+        if ":" in raw:
+            power = raw.split(":", 1)[1].strip().lower().replace(" ", "_") or power
+        elif "_" in normalised:
+            maybe_power = normalised.split("_", 1)[1].strip()
+            if maybe_power:
+                power = maybe_power
+
+        if character.force_rating <= 0 or not character_has_power(character, power):
+            return None
+
+        return CheckDecision(
+            requires_check=True,
+            skill=None,
+            difficulty=None,
+            scene_type="exploration",
+            moral_weight=1,
+            force_use=True,
+            force_power=power,
+            force_pips_required=get_effective_pips_required(power, character),
+            reasoning=f"Deterministic Force choice tag: {raw}",
+        )
+
+    skill = _normalise_choice_skill_tag(raw)
+    if not skill:
+        return None
+
+    return CheckDecision(
+        requires_check=True,
+        skill=skill,
+        difficulty=_tagged_difficulty(tension_level, recent_failure_count),
+        scene_type=_scene_type_for_tag(skill, ship_state),
+        moral_weight=0,
+        reasoning=f"Deterministic skill choice tag: {raw}",
+    )
+
+
+def _fast_anchor_proximity(progress: float) -> str:
+    if progress >= 0.95:
+        return "reached"
+    if progress >= 0.70:
+        return "imminent"
+    if progress >= 0.35:
+        return "approaching"
+    return "distant"
+
+
+def _fast_progress_delta(spine_act: dict) -> float:
+    expected = spine_act.get("expected_turns", [8, 12])
+    if isinstance(expected, str):
+        pieces = [int(p.strip()) for p in expected.split("-") if p.strip().isdigit()]
+        expected = pieces if len(pieces) == 2 else [8, 12]
+    if not isinstance(expected, list) or len(expected) != 2:
+        expected = [8, 12]
+    midpoint = max(6, sum(int(v) for v in expected) // 2)
+    return max(0.06, min(0.12, 1.0 / midpoint))
+
+
+def _fast_dramatic_mission(scene_type: str, player_action: str, check_result: str) -> dict:
+    text = f" {player_action.lower()} {check_result.lower()} "
+    if "force" in text or "sense" in text:
+        mission = "foreshadow"
+        sentence = "Let the Force reveal a specific but incomplete signal that points forward."
+    elif scene_type == "social" and any(cue in text for cue in ("truth", "admit", "confess", "trust")):
+        mission = "character_reveal"
+        sentence = "Use the conversation to expose what the protagonist chooses to risk emotionally."
+    elif scene_type == "social":
+        mission = "response"
+        sentence = "Keep the exchange dialogue-forward and let subtext carry the pressure."
+    elif scene_type == "introspection":
+        mission = "inner_demon_test"
+        sentence = "Make the inner conflict concrete without stalling the situation."
+    else:
+        mission = "thread_advance"
+        sentence = "Move one established question forward without resolving it too neatly."
+    return {"selected_mission": mission, "mission_sentence": sentence}
+
+
+def _referenced_npc_names(active_npcs: list, *texts: str) -> list[str]:
+    blob = " ".join(t or "" for t in texts).lower()
+    names = []
+    for npc in active_npcs or []:
+        name = getattr(npc, "name", "")
+        if not name:
+            continue
+        first = name.split()[0].lower()
+        full = name.lower()
+        if full in blob or (len(first) > 2 and f" {first} " in f" {blob} "):
+            names.append(name)
+    return names
+
+
+def _fast_disposition_shift(player_action: str, narration: str) -> float:
+    text = f" {player_action.lower()} {narration.lower()} "
+    positive = any(
+        cue in text for cue in (
+            "truth", "trust", "stand beside", "tell her", "tell him",
+            "admit", "confess", "listen", "protect", "help",
+        )
+    )
+    negative = any(
+        cue in text for cue in (
+            "lie", "take the datapad", "force her", "force him",
+            "threaten", "hide it", "conceal",
+        )
+    )
+    if positive and not negative:
+        return 0.03
+    if negative and not positive:
+        return -0.03
+    return 0.0
+
+
+def _fast_knowledge_note(player_action: str) -> str:
+    action = " ".join(player_action.split())
+    if len(action) > 140:
+        action = action[:137].rstrip() + "..."
+    return f"The player chose: {action}"
+
+
+VALID_RUNTIME_SCENE_TYPES = {
+    "combat", "chase", "infiltration", "social",
+    "exploration", "introspection", "space_combat",
+}
+
+
+def _clean_state_string(value, *, max_len: int = 220) -> str:
+    text = " ".join(str(value or "").split())
+    if len(text) > max_len:
+        text = text[: max_len - 3].rstrip() + "..."
+    return text
+
+
+def _clean_state_list(values, *, max_items: int = 8, max_len: int = 180) -> list[str]:
+    if not isinstance(values, list):
+        return []
+    cleaned: list[str] = []
+    for value in values:
+        text = _clean_state_string(value, max_len=max_len)
+        if text and text not in cleaned:
+            cleaned.append(text)
+        if len(cleaned) >= max_items:
+            break
+    return cleaned
+
+
+def _npc_aliases(name: str) -> set[str]:
+    lower = name.lower()
+    parts = [p for p in re.split(r"\s+", lower) if p]
+    aliases = {lower, *parts}
+    if lower == "luke skywalker":
+        aliases.update({"master skywalker", "skywalker", "luke"})
+    if lower == "kira denn":
+        aliases.update({"kira"})
+    if lower == "captain ress tannen":
+        aliases.update({"captain tannen", "tannen", "ress tannen"})
+    return aliases
+
+
+def _referenced_npc_names_from_text(npc_states: list[NPCState], *texts: str) -> list[str]:
+    blob = f" {' '.join(t or '' for t in texts).lower()} "
+    names: list[str] = []
+    for npc in npc_states or []:
+        if any(f" {alias} " in blob for alias in _npc_aliases(npc.name)):
+            names.append(npc.name)
+    return names
+
+
+def _normalise_present_npcs(
+    values,
+    npc_states: list[NPCState],
+    *fallback_texts: str,
+) -> list[str]:
+    valid = {npc.name.lower(): npc.name for npc in npc_states or []}
+    by_alias = {
+        alias: npc.name
+        for npc in npc_states or []
+        for alias in _npc_aliases(npc.name)
+    }
+    names: list[str] = []
+    for raw in values if isinstance(values, list) else []:
+        text = _clean_state_string(raw, max_len=80).lower()
+        name = valid.get(text) or by_alias.get(text)
+        if name and name not in names:
+            names.append(name)
+    for name in _referenced_npc_names_from_text(npc_states, *fallback_texts):
+        if name not in names:
+            names.append(name)
+    return names[:4]
+
+
+def _sanitize_scene_type(
+    raw_scene_type: str | None,
+    *,
+    skill: str | None,
+    player_action: str,
+    ship_state: ShipState | None,
+) -> str:
+    scene_type = (raw_scene_type or "").strip().lower()
+    if scene_type not in VALID_RUNTIME_SCENE_TYPES:
+        scene_type = ""
+
+    if scene_type == "space_combat":
+        if ship_state is not None and skill and is_vehicle_skill(skill):
+            return "space_combat"
+        if skill:
+            return _scene_type_for_tag(skill, None)
+        return _infer_no_check_scene_type(player_action)
+
+    if skill and skill in INTRINSIC_VEHICLE_SKILLS and ship_state is None:
+        return "chase"
+
+    return scene_type or (
+        _scene_type_for_tag(skill, ship_state) if skill
+        else _infer_no_check_scene_type(player_action)
+    )
+
+
+def _sanitize_check_decision(
+    decision: CheckDecision,
+    *,
+    player_action: str,
+    ship_state: ShipState | None,
+) -> CheckDecision:
+    cleaned = _sanitize_scene_type(
+        decision.scene_type,
+        skill=decision.skill,
+        player_action=player_action,
+        ship_state=ship_state,
+    )
+    if cleaned != decision.scene_type:
+        logging.info(
+            "Sanitized scene_type from %s to %s for action=%r",
+            decision.scene_type, cleaned, player_action[:120],
+        )
+        decision.scene_type = cleaned
+    return decision
+
+
+def _initial_scene_state(arc_state: dict, current_act: dict) -> dict:
+    existing = arc_state.get("scene_state")
+    if isinstance(existing, dict):
+        state = dict(existing)
+    else:
+        state = {}
+
+    location = (
+        state.get("current_location")
+        or arc_state.get("current_location")
+        or current_act.get("opening_location", "")
+    )
+    objective = (
+        state.get("current_objective")
+        or current_act.get("anchor_description")
+        or current_act.get("anchor")
+        or "follow the immediate situation"
+    )
+    return {
+        "current_location": _clean_state_string(location),
+        "current_objective": _clean_state_string(objective),
+        "present_npcs": _clean_state_list(state.get("present_npcs", []), max_items=4),
+        "scene_type": _clean_state_string(state.get("scene_type", "exploration"), max_len=40),
+        "immediate_pressure": _clean_state_string(state.get("immediate_pressure", "")),
+        "known_facts": _clean_state_list(state.get("known_facts", []), max_items=10),
+        "avoid_repeating": _clean_state_list(state.get("avoid_repeating", []), max_items=6),
+        "next_beat_requirement": _clean_state_string(
+            state.get("next_beat_requirement", "")
+        ),
+    }
+
+
+def _scene_state_block(state: dict) -> str:
+    lines = ["CURRENT AUTHORITATIVE SCENE STATE:"]
+    lines.append(f"Location: {state.get('current_location') or 'Unknown'}")
+    if state.get("current_objective"):
+        lines.append(f"Objective: {state['current_objective']}")
+    if state.get("present_npcs"):
+        lines.append(f"Present NPCs: {', '.join(state['present_npcs'])}")
+    if state.get("immediate_pressure"):
+        lines.append(f"Immediate pressure: {state['immediate_pressure']}")
+    if state.get("known_facts"):
+        lines.append("Known facts: " + "; ".join(state["known_facts"][:5]))
+    if state.get("avoid_repeating"):
+        lines.append("Do not repeat: " + "; ".join(state["avoid_repeating"][:4]))
+    if state.get("next_beat_requirement"):
+        lines.append(f"Next beat must: {state['next_beat_requirement']}")
+    return "\n".join(lines)
+
+
+def _previous_final_beat(narration: str, *, max_chars: int = 700) -> str:
+    text = " ".join((narration or "").split())
+    if len(text) <= max_chars:
+        return text
+    return text[-max_chars:]
+
+
+def _build_scene_description(
+    last_turn: dict,
+    player_action: str,
+    arc_state: dict,
+    current_act: dict,
+) -> str:
+    state = _initial_scene_state(arc_state, current_act)
+    return (
+        f"{_scene_state_block(state)}\n\n"
+        f"PREVIOUS FINAL BEAT: {_previous_final_beat(last_turn.get('narration', ''))}\n\n"
+        f"THE PLAYER CHOSE: {player_action}"
+    )
+
+
+def _select_active_scene_npcs(
+    npc_states: list[NPCState],
+    arc_state: dict,
+    current_act: dict,
+    *texts: str,
+) -> list[NPCState]:
+    state = _initial_scene_state(arc_state, current_act)
+    names = _normalise_present_npcs(
+        state.get("present_npcs", []), npc_states, *texts
+    )
+    if not names:
+        names = _referenced_npc_names_from_text(npc_states, *texts)
+    name_set = set(names)
+    return [npc for npc in npc_states if npc.name in name_set]
+
+
+def _infer_scene_location(
+    text: str,
+    previous_location: str,
+    current_act: dict,
+) -> str:
+    lower = text.lower()
+    if any(token in lower for token in (
+        "sealed stairs", "stairwell", "lower massassi", "lower levels",
+        "dark-side vergence", "dark side vergence",
+    )):
+        return "lower Massassi stairwell beneath the Jedi Praxeum, Yavin 4"
+    if "archway" in lower and "stairs" in lower:
+        return "archway above the sealed Massassi stairs, Jedi Praxeum, Yavin 4"
+    if "meditation" in lower or "training floor" in lower:
+        return current_act.get("opening_location", previous_location)
+    if "jungle" in lower and "temple" in lower:
+        return "jungle edge outside the Great Temple, Yavin 4"
+    return previous_location or current_act.get("opening_location", "")
+
+
+def _infer_objective(text: str, current_act: dict) -> str:
+    lower = text.lower()
+    if "knocking" in lower or "tapping" in lower or "metallic tap" in lower:
+        return "identify the source of the metallic sound below the sealed stairs"
+    if "keycard" in lower or "sealed stairs" in lower:
+        return "enter the lower Massassi levels without letting Kira face the pull alone"
+    if "kira" in lower and any(token in lower for token in ("calling", "calls", "pull")):
+        return "understand why the lower Massassi levels are calling to Kira"
+    if "luke" in lower and "massassi" in lower:
+        return "learn what Luke knows about the lower Massassi levels"
+    return current_act.get("anchor_description") or current_act.get("anchor", "")
+
+
+def _infer_pressure(text: str) -> str:
+    lower = text.lower()
+    if "knocking" in lower or "tapping" in lower or "metallic tap" in lower:
+        return "a metallic sound is coming from deeper in the lower Massassi levels"
+    if "cold" in lower and ("dark" in lower or "vergence" in lower):
+        return "the dark-side vergence beneath the temple is becoming physically present"
+    if "kira" in lower and ("freeze" in lower or "afraid" in lower or "tight" in lower):
+        return "Kira is close to the thing she fears and may lose her nerve"
+    return ""
+
+
+def _detect_known_facts(text: str) -> list[str]:
+    lower = text.lower()
+    facts: list[str] = []
+    if "lower massassi" in lower or "sealed stairs" in lower:
+        facts.append("The lower Massassi levels are reachable through sealed stairs beneath the Praxeum.")
+    if "kira" in lower and any(token in lower for token in ("calling", "calls", "pull")):
+        facts.append("Kira feels a personal pull from the lower Massassi levels.")
+    if "keycard" in lower:
+        facts.append("Luke gave the player access to the sealed lower levels.")
+    if "knocking" in lower or "tapping" in lower or "metallic tap" in lower:
+        facts.append("Something below the sealed stairs is making a light metallic sound.")
+    return facts
+
+
+def _detect_repetition_guards(recent_turns: list[TurnMemory], narration: str) -> list[str]:
+    combined = " ".join(
+        [getattr(t, "narration_excerpt", "") for t in recent_turns[-4:]]
+        + [narration or ""]
+    ).lower()
+    kira_hesitation_hits = sum(
+        combined.count(token)
+        for token in ("kira stops", "kira goes still", "kira freezes", "shoulders are tight")
+    )
+    guards: list[str] = []
+    if kira_hesitation_hits >= 2:
+        guards.append(
+            "Do not spend another beat on Kira merely hesitating; make her act, reveal something concrete, or force a choice."
+        )
+    return guards
+
+
+def _deterministic_thread_updates(text: str) -> dict:
+    lower = text.lower()
+    advanced: list[str] = []
+    resolved: list[str] = []
+    opened: list[str] = []
+
+    if "kira" in lower and any(token in lower for token in ("calling", "calls", "pull", "lower massassi")):
+        resolved.append("Why does Kira Denn seem distracted during training?")
+        opened.append("What is calling Kira from the lower Massassi levels?")
+    if any(token in lower for token in ("lower massassi", "sealed stairs", "massassi levels")):
+        advanced.append("What is the history of the Massassi temples beneath the Praxeum?")
+    if "dark-side vergence" in lower or "dark side vergence" in lower:
+        advanced.append("What does the dark side vergence in the lower ruins mean?")
+    if "luke" in lower and any(token in lower for token in ("trust", "keycard", "warning")):
+        advanced.append("Can the player build genuine trust with Luke Skywalker?")
+    if "knocking" in lower or "tapping" in lower or "metallic tap" in lower:
+        opened.append("What is making the metallic sound below the sealed stairs?")
+
+    return {
+        "threads_advanced": _clean_state_list(advanced),
+        "threads_resolved": _clean_state_list(resolved),
+        "threads_opened": _clean_state_list(opened),
+    }
+
+
+def _merge_thread_updates(*updates: dict | None) -> dict:
+    merged = {
+        "threads_advanced": [],
+        "threads_resolved": [],
+        "threads_opened": [],
+    }
+    for update in updates:
+        if not isinstance(update, dict):
+            continue
+        for key in merged:
+            for item in update.get(key, []) or []:
+                text = _clean_state_string(item)
+                if text and text not in merged[key]:
+                    merged[key].append(text)
+    return merged
+
+
+def _apply_narration_scene_state(
+    *,
+    arc_state: dict,
+    current_act: dict,
+    npc_states: list[NPCState],
+    narration_result,
+    player_action: str,
+    scene_type: str,
+    recent_turns: list[TurnMemory],
+    turn_number: int,
+    skill: str | None = None,
+    ship_state: ShipState | None = None,
+) -> dict:
+    prior = _initial_scene_state(arc_state, current_act)
+    patch = getattr(narration_result, "state_patch", {}) or {}
+    text = f"{player_action}\n{getattr(narration_result, 'passage', '')}"
+
+    location = _clean_state_string(patch.get("current_location")) or _infer_scene_location(
+        text, prior.get("current_location", ""), current_act
+    )
+    raw_present_npcs = patch.get("present_npcs", [])
+    fallback_texts = (
+        (text,)
+        if isinstance(raw_present_npcs, list) and raw_present_npcs
+        else (text, " ".join(prior.get("present_npcs", [])))
+    )
+    present_npcs = _normalise_present_npcs(
+        raw_present_npcs,
+        npc_states,
+        *fallback_texts,
+    )
+    if not present_npcs:
+        present_npcs = list(prior.get("present_npcs", []))
+
+    patch_scene = _clean_state_string(patch.get("scene_type"), max_len=40)
+    final_scene_type = _sanitize_scene_type(
+        patch_scene or scene_type,
+        skill=skill,
+        player_action=player_action,
+        ship_state=ship_state,
+    )
+
+    known_facts = _clean_state_list(
+        prior.get("known_facts", [])
+        + _clean_state_list(patch.get("known_facts", []))
+        + _detect_known_facts(text),
+        max_items=12,
+    )
+    avoid_repeating = _clean_state_list(
+        prior.get("avoid_repeating", [])
+        + _clean_state_list(patch.get("avoid_repeating", []), max_items=4)
+        + _detect_repetition_guards(recent_turns, getattr(narration_result, "passage", "")),
+        max_items=8,
+    )
+
+    objective = _clean_state_string(patch.get("current_objective")) or _infer_objective(
+        text, current_act
+    )
+    pressure = _clean_state_string(patch.get("immediate_pressure")) or _infer_pressure(text)
+    next_requirement = _clean_state_string(patch.get("next_beat_requirement"))
+    if not next_requirement and avoid_repeating:
+        next_requirement = avoid_repeating[-1]
+    if not next_requirement and int(arc_state.get("consecutive_no_check_turns", 0) or 0) >= 2:
+        next_requirement = (
+            "Change the external situation with a concrete clue, pressure, location shift, or decision point."
+        )
+
+    scene_state = {
+        "current_location": location,
+        "current_objective": objective,
+        "present_npcs": present_npcs,
+        "scene_type": final_scene_type,
+        "immediate_pressure": pressure,
+        "known_facts": known_facts,
+        "avoid_repeating": avoid_repeating,
+        "next_beat_requirement": next_requirement,
+    }
+    arc_state["scene_state"] = scene_state
+    arc_state["current_location"] = location
+    arc_state["active_npc_names"] = present_npcs
+    arc_state["last_scene_type"] = final_scene_type
+
+    for npc in npc_states:
+        if npc.name in present_npcs:
+            npc.last_seen_turn = turn_number
+
+    patch_updates = {
+        "threads_advanced": patch.get("threads_advanced", []),
+        "threads_resolved": patch.get("threads_resolved", []),
+        "threads_opened": patch.get("threads_opened", []),
+    }
+    return _merge_thread_updates(patch_updates, _deterministic_thread_updates(text))
+
+
+def _thread_states_for_context(current_act: dict, arc_state: dict) -> list[ThreadState]:
+    closed = set(arc_state.get("closed_threads", []))
+    seen: set[str] = set()
+    threads: list[ThreadState] = []
+    for raw in current_act.get("open_threads", []) + arc_state.get("dynamic_threads", []):
+        name = raw.name if isinstance(raw, ThreadState) else str(raw)
+        if not name or name in closed or name in seen:
+            continue
+        seen.add(name)
+        threads.append(raw if isinstance(raw, ThreadState) else ThreadState(name=name))
+    return threads
+
+
+def _fast_reconciliation_result(**kwargs) -> ReconciliationResult:
+    player_action = kwargs.get("player_action", "")
+    narration = kwargs.get("narration", "")
+    check_result = kwargs.get("check_result", "")
+    active_npcs = kwargs.get("active_npcs", [])
+    spine_act = kwargs.get("spine_act", {}) or {}
+    arc = kwargs.get("arc")
+    progress = float(getattr(arc, "act_progress", 0.0) or 0.0)
+    scene_type = getattr(arc, "scene_type", "") or _infer_no_check_scene_type(player_action)
+
+    delta = _fast_progress_delta(spine_act)
+    new_progress = min(1.0, progress + delta)
+    npc_updates = []
+    referenced = _referenced_npc_names(active_npcs, player_action, narration)
+    shift = _fast_disposition_shift(player_action, narration)
+    for name in referenced[:2]:
+        update = {
+            "npc_name": name,
+            "knowledge_gained": [],
+            "knowledge_lost": [],
+            "disposition_shift": shift,
+        }
+        if any(cue in player_action.lower() for cue in ("tell", "admit", "confess", "truth", "reveal")):
+            update["knowledge_gained"].append(_fast_knowledge_note(player_action))
+        npc_updates.append(update)
+
+    return ReconciliationResult(
+        npc_updates=npc_updates,
+        thread_updates=_merge_thread_updates(
+            _deterministic_thread_updates(f"{player_action}\n{narration}"),
+            {"threads_advanced": [spine_act.get("anchor", "")] if spine_act.get("anchor") else []},
+        ),
+        story_progress={
+            "anchor_proximity": _fast_anchor_proximity(new_progress),
+            "progress_delta": delta,
+            "reasoning": "Deterministic fast-mode coherence update.",
+        },
+        dramatic_mission=_fast_dramatic_mission(scene_type, player_action, check_result),
+    )
+
+
+def _reconcile_turn_fast_or_full(**kwargs):
+    """Run full LLM reconciliation only when enabled for the live hot path."""
+    if RECONCILIATION_INLINE:
+        return reconcile_turn_with_escalation(**kwargs)
+    prior = int(kwargs.get("prior_zero_delta_count", 0) or 0)
+    recon = _fast_reconciliation_result(**kwargs)
+    new_zero_delta_count = 0 if count_state_deltas(recon)["total_changes"] else prior + 1
+    return recon, new_zero_delta_count, False
 
 
 # ── Dynamic per-turn context helpers ──────────────────────────────────
@@ -459,6 +1201,76 @@ def get_most_recent_turn(session_id: str) -> dict:
     return dict(row)
 
 
+def _context_audit_json(ctx: ContextPackage) -> str | None:
+    """Serialize the prompt-relevant context we sent to narration."""
+    def _audit_redact(value: str) -> str:
+        text = _clean_state_string(value, max_len=400)
+        if not text:
+            return ""
+        redacted = ctx._redact_future_spoilers(f"  Field: {text}").strip()
+        if redacted.startswith("Field: "):
+            redacted = redacted[len("Field: "):]
+        return redacted.strip()
+
+    def _audit_list(values: list[str]) -> list[str]:
+        cleaned: list[str] = []
+        for value in values or []:
+            redacted = _audit_redact(value)
+            if redacted and redacted not in cleaned:
+                cleaned.append(redacted)
+        return cleaned
+
+    try:
+        payload = {
+            "location": ctx.location,
+            "situation": ctx.situation,
+            "scene_type": ctx.scene_type,
+            "arc": {
+                "campaign_name": ctx.arc.campaign_name,
+                "current_act": ctx.arc.current_act,
+                "act_name": ctx.arc.act_name,
+                "act_progress": ctx.arc.act_progress,
+                "current_anchor": ctx.arc.current_anchor,
+                "next_anchor": ctx.arc.next_anchor,
+                "anchor_proximity": ctx.arc.anchor_proximity,
+                "turns_this_act": ctx.arc.turns_this_act,
+                "tension_level": ctx.arc.tension_level,
+            },
+            "recent_turns": [
+                {
+                    "turn_number": t.turn_number,
+                    "player_action": t.player_action,
+                    "narration_excerpt": t.narration_excerpt,
+                    "check_made": t.check_made,
+                    "dice_result": t.dice_result,
+                    "outcome_quadrant": t.outcome_quadrant,
+                    "meaningful_choice_note": t.meaningful_choice_note,
+                }
+                for t in ctx.recent_turns
+            ],
+            "active_npcs": [
+                {
+                    "name": npc.name,
+                    "knows": _audit_list(npc.knows),
+                    "doesnt_know": _audit_list(npc.doesnt_know),
+                    "disposition": npc.disposition,
+                    "motivation": _audit_redact(npc.motivation),
+                    "pressure_role": npc.pressure_role,
+                }
+                for npc in ctx.active_npcs
+            ],
+            "open_threads": ctx.build_open_threads_block(),
+            "dice_result_block": ctx.build_dice_result_block(),
+            "force_result_block": ctx.force_result_block,
+            "force_check_kind": ctx.force_check_kind,
+            "dramatic_mission": ctx.dramatic_mission,
+        }
+        return json.dumps(payload, ensure_ascii=False)
+    except Exception:
+        logging.exception("Failed to serialize context audit payload")
+        return None
+
+
 def save_npc_state(session_id: str, npc: NPCState) -> None:
     """Write one NPC state to the npc_states table."""
     now = datetime.now(timezone.utc).isoformat()
@@ -502,6 +1314,7 @@ def load_npc_states(session_id: str, spine: dict) -> list[NPCState]:
             voice_notes=npc_data.get("voice_notes", ""),
             motivation=npc_data.get("motivation", ""),
             behavioral_envelope=npc_data.get("behavioral_envelope", []),
+            pressure_role=npc_data.get("pressure_role", ""),
         )
         save_npc_state(session_id, npc)
         npcs.append(npc)
@@ -695,6 +1508,7 @@ async def create_session_route(
             voice_notes=npc_data.get("voice_notes", ""),
             motivation=npc_data.get("motivation", ""),
             behavioral_envelope=npc_data.get("behavioral_envelope", []),
+            pressure_role=npc_data.get("pressure_role", ""),
         ))
 
     # ── Initialize ship states from spine vehicle registry (§17) ──────
@@ -707,13 +1521,17 @@ async def create_session_route(
 
     # ── Build opening context package ─────────────────────────────────
     npc_states = load_npc_states(session_id, spine)
+    arc_state["scene_state"] = _initial_scene_state(arc_state, act_1)
+    opening_npcs = _select_active_scene_npcs(
+        npc_states, arc_state, act_1, act_1.get("opening_situation", "")
+    )
 
     # Dynamic per-turn fields. Reputation/behavioral are no-ops on turn 0
     # (cooldown + empty log); era_voice_block is the meaningful piece — it
     # anchors the opening prose to the campaign's period from the very first
     # passage.
     dyn_fields_opening = _compute_dynamic_context_fields(
-        session_id, 0, arc_state, act_1, npc_states, spine,
+        session_id, 0, arc_state, act_1, opening_npcs, spine,
         character=character, roll_result=None,
     )
 
@@ -730,9 +1548,7 @@ async def create_session_route(
             anchors_completed=[],
             throughline_question=spine["throughline_question"],
             tension_level=act_1["tension"],
-            open_threads=[
-                ThreadState(name=t) for t in act_1.get("open_threads", [])
-            ],
+            open_threads=_thread_states_for_context(act_1, arc_state),
             closed_threads=[],
             anchor_description=act_1.get("anchor_description", ""),
             obligation_active=arc_state.get("obligation_active", False),
@@ -744,9 +1560,12 @@ async def create_session_route(
         ),
         story_summary="",
         recent_turns=[],
-        active_npcs=npc_states,
-        location=arc_state["current_location"],
-        situation=act_1["opening_situation"],
+        active_npcs=opening_npcs,
+        location=arc_state["scene_state"]["current_location"],
+        situation=(
+            f"{_scene_state_block(arc_state['scene_state'])}\n\n"
+            f"{act_1['opening_situation']}"
+        ),
         galactic_context=act_1.get("galactic_context", ""),
         scene_type="exploration",  # opening is always exploration
         tone_instruction=(
@@ -772,6 +1591,19 @@ async def create_session_route(
         roll_result=None,
         pinch_fired_this_turn=False,
     )
+    opening_thread_updates = _apply_narration_scene_state(
+        arc_state=arc_state,
+        current_act=act_1,
+        npc_states=npc_states,
+        narration_result=narration_result,
+        player_action="[session_start]",
+        scene_type="exploration",
+        recent_turns=[],
+        turn_number=0,
+    )
+    apply_thread_updates(opening_thread_updates, arc_state, act_1)
+    for npc in npc_states:
+        save_npc_state(session_id, npc)
 
     # ── Log Turn 0 ────────────────────────────────────────────────────
     log_turn(
@@ -781,9 +1613,9 @@ async def create_session_route(
         choice_index=-1,
         narration=narration_result.passage,
         choices=narration_result.choices,
-        scene_type="exploration",
+        scene_type=arc_state.get("scene_state", {}).get("scene_type", "exploration"),
         skill_tags_json=json.dumps(narration_result.skill_tags),
-        context_json=None,
+        context_json=_context_audit_json(ctx),
     )
 
     return {
@@ -837,11 +1669,16 @@ async def handle_turn(
         raise HTTPException(400, f"Invalid choice_index: {req.choice_index}")
 
     player_action = previous_choices[req.choice_index]
+    selected_skill_tag = (
+        previous_skill_tags[req.choice_index]
+        if req.choice_index < len(previous_skill_tags)
+        else None
+    )
+    update_session_state(session_id, character, arc_state)
 
     # ── Step 2: Build scene description for local GM ──────────────────
-    scene_description = (
-        f"PREVIOUS: {last_turn['narration'][-500:]}\n\n"
-        f"THE PLAYER CHOSE: {player_action}"
+    scene_description = _build_scene_description(
+        last_turn, player_action, arc_state, current_act
     )
 
     # ── Step 3: Check decision (local model) ──────────────────────────
@@ -851,13 +1688,27 @@ async def handle_turn(
         if t.outcome_quadrant and t.outcome_quadrant.startswith("failure")
     )
 
-    check_decision = decide_check(
-        character=character,
-        scene_description=scene_description,
+    check_decision = _decision_from_choice_tag(
+        selected_skill_tag,
+        character,
         player_action=player_action,
-        arc_state=arc_state,
         recent_failure_count=recent_failure_count,
-        ship_state=primary_ship if primary_ship else None,
+        tension_level=current_act.get("tension"),
+        ship_state=primary_ship,
+    )
+    if check_decision is None:
+        check_decision = decide_check(
+            character=character,
+            scene_description=scene_description,
+            player_action=player_action,
+            arc_state=arc_state,
+            recent_failure_count=recent_failure_count,
+            ship_state=primary_ship if primary_ship else None,
+        )
+    check_decision = _sanitize_check_decision(
+        check_decision,
+        player_action=player_action,
+        ship_state=primary_ship,
     )
 
     # ── Step 4: Dice resolution (if check required) ───────────────────
@@ -899,7 +1750,13 @@ async def handle_turn(
             # Check for antagonist NPC in scene (disposition < 0.3)
             npc_hostile = any(
                 npc.disposition < 0.3
-                for npc in load_npc_states(session_id, spine)
+                for npc in _select_active_scene_npcs(
+                    load_npc_states(session_id, spine),
+                    arc_state,
+                    current_act,
+                    scene_description,
+                    player_action,
+                )
             )
 
             dice_pool, talent_activations, destiny_result = build_pool(
@@ -1004,7 +1861,7 @@ async def handle_turn(
                     "required": pips_req,
                 },
                 "session_state": {
-                    "turn_number": get_turn_count(session_id) + 1,
+                    "turn_number": _next_turn_number(session_id),
                     "wounds": character.current_wounds,
                     "strain": character.current_strain,
                 },
@@ -1052,7 +1909,7 @@ async def handle_turn(
                 "dice_result": describe_pool_for_display(dice_pool),
                 "roll_summary": roll_result.narrative_label(),
                 "session_state": {
-                    "turn_number": get_turn_count(session_id) + 1,
+                    "turn_number": _next_turn_number(session_id),
                     "wounds": character.current_wounds,
                     "strain": character.current_strain,
                 },
@@ -1094,13 +1951,15 @@ async def handle_turn(
             throughline_question=spine.get("throughline_question", ""),
         )
 
-    annotation_thread = threading.Thread(target=_annotation_thread, daemon=True)
-    annotation_thread.start()
+    annotation_thread = None
+    if CHOICE_ANNOTATION_ENABLED:
+        annotation_thread = threading.Thread(target=_annotation_thread, daemon=True)
+        annotation_thread.start()
 
     # ── Phase 13: Prose diagnostic (§13) ──────────────────────────────
     recent_narrations = get_recent_narrations(session_id, limit=4)
     prose_diagnostic = None
-    if len(recent_narrations) >= 2:
+    if PROSE_DIAGNOSTIC_INLINE and len(recent_narrations) >= 2:
         npc_states_for_diag = load_npc_states(session_id, spine)
         npc_diag_block = "\n".join(
             npc.to_prompt_block() for npc in npc_states_for_diag
@@ -1132,7 +1991,11 @@ async def handle_turn(
     # ── Step 5: Assemble context package ──────────────────────────────
     story_summary = get_act_summaries(session_id)
     npc_states = load_npc_states(session_id, spine)
-    turn_number = get_turn_count(session_id) + 1
+    turn_number = _next_turn_number(session_id)
+    scene_state = _initial_scene_state(arc_state, current_act)
+    scene_npcs = _select_active_scene_npcs(
+        npc_states, arc_state, current_act, scene_description, player_action
+    )
 
     # Phase 8.5: Decay emotions + set from dice results (§25)
     for npc in npc_states:
@@ -1154,7 +2017,7 @@ async def handle_turn(
     # Dynamic per-turn fields (reputation, behavioral, era voice, identity
     # drift, introspection trigger).
     dyn_fields = _compute_dynamic_context_fields(
-        session_id, turn_number, arc_state, current_act, npc_states, spine,
+        session_id, turn_number, arc_state, current_act, scene_npcs, spine,
         character=character, roll_result=roll_result,
     )
 
@@ -1171,15 +2034,7 @@ async def handle_turn(
             anchors_completed=arc_state.get("anchors_completed", []),
             throughline_question=spine["throughline_question"],
             tension_level=current_act["tension"],
-            open_threads=[
-                ThreadState(name=t) if isinstance(t, str) else t
-                for t in (
-                    current_act.get("open_threads", [])
-                    + arc_state.get("dynamic_threads", [])
-                )
-                if (t if isinstance(t, str) else t.name)
-                not in arc_state.get("closed_threads", [])
-            ],
+            open_threads=_thread_states_for_context(current_act, arc_state),
             closed_threads=arc_state.get("closed_threads", []),
             turns_this_act=arc_state.get("turns_this_act", 0),
             anchor_proximity=arc_state.get("anchor_proximity", "distant"),
@@ -1193,8 +2048,8 @@ async def handle_turn(
         ),
         story_summary=story_summary,
         recent_turns=recent_turns,
-        active_npcs=npc_states,
-        location=arc_state.get("current_location", ""),
+        active_npcs=scene_npcs,
+        location=scene_state.get("current_location", ""),
         situation=scene_description,
         galactic_context=current_act.get("galactic_context", ""),
         scene_type=check_decision.scene_type,
@@ -1211,6 +2066,10 @@ async def handle_turn(
         prose_diagnostic=prose_diagnostic,
         force_state_block=_force_state_block,
         force_result_block=_force_result_block,
+        force_check_kind=(
+            "pure" if force_result and is_pure_force
+            else "enhanced" if force_result else ""
+        ),
         ship_state_block=(
             primary_ship.to_narration_block() if primary_ship
             and check_decision.scene_type == "space_combat" else ""
@@ -1237,6 +2096,18 @@ async def handle_turn(
         0 if roll_result is not None
         else int(arc_state.get("consecutive_no_check_turns", 0) or 0) + 1
     )
+    scene_thread_updates = _apply_narration_scene_state(
+        arc_state=arc_state,
+        current_act=current_act,
+        npc_states=npc_states,
+        narration_result=narration_result,
+        player_action=player_action,
+        scene_type=arc_state.get("scene_state", {}).get("scene_type", check_decision.scene_type),
+        recent_turns=recent_turns,
+        turn_number=turn_number,
+        skill=check_decision.skill,
+        ship_state=primary_ship,
+    )
 
     # ── Step 7: Reconciliation (local model, fast tier with escalation) ─
     check_result_str = ""
@@ -1246,19 +2117,22 @@ async def handle_turn(
             f"{roll_result.narrative_label()}"
         )
 
-    recon_result, new_zero_delta_count, _escalated = reconcile_turn_with_escalation(
+    recon_result, new_zero_delta_count, _escalated = _reconcile_turn_fast_or_full(
         session_id=session_id,
         turn_number=turn_number,
         prior_zero_delta_count=arc_state.get("consecutive_zero_delta_turns", 0),
         narration=narration_result.passage,
         player_action=player_action,
         check_result=check_result_str,
-        active_npcs=npc_states,
+        active_npcs=scene_npcs,
         arc=ctx.arc,
         spine_act=current_act,
         spine=spine,
     )
     arc_state["consecutive_zero_delta_turns"] = new_zero_delta_count
+    recon_result.thread_updates = _merge_thread_updates(
+        recon_result.thread_updates, scene_thread_updates
+    )
 
     _post_reconciliation_reputation_hook(session_id, turn_number, recon_result)
     _post_reconciliation_cs6_hook(arc_state, recon_result)
@@ -1282,8 +2156,7 @@ async def handle_turn(
         session_id, turn_number,
         choice_index=req.choice_index,
         choice_text=player_action,
-        skill_tag=(previous_skill_tags[req.choice_index]
-                   if req.choice_index < len(previous_skill_tags) else None),
+        skill_tag=selected_skill_tag,
     )
     if roll_result:
         emit_dice_resolved(
@@ -1330,7 +2203,8 @@ async def handle_turn(
     act_boundary_reached = detect_act_boundary(arc_state)
 
     # Phase 13: Wait for annotation thread to complete (§24)
-    annotation_thread.join(timeout=5.0)  # don't block more than 5s
+    if annotation_thread:
+        annotation_thread.join(timeout=ANNOTATION_JOIN_TIMEOUT_SEC)
     choice_implications_json = annotation_result[0]
 
     # ── Step 10: Persist ─────────────────────────────────────────────
@@ -1345,8 +2219,8 @@ async def handle_turn(
         check_difficulty=check_decision.difficulty if check_decision.requires_check else None,
         dice_pool_json=json.dumps(asdict(dice_pool)) if dice_pool else None,
         roll_result_json=json.dumps(asdict(roll_result)) if roll_result else None,
-        context_json=None,
-        scene_type=check_decision.scene_type,
+        context_json=_context_audit_json(ctx),
+        scene_type=arc_state.get("scene_state", {}).get("scene_type", check_decision.scene_type),
         moral_weight=check_decision.moral_weight,
         skill_tags_json=json.dumps(narration_result.skill_tags),
         choice_implications=choice_implications_json,
@@ -1419,6 +2293,7 @@ async def handle_turn(
             "strain": character.current_strain,
             "act_progress": arc_state.get("act_progress", 0.0),
             "anchor_proximity": arc_state.get("anchor_proximity", "distant"),
+            "scene_state": arc_state.get("scene_state", {}),
         },
         "used_local_narration": narration_result.used_local,
         "act_boundary": act_boundary_reached,
@@ -1535,16 +2410,21 @@ async def handle_turn_stream(
     # ── Step 1: Resolve the player's choice ───────────────────────────
     last_turn = get_most_recent_turn(session_id)
     previous_choices = json.loads(last_turn["choices_json"])
+    previous_skill_tags_s = json.loads(last_turn.get("skill_tags_json") or "[]")
 
     if req.choice_index < 0 or req.choice_index >= len(previous_choices):
         raise HTTPException(400, f"Invalid choice_index: {req.choice_index}")
 
     player_action = previous_choices[req.choice_index]
+    selected_skill_tag_s = (
+        previous_skill_tags_s[req.choice_index]
+        if req.choice_index < len(previous_skill_tags_s)
+        else None
+    )
 
     # ── Step 2: Build scene description for local GM ──────────────────
-    scene_description = (
-        f"PREVIOUS: {last_turn['narration'][-500:]}\n\n"
-        f"THE PLAYER CHOSE: {player_action}"
+    scene_description = _build_scene_description(
+        last_turn, player_action, arc_state, current_act
     )
 
     # ── Step 3: Check decision (local model) ──────────────────────────
@@ -1554,13 +2434,27 @@ async def handle_turn_stream(
         if t.outcome_quadrant and t.outcome_quadrant.startswith("failure")
     )
 
-    check_decision = decide_check(
-        character=character,
-        scene_description=scene_description,
+    check_decision = _decision_from_choice_tag(
+        selected_skill_tag_s,
+        character,
         player_action=player_action,
-        arc_state=arc_state,
         recent_failure_count=recent_failure_count,
-        ship_state=primary_ship_s if primary_ship_s else None,
+        tension_level=current_act.get("tension"),
+        ship_state=primary_ship_s,
+    )
+    if check_decision is None:
+        check_decision = decide_check(
+            character=character,
+            scene_description=scene_description,
+            player_action=player_action,
+            arc_state=arc_state,
+            recent_failure_count=recent_failure_count,
+            ship_state=primary_ship_s if primary_ship_s else None,
+        )
+    check_decision = _sanitize_check_decision(
+        check_decision,
+        player_action=player_action,
+        ship_state=primary_ship_s,
     )
 
     # ── Step 4: Dice resolution (if check required) ───────────────────
@@ -1600,7 +2494,13 @@ async def handle_turn_stream(
 
             npc_hostile = any(
                 npc.disposition < 0.3
-                for npc in load_npc_states(session_id, spine)
+                for npc in _select_active_scene_npcs(
+                    load_npc_states(session_id, spine),
+                    arc_state,
+                    current_act,
+                    scene_description,
+                    player_action,
+                )
             )
 
             dice_pool, talent_activations, destiny_result = build_pool(
@@ -1700,7 +2600,7 @@ async def handle_turn_stream(
                         "required": pips_req_s,
                     },
                     "session_state": {
-                        "turn_number": get_turn_count(session_id) + 1,
+                        "turn_number": _next_turn_number(session_id),
                         "wounds": character.current_wounds,
                         "strain": character.current_strain,
                     },
@@ -1754,7 +2654,7 @@ async def handle_turn_stream(
                     "dice_result": describe_pool_for_display(dice_pool),
                     "roll_summary": roll_result.narrative_label(),
                     "session_state": {
-                        "turn_number": get_turn_count(session_id) + 1,
+                        "turn_number": _next_turn_number(session_id),
                         "wounds": character.current_wounds,
                         "strain": character.current_strain,
                     },
@@ -1800,15 +2700,17 @@ async def handle_turn_stream(
             throughline_question=spine.get("throughline_question", ""),
         )
 
-    annotation_thread_s = threading.Thread(
-        target=_annotation_thread_stream, daemon=True,
-    )
-    annotation_thread_s.start()
+    annotation_thread_s = None
+    if CHOICE_ANNOTATION_ENABLED:
+        annotation_thread_s = threading.Thread(
+            target=_annotation_thread_stream, daemon=True,
+        )
+        annotation_thread_s.start()
 
     # ── Phase 13: Prose diagnostic (§13) ──────────────────────────────
     recent_narrations_s = get_recent_narrations(session_id, limit=4)
     prose_diagnostic_s = None
-    if len(recent_narrations_s) >= 2:
+    if PROSE_DIAGNOSTIC_INLINE and len(recent_narrations_s) >= 2:
         npc_states_for_diag_s = load_npc_states(session_id, spine)
         npc_diag_block_s = "\n".join(
             npc.to_prompt_block() for npc in npc_states_for_diag_s
@@ -1839,7 +2741,11 @@ async def handle_turn_stream(
     # ── Step 5: Assemble context package ──────────────────────────────
     story_summary = get_act_summaries(session_id)
     npc_states = load_npc_states(session_id, spine)
-    turn_number = get_turn_count(session_id) + 1
+    turn_number = _next_turn_number(session_id)
+    scene_state_s = _initial_scene_state(arc_state, current_act)
+    scene_npcs_s = _select_active_scene_npcs(
+        npc_states, arc_state, current_act, scene_description, player_action
+    )
 
     # Phase 8.5: Decay emotions + set from dice results (§25)
     for npc in npc_states:
@@ -1859,7 +2765,7 @@ async def handle_turn_stream(
         anchor_inst = build_anchor_instruction(current_act, next_act)
 
     dyn_fields_s = _compute_dynamic_context_fields(
-        session_id, turn_number, arc_state, current_act, npc_states, spine,
+        session_id, turn_number, arc_state, current_act, scene_npcs_s, spine,
         character=character, roll_result=roll_result,
     )
 
@@ -1876,15 +2782,7 @@ async def handle_turn_stream(
             anchors_completed=arc_state.get("anchors_completed", []),
             throughline_question=spine["throughline_question"],
             tension_level=current_act["tension"],
-            open_threads=[
-                ThreadState(name=t) if isinstance(t, str) else t
-                for t in (
-                    current_act.get("open_threads", [])
-                    + arc_state.get("dynamic_threads", [])
-                )
-                if (t if isinstance(t, str) else t.name)
-                not in arc_state.get("closed_threads", [])
-            ],
+            open_threads=_thread_states_for_context(current_act, arc_state),
             closed_threads=arc_state.get("closed_threads", []),
             turns_this_act=arc_state.get("turns_this_act", 0),
             anchor_proximity=arc_state.get("anchor_proximity", "distant"),
@@ -1898,8 +2796,8 @@ async def handle_turn_stream(
         ),
         story_summary=story_summary,
         recent_turns=recent_turns,
-        active_npcs=npc_states,
-        location=arc_state.get("current_location", ""),
+        active_npcs=scene_npcs_s,
+        location=scene_state_s.get("current_location", ""),
         situation=scene_description,
         galactic_context=current_act.get("galactic_context", ""),
         scene_type=check_decision.scene_type,
@@ -1916,6 +2814,10 @@ async def handle_turn_stream(
         prose_diagnostic=prose_diagnostic_s,
         force_state_block=_force_state_block_s,
         force_result_block=_force_result_block_s,
+        force_check_kind=(
+            "pure" if force_result and is_pure_force_s
+            else "enhanced" if force_result else ""
+        ),
         ship_state_block=(
             primary_ship_s.to_narration_block() if primary_ship_s
             and check_decision.scene_type == "space_combat" else ""
@@ -1973,8 +2875,19 @@ async def handle_turn_stream(
                 used_local=(NARRATIVE_BACKEND == "local"),
             )
         except CloudGMError as e:
-            yield f"event: error\ndata: {json.dumps({'error': str(e)})}\n\n"
-            return
+            logging.warning(
+                "Streaming narration parse failed; falling back to robust "
+                "non-stream narration for turn %s: %s",
+                turn_number, e,
+            )
+            try:
+                narration_result = narrate_turn(ctx)
+            except Exception as fallback_error:
+                yield (
+                    "event: error\ndata: "
+                    f"{json.dumps({'error': str(fallback_error)})}\n\n"
+                )
+                return
 
         _post_narration_reputation_hook(
             turn_number, arc_state,
@@ -1992,6 +2905,18 @@ async def handle_turn_stream(
             0 if roll_result is not None
             else int(arc_state.get("consecutive_no_check_turns", 0) or 0) + 1
         )
+        scene_thread_updates_s = _apply_narration_scene_state(
+            arc_state=arc_state,
+            current_act=current_act,
+            npc_states=npc_states,
+            narration_result=narration_result,
+            player_action=player_action,
+            scene_type=arc_state.get("scene_state", {}).get("scene_type", check_decision.scene_type),
+            recent_turns=recent_turns,
+            turn_number=turn_number,
+            skill=check_decision.skill,
+            ship_state=primary_ship_s,
+        )
 
         # ── Step 7: Reconciliation (local model, fast tier with escalation) ─
         check_result_str = ""
@@ -2001,19 +2926,22 @@ async def handle_turn_stream(
                 f"{roll_result.narrative_label()}"
             )
 
-        recon_result, new_zero_delta_count, _escalated = reconcile_turn_with_escalation(
+        recon_result, new_zero_delta_count, _escalated = _reconcile_turn_fast_or_full(
             session_id=session_id,
             turn_number=turn_number,
             prior_zero_delta_count=arc_state.get("consecutive_zero_delta_turns", 0),
             narration=narration_result.passage,
             player_action=player_action,
             check_result=check_result_str,
-            active_npcs=npc_states,
+            active_npcs=scene_npcs_s,
             arc=ctx.arc,
             spine_act=current_act,
             spine=spine,
         )
         arc_state["consecutive_zero_delta_turns"] = new_zero_delta_count
+        recon_result.thread_updates = _merge_thread_updates(
+            recon_result.thread_updates, scene_thread_updates_s
+        )
 
         _post_reconciliation_reputation_hook(session_id, turn_number, recon_result)
         _post_reconciliation_cs6_hook(arc_state, recon_result)
@@ -2031,7 +2959,8 @@ async def handle_turn_stream(
         act_boundary_reached = detect_act_boundary(arc_state)
 
         # Phase 13: Wait for annotation thread (§24)
-        annotation_thread_s.join(timeout=5.0)
+        if annotation_thread_s:
+            annotation_thread_s.join(timeout=ANNOTATION_JOIN_TIMEOUT_SEC)
         choice_implications_json_s = annotation_result_stream[0]
 
         # ── Step 10: Persist ──────────────────────────────────────────
@@ -2050,8 +2979,8 @@ async def handle_turn_stream(
                             if dice_pool else None),
             roll_result_json=(json.dumps(asdict(roll_result))
                               if roll_result else None),
-            context_json=None,
-            scene_type=check_decision.scene_type,
+            context_json=_context_audit_json(ctx),
+            scene_type=arc_state.get("scene_state", {}).get("scene_type", check_decision.scene_type),
             moral_weight=check_decision.moral_weight,
             skill_tags_json=json.dumps(narration_result.skill_tags),
             choice_implications=choice_implications_json_s,
@@ -2130,6 +3059,7 @@ async def handle_turn_stream(
                 "strain": character.current_strain,
                 "act_progress": arc_state.get("act_progress", 0.0),
                 "anchor_proximity": arc_state.get("anchor_proximity", "distant"),
+                "scene_state": arc_state.get("scene_state", {}),
             },
             "used_local_narration": narration_result.used_local,
             "act_boundary": act_boundary_reached,
@@ -2250,7 +3180,7 @@ async def handle_temptation(
     # Assemble context and narrate (Steps 5-6)
     story_summary = get_act_summaries(session_id)
     npc_states = load_npc_states(session_id, spine)
-    turn_number = get_turn_count(session_id) + 1
+    turn_number = _next_turn_number(session_id)
     recent_turns = get_recent_turns(session_id, limit=5)
 
     for npc in npc_states:
@@ -2263,7 +3193,22 @@ async def handle_temptation(
         )
 
     player_action = pending["player_action"]
-    scene_description = f"THE PLAYER CHOSE: {player_action}"
+    last_turn = get_most_recent_turn(session_id)
+    scene_description = _build_scene_description(
+        last_turn, player_action, arc_state, current_act
+    )
+    ships_t = load_ship_states(session_id)
+    primary_ship_t = ships_t[0] if ships_t else None
+    scene_type_t = _sanitize_scene_type(
+        pending.get("scene_type", "social"),
+        skill=check_skill,
+        player_action=player_action,
+        ship_state=primary_ship_t,
+    )
+    scene_state_t = _initial_scene_state(arc_state, current_act)
+    scene_npcs_t = _select_active_scene_npcs(
+        npc_states, arc_state, current_act, scene_description, player_action
+    )
 
     anchor_inst = None
     if arc_state.get("act_progress", 0.0) >= 1.0:
@@ -2273,7 +3218,7 @@ async def handle_temptation(
         anchor_inst = build_anchor_instruction(current_act, next_act)
 
     dyn_fields_t = _compute_dynamic_context_fields(
-        session_id, turn_number, arc_state, current_act, npc_states, spine,
+        session_id, turn_number, arc_state, current_act, scene_npcs_t, spine,
         character=character, roll_result=roll_result,
     )
 
@@ -2290,15 +3235,7 @@ async def handle_temptation(
             anchors_completed=arc_state.get("anchors_completed", []),
             throughline_question=spine["throughline_question"],
             tension_level=current_act["tension"],
-            open_threads=[
-                ThreadState(name=t) if isinstance(t, str) else t
-                for t in (
-                    current_act.get("open_threads", [])
-                    + arc_state.get("dynamic_threads", [])
-                )
-                if (t if isinstance(t, str) else t.name)
-                not in arc_state.get("closed_threads", [])
-            ],
+            open_threads=_thread_states_for_context(current_act, arc_state),
             closed_threads=arc_state.get("closed_threads", []),
             turns_this_act=arc_state.get("turns_this_act", 0),
             anchor_proximity=arc_state.get("anchor_proximity", "distant"),
@@ -2312,11 +3249,11 @@ async def handle_temptation(
         ),
         story_summary=story_summary,
         recent_turns=recent_turns,
-        active_npcs=npc_states,
-        location=arc_state.get("current_location", ""),
+        active_npcs=scene_npcs_t,
+        location=scene_state_t.get("current_location", ""),
         situation=scene_description,
         galactic_context=current_act.get("galactic_context", ""),
-        scene_type=pending.get("scene_type", "social"),
+        scene_type=scene_type_t,
         dice_pool=dice_pool,
         roll_result=roll_result,
         anchor_instruction=anchor_inst,
@@ -2326,6 +3263,14 @@ async def handle_temptation(
         destiny_narrative_note=pending.get("destiny_narrative_note", ""),
         force_state_block=_force_state_block,
         force_result_block=_force_result_block,
+        force_check_kind=(
+            "pure" if force_result and is_pure_force
+            else "enhanced" if force_result else ""
+        ),
+        ship_state_block=(
+            primary_ship_t.to_narration_block() if primary_ship_t
+            and scene_type_t == "space_combat" else ""
+        ),
         **dyn_fields_t,
     )
 
@@ -2347,6 +3292,18 @@ async def handle_temptation(
         0 if roll_result is not None
         else int(arc_state.get("consecutive_no_check_turns", 0) or 0) + 1
     )
+    scene_thread_updates_t = _apply_narration_scene_state(
+        arc_state=arc_state,
+        current_act=current_act,
+        npc_states=npc_states,
+        narration_result=narration_result,
+        player_action=player_action,
+        scene_type=scene_type_t,
+        recent_turns=recent_turns,
+        turn_number=turn_number,
+        skill=check_skill,
+        ship_state=primary_ship_t,
+    )
 
     # Reconciliation (fast tier with escalation)
     check_result_str = ""
@@ -2357,19 +3314,22 @@ async def handle_temptation(
             f"{roll_result.narrative_label()}"
         )
 
-    recon_result, new_zero_delta_count, _escalated = reconcile_turn_with_escalation(
+    recon_result, new_zero_delta_count, _escalated = _reconcile_turn_fast_or_full(
         session_id=session_id,
         turn_number=turn_number,
         prior_zero_delta_count=arc_state.get("consecutive_zero_delta_turns", 0),
         narration=narration_result.passage,
         player_action=player_action,
         check_result=check_result_str,
-        active_npcs=npc_states,
+        active_npcs=scene_npcs_t,
         arc=ctx.arc,
         spine_act=current_act,
         spine=spine,
     )
     arc_state["consecutive_zero_delta_turns"] = new_zero_delta_count
+    recon_result.thread_updates = _merge_thread_updates(
+        recon_result.thread_updates, scene_thread_updates_t
+    )
 
     _post_reconciliation_reputation_hook(session_id, turn_number, recon_result)
     _post_reconciliation_cs6_hook(arc_state, recon_result)
@@ -2395,7 +3355,8 @@ async def handle_temptation(
         check_difficulty=pending.get("check_difficulty"),
         dice_pool_json=json.dumps(asdict(dice_pool)),
         roll_result_json=json.dumps(asdict(roll_result)),
-        scene_type=pending.get("scene_type", "social"),
+        context_json=_context_audit_json(ctx),
+        scene_type=arc_state.get("scene_state", {}).get("scene_type", scene_type_t),
         moral_weight=pending.get("moral_weight", 0),
         skill_tags_json=json.dumps(narration_result.skill_tags),
         force_result_json=json.dumps(asdict(force_result)),
@@ -2461,6 +3422,7 @@ async def handle_temptation(
             "strain": character.current_strain,
             "act_progress": arc_state.get("act_progress", 0.0),
             "anchor_proximity": arc_state.get("anchor_proximity", "distant"),
+            "scene_state": arc_state.get("scene_state", {}),
         },
         "used_local_narration": narration_result.used_local,
         "act_boundary": act_boundary_reached,
@@ -2557,7 +3519,7 @@ async def handle_intervention(
     # Assemble context and narrate (Steps 5-6)
     story_summary = get_act_summaries(session_id)
     npc_states = load_npc_states(session_id, spine)
-    turn_number = get_turn_count(session_id) + 1
+    turn_number = _next_turn_number(session_id)
     recent_turns = get_recent_turns(session_id, limit=5)
 
     for npc in npc_states:
@@ -2569,7 +3531,22 @@ async def handle_intervention(
     )
 
     player_action = pending["player_action"]
-    scene_description = f"THE PLAYER CHOSE: {player_action}"
+    last_turn = get_most_recent_turn(session_id)
+    scene_description = _build_scene_description(
+        last_turn, player_action, arc_state, current_act
+    )
+    ships_iv = load_ship_states(session_id)
+    primary_ship_iv = ships_iv[0] if ships_iv else None
+    scene_type_iv = _sanitize_scene_type(
+        pending["scene_type"],
+        skill=pending["check_skill"],
+        player_action=player_action,
+        ship_state=primary_ship_iv,
+    )
+    scene_state_iv = _initial_scene_state(arc_state, current_act)
+    scene_npcs_iv = _select_active_scene_npcs(
+        npc_states, arc_state, current_act, scene_description, player_action
+    )
 
     anchor_inst = None
     if arc_state.get("act_progress", 0.0) >= 1.0:
@@ -2579,7 +3556,7 @@ async def handle_intervention(
         anchor_inst = build_anchor_instruction(current_act, next_act)
 
     dyn_fields_iv = _compute_dynamic_context_fields(
-        session_id, turn_number, arc_state, current_act, npc_states, spine,
+        session_id, turn_number, arc_state, current_act, scene_npcs_iv, spine,
         character=character, roll_result=roll_result,
     )
 
@@ -2596,15 +3573,7 @@ async def handle_intervention(
             anchors_completed=arc_state.get("anchors_completed", []),
             throughline_question=spine["throughline_question"],
             tension_level=current_act["tension"],
-            open_threads=[
-                ThreadState(name=t) if isinstance(t, str) else t
-                for t in (
-                    current_act.get("open_threads", [])
-                    + arc_state.get("dynamic_threads", [])
-                )
-                if (t if isinstance(t, str) else t.name)
-                not in arc_state.get("closed_threads", [])
-            ],
+            open_threads=_thread_states_for_context(current_act, arc_state),
             closed_threads=arc_state.get("closed_threads", []),
             turns_this_act=arc_state.get("turns_this_act", 0),
             anchor_proximity=arc_state.get("anchor_proximity", "distant"),
@@ -2618,11 +3587,11 @@ async def handle_intervention(
         ),
         story_summary=story_summary,
         recent_turns=recent_turns,
-        active_npcs=npc_states,
-        location=arc_state.get("current_location", ""),
+        active_npcs=scene_npcs_iv,
+        location=scene_state_iv.get("current_location", ""),
         situation=scene_description,
         galactic_context=current_act.get("galactic_context", ""),
-        scene_type=pending["scene_type"],
+        scene_type=scene_type_iv,
         dice_pool=dice_pool,
         roll_result=roll_result,
         anchor_instruction=anchor_inst,
@@ -2630,6 +3599,10 @@ async def handle_intervention(
         combat_damage_note=combat_damage_note,
         talent_activations=talent_activations,
         destiny_narrative_note=pending.get("destiny_narrative_note", ""),
+        ship_state_block=(
+            primary_ship_iv.to_narration_block() if primary_ship_iv
+            and scene_type_iv == "space_combat" else ""
+        ),
         **dyn_fields_iv,
     )
 
@@ -2651,25 +3624,40 @@ async def handle_intervention(
         0 if roll_result is not None
         else int(arc_state.get("consecutive_no_check_turns", 0) or 0) + 1
     )
+    scene_thread_updates_iv = _apply_narration_scene_state(
+        arc_state=arc_state,
+        current_act=current_act,
+        npc_states=npc_states,
+        narration_result=narration_result,
+        player_action=player_action,
+        scene_type=scene_type_iv,
+        recent_turns=recent_turns,
+        turn_number=turn_number,
+        skill=pending["check_skill"],
+        ship_state=primary_ship_iv,
+    )
 
     # Reconciliation (fast tier with escalation)
     check_result_str = (
         f"{pending['check_skill']} ({pending['check_difficulty']}): "
         f"{roll_result.narrative_label()}"
     )
-    recon_result, new_zero_delta_count, _escalated = reconcile_turn_with_escalation(
+    recon_result, new_zero_delta_count, _escalated = _reconcile_turn_fast_or_full(
         session_id=session_id,
         turn_number=turn_number,
         prior_zero_delta_count=arc_state.get("consecutive_zero_delta_turns", 0),
         narration=narration_result.passage,
         player_action=player_action,
         check_result=check_result_str,
-        active_npcs=npc_states,
+        active_npcs=scene_npcs_iv,
         arc=ctx.arc,
         spine_act=current_act,
         spine=spine,
     )
     arc_state["consecutive_zero_delta_turns"] = new_zero_delta_count
+    recon_result.thread_updates = _merge_thread_updates(
+        recon_result.thread_updates, scene_thread_updates_iv
+    )
 
     _post_reconciliation_reputation_hook(session_id, turn_number, recon_result)
     _post_reconciliation_cs6_hook(arc_state, recon_result)
@@ -2695,7 +3683,8 @@ async def handle_intervention(
         check_difficulty=pending["check_difficulty"],
         dice_pool_json=json.dumps(asdict(dice_pool)),
         roll_result_json=json.dumps(asdict(roll_result)),
-        scene_type=pending["scene_type"],
+        context_json=_context_audit_json(ctx),
+        scene_type=arc_state.get("scene_state", {}).get("scene_type", scene_type_iv),
         moral_weight=pending["moral_weight"],
         skill_tags_json=json.dumps(narration_result.skill_tags),
     )
@@ -2754,6 +3743,7 @@ async def handle_intervention(
             "strain": character.current_strain,
             "act_progress": arc_state.get("act_progress", 0.0),
             "anchor_proximity": arc_state.get("anchor_proximity", "distant"),
+            "scene_state": arc_state.get("scene_state", {}),
         },
         "act_boundary": act_boundary_reached,
     }

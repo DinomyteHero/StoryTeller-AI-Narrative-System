@@ -1,0 +1,37 @@
+ERROR:root:Failed to serialize context audit payload
+Traceback (most recent call last):
+  File "C:\Users\lbouw\OneDrive\Documents\Github Repos\StoryTeller-AI-Narrative-System\api\game_routes.py", line 788, in _context_audit_json
+    "knowledge": npc.knowledge,
+                 ^^^^^^^^^^^^^
+AttributeError: 'NPCState' object has no attribute 'knowledge'
+ERROR:root:Failed to serialize context audit payload
+Traceback (most recent call last):
+  File "C:\Users\lbouw\OneDrive\Documents\Github Repos\StoryTeller-AI-Narrative-System\api\game_routes.py", line 788, in _context_audit_json
+    "knowledge": npc.knowledge,
+                 ^^^^^^^^^^^^^
+AttributeError: 'NPCState' object has no attribute 'knowledge'
+ERROR:root:Failed to serialize context audit payload
+Traceback (most recent call last):
+  File "C:\Users\lbouw\OneDrive\Documents\Github Repos\StoryTeller-AI-Narrative-System\api\game_routes.py", line 788, in _context_audit_json
+    "knowledge": npc.knowledge,
+                 ^^^^^^^^^^^^^
+AttributeError: 'NPCState' object has no attribute 'knowledge'
+ERROR:root:Failed to serialize context audit payload
+Traceback (most recent call last):
+  File "C:\Users\lbouw\OneDrive\Documents\Github Repos\StoryTeller-AI-Narrative-System\api\game_routes.py", line 788, in _context_audit_json
+    "knowledge": npc.knowledge,
+                 ^^^^^^^^^^^^^
+AttributeError: 'NPCState' object has no attribute 'knowledge'
+WARNING:root:Narration parse rejected attempt=1/2 model=moonshotai/kimi-k2.6 reason=Passage too long (766 words, maximum 750). Retrying.
+ERROR:root:Failed to serialize context audit payload
+Traceback (most recent call last):
+  File "C:\Users\lbouw\OneDrive\Documents\Github Repos\StoryTeller-AI-Narrative-System\api\game_routes.py", line 788, in _context_audit_json
+    "knowledge": npc.knowledge,
+                 ^^^^^^^^^^^^^
+AttributeError: 'NPCState' object has no attribute 'knowledge'
+ERROR:root:Failed to serialize context audit payload
+Traceback (most recent call last):
+  File "C:\Users\lbouw\OneDrive\Documents\Github Repos\StoryTeller-AI-Narrative-System\api\game_routes.py", line 788, in _context_audit_json
+    "knowledge": npc.knowledge,
+                 ^^^^^^^^^^^^^
+AttributeError: 'NPCState' object has no attribute 'knowledge'

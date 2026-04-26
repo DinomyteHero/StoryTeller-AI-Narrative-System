@@ -1,0 +1,518 @@
+{
+  "schema_version": "campaign_content_pack.v0.1",
+  "id": "shadows_of_the_praxeum",
+  "display_name": "Shadows of the Praxeum",
+  "status": "sample_campaign_content_seed",
+  "continuity": "legends",
+  "source_spine": "data/campaigns/shadows_of_the_praxeum.json",
+  "era_pack_id": "new_republic_praxeum",
+  "era_pack_status": "available",
+  "campaign_identity": {
+    "era": "New Republic / Jedi Praxeum era",
+    "date": "~12 ABY",
+    "location_core": "Luke Skywalker's Jedi Praxeum on Yavin 4",
+    "genre_lanes": [
+      "Jedi academy mystery",
+      "friendship betrayal",
+      "Force-sensitive moral pressure",
+      "Imperial Remnant threat",
+      "Massassi ruin exploration"
+    ],
+    "dramatic_premise": "A student at Luke Skywalker's academy discovers their closest friend is feeding information to a surviving Inquisitor in exchange for the truth about a dead parent.",
+    "central_dramatic_question": "When every allegiance demands betrayal of another, which loyalty defines who you are?",
+    "story_promise": "A journey from naive trust through shattering discovery to a final loyalty choice that costs something real.",
+    "thematic_throughline": "Loyalty is not a debt. It is a choice you make knowing the cost."
+  },
+  "design_contract": {
+    "must_feel_like": [
+      "a small academy where every person matters",
+      "a Jedi tradition being rebuilt from fragments",
+      "hope that is fragile rather than triumphant",
+      "friendship under forensic pressure",
+      "secrets that are protective and corrosive at the same time"
+    ],
+    "must_not_feel_like": [
+      "a Clone Wars military campaign",
+      "a Sith temple dungeon crawl",
+      "a generic school story with Star Wars nouns",
+      "a settled Jedi Order with stable doctrine",
+      "an Imperial-era survival story where Jedi must hide by default"
+    ],
+    "player_agency_boundary": "The player should not decide whether the Praxeum matters or whether Kira's secret exists. The player should decide what loyalty requires, who receives the truth, how much trust survives, and what the academy becomes through the crisis.",
+    "canon_boundary": "Luke and Tionne may be present and affected locally, but the campaign should not rewrite the broad Legends timeline. Canon creates pressure and recognition; player choices decide personal and local outcomes."
+  },
+  "terminology": {
+    "campaign_terms": [
+      {
+        "term": "Praxeum",
+        "definition": "Luke Skywalker's early Jedi academy on Yavin 4. It is small, experimental, and vulnerable.",
+        "usage": "Use as a living community, not as a fully institutional Jedi Temple."
+      },
+      {
+        "term": "Massassi ruins",
+        "definition": "Ancient temple structures beneath and around the academy. They hold history, danger, and dark side echoes.",
+        "usage": "Use as physical and thematic pressure: old violence under new hope."
+      },
+      {
+        "term": "Dark side vergence",
+        "definition": "A Force locus in the lower ruins that intensifies fear, secrecy, and temptation.",
+        "usage": "Use to pressure choices; do not make it a simple evil object that solves the plot."
+      },
+      {
+        "term": "Surviving Inquisitor",
+        "definition": "A former Imperial hunter of Force-sensitives who outlived the Empire's central power.",
+        "usage": "Malakai is not a Sith Lord. His danger is patience, trauma, knowledge, and the ability to weaponize true facts."
+      },
+      {
+        "term": "Seren Denn",
+        "definition": "Kira Denn's parent, a Jedi whose wartime fall and sacrifice form the campaign's hidden wound.",
+        "usage": "Use the name as emotional evidence, not lore trivia."
+      },
+      {
+        "term": "Tannen's Task Force",
+        "definition": "A rogue Imperial Remnant force targeting the Praxeum for symbolic and personal reasons.",
+        "usage": "Use as escalation from personal secrecy to military consequence."
+      }
+    ],
+    "avoid_or_contextualize": [
+      {
+        "term": "Jedi Council",
+        "guidance": "Do not imply a stable prequel-style Council governs Luke's academy. Luke is building without that structure."
+      },
+      {
+        "term": "Padawan",
+        "guidance": "Can appear informally, but avoid making the academy feel like the late Old Republic Order with standardized ranks and rituals."
+      },
+      {
+        "term": "Inquisitor",
+        "guidance": "Use as Imperial survivor context, not as a living Imperial bureaucracy that still centrally controls the galaxy."
+      },
+      {
+        "term": "Sith",
+        "guidance": "Do not explain Malakai or the vergence as generic Sith plotting unless a future campaign explicitly changes that premise."
+      }
+    ]
+  },
+  "runtime_assets_snapshot": {
+    "acts": 5,
+    "allegiances": 2,
+    "variants": 2,
+    "npc_count": 5,
+    "faction_count": 3,
+    "vehicle_count": 2,
+    "variation_point_count": 2,
+    "foreshadow_link_count": 4,
+    "prologue_scene_sets": 0,
+    "primary_force_power": "sense",
+    "sample_characters": [
+      "praxeum_student",
+      "praxeum_mechanic"
+    ]
+  },
+  "funnel_state": {
+    "current_allegiances": [
+      {
+        "id": "jedi_order",
+        "display_name": "Jedi Order",
+        "current_variants": [
+          "praxeum_student"
+        ],
+        "content_assessment": "Playable but thin. Needs at least one more non-identical Jedi-aligned variant for the intended funnel experience."
+      },
+      {
+        "id": "academy_support",
+        "display_name": "Academy Support",
+        "current_variants": [
+          "praxeum_mechanic"
+        ],
+        "content_assessment": "Strong non-Force perspective. Needs at least one more support variant so the allegiance is not synonymous with mechanic play."
+      }
+    ],
+    "expansion_variant_seeds": [
+      {
+        "id": "praxeum_survivor_scholar",
+        "allegiance": "jedi_order",
+        "pitch": "A bookish Force-sensitive student descended from a hidden survivor line, more comfortable with fragments of old doctrine than with Luke's improvisational trust.",
+        "suggested_species": [
+          "human",
+          "mirialan",
+          "togruta"
+        ],
+        "career_mapping": {
+          "primary_game_line": "force_and_destiny",
+          "career": "consular",
+          "specializations": [
+            "sage",
+            "niman_disciple"
+          ]
+        },
+        "motivation_track": "morality",
+        "core_pressure": "They believe truth belongs in archives before it belongs in people's hands."
+      },
+      {
+        "id": "praxeum_failed_knight",
+        "allegiance": "jedi_order",
+        "pitch": "An older recruit who came to Luke after failing someone badly, desperate for the Jedi path to mean redemption rather than talent.",
+        "suggested_species": [
+          "human",
+          "zabrak",
+          "nautolan"
+        ],
+        "career_mapping": {
+          "primary_game_line": "force_and_destiny",
+          "career": "guardian",
+          "specializations": [
+            "protector"
+          ]
+        },
+        "motivation_track": "morality",
+        "core_pressure": "They protect people so fiercely that protection starts to look like control."
+      },
+      {
+        "id": "praxeum_archivist_aide",
+        "allegiance": "academy_support",
+        "pitch": "A non-Jedi archivist's aide working with Tionne, able to read patterns in broken history before Force users admit what the records imply.",
+        "suggested_species": [
+          "bothan",
+          "human",
+          "twi_lek"
+        ],
+        "career_mapping": {
+          "primary_game_line": "edge_of_empire",
+          "career": "colonist",
+          "specializations": [
+            "scholar"
+          ]
+        },
+        "motivation_track": "obligation",
+        "core_pressure": "They know knowledge can save lives, but publishing the wrong truth can destroy them."
+      },
+      {
+        "id": "praxeum_new_republic_liaison",
+        "allegiance": "academy_support",
+        "pitch": "A New Republic liaison assigned to observe the Praxeum for the Senate, caught between political oversight and personal loyalty to the students.",
+        "suggested_species": [
+          "human",
+          "bothan",
+          "mirialan"
+        ],
+        "career_mapping": {
+          "primary_game_line": "age_of_rebellion",
+          "career": "diplomat",
+          "specializations": [
+            "agitator",
+            "ambassador"
+          ]
+        },
+        "motivation_track": "duty",
+        "core_pressure": "They were sent to report on the Jedi and instead became responsible for them."
+      }
+    ]
+  },
+  "npc_content_cards": [
+    {
+      "name": "Luke Skywalker",
+      "canon": true,
+      "pressure_role": "witness",
+      "thematic_argument": "Trust, even when it fails, is better than suspicion that succeeds.",
+      "use_for": [
+        "mentor pressure",
+        "trust versus control",
+        "canon warmth without invulnerability"
+      ],
+      "avoid": [
+        "serene all-knowing grandmaster",
+        "quest giver who solves the mystery",
+        "prequel-style institutional authority"
+      ]
+    },
+    {
+      "name": "Kira Denn",
+      "canon": false,
+      "pressure_role": "catalyst",
+      "thematic_argument": "Truth is a right, not a privilege.",
+      "use_for": [
+        "friendship stakes",
+        "secrecy under love",
+        "the emotional cost of being protected from your own history"
+      ],
+      "avoid": [
+        "simple traitor",
+        "helpless victim",
+        "dark side fall without hesitation"
+      ]
+    },
+    {
+      "name": "Malakai",
+      "canon": false,
+      "pressure_role": "tempter",
+      "thematic_argument": "Institutions built on concealment always produce betrayal.",
+      "use_for": [
+        "truth as weapon",
+        "Inquisitor survivor trauma",
+        "antagonist who is factually right and morally wrong"
+      ],
+      "avoid": [
+        "Sith cackling",
+        "generic dark mentor",
+        "lying when the more dangerous move is telling the truth"
+      ]
+    },
+    {
+      "name": "Tionne",
+      "canon": true,
+      "pressure_role": "mirror",
+      "thematic_argument": "Truth matters, but timing and care matter too.",
+      "use_for": [
+        "Jedi history",
+        "archive mysteries",
+        "knowledge without control"
+      ],
+      "avoid": [
+        "walking encyclopedia",
+        "passive librarian",
+        "source of easy exposition"
+      ]
+    },
+    {
+      "name": "Captain Ress Tannen",
+      "canon": false,
+      "pressure_role": "escalator",
+      "thematic_argument": "Loyalty without moral examination becomes atrocity.",
+      "use_for": [
+        "military escalation",
+        "Imperial Remnant pressure",
+        "the dark mirror of loyalty"
+      ],
+      "avoid": [
+        "faceless Imperial officer",
+        "cartoon vengeance",
+        "central villain who replaces Kira and Malakai's emotional stakes"
+      ]
+    }
+  ],
+  "faction_guidance": [
+    {
+      "faction_id": "jedi_praxeum",
+      "display_name": "Jedi Praxeum",
+      "campaign_role": "Home, community, fragile institution, and moral test.",
+      "pressure_vectors": [
+        "trust versus secrecy",
+        "training versus crisis",
+        "new Jedi ideals versus old Jedi failures"
+      ]
+    },
+    {
+      "faction_id": "imperial_remnant_tannen",
+      "display_name": "Imperial Remnant (Tannen's Task Force)",
+      "campaign_role": "External military consequence of internal secrecy.",
+      "pressure_vectors": [
+        "old war unfinished",
+        "symbolic strike against Luke",
+        "military violence exploiting personal betrayal"
+      ]
+    },
+    {
+      "faction_id": "new_republic",
+      "display_name": "New Republic",
+      "campaign_role": "Distant legitimate authority that cannot arrive quickly enough.",
+      "pressure_vectors": [
+        "Senate skepticism of the Jedi",
+        "patrol delays",
+        "bureaucratic awareness lag"
+      ]
+    }
+  ],
+  "act_content_guidance": [
+    {
+      "act": 1,
+      "name": "The New Students",
+      "dramatic_job": "Establish the Praxeum as home before making it vulnerable.",
+      "scene_texture": [
+        "morning meditation",
+        "jungle rain",
+        "temple stone",
+        "training routines",
+        "Kira's absence as a small wrongness"
+      ],
+      "choice_pressure": "Do you trust the rhythm of the academy, pursue your friend's secret, or reveal concern to an authority?"
+    },
+    {
+      "act": 2,
+      "name": "Night Whispers",
+      "dramatic_job": "Turn concern into investigation and investigation into danger.",
+      "scene_texture": [
+        "night paths through jungle",
+        "flooded lower ruins",
+        "technical anomalies",
+        "Force unease",
+        "the first shape of Malakai's influence"
+      ],
+      "choice_pressure": "Do you follow, report, wait, or preserve Kira's trust while evidence accumulates?"
+    },
+    {
+      "act": 3,
+      "name": "The Inquisitor's Offer",
+      "dramatic_job": "Reframe the mystery: the antagonist has true information and uses it cruelly.",
+      "scene_texture": [
+        "verifiable recordings",
+        "old Imperial methods",
+        "Luke's omission",
+        "Kira's parentage",
+        "truth that cannot be put back"
+      ],
+      "choice_pressure": "Do you protect Kira from the truth, protect the academy from Kira, or refuse the premise that those are separate?"
+    },
+    {
+      "act": 4,
+      "name": "The Betrayal Price",
+      "dramatic_job": "Convert secrecy into military consequence and force the player to stop gathering information.",
+      "scene_texture": [
+        "encrypted military traffic",
+        "emergency assembly",
+        "Luke's confrontation",
+        "defensive preparation",
+        "no more new facts"
+      ],
+      "choice_pressure": "What truth do you tell, who do you protect, and what defense do you prioritize when help is too far away?"
+    },
+    {
+      "act": 5,
+      "name": "What Remains",
+      "dramatic_job": "Pay off loyalty through irreversible action and aftermath.",
+      "scene_texture": [
+        "dawn invasion",
+        "Massassi temple as shelter and battlefield",
+        "Red Five",
+        "Kira's final hesitation",
+        "the academy after the cost"
+      ],
+      "choice_pressure": "Who gets your loyalty when every available choice betrays someone?"
+    }
+  ],
+  "ffg_scene_guidance": [
+    {
+      "scene_type": "force",
+      "advantage": "A sensory clue, emotional truth, or warning arrives without solving the whole secret.",
+      "threat": "The vergence answers with fear, strain, or a partial truth that tempts overconfidence.",
+      "triumph": "The Force reveals the compassionate path through a fact that could otherwise become a weapon.",
+      "despair": "The character reaches too hard and violates trust, exposes themselves, or gives the vergence a sharper hold."
+    },
+    {
+      "scene_type": "social",
+      "advantage": "An NPC reveals a tell, admits a partial truth, or trusts the player with a narrower confidence.",
+      "threat": "A secret becomes harder to contain, an NPC notices the player's divided loyalty, or a relationship cools.",
+      "triumph": "The player creates a moment where truth can be spoken without immediately destroying the relationship.",
+      "despair": "The right truth reaches the wrong person first."
+    },
+    {
+      "scene_type": "infiltration",
+      "advantage": "The player finds evidence, a route, or a timing window while preserving plausible deniability.",
+      "threat": "Footprints, sensor logs, Force echoes, or broken stone create a trace back to the player.",
+      "triumph": "The investigation uncovers both the immediate clue and its emotional meaning.",
+      "despair": "Following the trail becomes part of Malakai's plan."
+    },
+    {
+      "scene_type": "combat",
+      "advantage": "The player protects a student, buys evacuation time, or turns temple terrain into cover.",
+      "threat": "A bystander is endangered, academy infrastructure suffers, or Tannen's force gains position.",
+      "triumph": "A decisive action preserves the Praxeum without erasing the personal cost.",
+      "despair": "A tactical mistake forces a loyalty choice before the player is ready."
+    },
+    {
+      "scene_type": "space_combat",
+      "advantage": "Red Five or the shuttle opens a brief lane for evacuation, interception, or communication.",
+      "threat": "System strain, shield loss, hard landing risk, or a separated transport raises pressure.",
+      "triumph": "The player turns an underpowered defense into a symbolic and practical victory.",
+      "despair": "The sky battle spills danger back onto the students below."
+    }
+  ],
+  "prologue_scene_seeds": [
+    {
+      "id": "missing_training_partner",
+      "usable_by": [
+        "praxeum_student",
+        "praxeum_survivor_scholar",
+        "praxeum_failed_knight"
+      ],
+      "scene": "Kira is late to morning meditation and Luke asks the player whether they want to sit with concern, speak up, or quietly investigate.",
+      "axes_tested": [
+        "trust",
+        "risk",
+        "authority"
+      ]
+    },
+    {
+      "id": "archive_fragment",
+      "usable_by": [
+        "praxeum_student",
+        "praxeum_survivor_scholar",
+        "praxeum_archivist_aide"
+      ],
+      "scene": "Tionne finds a damaged record with the name Denn in an unexpected place and asks whether to preserve, share, or suppress it until verified.",
+      "axes_tested": [
+        "truth",
+        "care",
+        "patience"
+      ]
+    },
+    {
+      "id": "comm_array_echo",
+      "usable_by": [
+        "praxeum_mechanic",
+        "praxeum_new_republic_liaison",
+        "praxeum_archivist_aide"
+      ],
+      "scene": "The academy comm array catches a faint encrypted burst that looks too disciplined to be local interference.",
+      "axes_tested": [
+        "duty",
+        "curiosity",
+        "self_protection"
+      ]
+    },
+    {
+      "id": "ruin_threshold",
+      "usable_by": [
+        "all"
+      ],
+      "scene": "A flooded Massassi passage opens after the rains. Something below feels historically important and personally wrong.",
+      "axes_tested": [
+        "risk",
+        "wonder",
+        "obedience"
+      ]
+    }
+  ],
+  "content_gaps": [
+    {
+      "gap": "era_pack_runtime_integration",
+      "impact": "The sample campaign now has a reusable New Republic / Jedi Praxeum era pack, but the Campaign Studio and runtime do not load era pack guidance automatically yet.",
+      "recommended_action": "Add a Studio loader that can resolve era_pack_id, inject era voice and terminology guidance into generation, and validate that campaign content remains era-consistent."
+    },
+    {
+      "gap": "thin_funnel",
+      "impact": "Each allegiance currently has one variant, so the sample demonstrates allegiance structure but not the intended breadth of the funnel.",
+      "recommended_action": "Add one additional Jedi Order variant and one additional Academy Support variant first."
+    },
+    {
+      "gap": "missing_prologue_sets",
+      "impact": "The spine has no prologue_scenes, so Phase 18 cannot use this sample as a full prologue demonstration yet.",
+      "recommended_action": "Promote the prologue_scene_seeds in this pack into authored PrologueSet entries."
+    },
+    {
+      "gap": "canon_profile_directory",
+      "impact": "Luke and Tionne have inline canon fields, but there is no reusable data/canon_profiles source.",
+      "recommended_action": "When Phase 21 begins, extract Luke and Tionne into reusable New Republic era canon profiles."
+    },
+    {
+      "gap": "talent_tree_coverage",
+      "impact": "Existing sample variants reference mystic/seer and technician/mechanic, while available talent trees do not yet include those exact trees.",
+      "recommended_action": "Add Mystic/Seer and Technician/Mechanic talent trees or adjust sample variants to currently supported trees."
+    },
+    {
+      "gap": "content_pack_loader",
+      "impact": "This pack documents reusable campaign content but is not consumed by Campaign Studio generation or validation yet.",
+      "recommended_action": "Add a Studio loader that can use content packs for Mode 3 assist, gap checks, and future campaign expansion."
+    }
+  ]
+}
