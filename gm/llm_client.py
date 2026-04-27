@@ -160,6 +160,89 @@ def _log_llm_timing(
     )
 
 
+# ── Retry-after / backoff helpers ────────────────────────────────────
+# Mirrors gm/cloud_gm.py._retry_after_seconds — keeps the narration path
+# and the structured-JSON / fast-tier path in sync. OpenRouter returns
+# rate-limit hints in two places: the standard HTTP `Retry-After` header
+# and `error.metadata.retry_after_seconds` in the response body. We honor
+# both, capped at 30s. Without server guidance we fall back to exponential
+# backoff capped at 20s.
+
+_RETRY_AFTER_CAP_SEC = 30.0
+_BACKOFF_CAP_SEC     = 20.0
+_BACKOFF_BASE_SEC    = 2.0
+
+
+def _retry_after_seconds(error: Exception) -> Optional[float]:
+    """Extract a server-provided retry-after delay from a provider error.
+
+    Reads (in order):
+      1. The `Retry-After` HTTP header on the response object.
+      2. `error.metadata.retry_after_seconds` from the JSON body
+         (OpenRouter convention).
+
+    Returns None when neither is present or the values are unparseable.
+    """
+    response = getattr(error, "response", None)
+    if response is None:
+        return None
+
+    headers = getattr(response, "headers", None)
+    if headers is not None:
+        header_value: Optional[str] = None
+        try:
+            header_value = headers.get("retry-after") or headers.get("Retry-After")
+        except Exception:  # noqa: BLE001 — header containers vary by SDK
+            header_value = None
+        if header_value is not None:
+            try:
+                return float(header_value)
+            except (TypeError, ValueError):
+                pass
+
+    json_loader = getattr(response, "json", None)
+    if callable(json_loader):
+        try:
+            data = json_loader()
+        except Exception:  # noqa: BLE001
+            data = None
+        if isinstance(data, dict):
+            metadata = (data.get("error") or {}).get("metadata") or {}
+            value = metadata.get("retry_after_seconds")
+            if value is not None:
+                try:
+                    return float(value)
+                except (TypeError, ValueError):
+                    pass
+
+    return None
+
+
+def _is_transient_error(error: Exception) -> bool:
+    """Returns True when an error looks worth retrying (rate-limit / 5xx / timeout)."""
+    status = getattr(error, "status_code", None)
+    if status is None:
+        response = getattr(error, "response", None)
+        status = getattr(response, "status_code", None)
+    if status in {408, 409, 429, 500, 502, 503, 504}:
+        return True
+    text = str(error).lower()
+    return any(token in text for token in ("rate", "timeout", "temporarily", "overloaded"))
+
+
+def _compute_backoff_seconds(error: Exception, attempt: int) -> float:
+    """Pick the wait time before the next retry.
+
+    Server-provided Retry-After (capped at 30s) wins. Without it, fall back
+    to exponential backoff (2s * 2^attempt) capped at 20s. Always at least
+    0.5s to avoid hammering a recovering provider.
+    """
+    parsed = _retry_after_seconds(error)
+    if parsed is not None:
+        return max(0.5, min(parsed, _RETRY_AFTER_CAP_SEC))
+    return max(0.5, min(_BACKOFF_BASE_SEC * (2 ** attempt), _BACKOFF_CAP_SEC))
+
+
 # ── Model capability registry ────────────────────────────────────────
 # Encodes provider-specific quirks behind a stable interface. New models
 # get a one-line entry; call sites keep their `tier=fast|quality` calls
@@ -393,6 +476,14 @@ def call_chat(
                 "LLM call failed (purpose=%s tier=%s attempt=%d/%d model=%s): %s",
                 purpose or "-", tier, attempt + 1, retries, model, e,
             )
+            if attempt < retries - 1 and _is_transient_error(e):
+                delay = _compute_backoff_seconds(e, attempt)
+                logging.warning(
+                    "Transient provider error — sleeping %.1fs before retry "
+                    "(purpose=%s tier=%s model=%s)",
+                    delay, purpose or "-", tier, model,
+                )
+                time.sleep(delay)
 
     _log_llm_timing(
         purpose=purpose,
@@ -405,7 +496,7 @@ def call_chat(
     raise RuntimeError(
         f"LLM call failed after {retries} attempts "
         f"(purpose={purpose} tier={tier} model={model}): {last_error}"
-    )
+    ) from last_error
 
 
 def call_local_chat(
@@ -551,10 +642,24 @@ def call_chat_json(
                     f"{json.dumps(schema, indent=2)}\n"
                 )
 
+            # call_chat wraps provider errors in RuntimeError with __cause__;
+            # introspect that for rate-limit hints. JSON-decode failures don't
+            # carry server hints, so they fall through to default backoff.
+            if attempt < retries - 1:
+                root = getattr(e, "__cause__", None) or e
+                if _is_transient_error(root):
+                    delay = _compute_backoff_seconds(root, attempt)
+                    logging.warning(
+                        "JSON LLM transient error — sleeping %.1fs before retry "
+                        "(purpose=%s)",
+                        delay, purpose or "-",
+                    )
+                    time.sleep(delay)
+
     raise RuntimeError(
         f"JSON LLM call failed after {retries} attempts "
         f"(purpose={purpose}): {last_error}"
-    )
+    ) from last_error
 
 
 def _call_ollama_json(
