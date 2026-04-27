@@ -1581,11 +1581,26 @@ def _post_turn_world_state_hook(
             if not faction_present:
                 continue
             current = emergent.get(fname, {"delta": 0.0, "recent_action": ""})
+            alignment = faction.get("alignment", "neutral")
             shift = 0.0
-            if any(k in action_lower for k in ("help", "save", "protect", "ally")):
-                shift = 0.05 if faction.get("alignment", "neutral") == "friendly" else -0.05
+            if any(k in action_lower for k in ("help", "save", "protect", "ally", "aid")):
+                shift = 0.05 if alignment == "friendly" else -0.05
             elif any(k in action_lower for k in ("attack", "kill", "destroy", "betray", "expose")):
-                shift = -0.08 if faction.get("alignment", "neutral") == "friendly" else 0.05
+                shift = -0.08 if alignment == "friendly" else 0.05
+            elif any(k in action_lower for k in ("report", "warn")):
+                # Reporting / warning aligns with friendly factions, undermines hostile.
+                shift = 0.04 if alignment == "friendly" else -0.04
+            elif any(k in action_lower for k in ("shelter", "conceal")):
+                # Protecting from a faction — friendly approves, hostile is obstructed.
+                shift = 0.03 if alignment == "friendly" else -0.03
+            elif any(k in action_lower for k in (
+                "investigate", "probe", "search", "question",
+                "trace", "follow", "observe",
+            )):
+                # Investigative attention — being noticed without confronting.
+                # Hostile factions tighten faster (you're a curious unknown);
+                # friendly factions register quiet alignment.
+                shift = 0.04 if alignment == "hostile" else 0.02
             elif any(k in action_lower for k in ("sneak", "evade", "hide", "deceive")):
                 shift = 0.02
             if shift != 0.0:

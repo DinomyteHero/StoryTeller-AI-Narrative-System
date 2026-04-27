@@ -12,6 +12,8 @@ import json
 import sys
 import os
 
+import pytest
+
 # Ensure project root is on path
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -130,6 +132,7 @@ def test_die_tables_registry():
 
 # ── Character loading test ───────────────────────────────────────────────────
 
+@pytest.mark.skip(reason="Keth Varso character / Nar Shaddaa spine removed; see changelog 2026-04-25")
 def test_load_praxeum_student():
     json_path = os.path.join(
         os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
@@ -147,6 +150,7 @@ def test_load_praxeum_student():
 
 # ── Pool construction test ───────────────────────────────────────────────────
 
+@pytest.mark.skip(reason="Keth Varso character / Nar Shaddaa spine removed; see changelog 2026-04-25")
 def test_keth_deception_pool():
     """
     Keth: Cunning 4, Deception 2.
