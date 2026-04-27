@@ -460,3 +460,68 @@ def select_and_apply_advancement(
         "scores below threshold or insufficient XP"
     )
     return None
+
+
+def build_growth_recognition(
+    *,
+    character,
+    behavioral_fingerprint: Optional[dict] = None,
+    advancement: Optional[dict] = None,
+) -> str:
+    """Compose a one-shot interior recognition for the next act's first turn.
+
+    The system has been silently noticing what the player keeps doing.
+    At act boundaries, that observation surfaces as a brief interior beat
+    the next act's narration prompt will see — the protagonist *recognizes*
+    that something inside them has shifted. Empty when nothing surfaces.
+
+    Inputs:
+      - behavioral_fingerprint: dominant_priorities, recurring_tags from
+        Phase 13 annotation aggregation.
+      - advancement: the skill rank this act produced (if any).
+    """
+    fingerprint = behavioral_fingerprint or {}
+    priorities = fingerprint.get("dominant_priorities", []) or []
+    tags = fingerprint.get("recurring_tags", []) or []
+
+    advanced_skill = ""
+    new_rank = 0
+    if isinstance(advancement, dict):
+        advanced_skill = (advancement.get("skill") or "").replace("_", " ").strip()
+        new_rank = int(advancement.get("new_rank", 0) or 0)
+
+    if not priorities and not tags and not advanced_skill:
+        return ""
+
+    parts: list[str] = []
+    if advanced_skill and new_rank:
+        if new_rank >= 3:
+            parts.append(
+                f"The {advanced_skill} that used to require concentration arrives "
+                "now as instinct — the body has learned what the mind kept practicing."
+            )
+        else:
+            parts.append(
+                f"The {advanced_skill} feels different in the hand than it did "
+                "last season — slightly more familiar, slightly less foreign."
+            )
+    if priorities:
+        priority_text = " and ".join(priorities[:2])
+        parts.append(
+            f"Looking back, the protagonist sees a pattern they didn't see while "
+            f"living it: a recurring pull toward {priority_text}. It clarifies "
+            "something about who they are becoming."
+        )
+    elif tags:
+        parts.append(
+            f"The shape of the recent past — {', '.join(tags[:3])} — leaves a "
+            "residue the protagonist can almost name."
+        )
+
+    if not parts:
+        return ""
+    return (
+        "GROWTH RECOGNITION (one-shot — fold into the FIRST passage of this "
+        "new act as a single interior moment, then never reference again): "
+        + " ".join(parts)
+    )

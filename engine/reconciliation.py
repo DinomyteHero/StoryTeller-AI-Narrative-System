@@ -740,31 +740,123 @@ def apply_story_progress(
     return arc_state
 
 
+FALLOUT_DURATION_TURNS = 3        # how many turns a resolved thread keeps rippling
+DORMANT_PROMOTION_TURNS = 4       # active → dormant after this many quiet turns
+HOT_TO_ACTIVE_DECAY_TURNS = 1     # hot threads cool to active when not touched
+
+
+def _thread_state_dict(arc_state: dict) -> dict:
+    """Lazy-init the rich thread-state map on arc_state."""
+    return arc_state.setdefault("thread_state", {})
+
+
+def _set_thread_status(
+    arc_state: dict,
+    name: str,
+    status: str,
+    *,
+    progress: Optional[float] = None,
+    hot_question: Optional[str] = None,
+    turn_number: Optional[int] = None,
+    fallout_turns: Optional[int] = None,
+) -> None:
+    """Update the rich thread-state entry for `name` in place."""
+    state = _thread_state_dict(arc_state)
+    entry = state.setdefault(name, {
+        "status": "active",
+        "progress": 0.0,
+        "hot_question": "",
+        "last_movement_turn": 0,
+        "fallout_remaining_turns": 0,
+    })
+    entry["status"] = status
+    if progress is not None:
+        entry["progress"] = max(0.0, min(1.0, float(progress)))
+    if hot_question is not None:
+        entry["hot_question"] = hot_question
+    if turn_number is not None:
+        entry["last_movement_turn"] = int(turn_number)
+    if fallout_turns is not None:
+        entry["fallout_remaining_turns"] = int(fallout_turns)
+
+
+def _decay_thread_statuses(arc_state: dict, turn_number: int) -> None:
+    """Apply per-turn status drift for threads that didn't move this turn.
+
+      hot                       → active                  after HOT_TO_ACTIVE_DECAY_TURNS
+      active                    → dormant                 after DORMANT_PROMOTION_TURNS
+      resolved_pending_fallout  → closed                  when fallout_remaining_turns hits 0
+    """
+    state = _thread_state_dict(arc_state)
+    for name, entry in state.items():
+        last = int(entry.get("last_movement_turn", 0) or 0)
+        gap = turn_number - last if turn_number else 0
+        status = entry.get("status", "active")
+        if status == "hot" and gap >= HOT_TO_ACTIVE_DECAY_TURNS:
+            entry["status"] = "active"
+        elif status == "active" and gap >= DORMANT_PROMOTION_TURNS:
+            entry["status"] = "dormant"
+        elif status == "resolved_pending_fallout":
+            remaining = int(entry.get("fallout_remaining_turns", 0) or 0) - 1
+            entry["fallout_remaining_turns"] = max(0, remaining)
+            if remaining <= 0:
+                entry["status"] = "closed"
+
+
 def apply_thread_updates(
     thread_updates: dict, arc_state: dict, spine_act: dict
 ) -> dict:
-    """Manage open/closed thread lists in the arc state."""
+    """Manage open/closed thread lists AND rich per-thread status state.
+
+    Backwards compatible: `dynamic_threads` and `closed_threads` are still
+    plain string lists. The new `thread_state` dict carries status, progress,
+    hot_question, last_movement_turn, fallout_remaining_turns per thread name.
+    """
     open_threads = list(arc_state.get("dynamic_threads", []))
     closed_threads = list(arc_state.get("closed_threads", []))
+    turn_number = int(arc_state.get("turns_this_act", 0) or 0)
 
-    # Threads resolved — move from open to closed
-    for thread_name in thread_updates.get("threads_resolved", []):
-        if thread_name not in closed_threads:
-            closed_threads.append(thread_name)
-        # Remove from dynamic threads if present
-        open_threads = [t for t in open_threads if t != thread_name]
-
-    # Threads advanced — promote spine threads into dynamic_threads so they
-    # persist across act boundaries even if the next act's spine has no threads
-    spine_threads = spine_act.get("open_threads", [])
-    for thread_name in thread_updates.get("threads_advanced", []):
-        if thread_name in spine_threads and thread_name not in open_threads:
-            open_threads.append(thread_name)
+    advanced = list(thread_updates.get("threads_advanced", []) or [])
+    resolved = list(thread_updates.get("threads_resolved", []) or [])
+    opened = list(thread_updates.get("threads_opened", []) or [])
 
     # Threads opened — add new threads
-    for thread_name in thread_updates.get("threads_opened", []):
+    for thread_name in opened:
         if thread_name not in open_threads:
             open_threads.append(thread_name)
+        _set_thread_status(
+            arc_state, thread_name, "hot",
+            progress=0.1, turn_number=turn_number,
+        )
+
+    # Threads advanced — promote to dynamic if from spine, mark hot, bump progress
+    spine_threads = spine_act.get("open_threads", [])
+    for thread_name in advanced:
+        if thread_name in spine_threads and thread_name not in open_threads:
+            open_threads.append(thread_name)
+        existing = _thread_state_dict(arc_state).get(thread_name) or {}
+        prior_progress = float(existing.get("progress", 0.0) or 0.0)
+        new_progress = min(0.85, prior_progress + 0.2)
+        new_status = "approaching_resolution" if new_progress >= 0.6 else "hot"
+        _set_thread_status(
+            arc_state, thread_name, new_status,
+            progress=new_progress, turn_number=turn_number,
+        )
+
+    # Threads resolved — move into resolved_pending_fallout and seed countdown
+    for thread_name in resolved:
+        if thread_name not in closed_threads:
+            closed_threads.append(thread_name)
+        open_threads = [t for t in open_threads if t != thread_name]
+        _set_thread_status(
+            arc_state, thread_name, "resolved_pending_fallout",
+            progress=1.0,
+            turn_number=turn_number,
+            fallout_turns=FALLOUT_DURATION_TURNS,
+        )
+
+    # Apply per-turn status decay for threads that didn't move
+    _decay_thread_statuses(arc_state, turn_number)
 
     arc_state["dynamic_threads"] = open_threads
     arc_state["closed_threads"] = closed_threads
@@ -996,8 +1088,37 @@ def run_between_act_pipeline(
         logging.error(f"Between-act step 12 failed: {e}")
         result.steps_completed.append("destiny_pool_failed")
 
-    # ── Step 13: Growth passage generation (Phase 8+) ────────────────
-    result.steps_completed.append("growth_passage_stub")
+    # ── Step 13: Growth recognition (was stubbed; now active) ────────
+    # Surface behavioral inference as a one-shot interior recognition the
+    # next act's first turn will see. The player has been doing things;
+    # the world (via the protagonist's interiority) is about to notice.
+    try:
+        from engine.advancement import build_growth_recognition
+        recognition = build_growth_recognition(
+            character=character,
+            behavioral_fingerprint=result.behavioral_fingerprint,
+            advancement=result.advancement,
+        )
+        if recognition:
+            with get_connection() as conn:
+                row = conn.execute(
+                    "SELECT arc_state_json FROM sessions WHERE id = ?",
+                    (session_id,),
+                ).fetchone()
+                if row:
+                    arc = json.loads(row["arc_state_json"])
+                    arc["pending_growth_recognition"] = recognition
+                    conn.execute(
+                        "UPDATE sessions SET arc_state_json = ? WHERE id = ?",
+                        (json.dumps(arc), session_id),
+                    )
+                    conn.commit()
+            result.steps_completed.append("growth_recognition_queued")
+        else:
+            result.steps_completed.append("growth_recognition_skipped")
+    except Exception as e:
+        logging.error(f"Between-act step 13 (growth recognition) failed: {e}")
+        result.steps_completed.append("growth_recognition_failed")
 
     # ── Step 14: Milestone reflection + intervention reset (Phase 12) ─
     # 14a: Reset intervention talent uses at act boundary (§15.1)

@@ -42,7 +42,7 @@ NARRATION_FALLBACK_MODELS = [
     for model in os.getenv("NARRATION_FALLBACK_MODELS", "").split(",")
     if model.strip()
 ]
-CHOICE_QUALITY_INLINE = os.getenv("CHOICE_QUALITY_INLINE", "false").lower() == "true"
+CHOICE_QUALITY_INLINE = os.getenv("CHOICE_QUALITY_INLINE", "true").lower() == "true"
 LLM_TIMING_LOG = os.getenv("LLM_TIMING_LOG", "true").lower() == "true"
 
 # Provider config. The unified client (gm/llm_client.py)
@@ -597,6 +597,10 @@ class CloudGMError(Exception):
 def _build_prompt(ctx: ContextPackage) -> str:
     from engine.talents import build_talent_capabilities, build_talent_activations_block
     from engine.force import build_force_capabilities_block
+    from gm.context import (
+        build_evolved_voice_block as _build_evolved_voice_block,
+        build_background_block as _build_background_block,
+    )
 
     prompt_path    = PROMPT_PATH_LITERARY if PROSE_VOICE == "literary" else PROMPT_PATH
     template       = prompt_path.read_text(encoding="utf-8")
@@ -622,6 +626,15 @@ def _build_prompt(ctx: ContextPackage) -> str:
     return template.format(
         character_summary=ctx.character.narrative_status(),
         character_voice=ctx.character.voice_notes,
+        evolved_voice_block=_build_evolved_voice_block(ctx.character),
+        background_block=_build_background_block(ctx.character),
+        lore_seeds_block=getattr(ctx, "lore_seeds_block", "") or "",
+        growth_recognition_block=getattr(ctx, "growth_recognition_block", "") or "",
+        tactical_state_block=getattr(ctx, "tactical_state_block", "") or "",
+        npc_counter_move_block=getattr(ctx, "npc_counter_move_block", "") or "",
+        faction_reactivity_block=getattr(ctx, "faction_reactivity_block", "") or "",
+        side_content_block=getattr(ctx, "side_content_block", "") or "",
+        pivot_warning_block=getattr(ctx, "pivot_warning_block", "") or "",
         equipment_block=build_equipment_narration_block(ctx.character.loadout),
         force_state_block=ctx.force_state_block,
         force_capabilities_block=force_caps,
@@ -636,6 +649,7 @@ def _build_prompt(ctx: ContextPackage) -> str:
         tension_level=ctx.arc.tension_level,
         story_summary=full_summary,
         open_threads=ctx.build_open_threads_block(),
+        memorable_moments_block=ctx.build_memorable_moments_block(),
         reputation_block=ctx.build_reputation_block(),
         era_voice_block=ctx.era_voice_block,
         pacing_block=ctx.build_pacing_block(),

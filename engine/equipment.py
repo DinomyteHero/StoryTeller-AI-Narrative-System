@@ -170,12 +170,19 @@ def build_equipment_narration_block(loadout: Loadout) -> str:
     """
     Full equipment block for the narration prompt.
     Includes narrative notes for prose flavor.
+
+    April 2026: items carrying a narrative_note are treated as "items of
+    meaning" — when the protagonist touches, uses, or relies on one of
+    them in a scene, the prose should let the meaning surface as
+    behavior or a half-line of interiority. The instruction footer at
+    the bottom of this block makes that explicit to the LLM.
     """
     if (not loadout.weapons and not loadout.armor
             and not loadout.tools and not loadout.special_items):
         return "No notable equipment."
 
     sections = []
+    items_of_meaning_present = False
 
     if loadout.weapons:
         weapon_lines = []
@@ -183,6 +190,7 @@ def build_equipment_narration_block(loadout: Loadout) -> str:
             line = f"- {w.name}"
             if w.narrative_note:
                 line += f": {w.narrative_note}"
+                items_of_meaning_present = True
             quals = ", ".join(w.qualities) if w.qualities else ""
             line += f"\n  (Damage +{w.damage_bonus}, critical {w.critical_rating}"
             if quals:
@@ -196,6 +204,7 @@ def build_equipment_narration_block(loadout: Loadout) -> str:
         line = f"- {a.name}"
         if a.narrative_note:
             line += f": {a.narrative_note}"
+            items_of_meaning_present = True
         line += f"\n  (Soak +{a.soak_bonus}"
         if a.defense > 0:
             line += f", defense {a.defense}"
@@ -208,6 +217,7 @@ def build_equipment_narration_block(loadout: Loadout) -> str:
             line = f"- {t.name}"
             if t.narrative_note:
                 line += f": {t.narrative_note}"
+                items_of_meaning_present = True
             tool_lines.append(line)
         sections.append("Gear:\n" + "\n".join(tool_lines))
 
@@ -217,8 +227,20 @@ def build_equipment_narration_block(loadout: Loadout) -> str:
             line = f"- {s.name}"
             if s.narrative_note:
                 line += f": {s.narrative_note}"
+                items_of_meaning_present = True
             item_lines.append(line)
         sections.append("Special:\n" + "\n".join(item_lines))
+
+    if items_of_meaning_present:
+        sections.append(
+            "ITEMS OF MEANING — handling instruction: any item above with "
+            "italicized prose alongside its mechanical line is an item of "
+            "meaning. When the protagonist touches, draws, repairs, loses, "
+            "or relies on one of these items in this turn, let the meaning "
+            "surface in behavior — a beat of hesitation, a remembered hand "
+            "guiding theirs, a steadying breath. Never quote the narrative "
+            "note back to the player; let it shape posture and silence."
+        )
 
     return "\n\n".join(sections)
 

@@ -235,6 +235,177 @@ def compute_pinch_point_instruction(
     return check_pinch_point(spine_act, act_progress, pinch_point_fired) or ""
 
 
+def compute_closure_heartbeat_instruction(arc_state: dict) -> str:
+    """Wrap engine.reconciliation.check_closure_heartbeat for the live turn loop.
+
+    Reads the per-thread silence counter from arc_state and produces a
+    narration prompt instruction when no thread has moved for several turns.
+    Returns empty string when threads moved recently or no threads are open.
+    """
+    from engine.reconciliation import check_closure_heartbeat
+    open_threads = arc_state.get("dynamic_threads", []) or []
+    silence = int(arc_state.get("turns_since_last_thread_change", 0) or 0)
+    instruction = check_closure_heartbeat(
+        open_threads=open_threads,
+        turns_since_last_thread_change=silence,
+        threads_advanced_this_turn=[],
+        threads_resolved_this_turn=[],
+    )
+    return instruction or ""
+
+
+def compute_foreshadow_instruction(
+    spine: dict,
+    current_act_number: int,
+    arc_state: dict,
+) -> str:
+    """Generate setup/payoff foreshadow instruction for the live turn loop.
+
+    Two paths surface in priority order:
+      1. **Payoff** — A registered foreshadow's `payoff_act` matches the
+         current act and its setup was previously delivered. Highest priority
+         because payoffs are time-sensitive.
+      2. **Setup** — A registered foreshadow's `setup_act` matches the
+         current act and the setup hasn't been delivered yet. Lower priority,
+         occasional surfacing.
+
+    Returns empty string when nothing matches. The narration prompt placeholder
+    silently disappears.
+    """
+    if not isinstance(spine, dict):
+        return ""
+    registry = spine.get("foreshadow_registry") or []
+    if not registry:
+        return ""
+
+    delivered = set(arc_state.get("foreshadow_setups_delivered", []) or [])
+
+    # Pass 1: look for a payoff opportunity (setup delivered, payoff act now)
+    for link in registry:
+        link_id = link.get("id") if isinstance(link, dict) else None
+        if not link_id or link_id not in delivered:
+            continue
+        payoff_act = int(link.get("payoff_act", 0) or 0)
+        if payoff_act != current_act_number:
+            continue
+        if link_id in (arc_state.get("foreshadow_payoffs_delivered", []) or []):
+            continue
+        payoff_desc = (link.get("payoff_description") or "").strip()
+        payoff_type = (link.get("payoff_type") or "callback").strip()
+        if not payoff_desc:
+            continue
+        return (
+            f"FORESHADOW PAYOFF ({payoff_type.upper()}): An earlier setup "
+            f"is ready to land. Weave this beat into the passage when a "
+            f"natural moment arrives — not as exposition, as recognition. "
+            f"The payoff: {payoff_desc} "
+            f"Reveal it through behavior, image, or a single line that the "
+            f"player will recognize as the answer to a question planted earlier."
+        )
+
+    # Pass 2: surface a setup that has not yet been delivered
+    for link in registry:
+        link_id = link.get("id") if isinstance(link, dict) else None
+        if not link_id or link_id in delivered:
+            continue
+        setup_act = int(link.get("setup_act", 0) or 0)
+        if setup_act != current_act_number:
+            continue
+        setup_desc = (link.get("setup_description") or "").strip()
+        if not setup_desc:
+            continue
+        return (
+            f"FORESHADOW SETUP: Plant a small detail that will pay off later. "
+            f"The setup: {setup_desc} "
+            f"This should not announce itself. Drop it lightly — a passing "
+            f"observation, an object on a shelf, a half-heard line — so the "
+            f"reader registers it without weight, then remembers it later."
+        )
+
+    return ""
+
+
+def accumulate_contradiction_arc(
+    arc_state: dict,
+    contradiction_tracking: dict,
+    turn_number: int,
+) -> None:
+    """Aggregate per-turn contradiction tracking into the per-act arc block.
+
+    Each turn's reconciliation returns a small contradiction_tracking record
+    (engaged?, arc_movement, arc_evidence). This accumulator builds a
+    multi-turn ledger on `arc_state["contradiction_arc"]` so the next turn's
+    narration can see how the protagonist has been relating to their core
+    contradiction across the act so far.
+    """
+    if not isinstance(contradiction_tracking, dict):
+        return
+    if not contradiction_tracking.get("contradiction_engaged"):
+        return
+    arc = arc_state.setdefault("contradiction_arc", {})
+    movements: list = arc.setdefault("movements", [])
+    movement = (contradiction_tracking.get("arc_movement") or "").strip()
+    evidence = (contradiction_tracking.get("arc_evidence") or "").strip()
+    if not movement or movement == "none":
+        return
+    movements.append({
+        "turn": int(turn_number),
+        "movement": movement,
+        "evidence": evidence,
+    })
+    # Keep the ledger compact — the most recent 8 entries cover roughly the
+    # current act for a normal-length act (8-12 turns).
+    if len(movements) > 8:
+        del movements[: len(movements) - 8]
+    counts = arc.setdefault("counts", {})
+    counts[movement] = int(counts.get(movement, 0)) + 1
+    arc["last_engaged_turn"] = int(turn_number)
+
+
+def build_contradiction_arc_block(
+    arc_state: dict, protagonist_contradiction: str = ""
+) -> str:
+    """Render the accumulated contradiction arc as a narration prompt block.
+
+    Empty when no movements have accumulated. The block tells the GM where
+    the protagonist's relationship to their core contradiction stands so
+    the prose can echo or invert the dominant pattern.
+    """
+    arc = arc_state.get("contradiction_arc") or {}
+    movements = arc.get("movements") or []
+    if not movements:
+        return ""
+    counts = arc.get("counts") or {}
+    dominant = max(counts.items(), key=lambda kv: kv[1])[0] if counts else ""
+    recent = movements[-3:]
+
+    lines = ["CHARACTER ARC STATE (protagonist contradiction):"]
+    if protagonist_contradiction:
+        lines.append(f"Core contradiction: {protagonist_contradiction}")
+    if dominant:
+        readable = {
+            "reinforced":  "leaning into the contradiction",
+            "resisted":    "actively pushing against the contradiction",
+            "transformed": "the contradiction has begun to evolve",
+            "cost_paid":   "paying real costs for the contradiction",
+        }.get(dominant, dominant)
+        lines.append(f"Dominant pattern this act: {readable}.")
+    if recent:
+        lines.append("Recent beats showing the pattern:")
+        for entry in recent:
+            evidence = entry.get("evidence") or ""
+            movement = entry.get("movement") or ""
+            if evidence:
+                lines.append(f"  - turn {entry.get('turn')}: {movement} — {evidence}")
+            else:
+                lines.append(f"  - turn {entry.get('turn')}: {movement}")
+    lines.append(
+        "Let this turn's prose acknowledge the pattern — by reinforcing it, "
+        "complicating it, or showing the cost — without naming it directly."
+    )
+    return "\n".join(lines)
+
+
 def compute_voice_mode_instruction(prior_dramatic_mission: str) -> str:
     """Map the previous turn's dramatic mission to a voice instruction
     for THIS turn's narration (CS-6 Phase 10).
@@ -251,6 +422,524 @@ def compute_voice_mode_instruction(prior_dramatic_mission: str) -> str:
     if not voice_mode:
         return ""
     return VOICE_INSTRUCTIONS.get(voice_mode, "")
+
+
+MEMORABLE_MOMENTS_CAP = 25
+MEMORABLE_MOMENTS_CALLBACK_COOLDOWN = 4
+
+
+def register_memorable_moment(
+    arc_state: dict,
+    *,
+    turn_number: int,
+    kind: str,
+    summary: str,
+    npc_names: Optional[list] = None,
+    act_number: int = 0,
+    weight: float = 1.0,
+) -> None:
+    """Append a memorable moment to the ledger, capping the rolling window.
+
+    Lower-weight moments are evicted first when the cap is exceeded so
+    pivotal beats outlast routine ones. Idempotent: a duplicate (same
+    turn + kind) is silently dropped.
+    """
+    summary = (summary or "").strip()
+    if not summary:
+        return
+    moments = arc_state.setdefault("memorable_moments", [])
+    for existing in moments:
+        if (
+            int(existing.get("turn_number", -1)) == int(turn_number)
+            and existing.get("kind", "") == kind
+        ):
+            return
+    moments.append({
+        "turn_number":        int(turn_number),
+        "act_number":         int(act_number),
+        "kind":               kind,
+        "summary":            summary,
+        "npc_names":          list(npc_names or []),
+        "weight":             float(weight),
+        "last_callback_turn": 0,
+        "callback_count":     0,
+    })
+    # Cap with weight-aware eviction: drop the lowest-weight oldest first.
+    if len(moments) > MEMORABLE_MOMENTS_CAP:
+        moments.sort(key=lambda m: (m.get("weight", 1.0), m.get("turn_number", 0)))
+        del moments[: len(moments) - MEMORABLE_MOMENTS_CAP]
+        moments.sort(key=lambda m: m.get("turn_number", 0))
+
+
+def select_callback_candidates(
+    arc_state: dict,
+    *,
+    current_turn: int,
+    scene_npc_names: list,
+    max_count: int = 2,
+) -> list[dict]:
+    """Pick 0-2 memorable moments that fit this scene as callback candidates.
+
+    Selection rules:
+      1. Skip moments still in cooldown (last_callback_turn within
+         MEMORABLE_MOMENTS_CALLBACK_COOLDOWN turns).
+      2. Prefer moments involving NPCs present in this scene — they get
+         a 0.5 weight boost.
+      3. Prefer moments at least 3 turns old — fresh moments are still
+         in recent_turns and don't need callback.
+      4. Penalize already-recalled moments (callback_count) so the same
+         moment doesn't dominate the campaign.
+    """
+    moments = arc_state.get("memorable_moments", []) or []
+    if not moments:
+        return []
+    scored: list[tuple[float, dict]] = []
+    scene_set = {str(n).lower() for n in (scene_npc_names or [])}
+    for m in moments:
+        last_callback = int(m.get("last_callback_turn", 0) or 0)
+        if (
+            last_callback
+            and current_turn - last_callback < MEMORABLE_MOMENTS_CALLBACK_COOLDOWN
+        ):
+            continue
+        age = current_turn - int(m.get("turn_number", 0) or 0)
+        if age < 3:
+            continue
+        score = float(m.get("weight", 1.0))
+        npcs = {str(n).lower() for n in (m.get("npc_names") or [])}
+        if npcs & scene_set:
+            score += 0.5
+        score -= 0.25 * float(m.get("callback_count", 0))
+        scored.append((score, m))
+    scored.sort(key=lambda kv: kv[0], reverse=True)
+    return [m for _, m in scored[:max_count]]
+
+
+def mark_callback_surfaced(
+    arc_state: dict,
+    moment: dict,
+    current_turn: int,
+) -> None:
+    """Mark a memorable moment as referenced so cooldown applies."""
+    if not isinstance(moment, dict):
+        return
+    target_turn = int(moment.get("turn_number", -1))
+    target_kind = moment.get("kind", "")
+    for m in arc_state.get("memorable_moments", []) or []:
+        if (
+            int(m.get("turn_number", -2)) == target_turn
+            and m.get("kind", "") == target_kind
+        ):
+            m["last_callback_turn"] = int(current_turn)
+            m["callback_count"] = int(m.get("callback_count", 0)) + 1
+            break
+
+
+def build_memorable_moments_block(candidates: list) -> str:
+    """Render selected callback candidates for the narration prompt.
+
+    Empty when no candidates surface. The block invites — does not
+    require — the LLM to weave one moment back into this scene as
+    resonance, not exposition.
+    """
+    if not candidates:
+        return ""
+    lines = ["MEMORABLE MOMENTS (callback candidates — weave at most ONE):"]
+    for moment in candidates:
+        turn = moment.get("turn_number", 0)
+        kind = moment.get("kind", "")
+        summary = moment.get("summary", "")
+        npcs = moment.get("npc_names") or []
+        npc_str = f" (with {', '.join(npcs)})" if npcs else ""
+        lines.append(f"  - Turn {turn} [{kind}]{npc_str}: {summary}")
+    lines.append(
+        "If a moment naturally fits this scene, surface it through behavior, "
+        "image, or a half-line of interiority — never narrate the memory in "
+        "full. The protagonist remembers; the world echoes. Do NOT manufacture "
+        "a callback if none fits — it's better to let a turn breathe than to "
+        "force resonance."
+    )
+    return "\n".join(lines)
+
+
+# ── Tactical scene-grammar state (Phase D — combat/negotiation/chase) ──
+#
+# A unified "tactical_state" lives on arc_state when the active scene_type
+# is one of combat / social / chase. Each scene type has its own sub-block
+# format. Initialized when the player enters that scene type, advanced
+# each turn, cleared when the player leaves the scene type.
+#
+# Structure:
+#   tactical_state = {
+#     "kind": "combat" | "negotiation" | "chase",
+#     "round": int,
+#     ... kind-specific fields ...
+#   }
+#
+# These give each scene type its own *grammar* — rounds in combat, stages
+# in negotiation, distance bands in chase — so single-check resolution
+# layers against meaningful tactical state instead of a flat one-roll-
+# per-turn loop.
+
+VALID_TACTICAL_KINDS = ("combat", "negotiation", "chase")
+RANGE_BANDS = ("engaged", "short", "medium", "long", "extreme")
+NEGOTIATION_STAGES = ("opening", "probing", "pressure", "give_or_break", "concluded")
+CHASE_ZONES = ("sighted", "closing", "neck_and_neck", "breaking_clear", "lost_or_caught")
+
+
+def initialize_tactical_state(scene_type: str, *, situation: str = "") -> dict:
+    """Initialize a fresh tactical_state when entering a tactical scene type.
+
+    Returns an empty dict for non-tactical scene types so the prompt
+    block silently disappears.
+    """
+    s = (scene_type or "").lower()
+    if s == "combat":
+        return {
+            "kind": "combat",
+            "round": 1,
+            "range_band": "medium",
+            "cover": False,
+            "suppressed": False,
+            "ally_position": "with_protagonist",
+            "enemy_actions_log": [],
+        }
+    if s == "social":
+        return {
+            "kind": "negotiation",
+            "round": 1,
+            "stage": "opening",
+            "positions_yielded": [],
+            "positions_held": [],
+            "walk_away_pressure": 0.0,  # 0.0 (calm) → 1.0 (NPC walks)
+            "shared_ground": [],
+        }
+    if s == "chase":
+        return {
+            "kind": "chase",
+            "round": 1,
+            "zone": "sighted",
+            "environment_hazards": [],
+            "split_attempts": 0,
+        }
+    return {}
+
+
+def advance_tactical_state(
+    tactical_state: dict,
+    *,
+    outcome_quadrant: str = "",
+    succeeded: bool = False,
+    player_action: str = "",
+) -> dict:
+    """Advance the tactical state by one turn based on the dice outcome.
+
+    Returns the same dict mutated. Pure heuristic — keeps the engine
+    deterministic and the LLM informed without requiring per-turn
+    structured updates from the model.
+    """
+    if not isinstance(tactical_state, dict):
+        return {}
+    kind = tactical_state.get("kind")
+    tactical_state["round"] = int(tactical_state.get("round", 1) or 1) + 1
+    pa = (player_action or "").lower()
+
+    if kind == "combat":
+        # Range band shifts based on player intent
+        if any(k in pa for k in ("close", "charge", "engage", "melee", "rush")):
+            tactical_state["range_band"] = _shift_range(tactical_state.get("range_band", "medium"), -1)
+        elif any(k in pa for k in ("retreat", "back away", "fall back", "withdraw")):
+            tactical_state["range_band"] = _shift_range(tactical_state.get("range_band", "medium"), +1)
+        # Cover acquisition
+        if any(k in pa for k in ("cover", "duck", "behind", "shelter", "wall")):
+            tactical_state["cover"] = True
+        elif any(k in pa for k in ("expose", "open", "advance into", "move forward")):
+            tactical_state["cover"] = False
+        # Suppression decays on success
+        if succeeded:
+            tactical_state["suppressed"] = False
+        elif outcome_quadrant == "failure_threat":
+            tactical_state["suppressed"] = True
+        return tactical_state
+
+    if kind == "negotiation":
+        # Stage progression
+        stages = list(NEGOTIATION_STAGES)
+        cur = tactical_state.get("stage", "opening")
+        idx = stages.index(cur) if cur in stages else 0
+        if outcome_quadrant in ("success_advantage", "success_threat", "failure_advantage"):
+            idx = min(len(stages) - 2, idx + 1)
+            tactical_state["stage"] = stages[idx]
+        # Walk-away pressure rises on harsh failures
+        if outcome_quadrant == "failure_threat":
+            tactical_state["walk_away_pressure"] = min(
+                1.0, float(tactical_state.get("walk_away_pressure", 0.0) or 0.0) + 0.2
+            )
+        elif succeeded and outcome_quadrant == "success_advantage":
+            tactical_state["walk_away_pressure"] = max(
+                0.0, float(tactical_state.get("walk_away_pressure", 0.0) or 0.0) - 0.1
+            )
+        return tactical_state
+
+    if kind == "chase":
+        zones = list(CHASE_ZONES)
+        cur = tactical_state.get("zone", "sighted")
+        idx = zones.index(cur) if cur in zones else 0
+        # Player succeeds → break clear; fails → close in
+        if succeeded:
+            idx = min(len(zones) - 1, idx + 1)
+        elif outcome_quadrant == "failure_threat":
+            idx = max(0, idx - 1)
+        tactical_state["zone"] = zones[idx]
+        return tactical_state
+
+    return tactical_state
+
+
+def _shift_range(current: str, direction: int) -> str:
+    """Move range band by +1 (away) or -1 (closer). Clamped to RANGE_BANDS."""
+    bands = list(RANGE_BANDS)
+    idx = bands.index(current) if current in bands else bands.index("medium")
+    idx = max(0, min(len(bands) - 1, idx + direction))
+    return bands[idx]
+
+
+def build_tactical_state_block(tactical_state: dict) -> str:
+    """Render the tactical state for the narration prompt.
+
+    Empty when no tactical state is active. The block tells the LLM both
+    *where the scene is* (state) and *how to honor it* (instructions).
+    """
+    if not isinstance(tactical_state, dict) or not tactical_state.get("kind"):
+        return ""
+    kind = tactical_state["kind"]
+    rnd = int(tactical_state.get("round", 1) or 1)
+
+    if kind == "combat":
+        band = tactical_state.get("range_band", "medium")
+        cover = bool(tactical_state.get("cover", False))
+        suppressed = bool(tactical_state.get("suppressed", False))
+        lines = [
+            f"COMBAT TACTICAL STATE (round {rnd}):",
+            f"  Range band: {band.upper()}  (engaged = melee, short = pistol/sidearm, medium = ranged_light, long = ranged_heavy/sniper, extreme = limit of weapons)",
+            f"  Cover: {'YES — protagonist behind something solid' if cover else 'NO — exposed, no concealment'}",
+            f"  Suppressed: {'YES — enemy fire pinning the protagonist (next check inherits a setback die in narration even if not mechanically applied)' if suppressed else 'no'}",
+            "  Combat is multi-round. This is not the only exchange. Show enemy reactions, allies adjusting, the environment shifting between rounds.",
+            "  Tactical movement (closing range, breaking cover, moving to flank) is a real choice — at least one offered choice should change tactical posture, not just attack again.",
+        ]
+        return "\n".join(lines)
+
+    if kind == "negotiation":
+        stage = tactical_state.get("stage", "opening")
+        pressure = float(tactical_state.get("walk_away_pressure", 0.0) or 0.0)
+        yielded = tactical_state.get("positions_yielded", []) or []
+        held = tactical_state.get("positions_held", []) or []
+        shared = tactical_state.get("shared_ground", []) or []
+        pressure_label = (
+            "CRITICAL — the NPC is one wrong beat from walking" if pressure >= 0.7
+            else "elevated — the NPC is guarded, considering whether to continue"
+            if pressure >= 0.4 else "stable — both parties are still talking"
+        )
+        lines = [
+            f"NEGOTIATION TACTICAL STATE (exchange {rnd}):",
+            f"  Stage: {stage.upper().replace('_', ' ')}",
+            f"  Walk-away pressure: {pressure_label}",
+        ]
+        if yielded:
+            lines.append(f"  Positions the NPC has yielded: {'; '.join(yielded)}")
+        if held:
+            lines.append(f"  Positions the NPC is still holding: {'; '.join(held)}")
+        if shared:
+            lines.append(f"  Shared ground established: {'; '.join(shared)}")
+        lines.extend([
+            "  Negotiation is multi-stage. The NPC should make a counter-move, hold a line, or test the protagonist back this turn — not just respond to the player's last beat.",
+            "  When the player succeeds, the NPC may concede ONE position but reveal a new one they will not yield. When the player fails harshly, the walk-away pressure rises and one offered choice should reflect that.",
+        ])
+        return "\n".join(lines)
+
+    if kind == "chase":
+        zone = tactical_state.get("zone", "sighted")
+        hazards = tactical_state.get("environment_hazards", []) or []
+        zone_descriptions = {
+            "sighted":           "The pursuer is in view but not closing fast — the protagonist has moves to make.",
+            "closing":           "The gap is shrinking. Each turn matters.",
+            "neck_and_neck":     "They are right behind. A wrong choice ends the chase.",
+            "breaking_clear":    "The protagonist has opened daylight. One more good beat and they're gone.",
+            "lost_or_caught":    "The chase resolves this turn — either escape or be caught.",
+        }
+        lines = [
+            f"CHASE TACTICAL STATE (round {rnd}):",
+            f"  Zone: {zone.upper().replace('_', ' ')} — {zone_descriptions.get(zone, '')}",
+        ]
+        if hazards:
+            lines.append(f"  Environmental hazards in play: {'; '.join(hazards)}")
+        lines.extend([
+            "  The geography of the pursuit must shift between rounds. Don't replay the same alley.",
+            "  At least one offered choice should let the protagonist exploit the environment (a shortcut, a hazard, a hiding spot, a misdirection) rather than just running faster.",
+        ])
+        return "\n".join(lines)
+
+    return ""
+
+
+def build_evolved_voice_block(character) -> str:
+    """Surface in-character voice deltas the static voice_notes can't capture.
+
+    The static voice_notes set at character creation never updates. This
+    helper layers dynamic modifiers on top so the prose actually shifts
+    as the character grows, breaks, or hardens. Empty string when nothing
+    distinguishes the current state from the baseline.
+
+    Inputs that influence voice:
+      - Morality band (Force-sensitive only) — light vs grey vs dark
+      - Conflict accumulation — internal moral pressure
+      - Wounds / strain ratio — fatigue, near-incapacitation
+      - Recent talent acquisitions — newly internalized identity facets
+      - Active injuries — long-term physical signature
+      - Force rating — increasing attunement
+    """
+    if character is None:
+        return ""
+
+    deltas: list[str] = []
+
+    motivation = getattr(character, "motivation", None)
+    morality = int(getattr(motivation, "morality", 50) or 50)
+    conflict = int(getattr(motivation, "conflict", 0) or 0)
+    force_rating = int(getattr(character, "force_rating", 0) or 0)
+
+    if force_rating > 0:
+        if morality <= 30:
+            deltas.append(
+                "DARK-LEANING VOICE: Sentences land harder; restraint feels "
+                "like delay. Heat is closer to the surface than it used to be. "
+                "When the character considers cruelty, they don't recoil from "
+                "the thought as quickly as they once would have."
+            )
+        elif morality >= 71:
+            deltas.append(
+                "LIGHT-LEANING VOICE: There is a quiet centeredness to the "
+                "character now — pauses where there used to be reaction, "
+                "patience where there used to be reach. The character notices "
+                "fear in others before they notice it in themselves."
+            )
+    if conflict >= 5:
+        deltas.append(
+            "ACCUMULATED CONFLICT: The character is carrying decisions that "
+            "are not yet resolved. Let the prose show small frictions — a "
+            "tightness that wasn't there, a sentence that doesn't quite finish, "
+            "a half-second of silence at the wrong moment."
+        )
+
+    wounds = int(getattr(character, "current_wounds", 0) or 0)
+    wound_threshold = int(getattr(character, "wound_threshold", 0) or 0)
+    if wound_threshold and wounds / max(1, wound_threshold) >= 0.7:
+        deltas.append(
+            "BATTERED PHYSICALITY: The character is hurt. Movement carries "
+            "cost. Don't narrate every wince — but let the body's negotiation "
+            "with motion be felt in the prose's rhythm and detail."
+        )
+    strain = int(getattr(character, "current_strain", 0) or 0)
+    strain_threshold = int(getattr(character, "strain_threshold", 0) or 0)
+    if strain_threshold and strain / max(1, strain_threshold) >= 0.7:
+        deltas.append(
+            "FRAYED COMPOSURE: The character is at the edge of their patience "
+            "and focus. Reactions sharper, deliberation thinner, dialogue "
+            "less measured than it would be on a rested day."
+        )
+
+    injuries = list(getattr(character, "active_injuries", []) or [])
+    if injuries:
+        deltas.append(
+            f"ACTIVE INJURIES (long-term physical signature): {'; '.join(injuries)}. "
+            "Let one of these surface as small, specific behavior when "
+            "appropriate — a favored hand, a hesitated step."
+        )
+
+    talents = list(getattr(character, "acquired_talents", []) or [])
+    if talents:
+        recent = talents[-2:]
+        recent_names: list[str] = []
+        for t in recent:
+            name = ""
+            if isinstance(t, dict):
+                name = (
+                    t.get("narrative_identity")
+                    or t.get("display_name")
+                    or t.get("name")
+                    or t.get("talent_ref")
+                    or ""
+                )
+            else:
+                name = str(t)
+            if name:
+                recent_names.append(name.strip())
+        if recent_names:
+            deltas.append(
+                "RECENT INTERNALIZATIONS: The character has recently grown "
+                f"into: {' | '.join(recent_names)}. These are still settling — "
+                "let them surface as new instinct or unfamiliar capacity, not "
+                "as fluent identity yet."
+            )
+
+    if not deltas:
+        return ""
+    return "EVOLVED VOICE (overlay these deltas on the baseline character voice):\n\n" + "\n\n".join(deltas)
+
+
+def build_background_block(character, spine: Optional[dict] = None) -> str:
+    """Surface character background as a prompt section the LLM can mine.
+
+    The background field is canonically authored at character creation
+    and never changes — but it shapes what the protagonist notices, why
+    certain images recur, what they instinctively reach for. This block
+    makes that available as living context, not just metadata.
+    """
+    if character is None:
+        return ""
+    background = (getattr(character, "background", "") or "").strip()
+    if not background:
+        return ""
+    return (
+        "PROTAGONIST BACKGROUND (use to shape what the character notices, "
+        "what they reach for instinctively, what images recur — never quote "
+        "the background back at the player as exposition):\n"
+        f"{background}"
+    )
+
+
+def build_lore_seeds_block(spine: Optional[dict]) -> str:
+    """Render the campaign-level sensory/lore seeds for atmosphere consistency.
+
+    Spine schema (optional):
+      lore_seeds: {
+        sensory:  ["smell of jungle rot", "the way the temple stone is warm at midday"],
+        ritual:   ["the Praxeum's morning meditation chime"],
+        objects:  ["Tionne's recordings", "salvaged crystals from Yavin's ruins"],
+      }
+    Empty when no seeds are declared. The LLM is invited to weave these
+    in occasionally so the world feels lived-in across turns.
+    """
+    if not isinstance(spine, dict):
+        return ""
+    seeds = spine.get("lore_seeds") or {}
+    if not isinstance(seeds, dict) or not any(seeds.values()):
+        return ""
+    lines = ["LORE SEEDS (sensory anchors — weave occasionally for world consistency):"]
+    for key, label in (
+        ("sensory",  "Sensory"),
+        ("ritual",   "Rituals"),
+        ("objects",  "Significant objects"),
+        ("language", "Period language / phrasing"),
+    ):
+        items = seeds.get(key) or []
+        if not items:
+            continue
+        rendered = "; ".join(str(x) for x in items[:6])
+        lines.append(f"  {label}: {rendered}")
+    if len(lines) == 1:
+        return ""
+    return "\n".join(lines)
 
 
 def build_era_voice_block(spine: dict) -> str:
@@ -309,18 +998,32 @@ def build_era_voice_block(spine: dict) -> str:
     return "\n".join(lines)
 
 
-# Phase 8.5: Decay rates per mood (§25.3) — intensity reduction per turn
+# Phase 8.5: Decay rates per mood (§25.3) — intensity reduction per turn.
+# Updated April 2026: rates reduced for high-stakes moods so betrayal-class
+# emotions don't evaporate in 7 turns. Couples with HIGH_INTENSITY_DECAY_MULT
+# below — when an emotion is set with intensity >= 0.6, decay is further
+# halved so deeply set emotions persist across an act, not just a scene.
 MOOD_DECAY_RATES = {
     "calm": 0.0,
-    "angry": 0.15,
-    "afraid": 0.10,
-    "grieving": 0.05,
-    "suspicious": 0.08,
-    "grateful": 0.20,
-    "desperate": 0.12,
-    "amused": 0.25,
-    "conflicted": 0.05,
+    "angry": 0.06,        # was 0.15 — betrayal anger now lasts ~17 turns
+    "afraid": 0.05,       # was 0.10
+    "grieving": 0.03,     # was 0.05 — grief lingers
+    "suspicious": 0.04,   # was 0.08 — suspicion is sticky
+    "grateful": 0.10,     # was 0.20 — gratitude lingers longer
+    "desperate": 0.08,    # was 0.12
+    "amused": 0.20,       # was 0.25 — humor still fades fast
+    "conflicted": 0.03,   # was 0.05 — internal conflict resolves slowly
+    # New high-stakes moods that should persist across acts
+    "betrayed":   0.02,   # cuts deepest, fades slowest
+    "awed":       0.04,   # genuine awe imprints
+    "bonded":     0.03,   # forged trust persists
 }
+
+# When an emotion is set with intensity at or above this threshold, decay is
+# multiplied by HIGH_INTENSITY_DECAY_MULT — a sharp moment lingers longer
+# than a passing one.
+HIGH_INTENSITY_THRESHOLD = 0.6
+HIGH_INTENSITY_DECAY_MULT = 0.5
 
 # Moods that nudge disposition negatively when sustained (3+ turns)
 NEGATIVE_MOODS = {"angry", "suspicious", "afraid"}
@@ -390,6 +1093,13 @@ class NPCState:
     motivation:          str = ""
     behavioral_envelope: list[str] = field(default_factory=list)  # hard "never" constraints
     emotional_state:     EmotionalState = field(default_factory=EmotionalState)  # Phase 8.5 (§25)
+    # The single sharpest impression this NPC carries of the protagonist.
+    # Set by crystallize_memory() when a turn produces a defining moment
+    # (betrayal, sacrifice, unexpected mercy, witnessed cruelty). Does not
+    # decay. Surfaces in the NPC prompt block so the LLM can let this
+    # memory color speech, behavior, and silence in every future scene.
+    crystallized_memory:      str = ""
+    crystallized_memory_turn: int = 0
 
     def disposition_label(self) -> str:
         """Human-readable label for prompt injection."""
@@ -400,10 +1110,17 @@ class NPCState:
         return "hostile"
 
     def set_emotion(self, mood: str, intensity: float, source: str, turn: int):
-        """Set a new emotional state (§25.2). Replaces current emotion."""
+        """Set a new emotional state (§25.2). Replaces current emotion.
+
+        High-intensity emotions decay slower (HIGH_INTENSITY_DECAY_MULT)
+        so a sharply set emotion lingers across an act, not just a scene.
+        """
+        clamped = min(1.0, max(0.0, intensity))
         decay = MOOD_DECAY_RATES.get(mood, 0.10)
+        if clamped >= HIGH_INTENSITY_THRESHOLD:
+            decay *= HIGH_INTENSITY_DECAY_MULT
         self.emotional_state = EmotionalState(
-            mood=mood, intensity=min(1.0, max(0.0, intensity)),
+            mood=mood, intensity=clamped,
             source=source, set_at_turn=turn, decay_rate=decay,
             sustained_turns=0,
         )
@@ -417,6 +1134,20 @@ class NPCState:
         es.sustained_turns += 1
         if es.intensity < 0.1:
             self.emotional_state = EmotionalState()  # reset to calm
+
+    def crystallize_memory(self, memory: str, turn: int) -> None:
+        """Imprint a sharp, non-decaying impression of the player.
+
+        Used when an event is significant enough to permanently shape this
+        NPC's view of the protagonist (a betrayal, a sacrifice, a moment of
+        unexpected mercy). The latest crystallized memory replaces any prior
+        one — an NPC has one sharpest impression at a time, not a stack.
+        """
+        memory = (memory or "").strip()
+        if not memory:
+            return
+        self.crystallized_memory = memory
+        self.crystallized_memory_turn = int(turn)
 
     def nudge_disposition_from_emotion(self):
         """If sustained 3+ turns in non-calm state, nudge disposition (§25.5)."""
@@ -442,6 +1173,15 @@ class NPCState:
         if self.emotional_state.is_active():
             es = self.emotional_state
             lines.append(f"  Currently: {es.mood} (intensity {es.intensity:.1f}) — {es.source}")
+        # Crystallized memory — the sharpest impression this NPC holds of
+        # the protagonist. Persists across the campaign. Tells the LLM how
+        # this NPC's silence, posture, and cadence should color when
+        # they're around the player.
+        if self.crystallized_memory:
+            lines.append(
+                f"  Sharpest memory of protagonist: {self.crystallized_memory} "
+                f"(let this color tone, posture, and silence — never quote it directly)"
+            )
         if self.voice_notes:
             lines.append(f"  Voice: {self.voice_notes}")
         if self.motivation:
@@ -465,12 +1205,67 @@ class TurnMemory:
     meaningful_choice_note: str = ""
 
 
+VALID_THREAD_STATUSES = (
+    "dormant",                  # known to exist, no recent movement
+    "active",                   # currently being explored
+    "hot",                      # the player is pressing on it right now
+    "approaching_resolution",   # close to closing — pieces are converging
+    "resolved_pending_fallout", # closed, but consequences still rippling
+    "closed",                   # fully closed, no longer surfaces
+)
+
+
 @dataclass
 class ThreadState:
-    """Stateful thread tracking — name + what's known/unknown."""
+    """Stateful thread tracking — name + what's known/unknown + status.
+
+    Status promotion (April 2026): a binary open/closed model couldn't
+    distinguish "the player just discovered the body" from "the player
+    has been ignoring this for 6 turns." Multi-stage status lets the
+    narration prompt see thread momentum and lets the LLM lay
+    consequences from `resolved_pending_fallout` threads even after
+    they've left the immediate spotlight.
+    """
     name:           str
     player_knows:   list[str] = field(default_factory=list)
     player_unknown: list[str] = field(default_factory=list)
+    status:         str = "active"          # see VALID_THREAD_STATUSES
+    hot_question:   str = ""                # one-line: "what is at stake right now?"
+    progress:       float = 0.0             # 0.0 (just opened) → 1.0 (resolved)
+    last_movement_turn: int = 0
+    fallout_remaining_turns: int = 0        # decrements while resolved_pending_fallout
+
+    def status_label(self) -> str:
+        """Human-readable status for the prompt block."""
+        return {
+            "dormant":                  "DORMANT (no recent movement)",
+            "active":                   "ACTIVE",
+            "hot":                      "HOT (player is pressing this now)",
+            "approaching_resolution":   "APPROACHING RESOLUTION",
+            "resolved_pending_fallout": "RESOLVED (consequences still rippling)",
+            "closed":                   "CLOSED",
+        }.get(self.status, self.status.upper())
+
+
+@dataclass
+class MemorableMoment:
+    """A scene worth referencing later in the campaign.
+
+    Auto-flagged when a turn crosses one of several emotional/mechanical
+    thresholds (Triumph, Despair, large disposition shift, thread resolved,
+    motivation activation, force temptation accepted, milestone fired).
+    The narration prompt receives a callback candidate so the LLM can
+    weave intimate or weighty earlier moments back into present scenes —
+    not as exposition, as resonance.
+    """
+    turn_number:  int
+    act_number:   int = 0
+    kind:         str = ""              # "triumph", "despair", "betrayal", "intimacy", ...
+    summary:      str = ""              # one sentence — the moment in present-tense flavor
+    npc_names:    list[str] = field(default_factory=list)
+    weight:       float = 1.0           # 0.0–2.0, controls callback priority
+    last_callback_turn: int = 0         # cooldown so the same moment doesn't repeat
+    callback_count: int = 0
 
 
 @dataclass
@@ -508,6 +1303,12 @@ class ArcState:
     contradiction_arc: dict = field(default_factory=dict)  # ContradictionArcState accumulation
     # CS-6 Phase 8: Closure heartbeats
     turns_since_last_thread_change: int = 0  # Reset when any thread changes
+    # Memorable moments ledger — a curated list of past beats the LLM can
+    # callback to in future scenes. Stored as a list of dicts (serializable
+    # to JSON for arc_state persistence). MemorableMoment dataclass above
+    # describes the schema. Capped to a rolling window so memory doesn't
+    # grow without bound — see register_memorable_moment.
+    memorable_moments: list = field(default_factory=list)
 
 
 @dataclass
@@ -567,6 +1368,34 @@ class ContextPackage:
     # by api/game_routes.py from compute_introspection_trigger() based on
     # post-Despair, post-pinch-point, and dry-spell conditions.
     introspection_trigger: str = ""
+    # Memorable-moments callback candidates — 0-2 dicts selected from the
+    # arc-state ledger. When non-empty, the narration prompt invites the
+    # LLM to weave one back into the scene as resonance.
+    memorable_moments: list[dict] = field(default_factory=list)
+    # Pre-rendered lore seeds block for atmosphere consistency. Populated
+    # from spine.lore_seeds — sensory anchors, rituals, significant objects,
+    # period language. Used to keep the world feeling consistent across turns.
+    lore_seeds_block: str = ""
+    # One-shot growth recognition produced by the between-act pipeline. The
+    # narration prompt receives this on the first turn of a new act, then it
+    # is cleared so the recognition doesn't echo turn after turn.
+    growth_recognition_block: str = ""
+    # Pre-rendered tactical state block (Phase D). Active when the player is
+    # in a multi-round combat / negotiation / chase. Empty for routine scenes.
+    tactical_state_block: str = ""
+    # Pre-rendered NPC counter-move block (Phase E17). Suggests the next
+    # tactical or social move the most-pressuring NPC is likely to take.
+    npc_counter_move_block: str = ""
+    # Pre-rendered faction reactivity block (Phase E18). Surfaces emergent
+    # faction state shifts caused by recent player actions.
+    faction_reactivity_block: str = ""
+    # Pre-rendered side-content offer block (Phase E20). Surfaces an
+    # optional encounter the player can engage with this turn.
+    side_content_block: str = ""
+    # Pre-rendered hard-pivot warning (Phase E19). When the player is at a
+    # spine pivot point, prompts the LLM to make the choices feel weighty
+    # and the consequences explicit.
+    pivot_warning_block: str = ""
 
     def build_dice_result_block(self) -> str:
         if self.roll_result is None:
@@ -906,13 +1735,55 @@ class ContextPackage:
             return "None established yet."
         lines = []
         for t in self.arc.open_threads:
-            line = f"- {t.name}"
+            status = getattr(t, "status", "active")
+            label = t.status_label() if hasattr(t, "status_label") else status.upper()
+            line = f"- {t.name} [{label}]"
+            hot_q = getattr(t, "hot_question", "") or ""
+            if hot_q:
+                line += f"\n  Hot question: {hot_q}"
+            progress = float(getattr(t, "progress", 0.0) or 0.0)
+            if progress > 0.0:
+                line += f"\n  Progress: {int(progress * 100)}%"
             if t.player_knows:
                 line += f"\n  Player knows: {'; '.join(t.player_knows)}"
             if t.player_unknown:
                 line += f"\n  Player does NOT know: {'; '.join(t.player_unknown)}"
+            if status == "resolved_pending_fallout":
+                line += (
+                    "\n  Fallout: this thread closed but its consequences are "
+                    "still rippling — let an NPC, a rumor, or an environmental "
+                    "detail show how the world is metabolizing what happened."
+                )
+            elif status == "hot":
+                line += (
+                    "\n  Pressure: the player is pressing this right now — "
+                    "this turn should advance, complicate, or invert the question."
+                )
+            elif status == "approaching_resolution":
+                line += (
+                    "\n  Convergence: the pieces are aligning — choices should "
+                    "feel like they could resolve or shatter this thread soon."
+                )
+            elif status == "dormant":
+                line += (
+                    "\n  Quiet: this thread hasn't moved recently. Consider a "
+                    "quiet reminder if a natural moment arrives — not exposition."
+                )
             lines.append(line)
         return "\n".join(lines)
+
+    def build_memorable_moments_block(self) -> str:
+        """Render the memorable-moments callback block.
+
+        Suppressed in high-action scenes (combat, chase, space_combat) where
+        callbacks would disrupt pacing. Empty when no candidates were
+        selected upstream.
+        """
+        if not self.memorable_moments:
+            return ""
+        if self.scene_type in ("combat", "chase", "space_combat"):
+            return ""
+        return build_memorable_moments_block(self.memorable_moments)
 
     def build_reputation_block(self) -> str:
         """Render the REPUTATION ECHOES block, or empty string if nothing surfaces.

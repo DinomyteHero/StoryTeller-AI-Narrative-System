@@ -38,12 +38,26 @@ Write a reflection passage (2-4 paragraphs) that:
 1. Opens with a quiet moment — the character between scenes, between
    decisions. This is not action. This is the space where identity shifts
    become conscious.
-2. Grounds the reflection in specific events from the act just completed.
+2. INCLUDES AN ACKNOWLEDGMENT BEAT: At least one of the following must
+   appear in the passage:
+     a. An NPC the character has bonded with NOTICES the change — they
+        say something different in how they speak to the protagonist,
+        or the protagonist catches them watching with a new expression.
+     b. An object, place, or ritual reflects the change back — a tool
+        the character once couldn't handle now sits naturally in their
+        grip; a doorway they once passed through with hesitation they
+        now cross without thinking; a phrase they used to repeat is
+        now strange in their mouth.
+     c. The protagonist catches their own reflection (literally or in a
+        prior version of themselves) and recognizes someone different.
+   This is the difference between "I am acquiring a talent" and "I have
+   become someone I wasn't." Pick the one that fits the act's events.
+3. Grounds the reflection in specific events from the act just completed.
    What happened that changed the character? Reference specific moments,
    not abstractions.
-3. Arrives at a point where the character's growth could go in different
+4. Arrives at a point where the character's growth could go in different
    directions — the divergence point.
-4. Does NOT resolve the divergence. The choices below do that.
+5. Does NOT resolve the divergence. The choices below do that.
 
 After the passage, on a new line write exactly: ---CHOICES---
 Then provide the choices listed above, rewritten in the character's
@@ -56,4 +70,6 @@ voice. Each choice must:
   (this tag will be stripped before the player sees it)
 
 TONE: Introspective, specific, grounded. The character is discovering
-something about themselves, not making a strategic decision.
+something about themselves, not making a strategic decision. The
+acknowledgment beat is what makes this feel like a CHARACTER MOMENT
+rather than a stat increase.

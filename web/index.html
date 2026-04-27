@@ -201,6 +201,99 @@ header {
   background: #1a1f2e;
 }
 
+/* ── Free-form input ───────────────────────────────────────────── */
+.freeform-wrapper {
+  margin-top: 0.5rem;
+}
+
+.freeform-details summary {
+  cursor: pointer;
+  color: var(--text-dim);
+  font-size: 0.85rem;
+  padding: 0.5rem 0.25rem;
+  user-select: none;
+}
+
+.freeform-details summary:hover {
+  color: var(--accent-dim);
+}
+
+.freeform-details[open] summary {
+  color: var(--accent);
+  margin-bottom: 0.5rem;
+}
+
+.freeform-row {
+  display: flex;
+  gap: 0.5rem;
+  align-items: stretch;
+}
+
+#freeform-input {
+  flex: 1;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 0.6rem 0.8rem;
+  border-radius: 4px;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 0.95rem;
+  resize: vertical;
+  min-height: 44px;
+}
+
+#freeform-input:focus {
+  outline: none;
+  border-color: var(--accent-dim);
+}
+
+.freeform-submit {
+  flex: 0 0 auto;
+  padding: 0.5rem 1rem;
+  min-width: 80px;
+  text-align: center;
+}
+
+.freeform-hint {
+  margin-top: 0.4rem;
+  font-size: 0.78rem;
+  color: var(--text-dim);
+  font-style: italic;
+}
+
+.freeform-hint kbd {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  padding: 0 0.3rem;
+  font-family: ui-monospace, SFMono-Regular, monospace;
+  font-size: 0.75rem;
+}
+
+/* ── Destiny indicator ─────────────────────────────────────────── */
+.destiny-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.25rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  margin-left: 0.5rem;
+  border: 1px solid var(--border);
+}
+
+.destiny-indicator.light {
+  color: #d8c878;
+  border-color: #c8a84e;
+  background: rgba(200, 168, 78, 0.1);
+}
+
+.destiny-indicator.dark {
+  color: #c87878;
+  border-color: #a04848;
+  background: rgba(160, 72, 72, 0.1);
+}
+
 /* ── Loading / Status ──────────────────────────────────────────── */
 .loading {
   display: none;
@@ -447,21 +540,24 @@ async function startSession() {
 document.addEventListener('DOMContentLoaded', loadCampaigns);
 
 /* ── Take a turn ───────────────────────────────────────────────── */
-async function takeTurn(choiceIndex) {
+async function takeTurn(choiceIndex, freeFormText) {
   if (streamingEnabled) {
-    return takeTurnStream(choiceIndex);
+    return takeTurnStream(choiceIndex, freeFormText);
   }
   disableChoices();
-  highlightChoice(choiceIndex);
+  if (choiceIndex >= 0) highlightChoice(choiceIndex);
   showLoading(true);
   clearError();
   hideDicePanel();
 
   try {
+    const body = freeFormText
+      ? { choice_index: -1, free_form_action: freeFormText }
+      : { choice_index: choiceIndex };
     const res = await fetch(API + '/session/' + sessionId + '/turn', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ choice_index: choiceIndex }),
+      body: JSON.stringify(body),
     });
 
     if (!res.ok) {
@@ -476,7 +572,7 @@ async function takeTurn(choiceIndex) {
 
     // Dice panel
     if (data.dice_result) {
-      renderDicePanel(data.dice_result, data.roll_summary);
+      renderDicePanel(data.dice_result, data.roll_summary, data.destiny);
     }
 
     // Local narration warning
@@ -504,19 +600,22 @@ async function takeTurn(choiceIndex) {
 }
 
 /* ── Take a turn (streaming) ────────────────────────────────────── */
-async function takeTurnStream(choiceIndex) {
+async function takeTurnStream(choiceIndex, freeFormText) {
   disableChoices();
-  highlightChoice(choiceIndex);
+  if (choiceIndex >= 0) highlightChoice(choiceIndex);
   showLoading(true);
   clearError();
   hideDicePanel();
-  renderPendingChoices('Resolving your choice...');
+  renderPendingChoices(freeFormText ? 'Acting on your words...' : 'Resolving your choice...');
 
   try {
+    const body = freeFormText
+      ? { choice_index: -1, free_form_action: freeFormText }
+      : { choice_index: choiceIndex };
     const res = await fetch(API + '/session/' + sessionId + '/turn/stream', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ choice_index: choiceIndex }),
+      body: JSON.stringify(body),
     });
 
     if (!res.ok) {
@@ -570,7 +669,7 @@ async function takeTurnStream(choiceIndex) {
           renderChoices(data.choices);
 
           if (data.dice_result) {
-            renderDicePanel(data.dice_result, data.roll_summary);
+            renderDicePanel(data.dice_result, data.roll_summary, data.destiny);
           }
 
           const warn = document.getElementById('local-warning');
@@ -639,6 +738,39 @@ function renderChoices(choices) {
     btn.onclick = () => takeTurn(i);
     el.appendChild(btn);
   });
+
+  // Free-form input affordance — let the player type their own action.
+  const ffWrapper = document.createElement('div');
+  ffWrapper.className = 'freeform-wrapper';
+  ffWrapper.innerHTML = ''
+    + '<details class="freeform-details">'
+    + '  <summary>Speak or act in your own words</summary>'
+    + '  <div class="freeform-row">'
+    + '    <textarea id="freeform-input" rows="2" maxlength="600" '
+    + '      placeholder="Describe what your character does or says..."></textarea>'
+    + '    <button id="freeform-submit" class="choice-btn freeform-submit">Act</button>'
+    + '  </div>'
+    + '  <div class="freeform-hint">'
+    + '    The system will pick an appropriate skill and difficulty for what you describe. '
+    + '    Press <kbd>Ctrl</kbd>+<kbd>Enter</kbd> to send.'
+    + '  </div>'
+    + '</details>';
+  el.appendChild(ffWrapper);
+
+  const ffInput = document.getElementById('freeform-input');
+  const ffSubmit = document.getElementById('freeform-submit');
+  const submitFreeform = () => {
+    const text = (ffInput.value || '').trim();
+    if (!text) return;
+    takeTurn(-1, text);
+  };
+  ffSubmit.onclick = submitFreeform;
+  ffInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+      e.preventDefault();
+      submitFreeform();
+    }
+  });
 }
 
 function renderPendingChoices(message) {
@@ -665,7 +797,7 @@ function highlightChoice(index) {
 }
 
 /* ── Dice panel ────────────────────────────────────────────────── */
-function renderDicePanel(diceResult, rollSummary) {
+function renderDicePanel(diceResult, rollSummary, destiny) {
   const panel = document.getElementById('dice-panel');
   const details = document.getElementById('dice-details');
   panel.classList.add('visible');
@@ -686,9 +818,16 @@ function renderDicePanel(diceResult, rollSummary) {
   html += '<div style="color:var(--text-dim);margin-bottom:0.5rem">'
     + escapeHtml(diceResult.description) + '</div>';
 
-  // Roll summary
+  // Roll summary + destiny indicator
   if (rollSummary) {
-    html += '<div class="roll-summary">' + escapeHtml(rollSummary) + '</div>';
+    html += '<div class="roll-summary">' + escapeHtml(rollSummary);
+    if (destiny && destiny.light_spent) {
+      html += '<span class="destiny-indicator light" title="The Force was with you — Light Destiny upgraded the pool.">★ Destiny (Light)</span>';
+    }
+    if (destiny && destiny.dark_spent) {
+      html += '<span class="destiny-indicator dark" title="The galaxy pushed back — Dark Destiny upgraded the difficulty.">★ Destiny (Dark)</span>';
+    }
+    html += '</div>';
   }
 
   details.innerHTML = html;
