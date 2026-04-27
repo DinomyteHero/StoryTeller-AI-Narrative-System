@@ -194,11 +194,14 @@ def evaluate_destiny_spend(
             result.light_remaining = destiny.light
             result.dark_remaining = destiny.dark
             result.narrative_note = (
-                "DESTINY (LIGHT SIDE SPENT): This check was touched by fate. "
-                "The character experienced a moment of preternatural luck, "
-                "perfect timing, or an instinct that arrived exactly when "
-                "needed. Weave this into the narration as fortune, not as "
-                "skill — something that went better than it should have."
+                "DESTINY (LIGHT SIDE SPENT — REQUIRED BEAT): This check was "
+                "touched by fate. You MUST include exactly one sentence of "
+                "interior recognition where the protagonist NOTICES that "
+                "something just went better than it should have — a held breath, "
+                "a flicker of disbelief, an instinct that arrived a half-second "
+                "before it should have. The player needs to feel the universe "
+                "step in. Do not narrate this as skill or competence. Frame it "
+                "as fortune the character can feel. One sentence, no more."
             )
 
     # ── Dark Side evaluation ─────────────────────────────────────
@@ -238,11 +241,14 @@ def evaluate_destiny_spend(
             result.dark_remaining = destiny.dark
 
             dark_note = (
-                "DESTINY (DARK SIDE SPENT): Fate worked against the character "
-                "this time. The situation was harder than it should have been "
-                "— bad timing, unexpected complications, the galaxy's "
-                "indifference to good intentions. Narrate the difficulty as "
-                "environmental or circumstantial, not as character incompetence."
+                "DESTINY (DARK SIDE SPENT — REQUIRED BEAT): Fate worked "
+                "against the character this time. You MUST include exactly "
+                "one sentence where the protagonist NOTICES the world tilting "
+                "wrong — a sudden chill, a piece of equipment betraying them, "
+                "a coincidence that lands the wrong way. The player needs to "
+                "feel the galaxy push back. Frame the difficulty as "
+                "environmental or circumstantial, not as character incompetence. "
+                "One sentence, no more."
             )
             if result.narrative_note:
                 result.narrative_note += "\n\n" + dark_note

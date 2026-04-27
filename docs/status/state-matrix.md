@@ -1,7 +1,7 @@
 # Storyteller V3 — Project State Matrix
 
-**Version:** 1.7
-**Date:** April 25, 2026
+**Version:** 1.8
+**Date:** April 26, 2026
 **Purpose:** Single-page snapshot of every major capability's status.
 This is a point-in-time view — for authoritative item-level status,
 see `backlog.md`. Prevents the most common review error: mistaking a
@@ -26,7 +26,11 @@ Milestone 4 partial (Phase 17 complete, Phases 18-22 not started).
 Campaign Studio CS-1 through CS-6 complete. April 2026 architecture
 pivot collapsed local/cloud split into a fast/quality tier abstraction
 via the unified `gm/llm_client.py` and wired the reputation echo,
-behavioral availability, and era-voice systems end-to-end.
+behavioral availability, and era-voice systems end-to-end. **April 26
+Depth & Enjoyment Pass** added memorable-moments ledger, multi-stage
+thread state, evolving voice, growth recognition, NPC counter-moves,
+emergent faction reactivity, side content + pivot points, tactical
+state for combat / negotiation / chase, and free-form player input.
 
 **Codebase metrics:** ~19,000 lines application code, ~10,300 lines
 test code, 20 test files. 653 tests pass + 12 cleanly skip (campaign-
@@ -81,7 +85,8 @@ Documentation: 16 active files in `docs/` plus 6 in `docs/reference/`.
 | Character-specific choice design (prompt) | §7 | ✓ | ✓ Verified (prompt instruction) | Phase 3 |
 | Conditional choice availability (behavioral) | §7 | ✓ | Partial (vignettes/talents only) | Phase 13 |
 | Semantic memory / choice annotation | §16 | ✓ | ✓ Built | Phase 13 |
-| Choice quality validation + repair loop | §7 | **Spec complete** | Not in V1 | Late Phase 3 / Phase 7 |
+| Choice quality validation + repair loop | §7 | ✓ | ✓ Built (on by default) | Depth pass (Apr 26) |
+| Free-form player input (typed action) | §7 | ✓ | ✓ Built | Depth pass (Apr 26) |
 
 ---
 
@@ -98,6 +103,9 @@ Documentation: 16 active files in `docs/` plus 6 in `docs/reference/`.
 | NPC voice generation (prompt template) | §11 | ✓ | ✓ Built | CS Phase 2 |
 | Large-scale NPC management (3-tier relevance) | §11 | ✓ | Not in V1 | Phase 20 |
 | Generative entity persistence | — | ✓ | Not in V1 | Post-Milestone 1 |
+| NPC crystallized memory (sharpest impression) | §11 | ✓ | ✓ Built | Depth pass (Apr 26) |
+| NPC counter-move cue (proactive pressure) | §11 | ✓ | ✓ Built | Depth pass (Apr 26) |
+| Slowed emotion decay for high-stakes moods | §25 | ✓ | ✓ Built (incl. betrayed/awed/bonded) | Depth pass (Apr 26) |
 
 ---
 
@@ -115,6 +123,15 @@ Documentation: 16 active files in `docs/` plus 6 in `docs/reference/`.
 | Reputation echo delivery (runtime) | §1, §11 | ✓ | ✓ Built | Architecture pivot (Apr 2026) |
 | Behavioral availability signal (annotation history → choice weighting) | §7, §16 | ✓ | ✓ Built | Architecture pivot (Apr 2026) |
 | Era voice anchoring (period-specific tone + period_avoid) | §4 | ✓ | ✓ Built | Architecture pivot (Apr 2026) |
+| Memorable moments ledger + callback candidates | §16 | ✓ | ✓ Built | Depth pass (Apr 26) |
+| Multi-stage thread state (dormant → resolved_pending_fallout → closed) | §13 | ✓ | ✓ Built | Depth pass (Apr 26) |
+| Lore seeds (sensory/ritual/object/language anchors) | §3, §4 | ✓ | ✓ Built (Shadows authored) | Depth pass (Apr 26) |
+| Tactical state — multi-round combat grammar | §3 | ✓ | ✓ Built | Depth pass (Apr 26) |
+| Tactical state — multi-stage negotiation grammar | §3 | ✓ | ✓ Built | Depth pass (Apr 26) |
+| Tactical state — chase distance bands | §3 | ✓ | ✓ Built | Depth pass (Apr 26) |
+| Side content scaffold (optional encounters) | §13 | ✓ | ✓ Built (Shadows seeded) | Depth pass (Apr 26) |
+| Hard pivot points (locks_off branching) | §13 | ✓ | ✓ Built (Shadows seeded) | Depth pass (Apr 26) |
+| Emergent faction reactivity (player-action signals) | §1, §11 | ✓ | ✓ Built | Depth pass (Apr 26) |
 
 ---
 
@@ -131,8 +148,13 @@ Documentation: 16 active files in `docs/` plus 6 in `docs/reference/`.
 | Character advancement (XP, skill ranks) | §14 | ✓ | ✓ Built | Phase 10 |
 | Milestone reflections (talents, specializations) | §14 | ✓ | ✓ Built | Phase 12 |
 | Aspiration echoes (latent Force, growth direction) | §14 | ✓ | ✓ Built | Phase 13 |
-| Character voice notes (evolved through play) | §8 | ✓ | ✓ Verified (static, from spine) | Phase 3 |
+| Character voice notes (evolved through play) | §8 | ✓ | ✓ Built (evolved_voice_block overlay) | Depth pass (Apr 26) |
 | Throughline question | §8 | ✓ | ✓ Verified (static, from spine) | Phase 3 |
+| Background field activated in narration prompt | §8 | ✓ | ✓ Built (Praxeum chars populated) | Depth pass (Apr 26) |
+| Equipment "items of meaning" handling instruction | §11 | ✓ | ✓ Built | Depth pass (Apr 26) |
+| Destiny spending visible to player (UI + required interior beat) | §6 | ✓ | ✓ Built | Depth pass (Apr 26) |
+| Growth recognition (between-act behavioral surface) | §14 | ✓ | ✓ Built (was Step 13 stub) | Depth pass (Apr 26) |
+| Milestone scenes (NPC-acknowledgment beat required) | §14.3 | ✓ | ✓ Built (prompt strengthened) | Depth pass (Apr 26) |
 
 ---
 
@@ -245,16 +267,17 @@ explained by intentional deferral or architecture reservation.
 
 | Gap | Category | Audit Finding | Recommendation |
 |-----|----------|--------------|----------------|
-| Choice quality validation | Validation / enforcement | No post-generation validator rejects weak choices before player sees them | **Spec complete** — `specialist/choice-quality-validation.md` v1.0. Awaits implementation (late Phase 3 or Phase 7, contingent on calibration). |
+| Choice quality validation | Validation / enforcement | No post-generation validator rejects weak choices before player sees them | **Closed (Apr 26)** — `gm/choice_validator.py` enabled by default (`CHOICE_QUALITY_INLINE` flipped to `true`). Five-dimension rubric runs inline; one repair attempt on 2+ failed dimensions; fail-open if evaluator errors. |
 | Prologue inference robustness | Validation / enforcement | Contradiction handling, anti-gaming, and per-axis confidence rules were under-specified | **Spec complete** — `specialist/prologue-system.md` v1.0. Awaits implementation (Phase 18). |
 | Import package quality | Validation / enforcement | Format was specified, quality standard was not | **Spec complete** — `specialist/import-package-quality.md` v1.0. Awaits implementation (Phase 19). |
 | Path differentiation proof | Validation / enforcement | No concrete test proves allegiances produce structurally different experiences beyond narrative wrappers | **Closed (Apr 2026)** — backlog 3.33 and 3.34 implemented in `studio/validate.py` (Gate 1 integration layer + Gate 3 allegiance diversity, 8 pure-Python checks via Jaccard token similarity). |
 | Identity drift surfacing | Experience surfacing | System tracks identity accumulation well at act boundaries but does not guarantee the player feels drift during turn-to-turn play | **Closed (Apr 2026)** — `compute_identity_drift_cue` in `gm/context.py` surfaces a one-line interior cue when morality / conflict / motivation deltas cross thresholds (5-turn cooldown). Wired at all 4 turn handlers. |
 | Introspection trigger logic | Experience surfacing | Introspection is supported in prompts and context routing but the trigger for when a turn should become introspective is implicit | **Closed (Apr 2026)** — `compute_introspection_trigger` in `gm/context.py` has three explicit conditions: post-Despair, post-pinch-point, mid-act dry spell. |
 | Missing data directories | Infrastructure | `data/evaluation_pairs/` and `data/canon_profiles/` referenced in design docs but directories do not exist in repo | Future — create when Phase 21 or trained evaluator work begins. No impact on current functionality. |
-| CS-6 closure heartbeat runtime | Runtime wiring | `check_closure_heartbeat` exists with unit tests but is not called from the live turn loop | Open — needs per-thread last-change tracking on `arc_state`. |
-| CS-6 foreshadow setup/payoff runtime | Runtime wiring | `ForeshadowLink` schema + setup/payoff tracking authored but no runtime detector | Open — needs setup-delivery detection + payoff trigger logic. |
-| CS-6 contradiction arc accumulation runtime | Runtime wiring | Reconciliation returns per-turn `contradiction_tracking` but nothing aggregates it into `contradiction_arc_block` | Open — needs a multi-turn aggregator that builds the per-act block. |
+| CS-6 closure heartbeat runtime | Runtime wiring | `check_closure_heartbeat` exists with unit tests but is not called from the live turn loop | **Closed (Apr 26)** — `compute_closure_heartbeat_instruction` in `gm/context.py`; counter on `arc_state.turns_since_last_thread_change` reset by `_post_reconciliation_cs6_hook`. |
+| CS-6 foreshadow setup/payoff runtime | Runtime wiring | `ForeshadowLink` schema + setup/payoff tracking authored but no runtime detector | **Closed (Apr 26)** — `compute_foreshadow_instruction` walks `spine.foreshadow_registry`; payoff prioritized over setup; delivered IDs persisted on `arc_state.foreshadow_setups_delivered` / `foreshadow_payoffs_delivered`. |
+| CS-6 contradiction arc accumulation runtime | Runtime wiring | Reconciliation returns per-turn `contradiction_tracking` but nothing aggregates it into `contradiction_arc_block` | **Closed (Apr 26)** — `accumulate_contradiction_arc` + `build_contradiction_arc_block` in `gm/context.py`; ledger capped at 8 entries; dominant movement surfaces in narration prompt. |
+| Player-felt depth gaps (April 26 audit) | Experience surfacing | Engine tracks rich state but player rarely felt it (single-check collapse, cosmetic choices, world forgets, identity is a spreadsheet, NPCs are stat blocks, authored treadmill, sparse backstory) | **Closed (Apr 26)** — Depth & Enjoyment Pass A–F: memorable moments, multi-stage thread state, evolving voice, growth recognition, NPC counter-moves, faction reactivity, side content + pivot points, tactical state for combat / negotiation / chase, free-form input, lore seeds, deepened character backgrounds. See changelog 2026-04-26. |
 
 ---
 
@@ -275,6 +298,35 @@ explained by intentional deferral or architecture reservation.
 ---
 
 ## Revision History
+
+**v1.8 — Depth & Enjoyment Pass (April 26, 2026)**
+
+Synced after the depth-and-enjoyment six-phase pass that closed the
+April 26 player-felt-experience audit. New rows added across Choice
+and Player Agency (free-form input, choice quality on by default), NPC
+System (crystallized memory, counter-move cue, slowed high-stakes mood
+decay), Campaign Pacing and Structure (memorable moments, multi-stage
+thread state, lore seeds, tactical state for combat / negotiation /
+chase, side content scaffold, hard pivot points, emergent faction
+reactivity), and Character Identity and Growth (evolved voice block,
+background activation, items of meaning, destiny visibility, growth
+recognition, milestone scenes with acknowledgment beat).
+
+Three open audit findings closed: choice quality validation (now on by
+default), CS-6 closure heartbeat runtime (wired), CS-6 foreshadow
+setup/payoff runtime (wired), CS-6 contradiction arc accumulation
+runtime (wired). New "Player-felt depth gaps" finding added and closed
+in the same pass.
+
+Self-playtest verified: 10 turns through Act 1 of Shadows, no crashes
+after two bugfixes (scene_npcs variable mismatch in three handlers,
+sqlite3.Row .get() error in destiny block). Reached act boundary on
+turn 10 with 23 threads tracked, 2 memorable moments captured (1
+callback already surfaced), 2 foreshadow setups delivered, 1 side
+content engaged, tactical-state negotiation grammar activated and
+cleared correctly across scene-type shifts. Opening passage threaded
+5+ lore seeds and the protagonist background into the prose without
+prompting.
 
 **v1.7 — Architecture pivot + audit closures (April 25, 2026)**
 

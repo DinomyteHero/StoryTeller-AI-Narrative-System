@@ -42,6 +42,10 @@ CHARACTER
 CHARACTER VOICE:
 {character_voice}
 
+{evolved_voice_block}
+
+{background_block}
+
 LOADOUT:
 {equipment_block}
 
@@ -59,6 +63,8 @@ LOADOUT:
 
 {depth_card_block}
 
+{growth_recognition_block}
+
 ═══════════════════════════════════════════
 STORY CONTEXT
 ═══════════════════════════════════════════
@@ -68,6 +74,8 @@ THROUGHLINE: {throughline_question}
 TENSION LEVEL: {tension_level}
 
 {era_voice_block}
+
+{lore_seeds_block}
 
 Never use the words "act," "chapter," "session," "turn," or any
 structural game terminology in your prose. The player is reading a
@@ -79,7 +87,21 @@ STORY SO FAR:
 OPEN THREADS:
 {open_threads}
 
+{memorable_moments_block}
+
 {reputation_block}
+
+NARRATIVE COHERENCE CONTRACT:
+- The world has a memory. NPCs remember what the player did to or for them.
+  When an NPC's "Sharpest memory of protagonist" is set, let it color
+  posture, cadence, and silence — never quote the memory back at the player.
+- Open threads have status labels. HOT threads should advance, complicate,
+  or invert this turn. APPROACHING_RESOLUTION threads should narrow toward
+  closure. RESOLVED_PENDING_FALLOUT threads must show a ripple — a rumor,
+  a changed dynamic, an environmental detail — even if no NPC mentions them.
+- If MEMORABLE MOMENTS candidates are offered above, weave AT MOST one as
+  resonance — a half-line, a gesture, an image — never as exposition. If
+  none fit naturally, skip them; manufactured callbacks are worse than none.
 
 {pacing_block}
 
@@ -102,6 +124,16 @@ GALACTIC CONTEXT:
 {galactic_context}
 
 {scene_pacing}
+
+{tactical_state_block}
+
+{npc_counter_move_block}
+
+{faction_reactivity_block}
+
+{side_content_block}
+
+{pivot_warning_block}
 
 {dice_result_block}
 

@@ -3,6 +3,35 @@
   "era": "new_republic",
   "total_acts": 5,
   "throughline_question": "What does loyalty cost when every allegiance demands a different piece of you?",
+  "lore_seeds": {
+    "sensory": [
+      "the perpetual humidity of Yavin 4 — even the duracrete sweats at midday",
+      "the smell of jungle rot mixed with ozone where the temple's ancient power conduits still leak",
+      "the dawn chorus of Whyren-fliers above the canopy — like bells underwater",
+      "the way the temple stone is warm at midday and cold by an hour after sunset, as if it remembers a sun that no longer reaches it",
+      "the reflective coral of the inner Massassi corridors that brightens when Force-sensitive students walk past — only fractionally, only to those watching",
+      "the quiet hiss of Tionne's recording crystals warming up in the archive at dusk"
+    ],
+    "ritual": [
+      "the morning meditation chime — three notes, the third half a tone flat by Luke's deliberate tuning",
+      "the meal-share custom Luke instituted — students take turns naming a small thing they were grateful for that day",
+      "the lighting of the perimeter glow-lanterns at sundown by the youngest student present",
+      "the silent walk Tionne makes around the archive's perimeter every night before sealing the door"
+    ],
+    "objects": [
+      "Tionne's recordings — small crystalline data wafers shelved alphabetically by the name of the Jedi they describe",
+      "salvaged kyber crystals from the lower Massassi levels, each one humming at a different almost-audible frequency",
+      "the Praxeum's perimeter glow-lanterns, each one carved with the symbol of the student whose responsibility it is to maintain it",
+      "the cracked obsidian disc Luke keeps on his desk — a fragment from the Death Star's debris field, kept as a discipline against forgetting",
+      "the practice remotes Luke salvaged from a Clone Wars-era training ship, still bearing scuff marks from earlier Padawans"
+    ],
+    "language": [
+      "students address Luke as 'Master Luke' only in formal contexts — otherwise simply 'Luke' (a deliberate break from the old Order's hierarchy)",
+      "Tionne uses 'lessons' instead of 'lectures' — a deliberate framing choice",
+      "the older students have begun greeting one another with 'May the Force breathe' — a phrase Luke neither encourages nor stops",
+      "Mirialan formality permits the prayer-form 'Ka'thari' (carry it well) when entrusting a difficult task to a friend"
+    ]
+  },
   "allegiances": [
     {
       "id": "jedi_order",
@@ -336,7 +365,21 @@
           "description": "First talent purchase after establishing character approach"
         }
       ],
-      "protagonist_mode": "orphan"
+      "protagonist_mode": "orphan",
+      "side_content": [
+        {
+          "id": "tionne_archive_visit",
+          "title": "An evening in the archive with Tionne",
+          "hook": "Tionne is cataloguing the latest fragments of pre-Empire Jedi journals and could use a second pair of eyes — particularly on a manuscript that mentions a Jedi Knight named Seren, no surname legible.",
+          "keywords": ["archive", "tionne", "library", "history", "seren", "journal"]
+        },
+        {
+          "id": "perimeter_lantern_repair",
+          "title": "The east perimeter lantern is dimming",
+          "hook": "One of the perimeter glow-lanterns has been flickering for two nights. The student responsible is a younger Padawan who has been quietly afraid since the lantern is theirs to maintain — and they don't know how.",
+          "keywords": ["lantern", "perimeter", "padawan", "repair", "young"]
+        }
+      ]
     },
     {
       "number": 2,
@@ -392,7 +435,21 @@
         "delivery_method": "environmental",
         "target_progress": 0.5
       },
-      "protagonist_mode": "wanderer"
+      "protagonist_mode": "wanderer",
+      "side_content": [
+        {
+          "id": "follow_kira_or_wait",
+          "title": "Wait for Kira's return at the dormitory door",
+          "hook": "If the student lets Kira come back on her own terms instead of following her, Kira may bring something back — a hidden truth, a dropped object, an opening in her guard.",
+          "keywords": ["wait", "stay", "doorway", "patience", "kira return"]
+        },
+        {
+          "id": "old_temple_meditation",
+          "title": "Sit alone in the upper meditation chamber",
+          "hook": "The chamber Luke uses at dawn is empty at midnight. Sitting in it alone might surface a vision the morning sessions never reach.",
+          "keywords": ["meditation", "alone", "vision", "upper chamber", "midnight"]
+        }
+      ]
     },
     {
       "number": 3,
@@ -455,6 +512,22 @@
         "delivery_method": "direct_witness",
         "target_progress": 0.5
       },
+      "pivot_points": [
+        {
+          "id": "act3_kira_disclosure_pivot",
+          "description": "Whether the student tells Luke what they have learned about Kira's secret meetings — or shields her — closes off one of two future relationship arcs. After this turn, the unchosen path is not available.",
+          "target_progress": 0.7,
+          "locks_off": "the alternative trust arc with whichever of Luke or Kira the student did not align with"
+        }
+      ],
+      "side_content": [
+        {
+          "id": "tannen_intercept",
+          "title": "An old freighter's transponder pings unfamiliar",
+          "hook": "A New Republic patrol pilot, off-duty, mentions a freighter at the system's edge whose IFF doesn't match its silhouette — could be smugglers, could be Imperial Remnant scouts running clean transponders. The pilot would owe the student a favor for a quiet check.",
+          "keywords": ["freighter", "transponder", "system edge", "pilot favor", "remnant scout"]
+        }
+      ],
       "time_skip_after": {
         "duration_months": 3,
         "narrative_framing": "Three months pass at the Praxeum. The student has not told anyone what they learned from Malakai. The knowledge sits like a stone in the chest. Kira has stopped leaving at night, but something has changed between them -- the silences are longer, the laughter rarer. Training continues. Luke adds advanced combat forms to the curriculum without explaining why. The jungle grows. And at the edge of the system, the hyperspace signatures have stopped. Which is worse than when they were there.",
@@ -1212,6 +1285,9 @@
     {
       "faction_id": "jedi_praxeum",
       "display_name": "Jedi Praxeum",
+      "name": "Jedi Praxeum",
+      "alignment": "friendly",
+      "trigger_keywords": ["jedi", "praxeum", "luke", "tionne", "kira", "academy", "student"],
       "disposition_start": 0.8,
       "influence_start": 0.3,
       "awareness_start": 0.2,
@@ -1231,6 +1307,9 @@
     {
       "faction_id": "imperial_remnant_tannen",
       "display_name": "Imperial Remnant (Tannen's Task Force)",
+      "name": "Imperial Remnant (Tannen's Task Force)",
+      "alignment": "hostile",
+      "trigger_keywords": ["empire", "imperial", "tannen", "tie", "stormtrooper", "remnant", "fleet", "inquisitor", "malakai"],
       "disposition_start": 0.1,
       "influence_start": 0.6,
       "awareness_start": 0.1,
@@ -1254,6 +1333,9 @@
     {
       "faction_id": "new_republic",
       "display_name": "New Republic",
+      "name": "New Republic",
+      "alignment": "friendly",
+      "trigger_keywords": ["new republic", "senate", "patrol", "alliance", "republic"],
       "disposition_start": 0.6,
       "influence_start": 0.7,
       "awareness_start": 0.1,

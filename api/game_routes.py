@@ -16,6 +16,7 @@ import re
 import threading
 from dataclasses import asdict, fields
 from datetime import datetime, timezone
+from typing import Optional
 
 from fastapi import APIRouter, BackgroundTasks, HTTPException
 from fastapi.responses import StreamingResponse
@@ -807,15 +808,54 @@ def _apply_narration_scene_state(
 
 
 def _thread_states_for_context(current_act: dict, arc_state: dict) -> list[ThreadState]:
+    """Assemble ThreadState objects for the narration context.
+
+    Pulls rich state (status, progress, hot_question, fallout) from
+    arc_state["thread_state"] when available; falls back to defaults so
+    legacy sessions without thread_state still work. Resolved-with-fallout
+    threads remain visible to the LLM (so consequences can ripple), even
+    though they're tracked in closed_threads — the LLM is told their
+    status is RESOLVED_PENDING_FALLOUT.
+    """
     closed = set(arc_state.get("closed_threads", []))
+    rich_state = arc_state.get("thread_state", {}) or {}
     seen: set[str] = set()
     threads: list[ThreadState] = []
+
+    def _build(name: str, base: ThreadState | None = None) -> ThreadState:
+        rich = rich_state.get(name, {}) or {}
+        if base is not None:
+            t = base
+        else:
+            t = ThreadState(name=name)
+        if rich:
+            t.status = str(rich.get("status", t.status) or t.status)
+            t.hot_question = str(rich.get("hot_question", t.hot_question) or t.hot_question)
+            t.progress = float(rich.get("progress", t.progress) or 0.0)
+            t.last_movement_turn = int(rich.get("last_movement_turn", t.last_movement_turn) or 0)
+            t.fallout_remaining_turns = int(
+                rich.get("fallout_remaining_turns", t.fallout_remaining_turns) or 0
+            )
+        return t
+
     for raw in current_act.get("open_threads", []) + arc_state.get("dynamic_threads", []):
         name = raw.name if isinstance(raw, ThreadState) else str(raw)
         if not name or name in closed or name in seen:
             continue
         seen.add(name)
-        threads.append(raw if isinstance(raw, ThreadState) else ThreadState(name=name))
+        threads.append(_build(name, raw if isinstance(raw, ThreadState) else None))
+
+    # Surface resolved-pending-fallout threads so consequences can ripple.
+    for name, rich in rich_state.items():
+        if name in seen:
+            continue
+        if rich.get("status") != "resolved_pending_fallout":
+            continue
+        if int(rich.get("fallout_remaining_turns", 0) or 0) <= 0:
+            continue
+        threads.append(_build(name))
+        seen.add(name)
+
     return threads
 
 
@@ -941,10 +981,41 @@ def _compute_dynamic_context_fields(
     # voice mode mapping. These existed as helpers but were never invoked
     # from the live turn loop until now.
     from gm.context import (
+        accumulate_contradiction_arc,
+        advance_tactical_state,
+        build_contradiction_arc_block,
         build_depth_card_block,
+        build_lore_seeds_block,
+        build_tactical_state_block,
+        compute_closure_heartbeat_instruction,
+        compute_foreshadow_instruction,
         compute_pinch_point_instruction,
         compute_voice_mode_instruction,
+        initialize_tactical_state,
+        resolve_variant,
     )
+
+    # Tactical state lifecycle (Phase D): if the player is in a combat/
+    # social/chase scene, ensure a tactical_state matches. The current
+    # scene_type comes from arc_state.scene_state (set by the previous
+    # turn's narration patch).
+    scene_state = arc_state.get("scene_state", {}) or {}
+    current_scene_type = (scene_state.get("scene_type", "") or "").lower()
+    tactical_state = arc_state.get("tactical_state") or {}
+    if current_scene_type in ("combat", "social", "chase"):
+        existing_kind = tactical_state.get("kind") if isinstance(tactical_state, dict) else None
+        expected_kind = {
+            "combat": "combat",
+            "social": "negotiation",
+            "chase":  "chase",
+        }[current_scene_type]
+        if existing_kind != expected_kind:
+            tactical_state = initialize_tactical_state(current_scene_type)
+            arc_state["tactical_state"] = tactical_state
+    else:
+        if tactical_state:
+            arc_state["tactical_state"] = {}
+            tactical_state = {}
     pinch_inst = compute_pinch_point_instruction(
         spine_act=current_act,
         act_progress=float(arc_state.get("act_progress", 0.0) or 0.0),
@@ -955,6 +1026,31 @@ def _compute_dynamic_context_fields(
     )
     voice_mode = compute_voice_mode_instruction(
         str(arc_state.get("last_dramatic_mission", "") or "")
+    )
+    closure_heartbeat = compute_closure_heartbeat_instruction(arc_state)
+    foreshadow_inst = compute_foreshadow_instruction(
+        spine=spine,
+        current_act_number=int(arc_state.get("current_act", 1) or 1),
+        arc_state=arc_state,
+    )
+    variant = resolve_variant(spine, str(arc_state.get("variant_id", "") or ""))
+    protagonist_contradiction = ""
+    if variant:
+        protagonist_contradiction = (
+            variant.get("protagonist_contradiction")
+            or (variant.get("depth_card") or {}).get("inner_demon")
+            or ""
+        )
+    contradiction_arc_block = build_contradiction_arc_block(
+        arc_state, protagonist_contradiction
+    )
+
+    from gm.context import select_callback_candidates
+    scene_npc_names = [getattr(n, "name", "") for n in npc_states]
+    callback_candidates = select_callback_candidates(
+        arc_state,
+        current_turn=turn_number,
+        scene_npc_names=scene_npc_names,
     )
 
     return {
@@ -972,6 +1068,17 @@ def _compute_dynamic_context_fields(
         "pinch_point_instruction": pinch_inst,
         "depth_card_block":        depth_card,
         "voice_mode_instruction":  voice_mode,
+        "closure_heartbeat_instruction": closure_heartbeat,
+        "foreshadow_instruction":        foreshadow_inst,
+        "contradiction_arc_block":       contradiction_arc_block,
+        "memorable_moments":             callback_candidates,
+        "lore_seeds_block":              build_lore_seeds_block(spine),
+        "growth_recognition_block":      str(arc_state.get("pending_growth_recognition", "") or ""),
+        "tactical_state_block":          build_tactical_state_block(tactical_state or {}),
+        "npc_counter_move_block":        _build_npc_counter_move_block(npc_states, arc_state),
+        "faction_reactivity_block":      _build_faction_reactivity_block(arc_state, spine),
+        "side_content_block":            _build_side_content_block(spine, current_act, arc_state),
+        "pivot_warning_block":           _build_pivot_warning_block(spine, current_act, arc_state),
     }
 
 
@@ -1013,15 +1120,246 @@ def _post_narration_drift_hook(
     if pinch_fired_this_turn:
         arc_state["pinch_point_fired"] = True
 
+    # Growth recognition is a one-shot — clear after surfacing.
+    if arc_state.get("pending_growth_recognition"):
+        arc_state["pending_growth_recognition"] = ""
 
-def _post_reconciliation_cs6_hook(arc_state: dict, recon_result) -> None:
-    """After reconciliation, capture the dramatic mission so the next turn's
-    narration can pick the right voice mode (CS-6 Phase 10).
+
+def _post_reconciliation_cs6_hook(
+    arc_state: dict,
+    recon_result,
+    turn_number: int = 0,
+    foreshadow_instruction: str = "",
+    spine: Optional[dict] = None,
+) -> None:
+    """After reconciliation, capture cross-turn CS-6 state.
+
+    Maintains four pieces of state for the next turn:
+      - dramatic_mission → next turn's voice mode
+      - contradiction_arc → multi-turn ledger of how the protagonist relates
+        to their core contradiction
+      - foreshadow_setups_delivered / payoffs_delivered → ensure each
+        foreshadow link only surfaces once
+      - turns_since_last_thread_change → drives the closure heartbeat
     """
     dm = getattr(recon_result, "dramatic_mission", None) or {}
     selected = dm.get("selected_mission") if isinstance(dm, dict) else ""
     if selected:
         arc_state["last_dramatic_mission"] = selected
+
+    # Contradiction arc accumulation (CS-6 Phase 6 — closes audit gap)
+    from gm.context import accumulate_contradiction_arc
+    accumulate_contradiction_arc(
+        arc_state=arc_state,
+        contradiction_tracking=getattr(recon_result, "contradiction_tracking", {}) or {},
+        turn_number=turn_number,
+    )
+
+    # Foreshadow setup/payoff delivery tracking (CS-6 Phase 5 — closes audit gap)
+    if foreshadow_instruction and isinstance(spine, dict):
+        registry = spine.get("foreshadow_registry") or []
+        delivered_setups = list(arc_state.get("foreshadow_setups_delivered", []) or [])
+        delivered_payoffs = list(arc_state.get("foreshadow_payoffs_delivered", []) or [])
+        current_act_num = int(arc_state.get("current_act", 1) or 1)
+        is_payoff = "PAYOFF" in foreshadow_instruction
+        for link in registry:
+            link_id = link.get("id") if isinstance(link, dict) else None
+            if not link_id:
+                continue
+            if is_payoff:
+                if (
+                    link_id in delivered_setups
+                    and link_id not in delivered_payoffs
+                    and int(link.get("payoff_act", 0) or 0) == current_act_num
+                ):
+                    delivered_payoffs.append(link_id)
+                    break
+            else:
+                if (
+                    link_id not in delivered_setups
+                    and int(link.get("setup_act", 0) or 0) == current_act_num
+                ):
+                    delivered_setups.append(link_id)
+                    break
+        arc_state["foreshadow_setups_delivered"] = delivered_setups
+        arc_state["foreshadow_payoffs_delivered"] = delivered_payoffs
+
+    # Closure heartbeat counter (CS-6 Phase 8 — closes audit gap)
+    tu = getattr(recon_result, "thread_updates", {}) or {}
+    moved = bool(
+        tu.get("threads_advanced") or tu.get("threads_resolved") or tu.get("threads_opened")
+    )
+    if moved:
+        arc_state["turns_since_last_thread_change"] = 0
+    else:
+        arc_state["turns_since_last_thread_change"] = (
+            int(arc_state.get("turns_since_last_thread_change", 0) or 0) + 1
+        )
+
+
+def _build_npc_counter_move_block(npc_states: list, arc_state: dict) -> str:
+    """Phase E17: suggest the most-pressuring NPC's likely next tactical move.
+
+    Looks at the most relevant scene NPC and produces a one-line GM cue
+    so NPCs feel proactive — escalating, exploiting, sustaining pressure —
+    rather than just reacting to player moves.
+    """
+    if not npc_states:
+        return ""
+    # Pick the NPC with the strongest pressure signal: lowest disposition,
+    # highest active emotional intensity, or hostile pressure_role.
+    def _pressure_score(n) -> float:
+        score = 0.0
+        disp = float(getattr(n, "disposition", 0.5) or 0.5)
+        score += max(0.0, 0.5 - disp) * 2.0
+        es = getattr(n, "emotional_state", None)
+        if es is not None and getattr(es, "is_active", lambda: False)():
+            score += float(getattr(es, "intensity", 0.0) or 0.0)
+        role = (getattr(n, "pressure_role", "") or "").lower()
+        if role in ("tempter", "betrayer", "escalator", "skeptic", "mirror"):
+            score += 0.5
+        return score
+
+    sorted_npcs = sorted(npc_states, key=_pressure_score, reverse=True)
+    candidate = sorted_npcs[0]
+    if _pressure_score(candidate) < 0.3:
+        return ""
+
+    name = getattr(candidate, "name", "")
+    disp = float(getattr(candidate, "disposition", 0.5) or 0.5)
+    es = getattr(candidate, "emotional_state", None)
+    mood = (getattr(es, "mood", "") or "").lower() if es is not None else ""
+    role = (getattr(candidate, "pressure_role", "") or "").lower()
+    crystallized = (getattr(candidate, "crystallized_memory", "") or "").strip()
+
+    move_options: list[str] = []
+    if disp <= 0.3:
+        move_options.append(f"escalate against the protagonist (verbal sharpening, naming a wound, or producing a fresh complication)")
+    elif disp <= 0.5:
+        move_options.append(f"test the protagonist with a pointed question or quiet refusal")
+    if mood == "betrayed":
+        move_options.append("withhold something the protagonist needs, or speak with a coldness they have not used before")
+    elif mood == "angry":
+        move_options.append("press a grievance the protagonist would rather not revisit")
+    elif mood == "afraid":
+        move_options.append("ask the protagonist for protection in a way that creates obligation")
+    elif mood == "grateful":
+        move_options.append("offer something unprompted — information, a tool, a moment of vulnerability")
+    if role == "tempter":
+        move_options.append("offer the protagonist a shortcut whose cost is hidden under its appeal")
+    elif role == "escalator":
+        move_options.append("act independently in a way that raises the time pressure on the protagonist")
+    elif role == "skeptic":
+        move_options.append("voice the doubt the protagonist has been suppressing")
+
+    if not move_options:
+        return ""
+
+    crystallized_note = ""
+    if crystallized:
+        crystallized_note = f" (let their sharpest memory of the protagonist — '{crystallized}' — color how they make the move)"
+
+    return (
+        f"NPC COUNTER-MOVE CUE: {name} should not just react this turn — they should "
+        f"{move_options[0]}{crystallized_note}. Make it concrete, not implied."
+    )
+
+
+def _build_faction_reactivity_block(arc_state: dict, spine: dict) -> str:
+    """Phase E18: surface emergent faction state shifts caused by player action.
+
+    Reads `arc_state["faction_emergent"]` (populated by the post-turn hook)
+    and renders a one-line cue when a faction's standing toward the
+    player has shifted recently.
+    """
+    emergent = arc_state.get("faction_emergent") or {}
+    if not isinstance(emergent, dict) or not emergent:
+        return ""
+    cues: list[str] = []
+    for faction_name, data in emergent.items():
+        if not isinstance(data, dict):
+            continue
+        delta = float(data.get("delta", 0.0) or 0.0)
+        if abs(delta) < 0.05:
+            continue
+        direction = "tightening" if delta > 0 else "easing"
+        action = (data.get("recent_action", "") or "").strip()
+        cues.append(
+            f"  - {faction_name}: {direction} attention on the protagonist "
+            f"({'+' if delta >= 0 else ''}{delta:.2f})"
+            + (f" — triggered by {action}" if action else "")
+        )
+    if not cues:
+        return ""
+    return (
+        "FACTION REACTIVITY (emergent — not authored drift):\n"
+        + "\n".join(cues)
+        + "\nIf a moment fits, let one of these reactivity shifts surface — through "
+          "a posted notice, a guarded look, an unexpected interest, or a deliberate ignoring."
+    )
+
+
+def _build_side_content_block(spine: dict, current_act: dict, arc_state: dict) -> str:
+    """Phase E20: surface an optional encounter the player can engage with.
+
+    Reads `current_act["side_content"]` (a list of optional encounters
+    authored in the spine). Selects one not yet engaged and renders a
+    one-line offer-to-the-LLM. Keeps the world from feeling on-rails.
+    """
+    side_content = current_act.get("side_content") or []
+    if not side_content:
+        return ""
+    seen = set(arc_state.get("side_content_engaged", []) or [])
+    for item in side_content:
+        if not isinstance(item, dict):
+            continue
+        cid = item.get("id")
+        if not cid or cid in seen:
+            continue
+        title = item.get("title", "an optional encounter")
+        hook = item.get("hook", "")
+        return (
+            f"SIDE CONTENT AVAILABLE: '{title}'. {hook} "
+            f"If a natural opening arrives in this passage, you MAY plant "
+            f"this hook (a sign, an overheard line, a stranger's question, "
+            f"a side door) — but only if it doesn't dilute the main action. "
+            f"It is fine to ignore this if the scene is already full."
+        )
+    return ""
+
+
+def _build_pivot_warning_block(spine: dict, current_act: dict, arc_state: dict) -> str:
+    """Phase E19: when the player is at a hard pivot point, mark the choices weighty.
+
+    Pivot points are authored in the spine as `pivot_points` per act —
+    moments where a choice closes off another path. When the act_progress
+    crosses a pivot's trigger, this block tells the LLM to make the
+    consequences explicit and irreversible-feeling.
+    """
+    pivots = current_act.get("pivot_points") or []
+    if not pivots:
+        return ""
+    progress = float(arc_state.get("act_progress", 0.0) or 0.0)
+    fired = set(arc_state.get("pivots_fired", []) or [])
+    for p in pivots:
+        if not isinstance(p, dict):
+            continue
+        pid = p.get("id")
+        if not pid or pid in fired:
+            continue
+        target = float(p.get("target_progress", 0.5) or 0.5)
+        if progress < target:
+            continue
+        description = (p.get("description") or "").strip()
+        consequence = (p.get("locks_off") or "").strip()
+        return (
+            f"HARD PIVOT POINT: This turn the player is at a real fork in the story. "
+            f"{description} The choices you offer must be genuine alternatives — picking one "
+            f"should feel like closing a door on the others. "
+            + (f"Specifically: choosing one path locks off {consequence}. " if consequence else "")
+            + "Make the weight of the choice land in the prose. Do not let the choices feel cosmetic."
+        )
+    return ""
 
 
 def _post_reconciliation_reputation_hook(
@@ -1037,6 +1375,324 @@ def _post_reconciliation_reputation_hook(
             summary=recon_result.reputation_event,
             faction_tags=recon_result.faction_tags or [],
         )
+
+
+def _flag_memorable_moments(
+    arc_state: dict,
+    turn_number: int,
+    *,
+    roll_result=None,
+    recon_result=None,
+    scene_npcs: Optional[list] = None,
+    player_action: str = "",
+    narration_passage: str = "",
+    obligation_just_activated: bool = False,
+    duty_just_activated: bool = False,
+    force_temptation_accepted: bool = False,
+    milestone_fired: bool = False,
+) -> None:
+    """Auto-flag this turn for the memorable moments ledger.
+
+    Triggered by:
+      - Triumph or Despair on the dice
+      - NPC disposition shift >= 0.15 (single turn) — both warm and cold
+      - Thread resolved
+      - Reputation event flagged
+      - Motivation activation (Obligation or Duty just turned on)
+      - Force temptation accepted (a darkside choice the player made)
+      - Milestone fired (talent or Force power chosen)
+      - Crystallized memory imprinted on an NPC
+
+    Each call adds 0+ moments. The arc_state ledger handles deduplication.
+    """
+    from gm.context import register_memorable_moment
+
+    act_number = int(arc_state.get("current_act", 1) or 1)
+    npc_names: list[str] = []
+    if scene_npcs:
+        npc_names = [getattr(n, "name", str(n)) for n in scene_npcs if getattr(n, "name", "")]
+
+    def first_sentence(text: str) -> str:
+        text = (text or "").strip()
+        if not text:
+            return ""
+        match = re.search(r"^(.{1,180}?[\.!?])\s", text + " ")
+        return (match.group(1) if match else text[:180]).strip()
+
+    excerpt = first_sentence(narration_passage)
+
+    # Triumph / Despair
+    if roll_result is not None:
+        if getattr(roll_result, "triumphs", 0) > 0:
+            register_memorable_moment(
+                arc_state,
+                turn_number=turn_number,
+                act_number=act_number,
+                kind="triumph",
+                summary=excerpt or f"Triumph on a {getattr(roll_result, 'narrative_label', lambda: 'check')()} — the moment broke open.",
+                npc_names=npc_names,
+                weight=1.5,
+            )
+        if getattr(roll_result, "despairs", 0) > 0:
+            register_memorable_moment(
+                arc_state,
+                turn_number=turn_number,
+                act_number=act_number,
+                kind="despair",
+                summary=excerpt or "Despair landed — the cost of this turn cuts.",
+                npc_names=npc_names,
+                weight=1.7,
+            )
+
+    # NPC disposition shifts and reputation event
+    if recon_result is not None:
+        for npc_update in getattr(recon_result, "npc_updates", []) or []:
+            shift = float(npc_update.get("disposition_shift", 0) or 0)
+            if abs(shift) >= 0.15:
+                npc_name = npc_update.get("npc_name", "")
+                kind = "trust_deepened" if shift > 0 else "trust_fractured"
+                summary = (
+                    f"{npc_name} {'opened up' if shift > 0 else 'pulled back'} after "
+                    f"{(player_action or 'this beat').strip().rstrip('.')[:120]}."
+                )
+                register_memorable_moment(
+                    arc_state,
+                    turn_number=turn_number,
+                    act_number=act_number,
+                    kind=kind,
+                    summary=summary,
+                    npc_names=[npc_name] if npc_name else npc_names,
+                    weight=1.3 + abs(shift),
+                )
+        for thread_name in (recon_result.thread_updates or {}).get("threads_resolved", []) or []:
+            register_memorable_moment(
+                arc_state,
+                turn_number=turn_number,
+                act_number=act_number,
+                kind="thread_resolved",
+                summary=f"The thread '{thread_name}' closed — its weight has shifted.",
+                npc_names=npc_names,
+                weight=1.4,
+            )
+        if getattr(recon_result, "reputation_event", None):
+            register_memorable_moment(
+                arc_state,
+                turn_number=turn_number,
+                act_number=act_number,
+                kind="reputation_event",
+                summary=str(recon_result.reputation_event),
+                npc_names=npc_names,
+                weight=1.2,
+            )
+
+    if obligation_just_activated:
+        register_memorable_moment(
+            arc_state,
+            turn_number=turn_number,
+            act_number=act_number,
+            kind="obligation_activated",
+            summary=excerpt or "An old debt surfaced.",
+            npc_names=npc_names,
+            weight=1.1,
+        )
+    if duty_just_activated:
+        register_memorable_moment(
+            arc_state,
+            turn_number=turn_number,
+            act_number=act_number,
+            kind="duty_activated",
+            summary=excerpt or "The cause demanded something.",
+            npc_names=npc_names,
+            weight=1.1,
+        )
+    if force_temptation_accepted:
+        register_memorable_moment(
+            arc_state,
+            turn_number=turn_number,
+            act_number=act_number,
+            kind="darkside_choice",
+            summary=excerpt or "The dark side flowed and the protagonist let it.",
+            npc_names=npc_names,
+            weight=1.6,
+        )
+    if milestone_fired:
+        register_memorable_moment(
+            arc_state,
+            turn_number=turn_number,
+            act_number=act_number,
+            kind="milestone",
+            summary=excerpt or "Something inside the protagonist crystallized.",
+            npc_names=npc_names,
+            weight=1.3,
+        )
+
+
+def _post_turn_world_state_hook(
+    arc_state: dict,
+    *,
+    spine: dict,
+    current_act: dict,
+    player_action: str = "",
+    roll_result=None,
+    npc_states: Optional[list] = None,
+    side_content_offered: bool = False,
+    pivot_offered: bool = False,
+) -> None:
+    """Phase D/E: advance tactical state, update faction reactivity,
+    mark side content / pivots as engaged.
+
+    Runs after reconciliation. The four sub-systems share a hook so all
+    four turn handlers stay in sync as the model evolves.
+    """
+    from gm.context import advance_tactical_state
+
+    # 1. Tactical state advancement
+    tactical_state = arc_state.get("tactical_state") or {}
+    if tactical_state and isinstance(tactical_state, dict) and tactical_state.get("kind"):
+        outcome = ""
+        succeeded = False
+        if roll_result is not None:
+            outcome = getattr(roll_result, "outcome_quadrant", "") or ""
+            succeeded = bool(getattr(roll_result, "succeeded", False))
+        advance_tactical_state(
+            tactical_state,
+            outcome_quadrant=outcome,
+            succeeded=succeeded,
+            player_action=player_action,
+        )
+        arc_state["tactical_state"] = tactical_state
+
+    # 2. Emergent faction reactivity
+    factions = (spine or {}).get("factions") or []
+    if factions and player_action:
+        emergent = arc_state.setdefault("faction_emergent", {})
+        action_lower = player_action.lower()
+        scene_factions = (current_act or {}).get("scene_factions", []) or []
+        for faction in factions:
+            if not isinstance(faction, dict):
+                continue
+            fname = faction.get("name", "")
+            if not fname:
+                continue
+            keywords = [str(k).lower() for k in (faction.get("trigger_keywords") or [])]
+            faction_present = fname.lower() in scene_factions or any(
+                k in action_lower for k in keywords
+            )
+            if not faction_present:
+                continue
+            current = emergent.get(fname, {"delta": 0.0, "recent_action": ""})
+            shift = 0.0
+            if any(k in action_lower for k in ("help", "save", "protect", "ally")):
+                shift = 0.05 if faction.get("alignment", "neutral") == "friendly" else -0.05
+            elif any(k in action_lower for k in ("attack", "kill", "destroy", "betray", "expose")):
+                shift = -0.08 if faction.get("alignment", "neutral") == "friendly" else 0.05
+            elif any(k in action_lower for k in ("sneak", "evade", "hide", "deceive")):
+                shift = 0.02
+            if shift != 0.0:
+                current["delta"] = float(current.get("delta", 0.0)) + shift
+                # Cap to plausible range
+                current["delta"] = max(-0.5, min(0.5, current["delta"]))
+                current["recent_action"] = player_action[:80]
+                emergent[fname] = current
+        arc_state["faction_emergent"] = emergent
+
+    # 3. Side content engagement tracking — heuristic: look for the side
+    # content title or hook tokens in the player action.
+    if side_content_offered:
+        side_content = (current_act or {}).get("side_content") or []
+        engaged = list(arc_state.get("side_content_engaged", []) or [])
+        action_lower = player_action.lower()
+        for item in side_content:
+            if not isinstance(item, dict):
+                continue
+            cid = item.get("id")
+            if not cid or cid in engaged:
+                continue
+            title = (item.get("title", "") or "").lower()
+            keywords = [str(k).lower() for k in (item.get("keywords") or [])]
+            if (title and title in action_lower) or any(k in action_lower for k in keywords):
+                engaged.append(cid)
+        arc_state["side_content_engaged"] = engaged
+
+    # 4. Pivot firing tracking
+    if pivot_offered:
+        pivots = (current_act or {}).get("pivot_points") or []
+        fired = list(arc_state.get("pivots_fired", []) or [])
+        progress = float(arc_state.get("act_progress", 0.0) or 0.0)
+        for p in pivots:
+            if not isinstance(p, dict):
+                continue
+            pid = p.get("id")
+            if not pid or pid in fired:
+                continue
+            target = float(p.get("target_progress", 0.5) or 0.5)
+            if progress >= target:
+                fired.append(pid)
+        arc_state["pivots_fired"] = fired
+
+
+def _post_turn_memorable_moments_hook(
+    arc_state: dict,
+    turn_number: int,
+    *,
+    roll_result=None,
+    recon_result=None,
+    scene_npcs: Optional[list] = None,
+    player_action: str = "",
+    narration_passage: str = "",
+    candidate_moments: Optional[list] = None,
+    obligation_just_activated: bool = False,
+    duty_just_activated: bool = False,
+    force_temptation_accepted: bool = False,
+    milestone_fired: bool = False,
+) -> None:
+    """One-stop call site for memorable-moments bookkeeping per turn.
+
+    Order matters: detect callbacks FIRST (so a fresh moment flagged this
+    turn isn't immediately marked as also referenced), then flag new
+    moments from this turn's events.
+    """
+    if candidate_moments:
+        _detect_memorable_callback_in_passage(
+            arc_state, candidate_moments, narration_passage, turn_number,
+        )
+    _flag_memorable_moments(
+        arc_state,
+        turn_number,
+        roll_result=roll_result,
+        recon_result=recon_result,
+        scene_npcs=scene_npcs,
+        player_action=player_action,
+        narration_passage=narration_passage,
+        obligation_just_activated=obligation_just_activated,
+        duty_just_activated=duty_just_activated,
+        force_temptation_accepted=force_temptation_accepted,
+        milestone_fired=milestone_fired,
+    )
+
+
+def _detect_memorable_callback_in_passage(
+    arc_state: dict,
+    candidates: list,
+    passage: str,
+    current_turn: int,
+) -> None:
+    """When the narration appears to use one of the offered callbacks,
+    mark it surfaced so cooldown applies. Heuristic: any NPC name + a
+    keyword from the moment's summary appearing in the passage.
+    """
+    from gm.context import mark_callback_surfaced
+    text = (passage or "").lower()
+    if not text or not candidates:
+        return
+    for moment in candidates:
+        npcs = [str(n).lower() for n in (moment.get("npc_names") or [])]
+        summary = (moment.get("summary") or "").lower()
+        keywords = [w for w in re.findall(r"[a-z]{5,}", summary)][:5]
+        npc_hit = any(name and name in text for name in npcs)
+        keyword_hit = any(k in text for k in keywords)
+        if npc_hit or keyword_hit:
+            mark_callback_surfaced(arc_state, moment, current_turn)
 
 
 @router.get("/campaigns")
@@ -1106,6 +1762,12 @@ class CreateSessionRequest(BaseModel):
 
 class TurnRequest(BaseModel):
     choice_index: int
+    # Phase D16: Optional free-form action. When set (non-empty), the
+    # player has typed their own action instead of picking from the
+    # offered choices. The turn handler routes this through the local
+    # check decision model so the system picks an appropriate skill
+    # and difficulty. choice_index should be -1 in this case.
+    free_form_action: Optional[str] = None
 
 
 class InterventionRequest(BaseModel):
@@ -1665,15 +2327,24 @@ async def handle_turn(
     previous_choices = json.loads(last_turn["choices_json"])
     previous_skill_tags = json.loads(last_turn.get("skill_tags_json") or "[]")
 
-    if req.choice_index < 0 or req.choice_index >= len(previous_choices):
-        raise HTTPException(400, f"Invalid choice_index: {req.choice_index}")
-
-    player_action = previous_choices[req.choice_index]
-    selected_skill_tag = (
-        previous_skill_tags[req.choice_index]
-        if req.choice_index < len(previous_skill_tags)
-        else None
-    )
+    free_form = (req.free_form_action or "").strip() if req.free_form_action else ""
+    if free_form:
+        # Free-form path: player typed their own action.
+        # The local check decision model picks the skill and difficulty.
+        # We require the action to be reasonable length to deter abuse.
+        if len(free_form) > 600:
+            raise HTTPException(400, "Free-form action too long (max 600 chars)")
+        player_action = free_form
+        selected_skill_tag = None  # let the check decision model decide
+    else:
+        if req.choice_index < 0 or req.choice_index >= len(previous_choices):
+            raise HTTPException(400, f"Invalid choice_index: {req.choice_index}")
+        player_action = previous_choices[req.choice_index]
+        selected_skill_tag = (
+            previous_skill_tags[req.choice_index]
+            if req.choice_index < len(previous_skill_tags)
+            else None
+        )
     update_session_state(session_id, character, arc_state)
 
     # ── Step 2: Build scene description for local GM ──────────────────
@@ -2135,7 +2806,33 @@ async def handle_turn(
     )
 
     _post_reconciliation_reputation_hook(session_id, turn_number, recon_result)
-    _post_reconciliation_cs6_hook(arc_state, recon_result)
+    _post_reconciliation_cs6_hook(
+        arc_state,
+        recon_result,
+        turn_number=turn_number,
+        foreshadow_instruction=dyn_fields.get("foreshadow_instruction", ""),
+        spine=spine,
+    )
+    _post_turn_memorable_moments_hook(
+        arc_state,
+        turn_number,
+        roll_result=roll_result,
+        recon_result=recon_result,
+        scene_npcs=scene_npcs,
+        player_action=player_action,
+        narration_passage=narration_result.passage,
+        candidate_moments=dyn_fields.get("memorable_moments", []),
+    )
+    _post_turn_world_state_hook(
+        arc_state,
+        spine=spine,
+        current_act=current_act,
+        player_action=player_action,
+        roll_result=roll_result,
+        npc_states=scene_npcs,
+        side_content_offered=bool(dyn_fields.get("side_content_block", "")),
+        pivot_offered=bool(dyn_fields.get("pivot_warning_block", "")),
+    )
 
     # ── Step 8: Apply state updates ──────────────────────────────────
     # NPC updates (knowledge, disposition)
@@ -2297,6 +2994,16 @@ async def handle_turn(
         },
         "used_local_narration": narration_result.used_local,
         "act_boundary": act_boundary_reached,
+        "destiny": {
+            "light_spent": bool(destiny_result and destiny_result.light_spent),
+            "dark_spent":  bool(destiny_result and destiny_result.dark_spent),
+            "light_remaining": (
+                destiny_result.light_remaining if destiny_result else session["destiny_light"]
+            ),
+            "dark_remaining": (
+                destiny_result.dark_remaining if destiny_result else session["destiny_dark"]
+            ),
+        },
     }
     if milestone_data:
         response["milestone"] = milestone_data
@@ -2944,7 +3651,33 @@ async def handle_turn_stream(
         )
 
         _post_reconciliation_reputation_hook(session_id, turn_number, recon_result)
-        _post_reconciliation_cs6_hook(arc_state, recon_result)
+        _post_reconciliation_cs6_hook(
+            arc_state,
+            recon_result,
+            turn_number=turn_number,
+            foreshadow_instruction=dyn_fields_s.get("foreshadow_instruction", ""),
+            spine=spine,
+        )
+        _post_turn_memorable_moments_hook(
+            arc_state,
+            turn_number,
+            roll_result=roll_result,
+            recon_result=recon_result,
+            scene_npcs=scene_npcs_s,
+            player_action=player_action,
+            narration_passage=narration_result.passage,
+            candidate_moments=dyn_fields_s.get("memorable_moments", []),
+        )
+        _post_turn_world_state_hook(
+            arc_state,
+            spine=spine,
+            current_act=current_act,
+            player_action=player_action,
+            roll_result=roll_result,
+            npc_states=scene_npcs_s,
+            side_content_offered=bool(dyn_fields_s.get("side_content_block", "")),
+            pivot_offered=bool(dyn_fields_s.get("pivot_warning_block", "")),
+        )
 
         # ── Step 8: Apply state updates ───────────────────────────────
         apply_npc_updates(recon_result.npc_updates, npc_states)
@@ -3332,7 +4065,33 @@ async def handle_temptation(
     )
 
     _post_reconciliation_reputation_hook(session_id, turn_number, recon_result)
-    _post_reconciliation_cs6_hook(arc_state, recon_result)
+    _post_reconciliation_cs6_hook(
+        arc_state,
+        recon_result,
+        turn_number=turn_number,
+        foreshadow_instruction=dyn_fields_t.get("foreshadow_instruction", ""),
+        spine=spine,
+    )
+    _post_turn_memorable_moments_hook(
+        arc_state,
+        turn_number,
+        roll_result=roll_result,
+        recon_result=recon_result,
+        scene_npcs=scene_npcs_t,
+        player_action=player_action,
+        narration_passage=narration_result.passage,
+        candidate_moments=dyn_fields_t.get("memorable_moments", []),
+    )
+    _post_turn_world_state_hook(
+        arc_state,
+        spine=spine,
+        current_act=current_act,
+        player_action=player_action,
+        roll_result=roll_result,
+        npc_states=scene_npcs_t,
+        side_content_offered=bool(dyn_fields_t.get("side_content_block", "")),
+        pivot_offered=bool(dyn_fields_t.get("pivot_warning_block", "")),
+    )
 
     apply_npc_updates(recon_result.npc_updates, npc_states)
     for npc in npc_states:
@@ -3660,7 +4419,33 @@ async def handle_intervention(
     )
 
     _post_reconciliation_reputation_hook(session_id, turn_number, recon_result)
-    _post_reconciliation_cs6_hook(arc_state, recon_result)
+    _post_reconciliation_cs6_hook(
+        arc_state,
+        recon_result,
+        turn_number=turn_number,
+        foreshadow_instruction=dyn_fields_iv.get("foreshadow_instruction", ""),
+        spine=spine,
+    )
+    _post_turn_memorable_moments_hook(
+        arc_state,
+        turn_number,
+        roll_result=roll_result,
+        recon_result=recon_result,
+        scene_npcs=scene_npcs_iv,
+        player_action=player_action,
+        narration_passage=narration_result.passage,
+        candidate_moments=dyn_fields_iv.get("memorable_moments", []),
+    )
+    _post_turn_world_state_hook(
+        arc_state,
+        spine=spine,
+        current_act=current_act,
+        player_action=player_action,
+        roll_result=roll_result,
+        npc_states=scene_npcs_iv,
+        side_content_offered=bool(dyn_fields_iv.get("side_content_block", "")),
+        pivot_offered=bool(dyn_fields_iv.get("pivot_warning_block", "")),
+    )
 
     apply_npc_updates(recon_result.npc_updates, npc_states)
     for npc in npc_states:
