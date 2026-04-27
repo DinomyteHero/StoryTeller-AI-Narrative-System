@@ -10,6 +10,8 @@ Tests the 12 V1 success criteria.
 
 import json
 import os
+from pathlib import Path
+import uuid
 from unittest.mock import patch, MagicMock
 
 import pytest
@@ -196,9 +198,14 @@ def _make_narration_result(narration_text):
 # ── Fixtures ────────────────────────────────────────────────────────────────
 
 @pytest.fixture(autouse=True)
-def temp_db(tmp_path):
+def temp_db():
     """Create a temporary database for each test."""
-    db_path = str(tmp_path / "test_storyteller.db")
+    db_dir = Path(os.environ.get(
+        "STORYTELLER_TEST_DB_DIR",
+        Path(__file__).resolve().parents[1] / "__test_dbs",
+    ))
+    db_dir.mkdir(parents=True, exist_ok=True)
+    db_path = str(db_dir / f"test_storyteller_{uuid.uuid4().hex}.db")
 
     import state.db
     original_path = state.db._DB_PATH
@@ -216,6 +223,12 @@ def temp_db(tmp_path):
         os.environ["DB_PATH"] = original_env
     elif "DB_PATH" in os.environ:
         del os.environ["DB_PATH"]
+
+    for suffix in ("", "-wal", "-shm"):
+        try:
+            Path(db_path + suffix).unlink(missing_ok=True)
+        except OSError:
+            pass
 
 
 @pytest.fixture
@@ -312,10 +325,12 @@ class TestV1SuccessCriteria:
         session_id = res.json()["session_id"]
 
         turn_res = client.post(f"/session/{session_id}/turn", json={
-            "choice_index": 0,
+            "choice_index": -1,
+            "free_form_action": "Bluff the temple supply clerk into overlooking a mismatched crate manifest.",
         })
         assert turn_res.status_code == 200
-        # The local LLM client was called for check decision (and reconciliation)
+        # Free-form actions route through the local check-decision model.
+        # Tagged authored choices can be resolved deterministically.
         assert mock_llms["local_llm"].called or mock_llms["http"].called
 
     def test_criterion_5_and_6_dice_pool_and_roll(self, client, mock_llms):

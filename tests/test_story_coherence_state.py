@@ -350,6 +350,30 @@ def test_parse_response_strips_accidental_wrapped_narration_quotes():
     assert not result.passage.endswith('"')
 
 
+def test_parse_response_preserves_dialogue_paragraph_quotes():
+    dialogue = (
+        '"Come on," she says. "If you keep staring at exits, Luke will make '
+        'you meditate at one. The training remote is already watching you, '
+        'and I refuse to lose a sparring partner to architecture."'
+    )
+    body = (
+        "The upper training level smells of rain-damp robes, old stone, "
+        "and the faint ozone leak from the practice remotes. Students spread "
+        "into pairs while the noon maintenance bell waits to interrupt them. "
+        "The common-room map remains behind you, three inks arguing about "
+        "the shape of a home nobody fully understands. " * 10
+    )
+    raw = (
+        f"{body}\n\n{dialogue}\n\n---CHOICES---\n"
+        "1. Let the sparring begin.\n"
+        "2. Ask about the corridor directly.\n"
+    )
+
+    result = _parse_response(raw)
+
+    assert dialogue in result.passage
+
+
 def test_parse_response_strips_wrapped_third_person_action_paragraph():
     inner = (
         "The drag stops below. "

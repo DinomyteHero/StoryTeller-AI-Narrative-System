@@ -743,6 +743,13 @@ def _strip_wrapped_narration_quotes(passage: str) -> str:
         if len(text) > 80:
             for left, right in (('"', '"'), ("“", "”")):
                 if text.startswith(left) and text.endswith(right):
+                    if re.search(
+                        r'^"[^"\n]+,"\s+\w+\s+'
+                        r'(says|said|asks|asked|answers|answered|'
+                        r'whispers|whispered|shouts|shouted|murmurs|murmured)\b',
+                        text,
+                    ):
+                        break
                     inner = text[1:-1].strip()
                     if (
                         re.search(

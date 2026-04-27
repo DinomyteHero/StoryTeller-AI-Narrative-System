@@ -1,0 +1,151 @@
+{
+  "name": "Clovis Beryl",
+  "species": "human",
+  "career": "sentinel",
+  "specializations": [
+    "shadow"
+  ],
+  "primary_game_line": "force_and_destiny",
+  "background": "Clovis Beryl was born to a respectable human family on the Mid Rim trade route of Brentaal space, in a household that believed good records, good manners, and quiet New Republic sympathies could keep danger at a distance. The Empire proved otherwise. In 4 ABY, his parents were listed for public execution after an Imperial governor discovered that the family had been moving fugitives through its shipping accounts. Clovis was supposed to die with them. A smuggler crew called the Glass Wake took him out through a bonded cargo chute six hours before the executions began. He was twelve. He grew up in holds, maintenance shafts, customs queues, and rented rooms above landing bays, learning which lies kept people alive and which lies got them spaced. The Force first came to him as warnings: a customs officer about to turn, a crate too quiet, a hyperlane that felt wrong before the navicomputer agreed. The crew called it luck. Clovis called it owing the dead. A New Republic contact eventually recognized what he was and arranged passage to Luke Skywalker's Praxeum. Clovis arrived with one bag, two false names he has not quite stopped answering to, and the habit of checking every exit before sitting down. He wants to learn the Jedi way. He does not yet trust peace enough to believe it can protect anyone. Kira Denn became his first real friend at the academy after catching him mapping blind spots in the temple corridors. She did not report him. She asked where the best hiding place was.",
+  "characteristics": {
+    "brawn": 2,
+    "agility": 3,
+    "intellect": 2,
+    "cunning": 3,
+    "willpower": 3,
+    "presence": 2
+  },
+  "skills": {
+    "astrogation": 1,
+    "athletics": 0,
+    "charm": 0,
+    "coercion": 0,
+    "computers": 1,
+    "cool": 0,
+    "coordination": 0,
+    "deception": 1,
+    "discipline": 1,
+    "leadership": 0,
+    "mechanics": 0,
+    "medicine": 0,
+    "negotiation": 0,
+    "perception": 1,
+    "piloting_planetary": 0,
+    "piloting_space": 0,
+    "resilience": 0,
+    "skulduggery": 2,
+    "stealth": 2,
+    "streetwise": 1,
+    "survival": 0,
+    "vigilance": 1,
+    "brawl": 0,
+    "gunnery": 0,
+    "melee": 0,
+    "ranged_light": 1,
+    "ranged_heavy": 0,
+    "core_worlds": 0,
+    "education": 0,
+    "lore": 0,
+    "outer_rim": 0,
+    "underworld": 1,
+    "warfare": 0,
+    "xenology": 0,
+    "lightsaber": 1
+  },
+  "wound_threshold": 12,
+  "strain_threshold": 13,
+  "current_wounds": 0,
+  "current_strain": 0,
+  "soak": 2,
+  "total_xp": 110,
+  "available_xp": 0,
+  "motivation": {
+    "obligation_type": null,
+    "obligation_value": 0,
+    "duty_type": null,
+    "duty_value": 0,
+    "morality": 50,
+    "conflict": 0
+  },
+  "force_rating": 1,
+  "force_committed": 0,
+  "loadout": {
+    "weapons": [
+      {
+        "name": "Training lightsaber (green crystal)",
+        "skill": "lightsaber",
+        "damage_bonus": 6,
+        "critical_rating": 2,
+        "qualities": [
+          "breach_1",
+          "sunder"
+        ],
+        "narrative_note": "Built under Luke's supervision from Praxeum salvage. Clovis still holds it like something borrowed from a braver person."
+      },
+      {
+        "name": "Hold-out blaster with filed serial",
+        "skill": "ranged_light",
+        "damage_bonus": 5,
+        "critical_rating": 4,
+        "qualities": [
+          "stun_setting"
+        ],
+        "narrative_note": "A Glass Wake habit he has not surrendered. Hidden, unloaded, and still a small argument with everything Luke is trying to teach him."
+      }
+    ],
+    "armor": {
+      "name": "Praxeum training robes over spacer underlayers",
+      "soak_bonus": 1,
+      "defense": 0,
+      "narrative_note": "Simple academy robes worn over old spacer thermals with secret inner pockets Clovis stitched shut and reopened twice."
+    },
+    "tools": [
+      {
+        "category": "security",
+        "name": "Compact bypass kit",
+        "mechanical_effect": "Enables Skulduggery checks against simple mechanical locks and adds 1 boost die when bypassing civilian access panels.",
+        "narrative_note": "Too clean for a smuggler kit, too illegal for a student tool roll."
+      },
+      {
+        "category": "navigation",
+        "name": "Smuggler route chip",
+        "mechanical_effect": "Adds 1 boost die to Astrogation or Underworld checks involving fringe routes, shadowports, or old Glass Wake contacts.",
+        "narrative_note": "Encrypted under a cargo manifest for dried Ithorian fungus. Clovis knows the real map by touch."
+      },
+      {
+        "category": "medical",
+        "name": "Two stimpacks",
+        "mechanical_effect": "Can heal 5 wounds per stimpack. Two uses before resupply needed.",
+        "narrative_note": "Kept because smugglers count medical supplies before ammunition."
+      }
+    ],
+    "special_items": [
+      {
+        "name": "Glass Wake transponder tag",
+        "mechanical_effect": "Once per session, adds 1 boost die to a Streetwise or Deception check involving smugglers, false identities, or old Imperial patrol habits.",
+        "narrative_note": "A thumb-sized strip of hull transponder with the crew's private mark scratched under the casing."
+      }
+    ]
+  },
+  "career_skills": [],
+  "reserved_xp": 0,
+  "advancement_log": [],
+  "acquired_talents": [],
+  "talent_uses": {},
+  "force_powers": [
+    {
+      "power_id": "sense",
+      "name": "Sense",
+      "category": "perception_knowledge",
+      "base_pips_required": 1,
+      "active_upgrades": [],
+      "narrative_capability": "Can sense the emotions and immediate intentions of nearby beings. For Clovis, this often arrives as a survival instinct before it feels like a sacred discipline.",
+      "gm_choice_guidance": "Offer sensing choices when Clovis could read fear, notice a lie, feel danger before it becomes visible, or distinguish genuine trust from practiced misdirection. Especially relevant around Kira, Luke's trust exercises, and the lower Massassi ruins.",
+      "dark_side_flavor": "Dark side Sense feels like casing a room by tearing the truth out of everyone in it. It works, and that is why Clovis should be afraid of wanting it."
+    }
+  ],
+  "active_commitments": [],
+  "throughline_question": "What does loyalty cost when every allegiance demands a different piece of you?",
+  "voice_notes": "Guarded, dry, and observant. Speaks like someone editing himself in real time. Uses smuggler slang when startled or comfortable, then notices he has done it. Polite with teachers, quietly funny with peers, ruthless about exits and contingencies.",
+  "active_injuries": []
+}

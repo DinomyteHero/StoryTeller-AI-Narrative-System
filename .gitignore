@@ -9,3 +9,5 @@ build/
 data/storyteller.db
 data/telemetry/*.jsonl
 eval_report.json
+__test_dbs/
+codex_smoke_tmp/

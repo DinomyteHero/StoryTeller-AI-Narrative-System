@@ -2374,7 +2374,7 @@ async def handle_turn(
         if t.outcome_quadrant and t.outcome_quadrant.startswith("failure")
     )
 
-    check_decision = _decision_from_choice_tag(
+    check_decision = None if free_form else _decision_from_choice_tag(
         selected_skill_tag,
         character,
         player_action=player_action,
@@ -3134,15 +3134,22 @@ async def handle_turn_stream(
     previous_choices = json.loads(last_turn["choices_json"])
     previous_skill_tags_s = json.loads(last_turn.get("skill_tags_json") or "[]")
 
-    if req.choice_index < 0 or req.choice_index >= len(previous_choices):
-        raise HTTPException(400, f"Invalid choice_index: {req.choice_index}")
+    free_form_s = (req.free_form_action or "").strip() if req.free_form_action else ""
+    if free_form_s:
+        if len(free_form_s) > 600:
+            raise HTTPException(400, "Free-form action too long (max 600 chars)")
+        player_action = free_form_s
+        selected_skill_tag_s = None
+    else:
+        if req.choice_index < 0 or req.choice_index >= len(previous_choices):
+            raise HTTPException(400, f"Invalid choice_index: {req.choice_index}")
 
-    player_action = previous_choices[req.choice_index]
-    selected_skill_tag_s = (
-        previous_skill_tags_s[req.choice_index]
-        if req.choice_index < len(previous_skill_tags_s)
-        else None
-    )
+        player_action = previous_choices[req.choice_index]
+        selected_skill_tag_s = (
+            previous_skill_tags_s[req.choice_index]
+            if req.choice_index < len(previous_skill_tags_s)
+            else None
+        )
 
     # ── Step 2: Build scene description for local GM ──────────────────
     scene_description = _build_scene_description(
@@ -3156,7 +3163,7 @@ async def handle_turn_stream(
         if t.outcome_quadrant and t.outcome_quadrant.startswith("failure")
     )
 
-    check_decision = _decision_from_choice_tag(
+    check_decision = None if free_form_s else _decision_from_choice_tag(
         selected_skill_tag_s,
         character,
         player_action=player_action,

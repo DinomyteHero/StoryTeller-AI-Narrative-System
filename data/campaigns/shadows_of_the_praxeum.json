@@ -16,20 +16,25 @@
       "the morning meditation chime — three notes, the third half a tone flat by Luke's deliberate tuning",
       "the meal-share custom Luke instituted — students take turns naming a small thing they were grateful for that day",
       "the lighting of the perimeter glow-lanterns at sundown by the youngest student present",
-      "the silent walk Tionne makes around the archive's perimeter every night before sealing the door"
+      "the silent walk Tionne makes around the archive's perimeter every night before sealing the door",
+      "the noon maintenance bell that means everyone stops training long enough to keep the temple habitable",
+      "Luke's rule that no student spars twice with the same partner until they have eaten together once"
     ],
     "objects": [
       "Tionne's recordings — small crystalline data wafers shelved alphabetically by the name of the Jedi they describe",
       "salvaged kyber crystals from the lower Massassi levels, each one humming at a different almost-audible frequency",
       "the Praxeum's perimeter glow-lanterns, each one carved with the symbol of the student whose responsibility it is to maintain it",
       "the cracked obsidian disc Luke keeps on his desk — a fragment from the Death Star's debris field, kept as a discipline against forgetting",
-      "the practice remotes Luke salvaged from a Clone Wars-era training ship, still bearing scuff marks from earlier Padawans"
+      "the practice remotes Luke salvaged from a Clone Wars-era training ship, still bearing scuff marks from earlier Padawans",
+      "a hand-drawn temple map in the student common room, wrong in three places and corrected by three different people"
     ],
     "language": [
       "students address Luke as 'Master Luke' only in formal contexts — otherwise simply 'Luke' (a deliberate break from the old Order's hierarchy)",
       "Tionne uses 'lessons' instead of 'lectures' — a deliberate framing choice",
       "the older students have begun greeting one another with 'May the Force breathe' — a phrase Luke neither encourages nor stops",
-      "Mirialan formality permits the prayer-form 'Ka'thari' (carry it well) when entrusting a difficult task to a friend"
+      "Mirialan formality permits the prayer-form 'Ka'thari' (carry it well) when entrusting a difficult task to a friend",
+      "support staff call unexplored corridors 'old teeth' because every new passage bites someone eventually",
+      "students use 'glow duty' as shorthand for any small responsibility that proves you live here, not just train here"
     ]
   },
   "allegiances": [
@@ -172,6 +177,164 @@
             "under_pressure": "Becomes controlling -- gathers information, makes plans, tries to manage situations alone.",
             "worldview": "The galaxy is full of people who need help and institutions that fail them. The Force is the bridge.",
             "moral_line": "Will not sacrifice an innocent to protect a guilty friend. But the line between innocent and guilty is where the real torture lives."
+          }
+        },
+        {
+          "id": "clovis_beryl",
+          "allegiance": "jedi_order",
+          "pitch": "Clovis Beryl, a human Sentinel/Shadow in his early twenties, survived an Imperial execution order because smugglers pulled him out through the cracks. At Luke's Praxeum he is learning that the Force is not just survival instinct -- and that trust may be harder than stealth.",
+          "species": "human",
+          "career": "sentinel",
+          "career_type": "shadow",
+          "specializations": [
+            "shadow"
+          ],
+          "primary_game_line": "force_and_destiny",
+          "force_sensitive": true,
+          "motivation_default": {
+            "track": "morality",
+            "possible_types": [
+              "caution_fear",
+              "justice_cruelty",
+              "bravery_anger"
+            ]
+          },
+          "starting_situation": "Clovis has been at the Praxeum for five weeks. The first days were practical: where the generators sit, which stairs echo, who checks the perimeter lanterns, how long Luke waits before correcting a student's stance. Kira Denn became his first friend after catching him mapping blind spots in the temple corridors and asking, without judgment, where the best hiding place was. Now daily life is beginning to feel almost believable -- morning meditation, shared meals, sparring drills, archive chores -- when Kira misses a training rotation and Clovis notices because noticing is what kept him alive.",
+          "voice_baseline": "Guarded, dry, and observant. Speaks like someone editing himself in real time. Uses smuggler slang when startled or comfortable, then notices he has done it. Polite with teachers, quietly funny with peers, ruthless about exits and contingencies.",
+          "background": "A human from a Mid Rim trade family scheduled for execution by the Empire after their shipping accounts were used to move fugitives. A smuggler crew called the Glass Wake saved Clovis and raised him among cargo holds, false manifests, and customs lies. His Force sensitivity first appeared as impossible timing and danger sense. Luke's Praxeum is the first place asking him to survive by trusting instead of hiding.",
+          "integration_layer": {
+            "entry_point": "Clovis enters the campaign as a new student still translating smuggler survival habits into Jedi discipline. He knows how to vanish, lie, and read a room, but he does not yet know how to belong in one.",
+            "personal_stakes": "If Clovis reports Kira too soon, he betrays the code that once saved him: never hand a frightened person to authority. If he protects her too long, he repeats the old smuggler mistake of hiding danger until it gets people killed.",
+            "npc_overrides": {
+              "Kira Denn": {
+                "disposition_start": 0.78,
+                "relationship": "first true friend at the Praxeum; sparring partner and co-conspirator in harmless rule-bending"
+              },
+              "Luke Skywalker": {
+                "disposition_start": 0.62,
+                "relationship": "teacher trying to convince Clovis that discipline is not another word for captivity"
+              },
+              "Tionne": {
+                "disposition_start": 0.58,
+                "relationship": "archivist who notices which old Jedi accounts Clovis avoids reading"
+              }
+            },
+            "anchor_adaptations": {
+              "academy_arrival": "Arrives by supply shuttle and spends the first weeks learning the Praxeum through chores, training drills, shared meals, and Kira's amused refusal to let him stay invisible.",
+              "night_investigation": "Follows Kira through routes he has already mapped, using Sense and old smuggler instincts to tell the difference between a friend in trouble and a trap.",
+              "inquisitor_contact": "Recognizes Malakai's method as the worst kind of authority: patient, wounded, and fluent in true things used as weapons.",
+              "betrayal_crisis": "Must decide whether secrecy is still protection when the Praxeum's trust network begins to fracture.",
+              "final_convergence": "Faces the Imperial attack as someone who knows how to run and must choose whether the Praxeum has become a place worth standing for."
+            }
+          },
+          "characteristics_base": {
+            "brawn": 2,
+            "agility": 3,
+            "intellect": 2,
+            "cunning": 3,
+            "willpower": 3,
+            "presence": 2
+          },
+          "skills_base": {
+            "astrogation": 1,
+            "computers": 1,
+            "deception": 1,
+            "discipline": 1,
+            "perception": 1,
+            "ranged_light": 1,
+            "skulduggery": 2,
+            "stealth": 2,
+            "streetwise": 1,
+            "underworld": 1,
+            "vigilance": 1,
+            "lightsaber": 1
+          },
+          "wound_threshold": 12,
+          "strain_threshold": 13,
+          "soak": 2,
+          "starting_loadout": {
+            "weapons": [
+              {
+                "name": "Training lightsaber (green crystal)",
+                "skill": "lightsaber",
+                "damage_bonus": 6,
+                "critical_rating": 2,
+                "qualities": [
+                  "breach_1",
+                  "sunder"
+                ],
+                "narrative_note": "Built under Luke's supervision from Praxeum salvage. Clovis still holds it like something borrowed from a braver person."
+              },
+              {
+                "name": "Hold-out blaster with filed serial",
+                "skill": "ranged_light",
+                "damage_bonus": 5,
+                "critical_rating": 4,
+                "qualities": [
+                  "stun_setting"
+                ],
+                "narrative_note": "A Glass Wake habit he has not surrendered. Hidden, unloaded, and still a small argument with everything Luke is trying to teach him."
+              }
+            ],
+            "armor": {
+              "name": "Praxeum training robes over spacer underlayers",
+              "soak_bonus": 1,
+              "defense": 0,
+              "narrative_note": "Simple academy robes worn over old spacer thermals with secret inner pockets Clovis stitched shut and reopened twice."
+            },
+            "tools": [
+              {
+                "category": "security",
+                "name": "Compact bypass kit",
+                "mechanical_effect": "Enables Skulduggery checks against simple mechanical locks and adds 1 boost die when bypassing civilian access panels.",
+                "narrative_note": "Too clean for a smuggler kit, too illegal for a student tool roll."
+              },
+              {
+                "category": "navigation",
+                "name": "Smuggler route chip",
+                "mechanical_effect": "Adds 1 boost die to Astrogation or Underworld checks involving fringe routes, shadowports, or old Glass Wake contacts.",
+                "narrative_note": "Encrypted under a cargo manifest for dried Ithorian fungus. Clovis knows the real map by touch."
+              },
+              {
+                "category": "medical",
+                "name": "Two stimpacks",
+                "mechanical_effect": "Can heal 5 wounds per stimpack. Two uses before resupply needed.",
+                "narrative_note": "Kept because smugglers count medical supplies before ammunition."
+              }
+            ],
+            "special_items": [
+              {
+                "name": "Glass Wake transponder tag",
+                "mechanical_effect": "Once per session, adds 1 boost die to a Streetwise or Deception check involving smugglers, false identities, or old Imperial patrol habits.",
+                "narrative_note": "A thumb-sized strip of hull transponder with the crew's private mark scratched under the casing."
+              }
+            ]
+          },
+          "starting_force_powers": [
+            {
+              "power_id": "sense",
+              "name": "Sense",
+              "category": "perception_knowledge",
+              "base_pips_required": 1,
+              "active_upgrades": [],
+              "narrative_capability": "Can sense the emotions and immediate intentions of nearby beings. For Clovis, this often arrives as a survival instinct before it feels like a sacred discipline.",
+              "gm_choice_guidance": "Offer sensing choices when Clovis could read fear, notice a lie, feel danger before it becomes visible, or distinguish genuine trust from practiced misdirection. Especially relevant around Kira, Luke's trust exercises, and the lower Massassi ruins.",
+              "dark_side_flavor": "Dark side Sense feels like casing a room by tearing the truth out of everyone in it. It works, and that is why Clovis should be afraid of wanting it."
+            }
+          ],
+          "starting_xp": 110,
+          "protagonist_contradiction": "Believes secrecy saves lives, but the Jedi path keeps asking him to trust people before he has proof they deserve it.",
+          "pressure_revealed_identity": "Under maximum pressure, Clovis becomes the person who stays visible so someone else can make it out alive.",
+          "contradiction_origin": "The Glass Wake saved Clovis by lying, hiding, and moving faster than Imperial truth. His family died because public law called them criminals. Trusting authority feels less like wisdom than forgetting the lesson that kept him breathing.",
+          "depth_card": {
+            "inner_demon": "Fear that survival has made him unfit for peace -- too suspicious, too ready to lie, too comfortable in shadows.",
+            "secret_yearning": "To be known by one true name and not regret it.",
+            "lesson_not_learned": "That trust is not the absence of caution. It is choosing what caution serves.",
+            "worst_act": "Let a frightened informant take the blame for a smuggling run because correcting the story would have exposed the Glass Wake. The informant survived prison, but Clovis never checked what it cost them.",
+            "social_mask": "The useful newcomer: polite, competent, funny enough to deflect questions, always willing to take the errand that lets him learn the building.",
+            "under_pressure": "Goes quiet, gathers leverage, makes contingency plans, and withholds the one detail someone else most needs.",
+            "worldview": "Institutions say protection and mean control. People say trust and mean leverage. The Force may be different, but he needs evidence.",
+            "moral_line": "Will not hand a vulnerable person to power simply because power asks cleanly."
           }
         }
       ]
@@ -324,20 +487,23 @@
       "number": 1,
       "name": "The New Students",
       "tension": "low",
-      "opening_situation": "Morning at the Jedi Praxeum on Yavin 4. The Great Temple rises above the jungle canopy, its stones older than the Republic. Twelve students sit in meditation on the upper level. Master Skywalker walks among them, barefoot, his presence in the Force like a quiet river. Somewhere below, a generator coughs and resets. Somewhere outside, Kira Denn is late to meditation again.",
-      "opening_location": "Jedi Praxeum, upper meditation level of the Great Temple, Yavin 4",
-      "galactic_context": "The New Republic is seven years old and still finding its footing. The Imperial Remnant has fractured into warlord fiefdoms competing for scraps of the old Empire. Luke's Praxeum is barely a year old -- twelve students, a handful of support staff, one X-wing. The Senate debates whether the Jedi should exist at all. On Yavin 4, the jungle reclaims the Massassi ruins faster than anyone can explore them.",
+      "opening_situation": "The Jedi Praxeum is still small enough that every arrival changes the shape of the day. The Great Temple rises above the Yavin jungle, its stones older than the Republic and its corridors full of borrowed equipment, improvised lessons, damp robes, and students learning what a Jedi is supposed to be when there is no Order left to copy. This opening stretch should breathe: arrival, orientation, chores, first training drills, shared meals, archive errands, perimeter lanterns at dusk, and the slow formation of trust with Kira Denn before her absences become frightening. Let the academy feel like a fragile home first. The mystery should begin as a missed lesson, a private look, a route through the temple someone knows too well -- not as an immediate crisis.",
+      "opening_location": "Jedi Praxeum, Great Temple landing terrace and upper training levels, Yavin 4",
+      "galactic_context": "The New Republic is seven years old and still finding its footing. The Imperial Remnant has fractured into warlord fiefdoms competing for scraps of the old Empire. Luke's Praxeum is barely a year old -- twelve students, a handful of support staff, one X-wing, and a Jedi tradition rebuilt from fragments. The Senate debates whether the Jedi should exist at all. On Yavin 4, the jungle reclaims the Massassi ruins faster than anyone can explore them, while the academy's daily rituals try to make hope practical.",
       "anchor": "academy_arrival",
       "next_anchor": "night_investigation",
+      "anchor_description": "The protagonist settles into Praxeum life, forms a meaningful early bond with Kira Denn, and notices the first small inconsistency that will later become the night investigation.",
       "open_threads": [
         "What is the history of the Massassi temples beneath the Praxeum?",
-        "Why does Kira Denn seem distracted during training?",
+        "What does ordinary life at Luke's unfinished academy ask of the protagonist?",
+        "How does the protagonist first earn Kira Denn's trust?",
+        "Why does Kira Denn begin to seem distracted during training?",
         "What does the dark side vergence in the lower ruins mean?",
         "Can the player build genuine trust with Luke Skywalker?"
       ],
       "expected_turns": [
-        8,
-        12
+        12,
+        16
       ],
       "dramatic_function": "setup",
       "xp_base": 15,
@@ -367,6 +533,36 @@
       ],
       "protagonist_mode": "orphan",
       "side_content": [
+        {
+          "id": "kira_first_friendship",
+          "title": "Kira catches the protagonist somewhere they should not be",
+          "hook": "Kira Denn finds the protagonist in a half-lit corridor, training room, service passage, or archive annex after hours. Instead of reporting them, she asks a practical question that turns suspicion into the first private joke between them.",
+          "keywords": ["kira", "friend", "corridor", "after", "training", "trust"]
+        },
+        {
+          "id": "meal_share_ritual",
+          "title": "The evening meal-share ritual",
+          "hook": "Luke asks each person at the table to name one small thing they were grateful for that day. The ritual is awkward, sincere, and revealing -- especially for someone unused to safe rooms.",
+          "keywords": ["meal", "table", "grateful", "luke", "ritual", "evening"]
+        },
+        {
+          "id": "training_remote_misfire",
+          "title": "A Clone Wars training remote misfires",
+          "hook": "One of Luke's salvaged practice remotes jitters out of calibration during drills. It is harmless until it is not, creating a small public test of reflex, restraint, and whether the protagonist lets someone else help.",
+          "keywords": ["remote", "training", "drill", "lightsaber", "luke", "help"]
+        },
+        {
+          "id": "common_room_corkboard",
+          "title": "The common room corkboard tells on everyone",
+          "hook": "The student common room has a warped corkboard layered with chore swaps, missing-tool notes, jokes about Luke's meditation chime, and one unsigned message asking whoever borrowed the blue raincloak to please return it before the next storm.",
+          "keywords": ["common room", "corkboard", "chores", "raincloak", "students", "notes"]
+        },
+        {
+          "id": "supply_shuttle_unloading",
+          "title": "Supply shuttle day",
+          "hook": "The Horizon arrives with crates of ration packs, coolant seals, spare robe cloth, archive sleeves, and two letters no one admits they are waiting for. Everyone helps unload because the Praxeum has no one else.",
+          "keywords": ["supply", "shuttle", "horizon", "crates", "letters", "unload"]
+        },
         {
           "id": "tionne_archive_visit",
           "title": "An evening in the archive with Tionne",
@@ -448,6 +644,30 @@
           "title": "Sit alone in the upper meditation chamber",
           "hook": "The chamber Luke uses at dawn is empty at midnight. Sitting in it alone might surface a vision the morning sessions never reach.",
           "keywords": ["meditation", "alone", "vision", "upper chamber", "midnight"]
+        },
+        {
+          "id": "flooded_map_room",
+          "title": "The flooded map room under the east stair",
+          "hook": "Rainwater has opened a half-submerged Massassi chamber where old wall-grooves resemble a map of passages beneath the temple. The chamber is unstable, useful, and wrong in one important place.",
+          "keywords": ["flooded", "map", "east stair", "massassi", "passages", "ruins"]
+        },
+        {
+          "id": "dormitory_whisper_network",
+          "title": "Younger students notice more than adults think",
+          "hook": "Two younger students trade nervous guesses about Kira, the sealed stairs, and which corridors feel colder after sundown. Their rumors are messy, but one detail is too specific to ignore.",
+          "keywords": ["younger", "students", "rumor", "dormitory", "sealed", "stairs"]
+        },
+        {
+          "id": "rain_bucket_line",
+          "title": "The dormitory roof starts leaking again",
+          "hook": "A night storm turns the upper dormitory into a line of buckets, towels, and irritated students trying to sleep anyway. Someone jokes that if the Jedi return, maybe they can start with plumbing.",
+          "keywords": ["rain", "bucket", "dormitory", "roof", "students", "plumbing"]
+        },
+        {
+          "id": "late_kitchen_light",
+          "title": "A late light in the tiny kitchen",
+          "hook": "Long after dinner, the kitchen light is still on. Someone has left half-sliced fruit, a pot of bitter caf, and two cups on the counter -- ordinary evidence of a conversation that ended quickly.",
+          "keywords": ["kitchen", "caf", "fruit", "late", "cups", "conversation"]
         }
       ]
     },
@@ -526,6 +746,30 @@
           "title": "An old freighter's transponder pings unfamiliar",
           "hook": "A New Republic patrol pilot, off-duty, mentions a freighter at the system's edge whose IFF doesn't match its silhouette — could be smugglers, could be Imperial Remnant scouts running clean transponders. The pilot would owe the student a favor for a quiet check.",
           "keywords": ["freighter", "transponder", "system edge", "pilot favor", "remnant scout"]
+        },
+        {
+          "id": "seren_training_echo",
+          "title": "Kira repeats a parry Luke never taught",
+          "hook": "During a tense practice exchange, Kira uses the same defensive angle shown in an old archive fragment associated with Seren Denn. She corrects herself immediately, but the motion has already named a ghost.",
+          "keywords": ["kira", "parry", "seren", "training", "archive", "stance"]
+        },
+        {
+          "id": "concealed_landing_cache",
+          "title": "A cache near the hidden landing site",
+          "hook": "A small survival cache lies near Malakai's concealed approach route: water tablets, med-sealant, outdated Imperial code cylinders, and one civilian child's ration wrapper folded flat.",
+          "keywords": ["cache", "landing", "survival", "imperial", "route", "wrapper"]
+        },
+        {
+          "id": "hangar_cards_after_hours",
+          "title": "After-hours cards in the hangar",
+          "hook": "Two support staff and an older student play sabacc beside the shuttle's open maintenance panel. Their gossip is mostly harmless -- ration trades, bad drills, who snores -- until one of them mentions a landing sound no scheduled ship made.",
+          "keywords": ["hangar", "sabacc", "support", "gossip", "landing", "shuttle"]
+        },
+        {
+          "id": "borrowed_archive_sleeves",
+          "title": "The archive supply ledger has a small lie in it",
+          "hook": "Tionne's ledger says twenty archival sleeves were issued for student lessons. There are nineteen on the shelf, eighteen in the lesson room, and one damp sleeve tucked near a service stair.",
+          "keywords": ["archive", "ledger", "sleeve", "service stair", "tionne", "missing"]
         }
       ],
       "time_skip_after": {
@@ -736,6 +980,38 @@
         "delivery_method": "direct_witness",
         "target_progress": 0.4
       },
+      "side_content": [
+        {
+          "id": "defense_triage_roster",
+          "title": "The defense roster has too many gaps",
+          "hook": "A hand-written defense roster lists the hangar, archive, dormitory level, and east stair as simultaneous vulnerabilities. There are not enough trained people to cover all four.",
+          "keywords": ["defense", "roster", "hangar", "archive", "dormitory", "triage"]
+        },
+        {
+          "id": "student_evacuation_argument",
+          "title": "The youngest students argue about evacuation",
+          "hook": "Two frightened students disagree in the corridor: one wants to board the shuttle immediately, the other refuses to leave Luke, Kira, or the temple behind. Their fear makes the strategic problem personal.",
+          "keywords": ["students", "evacuation", "shuttle", "fear", "corridor", "leave"]
+        },
+        {
+          "id": "archive_firebreak",
+          "title": "Tionne prepares an archive firebreak",
+          "hook": "Tionne quietly packs the most fragile recordings into shock cases and asks which truth matters more if the worst happens: preserving the Jedi past or keeping the living students safe.",
+          "keywords": ["tionne", "archive", "recordings", "firebreak", "preserve", "students"]
+        },
+        {
+          "id": "unfinished_supper_tables",
+          "title": "The supper tables are still set",
+          "hook": "The emergency assembly pulls everyone away before supper is cleared. Cups, bread, and half-finished bowls sit under cooling lamps, making the crisis feel less like strategy and more like a home interrupted.",
+          "keywords": ["supper", "tables", "assembly", "bowls", "home", "interrupted"]
+        },
+        {
+          "id": "someone_packs_the_games",
+          "title": "Someone packs the student games",
+          "hook": "In the common room, a younger student quietly packs carved tiles, a battered dejarik board, and the shared deck of sabacc cards into an evacuation bag. They ask whether there will be somewhere to play later.",
+          "keywords": ["common room", "games", "evacuation", "student", "sabacc", "later"]
+        }
+      ],
       "protagonist_mode": "warrior"
     },
     {
@@ -769,6 +1045,38 @@
           "condition_type": "failure_engagement",
           "description": "Engaged meaningfully with consequences of earlier choices",
           "xp_value": 5
+        }
+      ],
+      "side_content": [
+        {
+          "id": "perimeter_lantern_signal",
+          "title": "The perimeter lanterns can become a landing signal",
+          "hook": "The academy's carved glow-lanterns can be rewired into a crude guidance pattern for evacuation or New Republic rescue craft, but doing it exposes whoever runs the perimeter.",
+          "keywords": ["lantern", "signal", "perimeter", "rescue", "evacuation", "rewire"]
+        },
+        {
+          "id": "red_five_launch_window",
+          "title": "Red Five has one clean launch window",
+          "hook": "Luke's X-wing can punch through the first wave if someone buys thirty seconds at the hangar threshold. The opening is real, narrow, and obvious to anyone with enough tactical sense to hate it.",
+          "keywords": ["red five", "x-wing", "hangar", "launch", "threshold", "thirty"]
+        },
+        {
+          "id": "kira_last_message",
+          "title": "Kira leaves one message behind",
+          "hook": "A short message from Kira waits where only the protagonist is likely to find it. It is not an apology. It is a location, a warning, and one line that depends on the friendship built earlier.",
+          "keywords": ["kira", "message", "warning", "location", "friendship", "behind"]
+        },
+        {
+          "id": "names_on_the_lanterns",
+          "title": "Every lantern has a student's mark",
+          "hook": "The perimeter lanterns are not anonymous defenses. Each one is carved with a student's small symbol: initials, a homeworld flower, a ship silhouette, a joke only two people understand.",
+          "keywords": ["lantern", "names", "symbols", "student", "perimeter", "defense"]
+        },
+        {
+          "id": "dormitory_left_behind",
+          "title": "The dormitory was abandoned mid-morning",
+          "hook": "In the dormitory, blankets are folded badly, boots are under bunks, a half-written letter sits unsent, and someone's training remote scorecard is still pinned to the wall.",
+          "keywords": ["dormitory", "letter", "boots", "bunks", "scorecard", "left"]
         }
       ],
       "protagonist_mode": "martyr"
