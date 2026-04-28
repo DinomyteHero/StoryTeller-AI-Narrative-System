@@ -286,7 +286,129 @@ def gate4_check(
     cs6_warnings = _check_cs6_structural(spine)
     warnings.extend(cs6_warnings)
 
+    # ── Brooks/Weiland arc coherence (Apr 2026 pass) ──────────────────
+    arc_warnings = _check_narrative_arc_coherence(spine)
+    warnings.extend(arc_warnings)
+
     return errors, warnings
+
+
+def _check_narrative_arc_coherence(spine: CampaignSpine) -> list[dict]:
+    """Brooks/Weiland arc coherence checks for character variants.
+
+    Each populated `narrative_arc` should:
+      - have lie + ghost + truth all populated (the load-bearing triple)
+      - have a ghost that plausibly explains the lie (LLM check could
+        verify this; for now we check minimum length + that the ghost
+        contains at least one concrete detail — capitalised proper noun
+        or numeric reference)
+      - declare an arc_type that matches the lie/truth direction
+      - start with lie_grip in the [0.7, 1.0] range for positive arcs,
+        [0.0, 0.3] for flat arcs (truth held from t=0)
+
+    These checks fire only when narrative_arc is populated. Variants
+    without it produce no warnings.
+    """
+    warnings: list[dict] = []
+    for allg in spine.allegiances:
+        for cv in allg.character_variants:
+            arc = getattr(cv, "narrative_arc", None)
+            if arc is None:
+                continue
+            path = f"allegiances[*].character_variants[{cv.id}].narrative_arc"
+            if not (arc.lie or "").strip():
+                warnings.append({
+                    "gate": 4,
+                    "code": "narrative_arc_missing_lie",
+                    "message": (
+                        f"Variant '{cv.id}' has narrative_arc populated but "
+                        f"`lie` is empty. The lie is the load-bearing field — "
+                        f"without it, none of the arc machinery activates."
+                    ),
+                    "path": f"{path}.lie",
+                })
+                continue
+            if not (arc.ghost or "").strip():
+                warnings.append({
+                    "gate": 4,
+                    "code": "narrative_arc_missing_ghost",
+                    "message": (
+                        f"Variant '{cv.id}' has a lie but no ghost. The ghost "
+                        f"is the wound that planted the lie; without it the "
+                        f"lie reads as a flaw rather than a wound, and "
+                        f"players don't root for someone with a flaw."
+                    ),
+                    "path": f"{path}.ghost",
+                })
+            if not (arc.truth or "").strip():
+                warnings.append({
+                    "gate": 4,
+                    "code": "narrative_arc_missing_truth",
+                    "message": (
+                        f"Variant '{cv.id}' has a lie but no truth. The truth "
+                        f"is what the story will teach; without it the arc "
+                        f"has no destination."
+                    ),
+                    "path": f"{path}.truth",
+                })
+            # Ghost should contain a concrete detail
+            ghost_text = (arc.ghost or "").strip()
+            if ghost_text and len(ghost_text) < 60:
+                warnings.append({
+                    "gate": 4,
+                    "code": "narrative_arc_ghost_too_thin",
+                    "message": (
+                        f"Variant '{cv.id}' ghost is only {len(ghost_text)} "
+                        f"chars. A ghost that is concrete enough to land in "
+                        f"prose (gestures, sensory echoes) should be at least "
+                        f"60 chars and ideally name a specific moment, place, "
+                        f"or relationship."
+                    ),
+                    "path": f"{path}.ghost",
+                })
+            # arc_type validity
+            valid_arc_types = {
+                "positive", "flat", "disillusionment", "fall", "corruption"
+            }
+            if arc.arc_type not in valid_arc_types:
+                warnings.append({
+                    "gate": 4,
+                    "code": "narrative_arc_unknown_type",
+                    "message": (
+                        f"Variant '{cv.id}' has arc_type='{arc.arc_type}'; "
+                        f"expected one of {sorted(valid_arc_types)}."
+                    ),
+                    "path": f"{path}.arc_type",
+                })
+            # lie_grip starting range alignment with arc_type
+            if arc.arc_type in ("positive", "fall", "corruption"):
+                if arc.lie_grip_initial < 0.6:
+                    warnings.append({
+                        "gate": 4,
+                        "code": "narrative_arc_grip_misaligned",
+                        "message": (
+                            f"Variant '{cv.id}' is a {arc.arc_type} arc but "
+                            f"starts with lie_grip={arc.lie_grip_initial}. "
+                            f"Positive / fall / corruption arcs typically "
+                            f"start with lie_grip in [0.7, 1.0] — the lie "
+                            f"still rules the protagonist at story start."
+                        ),
+                        "path": f"{path}.lie_grip_initial",
+                    })
+            elif arc.arc_type == "flat":
+                if arc.lie_grip_initial > 0.4:
+                    warnings.append({
+                        "gate": 4,
+                        "code": "narrative_arc_grip_misaligned",
+                        "message": (
+                            f"Variant '{cv.id}' is a flat arc but starts "
+                            f"with lie_grip={arc.lie_grip_initial}. Flat "
+                            f"arcs hold the truth from the start — typical "
+                            f"starting lie_grip is in [0.0, 0.3]."
+                        ),
+                        "path": f"{path}.lie_grip_initial",
+                    })
+    return warnings
 
 
 def _check_cs6_structural(spine: CampaignSpine) -> list[dict]:

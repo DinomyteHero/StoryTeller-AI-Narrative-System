@@ -450,6 +450,14 @@ let currentChoices = [];
 let streamingEnabled = false;
 let selectedCampaign = null;  // { campaign_name, display_name, character_id }
 
+/* ── Helpers ────────────────────────────────────────────────────── */
+function _esc(s) {
+  if (s === null || s === undefined) return '';
+  return String(s)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+
 /* ── Load campaign list on page load ──────────────────────────── */
 async function loadCampaigns() {
   const picker = document.getElementById('campaign-picker');
@@ -460,23 +468,68 @@ async function loadCampaigns() {
 
     let html = '';
     for (const c of campaigns) {
-      html += `<div style="background:var(--surface); border:1px solid var(--border); border-radius:6px; padding:1rem; margin-bottom:0.75rem;">`;
-      html += `<div style="color:var(--accent); font-weight:bold; font-size:1.05rem;">${c.display_name}</div>`;
-      html += `<div style="color:var(--text-dim); font-size:0.8rem; margin-bottom:0.5rem; font-style:italic;">${c.throughline}</div>`;
+      html += `<div style="background:var(--surface); border:1px solid var(--border); border-radius:6px; padding:1.1rem; margin-bottom:0.9rem;">`;
+      html += `<div style="color:var(--accent); font-weight:bold; font-size:1.15rem;">${_esc(c.display_name)}</div>`;
+      if (c.era_year) {
+        html += `<div style="color:var(--text-dim); font-size:0.75rem;">${_esc(c.era)} · ${_esc(c.era_year)}</div>`;
+      }
+
+      // Story-architecture surface: dramatic premise, central question,
+      // antagonistic force. Only shown for campaigns with story_architecture.
+      if (c.dramatic_premise || c.central_dramatic_question || c.antagonistic_force) {
+        html += `<details style="margin-top:0.7rem; cursor:pointer;">`;
+        html += `<summary style="color:var(--text-dim); font-size:0.85rem; user-select:none;">What this story is about</summary>`;
+        html += `<div style="margin-top:0.5rem; padding:0.6rem 0.8rem; background:var(--surface-alt); border-left:3px solid var(--accent); border-radius:0 4px 4px 0;">`;
+        if (c.dramatic_premise) {
+          html += `<div style="margin-bottom:0.5rem;"><span style="color:var(--text-dim); font-size:0.7rem; text-transform:uppercase; letter-spacing:0.05em;">Premise</span><div style="font-size:0.88rem; line-height:1.4;">${_esc(c.dramatic_premise)}</div></div>`;
+        }
+        if (c.central_dramatic_question) {
+          html += `<div style="margin-bottom:0.5rem;"><span style="color:var(--text-dim); font-size:0.7rem; text-transform:uppercase; letter-spacing:0.05em;">Central question</span><div style="font-size:0.88rem; font-style:italic; line-height:1.4;">${_esc(c.central_dramatic_question)}</div></div>`;
+        }
+        if (c.antagonistic_force) {
+          html += `<div><span style="color:var(--text-dim); font-size:0.7rem; text-transform:uppercase; letter-spacing:0.05em;">The opposition</span><div style="font-size:0.88rem; line-height:1.4;">${_esc(c.antagonistic_force)}</div></div>`;
+        }
+        html += `</div></details>`;
+      }
+
+      html += `<div style="color:var(--text-dim); font-size:0.8rem; margin-top:0.6rem; font-style:italic;">${_esc(c.throughline)}</div>`;
+
+      // Character cards with narrative_arc surface
       for (const ch of c.characters) {
-        const label = `${ch.name} — ${ch.species} ${ch.career}`;
-        html += `<button onclick="selectCampaign('${c.campaign_name}', '${c.display_name}', '${ch.id}')" `
-          + `style="display:block; width:100%; text-align:left; background:var(--surface-alt); border:1px solid var(--border); color:var(--text); padding:0.6rem 0.8rem; border-radius:4px; margin-top:0.4rem; cursor:pointer; font-family:inherit; font-size:0.9rem;">`
-          + `<strong style="color:var(--accent);">${ch.name}</strong>`
-          + `<span style="color:var(--text-dim);"> — ${ch.species} ${ch.career}</span>`
-          + `<div style="color:var(--text-dim); font-size:0.8rem; margin-top:0.25rem;">${ch.pitch}</div>`
-          + `</button>`;
+        const safeId = _esc(ch.id);
+        const arc = ch.narrative_arc || null;
+        html += `<button onclick="selectCampaign('${_esc(c.campaign_name)}', '${_esc(c.display_name)}', '${safeId}')" `
+          + `data-character-id="${safeId}" `
+          + `style="display:block; width:100%; text-align:left; background:var(--surface-alt); border:1px solid var(--border); color:var(--text); padding:0.7rem 0.9rem; border-radius:4px; margin-top:0.5rem; cursor:pointer; font-family:inherit; font-size:0.9rem;">`
+          + `<strong style="color:var(--accent);">${_esc(ch.name)}</strong>`
+          + `<span style="color:var(--text-dim);"> — ${_esc(ch.species)} ${_esc(ch.career)}</span>`;
+        if (ch.pitch) {
+          html += `<div style="color:var(--text-dim); font-size:0.82rem; margin-top:0.3rem; line-height:1.4;">${_esc(ch.pitch)}</div>`;
+        }
+        // Surface lie / ghost / want / need so the player chooses with eyes open
+        if (arc && (arc.lie || arc.ghost)) {
+          html += `<div style="margin-top:0.55rem; padding-top:0.55rem; border-top:1px dashed var(--border); font-size:0.8rem;">`;
+          if (arc.lie) {
+            html += `<div style="margin-bottom:0.3rem;"><span style="color:var(--text-dim); font-size:0.7rem;">What they believe (wrongly):</span> <span style="color:var(--text); font-style:italic;">${_esc(arc.lie)}</span></div>`;
+          }
+          if (arc.ghost) {
+            html += `<div style="margin-bottom:0.3rem;"><span style="color:var(--text-dim); font-size:0.7rem;">The wound behind it:</span> <span style="color:var(--text);">${_esc(arc.ghost)}</span></div>`;
+          }
+          if (arc.want) {
+            html += `<div style="margin-bottom:0.3rem;"><span style="color:var(--text-dim); font-size:0.7rem;">What they want:</span> <span style="color:var(--text);">${_esc(arc.want)}</span></div>`;
+          }
+          if (arc.need) {
+            html += `<div><span style="color:var(--text-dim); font-size:0.7rem;">What they need:</span> <span style="color:var(--text);">${_esc(arc.need)}</span></div>`;
+          }
+          html += `</div>`;
+        }
+        html += `</button>`;
       }
       html += `</div>`;
     }
     picker.innerHTML = html;
   } catch (e) {
-    picker.innerHTML = `<p style="color:var(--danger);">Could not load campaigns: ${e.message}</p>`;
+    picker.innerHTML = `<p style="color:var(--danger);">Could not load campaigns: ${_esc(e.message)}</p>`;
   }
 }
 
@@ -526,6 +579,10 @@ async function startSession() {
     document.getElementById('campaign-name').textContent = selectedCampaign.display_name;
     updateSessionInfo(0);
 
+    // Render the "you are about to play..." session intro before turn 1.
+    // The intro is GM-facing flavour the player commits to before the
+    // opening narration begins; it carries forward into the prose contract.
+    renderSessionIntro(data.session_intro);
     renderPassage(data.opening_narration);
     renderChoices(data.choices);
     showStatus(0, 0, 0);
@@ -715,12 +772,49 @@ function renderStreamedPassage(text) {
   el.innerHTML = paragraphs.map(p => '<p>' + escapeHtml(p.trim()) + '</p>').join('');
 }
 
+/* ── Render the "you are about to play..." session intro ───────── */
+function renderSessionIntro(intro) {
+  if (!intro) return;
+  const passageEl = document.getElementById('passage');
+  if (!passageEl) return;
+  const ch = intro.character || {};
+  const arc = ch.narrative_arc || null;
+  let html = '';
+  html += '<div style="background:var(--surface); border:1px solid var(--accent); border-radius:6px; padding:1rem 1.25rem; margin-bottom:1.25rem;">';
+  html += '<div style="color:var(--accent); font-size:0.75rem; text-transform:uppercase; letter-spacing:0.08em; margin-bottom:0.4rem;">YOU ARE ABOUT TO PLAY</div>';
+  html += '<div style="color:var(--text); font-weight:bold; font-size:1.1rem; margin-bottom:0.6rem;">' + _esc(ch.name || '') + '</div>';
+  if (intro.dramatic_premise) {
+    html += '<div style="color:var(--text); font-size:0.9rem; line-height:1.5; margin-bottom:0.5rem;">' + _esc(intro.dramatic_premise) + '</div>';
+  }
+  if (intro.central_dramatic_question) {
+    html += '<div style="color:var(--text-dim); font-style:italic; font-size:0.88rem; margin-bottom:0.6rem;">' + _esc(intro.central_dramatic_question) + '</div>';
+  }
+  if (arc && (arc.lie || arc.ghost || arc.want || arc.need)) {
+    html += '<div style="margin-top:0.6rem; padding-top:0.6rem; border-top:1px dashed var(--border); font-size:0.83rem; line-height:1.45;">';
+    if (arc.lie)   html += '<div><span style="color:var(--text-dim); font-size:0.7rem;">What you believe (wrongly):</span> <span style="font-style:italic;">' + _esc(arc.lie) + '</span></div>';
+    if (arc.ghost) html += '<div style="margin-top:0.3rem;"><span style="color:var(--text-dim); font-size:0.7rem;">The wound behind it:</span> ' + _esc(arc.ghost) + '</div>';
+    if (arc.want)  html += '<div style="margin-top:0.3rem;"><span style="color:var(--text-dim); font-size:0.7rem;">What you want:</span> ' + _esc(arc.want) + '</div>';
+    if (arc.need)  html += '<div style="margin-top:0.3rem;"><span style="color:var(--text-dim); font-size:0.7rem;">What you need:</span> ' + _esc(arc.need) + '</div>';
+    html += '</div>';
+  }
+  html += '</div>';
+  passageEl.innerHTML = html;
+}
+
 /* ── Render prose ──────────────────────────────────────────────── */
 function renderPassage(text) {
   const el = document.getElementById('passage');
-  // Split into paragraphs on double newlines
+  // Split into paragraphs on double newlines. Append after any
+  // session-intro card already rendered so the intro stays visible
+  // alongside the opening passage on turn 0.
+  const existingHtml = el.innerHTML.trim();
   const paragraphs = text.split(/\n\n+/).filter(p => p.trim());
-  el.innerHTML = paragraphs.map(p => '<p>' + escapeHtml(p.trim()) + '</p>').join('');
+  const passageHtml = paragraphs.map(p => '<p>' + escapeHtml(p.trim()) + '</p>').join('');
+  if (existingHtml && existingHtml.includes('YOU ARE ABOUT TO PLAY')) {
+    el.innerHTML = existingHtml + passageHtml;
+  } else {
+    el.innerHTML = passageHtml;
+  }
   // Scroll to top of passage
   el.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }

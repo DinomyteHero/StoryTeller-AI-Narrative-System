@@ -5,36 +5,50 @@
   "throughline_question": "What does loyalty cost when every allegiance demands a different piece of you?",
   "lore_seeds": {
     "sensory": [
-      "the perpetual humidity of Yavin 4 — even the duracrete sweats at midday",
+      "the perpetual humidity of Yavin 4 \u2014 even the duracrete sweats at midday",
       "the smell of jungle rot mixed with ozone where the temple's ancient power conduits still leak",
-      "the dawn chorus of Whyren-fliers above the canopy — like bells underwater",
+      "the dawn chorus of Whyren-fliers above the canopy \u2014 like bells underwater",
       "the way the temple stone is warm at midday and cold by an hour after sunset, as if it remembers a sun that no longer reaches it",
-      "the reflective coral of the inner Massassi corridors that brightens when Force-sensitive students walk past — only fractionally, only to those watching",
+      "the reflective coral of the inner Massassi corridors that brightens when Force-sensitive students walk past \u2014 only fractionally, only to those watching",
       "the quiet hiss of Tionne's recording crystals warming up in the archive at dusk"
     ],
     "ritual": [
-      "the morning meditation chime — three notes, the third half a tone flat by Luke's deliberate tuning",
-      "the meal-share custom Luke instituted — students take turns naming a small thing they were grateful for that day",
+      "the morning meditation chime \u2014 three notes, the third half a tone flat by Luke's deliberate tuning",
+      "the meal-share custom Luke instituted \u2014 students take turns naming a small thing they were grateful for that day",
       "the lighting of the perimeter glow-lanterns at sundown by the youngest student present",
       "the silent walk Tionne makes around the archive's perimeter every night before sealing the door",
       "the noon maintenance bell that means everyone stops training long enough to keep the temple habitable",
       "Luke's rule that no student spars twice with the same partner until they have eaten together once"
     ],
     "objects": [
-      "Tionne's recordings — small crystalline data wafers shelved alphabetically by the name of the Jedi they describe",
+      "Tionne's recordings \u2014 small crystalline data wafers shelved alphabetically by the name of the Jedi they describe",
       "salvaged kyber crystals from the lower Massassi levels, each one humming at a different almost-audible frequency",
       "the Praxeum's perimeter glow-lanterns, each one carved with the symbol of the student whose responsibility it is to maintain it",
-      "the cracked obsidian disc Luke keeps on his desk — a fragment from the Death Star's debris field, kept as a discipline against forgetting",
+      "the cracked obsidian disc Luke keeps on his desk \u2014 a fragment from the Death Star's debris field, kept as a discipline against forgetting",
       "the practice remotes Luke salvaged from a Clone Wars-era training ship, still bearing scuff marks from earlier Padawans",
       "a hand-drawn temple map in the student common room, wrong in three places and corrected by three different people"
     ],
     "language": [
-      "students address Luke as 'Master Luke' only in formal contexts — otherwise simply 'Luke' (a deliberate break from the old Order's hierarchy)",
-      "Tionne uses 'lessons' instead of 'lectures' — a deliberate framing choice",
-      "the older students have begun greeting one another with 'May the Force breathe' — a phrase Luke neither encourages nor stops",
+      "students address Luke as 'Master Luke' only in formal contexts \u2014 otherwise simply 'Luke' (a deliberate break from the old Order's hierarchy)",
+      "Tionne uses 'lessons' instead of 'lectures' \u2014 a deliberate framing choice",
+      "the older students have begun greeting one another with 'May the Force breathe' \u2014 a phrase Luke neither encourages nor stops",
       "Mirialan formality permits the prayer-form 'Ka'thari' (carry it well) when entrusting a difficult task to a friend",
       "support staff call unexplored corridors 'old teeth' because every new passage bites someone eventually",
       "students use 'glow duty' as shorthand for any small responsibility that proves you live here, not just train here"
+    ],
+    "sensory_anchors": [
+      "The lower temple's sealed-stairway draft \u2014 not cold, exactly, but slightly thinner-feeling than the air above, the way a room two days after a death is thinner than a room before",
+      "The faint salt-iron taste at the back of the throat after a long meditation in the meditation chamber, which Luke does not explain and which the older students attribute, half-jokingly, to the year before",
+      "The high-tower wind, which has its own voice \u2014 not howl, not whistle, a low fluted note older students claim only Streen can interpret"
+    ],
+    "rituals": [
+      "The post-Exar-Kun silence \u2014 twelve seconds at the start of the noon meal, not formal, not announced, a habit the senior students kept after the crisis and the new students learn by watching",
+      "Kyp Durron's evening repetition: he passes through the colonnade after dinner, alone, walking the same loop he walked the night Luke pulled him back; the students who notice do not comment"
+    ],
+    "significant_objects": [
+      "A Massassi-stone fragment Luke keeps on his desk, scorched on one face \u2014 what's left of a corridor that fell during the Exar Kun crisis, kept as a reminder that walls fail",
+      "Tionne's sealed crate at the back of the archive \u2014 recent seals, content unspecified to students; senior staff know it holds a Sith holocron she has chosen not to destroy",
+      "The wooden shape Streen is whittling \u2014 has been the same piece of wood for over a year, somehow never finished, somehow never the same shape twice"
     ]
   },
   "allegiances": [
@@ -487,8 +501,8 @@
       "number": 1,
       "name": "The New Students",
       "tension": "low",
-      "opening_situation": "The Jedi Praxeum is still small enough that every arrival changes the shape of the day. The Great Temple rises above the Yavin jungle, its stones older than the Republic and its corridors full of borrowed equipment, improvised lessons, damp robes, and students learning what a Jedi is supposed to be when there is no Order left to copy. This opening stretch should breathe: arrival, orientation, chores, first training drills, shared meals, archive errands, perimeter lanterns at dusk, and the slow formation of trust with Kira Denn before her absences become frightening. Let the academy feel like a fragile home first. The mystery should begin as a missed lesson, a private look, a route through the temple someone knows too well -- not as an immediate crisis.",
-      "opening_location": "Jedi Praxeum, Great Temple landing terrace and upper training levels, Yavin 4",
+      "opening_situation": "Sunrise on Yavin 4. The morning meditation chime rings \u2014 Luke's flat third note, the one that tells the temple it is alive \u2014 and the protagonist is already on the upper terrace doing a personal warm-up because they have not yet trusted that the bell will reach them. Kira Denn's mat is in its usual place at the south end of the line. Kira Denn is not. Kam Solusar leads the breathing exercise without comment, but his eyes find the empty cushion twice. Tionne, walking the perimeter with her morning archive datapad, hesitates at the colonnade and does not come in. The Praxeum is still small enough that every absence changes the shape of the day. \n\nBy the second pass of the breathing cycle, Kira slips in along the back wall, hair damp from the river, robes slightly mis-fastened, smiling the way she smiles when she has not slept. She catches the protagonist's eye, mouths 'overslept' \u2014 and the protagonist, who has made a quiet life of noticing things, sees the lie before it has finished leaving her mouth. \n\nThis is the first crack in a fragile home. The opening stretch should BREATHE \u2014 arrival rituals, chores, perimeter-lantern duty at dusk, training drills with Kam Solusar's measured corrections, archive errands for Tionne, shared meals, the slow daily grammar of a place that is still teaching itself how to be \u2014 but the missed morning, and the next missed morning, and the small hour-shaped shape of Kira's absences should be the spine the rest of the act bends around. The mystery begins as a missed lesson, a private look, a route through the temple someone knows too well. Not yet a crisis. Already a question.",
+      "opening_location": "Jedi Praxeum, Great Temple landing terrace and upper training levels, Yavin 4 \u2014 the temple stones still bearing the soot-shadows of the Exar Kun crisis a year past, scrubbed but never quite cleaned, the lower Massassi corridors sealed and silent rather than dangerous",
       "galactic_context": "The New Republic is seven years old and still finding its footing. The Imperial Remnant has fractured into warlord fiefdoms competing for scraps of the old Empire. Luke's Praxeum is barely a year old -- twelve students, a handful of support staff, one X-wing, and a Jedi tradition rebuilt from fragments. The Senate debates whether the Jedi should exist at all. On Yavin 4, the jungle reclaims the Massassi ruins faster than anyone can explore them, while the academy's daily rituals try to make hope practical.",
       "anchor": "academy_arrival",
       "next_anchor": "night_investigation",
@@ -502,8 +516,8 @@
         "Can the player build genuine trust with Luke Skywalker?"
       ],
       "expected_turns": [
-        12,
-        16
+        22,
+        28
       ],
       "dramatic_function": "setup",
       "xp_base": 15,
@@ -537,44 +551,238 @@
           "id": "kira_first_friendship",
           "title": "Kira catches the protagonist somewhere they should not be",
           "hook": "Kira Denn finds the protagonist in a half-lit corridor, training room, service passage, or archive annex after hours. Instead of reporting them, she asks a practical question that turns suspicion into the first private joke between them.",
-          "keywords": ["kira", "friend", "corridor", "after", "training", "trust"]
+          "keywords": [
+            "kira",
+            "friend",
+            "corridor",
+            "after",
+            "training",
+            "trust"
+          ]
         },
         {
           "id": "meal_share_ritual",
           "title": "The evening meal-share ritual",
           "hook": "Luke asks each person at the table to name one small thing they were grateful for that day. The ritual is awkward, sincere, and revealing -- especially for someone unused to safe rooms.",
-          "keywords": ["meal", "table", "grateful", "luke", "ritual", "evening"]
+          "keywords": [
+            "meal",
+            "table",
+            "grateful",
+            "luke",
+            "ritual",
+            "evening"
+          ]
         },
         {
           "id": "training_remote_misfire",
           "title": "A Clone Wars training remote misfires",
           "hook": "One of Luke's salvaged practice remotes jitters out of calibration during drills. It is harmless until it is not, creating a small public test of reflex, restraint, and whether the protagonist lets someone else help.",
-          "keywords": ["remote", "training", "drill", "lightsaber", "luke", "help"]
+          "keywords": [
+            "remote",
+            "training",
+            "drill",
+            "lightsaber",
+            "luke",
+            "help"
+          ]
         },
         {
           "id": "common_room_corkboard",
           "title": "The common room corkboard tells on everyone",
           "hook": "The student common room has a warped corkboard layered with chore swaps, missing-tool notes, jokes about Luke's meditation chime, and one unsigned message asking whoever borrowed the blue raincloak to please return it before the next storm.",
-          "keywords": ["common room", "corkboard", "chores", "raincloak", "students", "notes"]
+          "keywords": [
+            "common room",
+            "corkboard",
+            "chores",
+            "raincloak",
+            "students",
+            "notes"
+          ]
         },
         {
           "id": "supply_shuttle_unloading",
           "title": "Supply shuttle day",
           "hook": "The Horizon arrives with crates of ration packs, coolant seals, spare robe cloth, archive sleeves, and two letters no one admits they are waiting for. Everyone helps unload because the Praxeum has no one else.",
-          "keywords": ["supply", "shuttle", "horizon", "crates", "letters", "unload"]
+          "keywords": [
+            "supply",
+            "shuttle",
+            "horizon",
+            "crates",
+            "letters",
+            "unload"
+          ]
         },
         {
           "id": "tionne_archive_visit",
           "title": "An evening in the archive with Tionne",
-          "hook": "Tionne is cataloguing the latest fragments of pre-Empire Jedi journals and could use a second pair of eyes — particularly on a manuscript that mentions a Jedi Knight named Seren, no surname legible.",
-          "keywords": ["archive", "tionne", "library", "history", "seren", "journal"]
+          "hook": "Tionne is cataloguing the latest fragments of pre-Empire Jedi journals and could use a second pair of eyes \u2014 particularly on a manuscript that mentions a Jedi Knight named Seren, no surname legible.",
+          "keywords": [
+            "archive",
+            "tionne",
+            "library",
+            "history",
+            "seren",
+            "journal"
+          ]
         },
         {
           "id": "perimeter_lantern_repair",
           "title": "The east perimeter lantern is dimming",
-          "hook": "One of the perimeter glow-lanterns has been flickering for two nights. The student responsible is a younger Padawan who has been quietly afraid since the lantern is theirs to maintain — and they don't know how.",
-          "keywords": ["lantern", "perimeter", "padawan", "repair", "young"]
+          "hook": "One of the perimeter glow-lanterns has been flickering for two nights. The student responsible is a younger Padawan who has been quietly afraid since the lantern is theirs to maintain \u2014 and they don't know how.",
+          "keywords": [
+            "lantern",
+            "perimeter",
+            "padawan",
+            "repair",
+            "young"
+          ]
+        },
+        {
+          "id": "act1_kyp_meditation_offer",
+          "title": "Kyp Durron's resistance meditation",
+          "hook": "Kyp catches the protagonist on the upper terrace at dusk and offers to teach the meditation Luke taught him after Carida \u2014 the one about looking at the worst thing you have done without flinching. He says, with no preamble, 'You move like someone who already knows the room can fall.' He does not explain what room. The offer is open and quietly serious.",
+          "keywords": [
+            "Kyp",
+            "meditation",
+            "carry it",
+            "resist the dark"
+          ]
+        },
+        {
+          "id": "act1_iila_gift",
+          "title": "Iila Vand brings a found object",
+          "hook": "Iila Vand finds the protagonist in the colonnade and produces, from a pocket lined with crushed leaves, a small fragment of kyber the size of a thumbnail. She says she found it on the north terrace and that it likes the protagonist better than her. She does not want it back. She will not be talked out of having decided this. The fragment is real.",
+          "keywords": [
+            "Iila",
+            "kyber",
+            "child",
+            "gift",
+            "Theelin"
+          ]
+        },
+        {
+          "id": "act1_streen_warning",
+          "title": "Streen at the high tower stairs",
+          "hook": "Streen is sitting on the third landing of the high tower stairs when the protagonist passes. He says, without looking up, 'The wind has been telling me a name for two days. I do not know whose. It is one of you.' He goes back to whittling a small piece of wood that does not appear to be becoming anything. He does not say more.",
+          "keywords": [
+            "Streen",
+            "tower",
+            "wind",
+            "warning"
+          ]
+        },
+        {
+          "id": "act1_perimeter_walk_with_vex",
+          "title": "Perimeter walk with Sergeant Vex",
+          "hook": "Sergeant Daro Vex is rotating the night-watch schedule and asks, without explanation, whether the protagonist would walk the eastern perimeter with him this evening. He is not invoking authority. He sounds like someone who needs to talk to a person whose past does not look like his.",
+          "keywords": [
+            "Vex",
+            "perimeter",
+            "watch",
+            "Imperial",
+            "former"
+          ]
+        },
+        {
+          "id": "act1_dorsk_breath",
+          "title": "Dorsk 81 asks about choice",
+          "hook": "Dorsk 81 is on the upper terrace before sunrise, running a Khommite breathing pattern that is almost the academy's morning form but a half-step different. He notices the protagonist watching, and after a moment says, in his careful Basic, 'May I ask you something. When you decided to come here. Was there a moment that felt like the choice. Or did it arrive in pieces.' He is genuinely asking.",
+          "keywords": [
+            "Dorsk",
+            "Khommite",
+            "choice",
+            "breathing",
+            "clone"
+          ]
+        },
+        {
+          "id": "act1_mira_dinner",
+          "title": "Mira Vex feeds the room",
+          "hook": "Mira Vex has commandeered the kitchen and is making something she calls 'jungle stew but worse on purpose.' She catches the protagonist trying to slip past with a ration bar and refuses to let it stand. 'Sit down, eat the worse stew, tell me one thing about today that wasn't fine.' She is smiling but she is not joking.",
+          "keywords": [
+            "Mira",
+            "Twi'lek",
+            "stew",
+            "kitchen",
+            "feeding"
+          ]
+        },
+        {
+          "id": "act1_morning_run_with_loka",
+          "title": "A morning run with Loka Hask",
+          "hook": "Loka Hask is up before the chime, doing wide loops around the perimeter trail. He sees the protagonist and growls a single Shyriiwook syllable that means 'come.' He does not wait for an answer. He does not need one.",
+          "keywords": [
+            "Loka",
+            "running",
+            "perimeter",
+            "morning",
+            "Wookiee"
+          ]
+        },
+        {
+          "id": "act1_kitchen_duty_kira",
+          "title": "Kitchen duty with Kira",
+          "hook": "The duty roster has put Kira and the protagonist on kitchen scrub for the second time this week. Kira does the wet work; the protagonist racks the plates. They have an hour of nothing in particular to do but stand near each other and not say what is between them.",
+          "keywords": [
+            "Kira",
+            "kitchen",
+            "duty",
+            "chore",
+            "domestic"
+          ]
+        },
+        {
+          "id": "act1_basic_saber_drill",
+          "title": "A solo basic-form drill on the south terrace",
+          "hook": "The training remotes are off-line and the south terrace is empty. The protagonist could put in an hour with the training saber alone \u2014 slow, deliberate, the first three Shii-Cho forms \u2014 without anyone watching the awkwardness out of it.",
+          "keywords": [
+            "saber",
+            "drill",
+            "Shii-Cho",
+            "solo",
+            "training"
+          ]
+        },
+        {
+          "id": "act1_perimeter_lantern_carving",
+          "title": "Carving a name into a perimeter lantern",
+          "hook": "Tradition: students who finish their first month at the Praxeum carve their initials into one of the perimeter lanterns they tend. The protagonist's month was eight days ago. The carving knife is in the hut by the eastern post. Nobody is watching whether they go.",
+          "keywords": [
+            "lantern",
+            "perimeter",
+            "tradition",
+            "name",
+            "carving"
+          ]
+        },
+        {
+          "id": "act1_brann_imperial_question",
+          "title": "Brann asks a quiet Imperial-history question",
+          "hook": "Brann Riako finds the protagonist in the colonnade after evening lessons and asks, with no preamble, whether they remember which year their family stopped trusting Imperial comms. He is not interrogating. He is comparing. He has a private theory about when Mid Rim trade families started going dark.",
+          "keywords": [
+            "Brann",
+            "Imperial",
+            "comms",
+            "Mid Rim",
+            "history"
+          ]
+        },
+        {
+          "id": "act1_iila_lesson_swap",
+          "title": "Iila Vand wants to teach you something",
+          "hook": "Iila Vand has been working on something with Cilghal \u2014 a small breath-and-listen exercise the Mon Calamari healer uses on patients in pain. Iila wants to teach it to the protagonist. She is very serious about getting the breaths in the right order.",
+          "keywords": [
+            "Iila",
+            "Cilghal",
+            "breath",
+            "lesson",
+            "child teacher"
+          ]
         }
+      ],
+      "beat_roles": [
+        "setup",
+        "inciting"
       ]
     },
     {
@@ -594,8 +802,8 @@
         "What did the flooding ruins reveal?"
       ],
       "expected_turns": [
-        8,
-        12
+        16,
+        22
       ],
       "dramatic_function": "destabilization",
       "xp_base": 15,
@@ -636,39 +844,215 @@
         {
           "id": "follow_kira_or_wait",
           "title": "Wait for Kira's return at the dormitory door",
-          "hook": "If the student lets Kira come back on her own terms instead of following her, Kira may bring something back — a hidden truth, a dropped object, an opening in her guard.",
-          "keywords": ["wait", "stay", "doorway", "patience", "kira return"]
+          "hook": "If the student lets Kira come back on her own terms instead of following her, Kira may bring something back \u2014 a hidden truth, a dropped object, an opening in her guard.",
+          "keywords": [
+            "wait",
+            "stay",
+            "doorway",
+            "patience",
+            "kira return"
+          ]
         },
         {
           "id": "old_temple_meditation",
           "title": "Sit alone in the upper meditation chamber",
           "hook": "The chamber Luke uses at dawn is empty at midnight. Sitting in it alone might surface a vision the morning sessions never reach.",
-          "keywords": ["meditation", "alone", "vision", "upper chamber", "midnight"]
+          "keywords": [
+            "meditation",
+            "alone",
+            "vision",
+            "upper chamber",
+            "midnight"
+          ]
         },
         {
           "id": "flooded_map_room",
           "title": "The flooded map room under the east stair",
           "hook": "Rainwater has opened a half-submerged Massassi chamber where old wall-grooves resemble a map of passages beneath the temple. The chamber is unstable, useful, and wrong in one important place.",
-          "keywords": ["flooded", "map", "east stair", "massassi", "passages", "ruins"]
+          "keywords": [
+            "flooded",
+            "map",
+            "east stair",
+            "massassi",
+            "passages",
+            "ruins"
+          ]
         },
         {
           "id": "dormitory_whisper_network",
           "title": "Younger students notice more than adults think",
           "hook": "Two younger students trade nervous guesses about Kira, the sealed stairs, and which corridors feel colder after sundown. Their rumors are messy, but one detail is too specific to ignore.",
-          "keywords": ["younger", "students", "rumor", "dormitory", "sealed", "stairs"]
+          "keywords": [
+            "younger",
+            "students",
+            "rumor",
+            "dormitory",
+            "sealed",
+            "stairs"
+          ]
         },
         {
           "id": "rain_bucket_line",
           "title": "The dormitory roof starts leaking again",
           "hook": "A night storm turns the upper dormitory into a line of buckets, towels, and irritated students trying to sleep anyway. Someone jokes that if the Jedi return, maybe they can start with plumbing.",
-          "keywords": ["rain", "bucket", "dormitory", "roof", "students", "plumbing"]
+          "keywords": [
+            "rain",
+            "bucket",
+            "dormitory",
+            "roof",
+            "students",
+            "plumbing"
+          ]
         },
         {
           "id": "late_kitchen_light",
           "title": "A late light in the tiny kitchen",
           "hook": "Long after dinner, the kitchen light is still on. Someone has left half-sliced fruit, a pot of bitter caf, and two cups on the counter -- ordinary evidence of a conversation that ended quickly.",
-          "keywords": ["kitchen", "caf", "fruit", "late", "cups", "conversation"]
+          "keywords": [
+            "kitchen",
+            "caf",
+            "fruit",
+            "late",
+            "cups",
+            "conversation"
+          ]
+        },
+        {
+          "id": "act2_glass_wake_offer",
+          "title": "An encrypted ping from the Glass Wake",
+          "hook": "A clean transmission, properly addressed to a name the protagonist has not used in five years, arrives on the smuggler route chip at 0240 local. The Glass Wake has a job in the Tion Cluster that needs a Force-sensitive nose for Imperial customs sweeps. It pays. The crew misses him. There is no mention of how they would feel about him bringing a Jedi school back with him.",
+          "keywords": [
+            "Glass Wake",
+            "transmission",
+            "Tion Cluster",
+            "smuggler",
+            "old crew"
+          ]
+        },
+        {
+          "id": "act2_archive_sealed_crate",
+          "title": "The sealed crate at the back of the archive",
+          "hook": "Tionne sends the protagonist to retrieve a particular text and, in passing, asks them not to disturb the sealed crate behind the second column of cabinets. She does not explain what is in it. The crate is recent \u2014 fresh seals \u2014 and warmer than the air around it by perhaps half a degree.",
+          "keywords": [
+            "archive",
+            "sealed crate",
+            "Tionne",
+            "warm",
+            "holocron"
+          ]
+        },
+        {
+          "id": "act2_brakiss_late_practice",
+          "title": "Brakiss in the lower training hall after midnight",
+          "hook": "The protagonist, returning from the perimeter, sees light under the door of the lower training hall well after the academy is supposed to be sleeping. Inside, Brakiss is running the third-tier saber form alone, faster and cleaner than he has ever been seen practicing in daylight. He stops when he notices and laughs, easy, charming. He says he was having trouble sleeping.",
+          "keywords": [
+            "Brakiss",
+            "saber form",
+            "midnight",
+            "alone",
+            "skill"
+          ]
+        },
+        {
+          "id": "act2_octa_archive_help",
+          "title": "Octa Ramis offers her index",
+          "hook": "Octa Ramis catches the protagonist in the second column of the archive and, without preamble, says she has been keeping a private cross-index of Tionne's recent acquisitions. She will share it. She does not require a reason. She does ask that the protagonist write down what they were looking for, for her own records.",
+          "keywords": [
+            "Octa Ramis",
+            "archive",
+            "catalogue",
+            "index",
+            "research"
+          ]
+        },
+        {
+          "id": "act2_brann_perimeter",
+          "title": "Brann Riako on watch",
+          "hook": "Brann Riako has the perimeter rotation and the protagonist finds him standing too still at the eastern lantern post. He does not turn. 'Three lights are out on the south line,' he says quietly. 'Sergeant Vex hasn't logged it yet. I don't think he's seen it.' He waits to be told what to do.",
+          "keywords": [
+            "Brann",
+            "perimeter",
+            "lights",
+            "Imperial cadet",
+            "watch"
+          ]
+        },
+        {
+          "id": "act2_kam_sparring_invitation",
+          "title": "Kam Solusar offers a sparring round",
+          "hook": "Kam Solusar has been watching the protagonist's saber form for three weeks. He invites them to spar \u2014 slow, training blades, on the south terrace at dusk. He says, with a small smile, that he wants to see whether the protagonist's grip has loosened since they arrived. It has.",
+          "keywords": [
+            "Kam",
+            "sparring",
+            "saber",
+            "training",
+            "evening"
+          ]
+        },
+        {
+          "id": "act2_octa_history_lesson",
+          "title": "Octa Ramis teaches a history fragment",
+          "hook": "Octa Ramis has cross-indexed a Republic-era ritual she thinks the academy should be using. She wants someone to test it with her. The ritual is a four-minute meditation that ends with the participants saying one true thing each. She does not have a partner.",
+          "keywords": [
+            "Octa",
+            "ritual",
+            "meditation",
+            "history",
+            "true thing"
+          ]
+        },
+        {
+          "id": "act2_dorsk_late_night",
+          "title": "Dorsk 81 in the meditation chamber after lights-out",
+          "hook": "After lights-out the meditation chamber is supposed to be empty, but a low light is on. Dorsk 81 is sitting in the centre of the room, not meditating, looking at the door the protagonist has just come through. 'I would like a second opinion,' he says. 'On a thing I have decided.'",
+          "keywords": [
+            "Dorsk",
+            "decision",
+            "meditation",
+            "midnight",
+            "consult"
+          ]
+        },
+        {
+          "id": "act2_supply_freighter_unloading",
+          "title": "Unloading the supply freighter at the landing terrace",
+          "hook": "A New Republic supply freighter has touched down on the lower terrace and Sergeant Vex is short two pairs of hands for the unload. It is two hours of physical work, three students, and a chance to listen to whatever the pilots are talking about while they wait for cargo manifests.",
+          "keywords": [
+            "supply",
+            "freighter",
+            "unloading",
+            "physical work",
+            "pilots"
+          ]
+        },
+        {
+          "id": "act2_streen_brief_appearance",
+          "title": "Streen passes through the colonnade",
+          "hook": "Streen, who almost never leaves the high tower, passes through the colonnade at midday with his small whittling knife in one hand and an empty mug in the other. He stops when he sees the protagonist. He says, 'There are more breaths in the air today than yesterday.' He does not explain. He moves on.",
+          "keywords": [
+            "Streen",
+            "tower",
+            "wind",
+            "passing",
+            "warning"
+          ]
+        },
+        {
+          "id": "act2_mira_difficult_conversation",
+          "title": "Mira Vex wants to ask about your past",
+          "hook": "Mira Vex has been thinking about asking the protagonist a specific thing for two weeks. She catches them in the kitchen alone after the dinner rush and says, 'I'm going to ask you something and you can say no. Why do you check the exits when you sit down. I do it too. I want to know if it's the same thing.' Her voice is not soft. It is steady.",
+          "keywords": [
+            "Mira",
+            "exits",
+            "trauma",
+            "Twi'lek",
+            "shared"
+          ]
         }
+      ],
+      "beat_roles": [
+        "response",
+        "first_plot_point"
       ]
     },
     {
@@ -688,8 +1072,8 @@
         "What is the connection between Malakai and the Imperial Remnant fleet?"
       ],
       "expected_turns": [
-        10,
-        14
+        20,
+        26
       ],
       "dramatic_function": "escalation",
       "xp_base": 20,
@@ -735,7 +1119,7 @@
       "pivot_points": [
         {
           "id": "act3_kira_disclosure_pivot",
-          "description": "Whether the student tells Luke what they have learned about Kira's secret meetings — or shields her — closes off one of two future relationship arcs. After this turn, the unchosen path is not available.",
+          "description": "Whether the student tells Luke what they have learned about Kira's secret meetings \u2014 or shields her \u2014 closes off one of two future relationship arcs. After this turn, the unchosen path is not available.",
           "target_progress": 0.7,
           "locks_off": "the alternative trust arc with whichever of Luke or Kira the student did not align with"
         }
@@ -744,32 +1128,174 @@
         {
           "id": "tannen_intercept",
           "title": "An old freighter's transponder pings unfamiliar",
-          "hook": "A New Republic patrol pilot, off-duty, mentions a freighter at the system's edge whose IFF doesn't match its silhouette — could be smugglers, could be Imperial Remnant scouts running clean transponders. The pilot would owe the student a favor for a quiet check.",
-          "keywords": ["freighter", "transponder", "system edge", "pilot favor", "remnant scout"]
+          "hook": "A New Republic patrol pilot, off-duty, mentions a freighter at the system's edge whose IFF doesn't match its silhouette \u2014 could be smugglers, could be Imperial Remnant scouts running clean transponders. The pilot would owe the student a favor for a quiet check.",
+          "keywords": [
+            "freighter",
+            "transponder",
+            "system edge",
+            "pilot favor",
+            "remnant scout"
+          ]
         },
         {
           "id": "seren_training_echo",
           "title": "Kira repeats a parry Luke never taught",
           "hook": "During a tense practice exchange, Kira uses the same defensive angle shown in an old archive fragment associated with Seren Denn. She corrects herself immediately, but the motion has already named a ghost.",
-          "keywords": ["kira", "parry", "seren", "training", "archive", "stance"]
+          "keywords": [
+            "kira",
+            "parry",
+            "seren",
+            "training",
+            "archive",
+            "stance"
+          ]
         },
         {
           "id": "concealed_landing_cache",
           "title": "A cache near the hidden landing site",
           "hook": "A small survival cache lies near Malakai's concealed approach route: water tablets, med-sealant, outdated Imperial code cylinders, and one civilian child's ration wrapper folded flat.",
-          "keywords": ["cache", "landing", "survival", "imperial", "route", "wrapper"]
+          "keywords": [
+            "cache",
+            "landing",
+            "survival",
+            "imperial",
+            "route",
+            "wrapper"
+          ]
         },
         {
           "id": "hangar_cards_after_hours",
           "title": "After-hours cards in the hangar",
           "hook": "Two support staff and an older student play sabacc beside the shuttle's open maintenance panel. Their gossip is mostly harmless -- ration trades, bad drills, who snores -- until one of them mentions a landing sound no scheduled ship made.",
-          "keywords": ["hangar", "sabacc", "support", "gossip", "landing", "shuttle"]
+          "keywords": [
+            "hangar",
+            "sabacc",
+            "support",
+            "gossip",
+            "landing",
+            "shuttle"
+          ]
         },
         {
           "id": "borrowed_archive_sleeves",
           "title": "The archive supply ledger has a small lie in it",
           "hook": "Tionne's ledger says twenty archival sleeves were issued for student lessons. There are nineteen on the shelf, eighteen in the lesson room, and one damp sleeve tucked near a service stair.",
-          "keywords": ["archive", "ledger", "sleeve", "service stair", "tionne", "missing"]
+          "keywords": [
+            "archive",
+            "ledger",
+            "sleeve",
+            "service stair",
+            "tionne",
+            "missing"
+          ]
+        },
+        {
+          "id": "act3_cilghal_medical_session",
+          "title": "Cilghal's medical evaluation",
+          "hook": "Cilghal has scheduled the protagonist for the standard academy medical evaluation. She closes the door, sits across from them in the small clean room with the salvaged ortho table, and asks how their sleep has been. She is not in a hurry. She has time. She is not going to accept 'fine.'",
+          "keywords": [
+            "Cilghal",
+            "medical",
+            "Mon Calamari",
+            "evaluation",
+            "wound"
+          ]
+        },
+        {
+          "id": "act3_kam_solusar_one_on_one",
+          "title": "Kam Solusar offers an evening lesson",
+          "hook": "After the morning training drill, Kam Solusar pulls the protagonist aside and asks if they would join him at dusk on the south terrace. He has noticed the way the protagonist carries the saber. He says, with a small economical smile, 'I once held mine the same way. It is a bad habit, and I can teach you how I broke it.' The offer is generous and specific.",
+          "keywords": [
+            "Kam Solusar",
+            "saber",
+            "fall",
+            "redemption",
+            "lesson"
+          ]
+        },
+        {
+          "id": "act3_loka_hask_invites_meal",
+          "title": "Loka Hask brings stew",
+          "hook": "Loka Hask appears at the protagonist's quarters with a deep bowl of jungle-meat stew he has cooked himself and a Shyriiwook insistence that the protagonist cannot be allowed to eat alone tonight. He does not need a reason. He has decided. He will sit in the doorway if there is no second chair.",
+          "keywords": [
+            "Loka Hask",
+            "Wookiee",
+            "stew",
+            "company",
+            "trust"
+          ]
+        },
+        {
+          "id": "act3_dorsk_choice_followup",
+          "title": "Dorsk 81 returns the question",
+          "hook": "Dorsk 81 finds the protagonist near the colonnade after training and returns to the conversation they started weeks ago. 'I have been trying,' he says, 'to make a choice that is mine. I think I have made one. I would like to tell you what it is. If that is appropriate.' He looks like he has rehearsed the framing twice.",
+          "keywords": [
+            "Dorsk",
+            "choice",
+            "decision",
+            "individuality",
+            "trust"
+          ]
+        },
+        {
+          "id": "act3_kyp_resistance_session",
+          "title": "Kyp Durron's resistance meditation, second offer",
+          "hook": "Kyp Durron offers the protagonist the resistance meditation again. The first time was an opening. This time he is specific: 'I think the thing you are about to find out is the kind of thing I had to find out. I do not want you to find it the way I did.'",
+          "keywords": [
+            "Kyp",
+            "meditation",
+            "resistance",
+            "dark side",
+            "warning"
+          ]
+        },
+        {
+          "id": "act3_brann_warning",
+          "title": "Brann Riako has noticed something",
+          "hook": "Brann Riako pulls the protagonist aside after the morning drill and says, quietly, that he has noticed Brakiss asking the same question of three different students this week \u2014 phrased differently each time. Brann does not have a theory. He has a feeling. He has decided to tell someone. He has chosen the protagonist.",
+          "keywords": [
+            "Brann",
+            "Brakiss",
+            "warning",
+            "Imperial",
+            "pattern"
+          ]
+        },
+        {
+          "id": "act3_iila_nightmare",
+          "title": "Iila Vand has a nightmare",
+          "hook": "Iila Vand wakes the protagonist by knocking on their door at 0300 \u2014 she is barefoot, holding a blanket, and she has had a dream she will not describe except to say that there was a man she did not recognise standing in the colonnade and 'his face wasn't his.' She wants to sit with someone until she's sleepy again.",
+          "keywords": [
+            "Iila",
+            "nightmare",
+            "child",
+            "comfort",
+            "vision"
+          ]
+        },
+        {
+          "id": "act3_loka_crisis_check_in",
+          "title": "Loka Hask senses your weather changing",
+          "hook": "Loka Hask has noticed the protagonist's last three days. He says, in three slow Shyriiwook sentences, that whatever the protagonist is carrying is heavier this morning than it was last week. He does not need to be told what it is. He is offering a hand.",
+          "keywords": [
+            "Loka",
+            "Wookiee",
+            "checking in",
+            "support",
+            "care"
+          ]
+        },
+        {
+          "id": "act3_octa_research_assist",
+          "title": "Octa Ramis has found something",
+          "hook": "Octa Ramis has found a Republic-era reference to a Force vergence under a Massassi temple \u2014 not this temple specifically, but the type. She has a theory about containment rituals. She wants the protagonist's eye on her notes before she takes them to Tionne.",
+          "keywords": [
+            "Octa",
+            "Massassi",
+            "vergence",
+            "research",
+            "containment"
+          ]
         }
       ],
       "time_skip_after": {
@@ -909,7 +1435,11 @@
           }
         ]
       },
-      "protagonist_mode": "warrior"
+      "protagonist_mode": "warrior",
+      "beat_roles": [
+        "midpoint",
+        "pinch1"
+      ]
     },
     {
       "number": 4,
@@ -928,8 +1458,8 @@
         "What is Malakai's true endgame?"
       ],
       "expected_turns": [
-        10,
-        14
+        20,
+        26
       ],
       "dramatic_function": "confrontation",
       "xp_base": 20,
@@ -985,34 +1515,146 @@
           "id": "defense_triage_roster",
           "title": "The defense roster has too many gaps",
           "hook": "A hand-written defense roster lists the hangar, archive, dormitory level, and east stair as simultaneous vulnerabilities. There are not enough trained people to cover all four.",
-          "keywords": ["defense", "roster", "hangar", "archive", "dormitory", "triage"]
+          "keywords": [
+            "defense",
+            "roster",
+            "hangar",
+            "archive",
+            "dormitory",
+            "triage"
+          ]
         },
         {
           "id": "student_evacuation_argument",
           "title": "The youngest students argue about evacuation",
           "hook": "Two frightened students disagree in the corridor: one wants to board the shuttle immediately, the other refuses to leave Luke, Kira, or the temple behind. Their fear makes the strategic problem personal.",
-          "keywords": ["students", "evacuation", "shuttle", "fear", "corridor", "leave"]
+          "keywords": [
+            "students",
+            "evacuation",
+            "shuttle",
+            "fear",
+            "corridor",
+            "leave"
+          ]
         },
         {
           "id": "archive_firebreak",
           "title": "Tionne prepares an archive firebreak",
           "hook": "Tionne quietly packs the most fragile recordings into shock cases and asks which truth matters more if the worst happens: preserving the Jedi past or keeping the living students safe.",
-          "keywords": ["tionne", "archive", "recordings", "firebreak", "preserve", "students"]
+          "keywords": [
+            "tionne",
+            "archive",
+            "recordings",
+            "firebreak",
+            "preserve",
+            "students"
+          ]
         },
         {
           "id": "unfinished_supper_tables",
           "title": "The supper tables are still set",
           "hook": "The emergency assembly pulls everyone away before supper is cleared. Cups, bread, and half-finished bowls sit under cooling lamps, making the crisis feel less like strategy and more like a home interrupted.",
-          "keywords": ["supper", "tables", "assembly", "bowls", "home", "interrupted"]
+          "keywords": [
+            "supper",
+            "tables",
+            "assembly",
+            "bowls",
+            "home",
+            "interrupted"
+          ]
         },
         {
           "id": "someone_packs_the_games",
           "title": "Someone packs the student games",
           "hook": "In the common room, a younger student quietly packs carved tiles, a battered dejarik board, and the shared deck of sabacc cards into an evacuation bag. They ask whether there will be somewhere to play later.",
-          "keywords": ["common room", "games", "evacuation", "student", "sabacc", "later"]
+          "keywords": [
+            "common room",
+            "games",
+            "evacuation",
+            "student",
+            "sabacc",
+            "later"
+          ]
+        },
+        {
+          "id": "act4_karrde_information_offer",
+          "title": "Talon Karrde opens an encrypted channel",
+          "hook": "An encrypted handshake reaches the protagonist's smuggler route chip \u2014 Karrde's signature, no preamble. He has, he says, been keeping a low watch on a name. He has reason to believe one of the protagonist's classmates is not who their paperwork claims. He will trade. The price is reasonable. He is not the protagonist's friend, and he is offering this anyway.",
+          "keywords": [
+            "Karrde",
+            "information",
+            "mole",
+            "trade",
+            "encrypted"
+          ]
+        },
+        {
+          "id": "act4_streen_arrives_unbidden",
+          "title": "Streen leaves the tower",
+          "hook": "Streen, who has not eaten with the academy in nine months, appears at the evening meal carrying his small whittling knife and the wooden shape that has not yet decided what it is. He sits across from the protagonist. He says nothing. He stays for an hour. He goes back to the tower. Tionne, watching from the head of the table, has gone the colour of old parchment.",
+          "keywords": [
+            "Streen",
+            "tower",
+            "warning",
+            "presence",
+            "silence"
+          ]
+        },
+        {
+          "id": "act4_dorsk_solidarity",
+          "title": "Dorsk 81 stands with you",
+          "hook": "When the academy is preparing for what is coming, Dorsk 81 appears at the protagonist's door and says, 'I have decided where I am standing. I am standing here. I want you to know.' He does not need a response. He has come to tell, not to ask.",
+          "keywords": [
+            "Dorsk",
+            "solidarity",
+            "choice",
+            "stand",
+            "loyalty"
+          ]
+        },
+        {
+          "id": "act4_mira_field_kitchen",
+          "title": "Mira Vex sets up a field kitchen",
+          "hook": "When the academy starts preparing defensive rotations, Mira Vex commandeers a corner of the great hall and sets up a field kitchen. People who walk past get fed. People who sit down get fed and listened to. The protagonist could sit down.",
+          "keywords": [
+            "Mira",
+            "field kitchen",
+            "before battle",
+            "comfort",
+            "feeding"
+          ]
+        },
+        {
+          "id": "act4_kam_last_lesson",
+          "title": "Kam Solusar's last lesson",
+          "hook": "Kam Solusar finds the protagonist on the south terrace at dusk and says, 'There is a thing I want you to know before tomorrow. It is the thing Luke told me when he pulled me back. May I tell you.' He waits. He will not say it without permission.",
+          "keywords": [
+            "Kam",
+            "lesson",
+            "before battle",
+            "fall",
+            "return"
+          ]
+        },
+        {
+          "id": "act4_brann_old_id",
+          "title": "Brann Riako with his old cadet ID",
+          "hook": "Brann Riako finds the protagonist in his quarters and shows them the small chrome rectangle of his old Imperial Academy cadet ID. 'I have not destroyed it,' he says. 'I have been waiting to know whether I am the kind of person who destroys it. I think I am about to find out tomorrow.'",
+          "keywords": [
+            "Brann",
+            "Imperial cadet",
+            "ID",
+            "past",
+            "before battle"
+          ]
         }
       ],
-      "protagonist_mode": "warrior"
+      "protagonist_mode": "warrior",
+      "beat_roles": [
+        "attack",
+        "pinch2",
+        "second_plot_point"
+      ]
     },
     {
       "number": 5,
@@ -1025,8 +1667,8 @@
       "next_anchor": null,
       "open_threads": [],
       "expected_turns": [
-        8,
-        12
+        16,
+        22
       ],
       "dramatic_function": "resolution",
       "xp_base": 20,
@@ -1052,34 +1694,133 @@
           "id": "perimeter_lantern_signal",
           "title": "The perimeter lanterns can become a landing signal",
           "hook": "The academy's carved glow-lanterns can be rewired into a crude guidance pattern for evacuation or New Republic rescue craft, but doing it exposes whoever runs the perimeter.",
-          "keywords": ["lantern", "signal", "perimeter", "rescue", "evacuation", "rewire"]
+          "keywords": [
+            "lantern",
+            "signal",
+            "perimeter",
+            "rescue",
+            "evacuation",
+            "rewire"
+          ]
         },
         {
           "id": "red_five_launch_window",
           "title": "Red Five has one clean launch window",
           "hook": "Luke's X-wing can punch through the first wave if someone buys thirty seconds at the hangar threshold. The opening is real, narrow, and obvious to anyone with enough tactical sense to hate it.",
-          "keywords": ["red five", "x-wing", "hangar", "launch", "threshold", "thirty"]
+          "keywords": [
+            "red five",
+            "x-wing",
+            "hangar",
+            "launch",
+            "threshold",
+            "thirty"
+          ]
         },
         {
           "id": "kira_last_message",
           "title": "Kira leaves one message behind",
           "hook": "A short message from Kira waits where only the protagonist is likely to find it. It is not an apology. It is a location, a warning, and one line that depends on the friendship built earlier.",
-          "keywords": ["kira", "message", "warning", "location", "friendship", "behind"]
+          "keywords": [
+            "kira",
+            "message",
+            "warning",
+            "location",
+            "friendship",
+            "behind"
+          ]
         },
         {
           "id": "names_on_the_lanterns",
           "title": "Every lantern has a student's mark",
           "hook": "The perimeter lanterns are not anonymous defenses. Each one is carved with a student's small symbol: initials, a homeworld flower, a ship silhouette, a joke only two people understand.",
-          "keywords": ["lantern", "names", "symbols", "student", "perimeter", "defense"]
+          "keywords": [
+            "lantern",
+            "names",
+            "symbols",
+            "student",
+            "perimeter",
+            "defense"
+          ]
         },
         {
           "id": "dormitory_left_behind",
           "title": "The dormitory was abandoned mid-morning",
           "hook": "In the dormitory, blankets are folded badly, boots are under bunks, a half-written letter sits unsent, and someone's training remote scorecard is still pinned to the wall.",
-          "keywords": ["dormitory", "letter", "boots", "bunks", "scorecard", "left"]
+          "keywords": [
+            "dormitory",
+            "letter",
+            "boots",
+            "bunks",
+            "scorecard",
+            "left"
+          ]
+        },
+        {
+          "id": "act5_iila_pre_battle",
+          "title": "Iila Vand on the eve",
+          "hook": "Iila Vand finds the protagonist on the night before the convergence. She is carrying her ration bar. She has questions she has been saving. She wants to know if the protagonist is going to come back. She does not want to be told yes if it is not true. She is eleven.",
+          "keywords": [
+            "Iila",
+            "child",
+            "eve of",
+            "promise",
+            "innocent"
+          ]
+        },
+        {
+          "id": "act5_goodbye_iila",
+          "title": "A quiet morning with Iila Vand",
+          "hook": "Iila Vand has decided she wants a normal morning with the protagonist. Breakfast. Something to do that is not important. A walk, maybe. She is not asking for a story. She wants the kind of morning that means tomorrow exists.",
+          "keywords": [
+            "Iila",
+            "after battle",
+            "normal morning",
+            "child",
+            "future"
+          ]
+        },
+        {
+          "id": "act5_kira_repair",
+          "title": "Sitting with Kira",
+          "hook": "Kira is on the steps of the great temple at sunset, by herself, looking at the jungle line. She has not been told what to do next; the academy is still working it out. There is room next to her on the step. The protagonist could sit there.",
+          "keywords": [
+            "Kira",
+            "after battle",
+            "repair",
+            "silence",
+            "sunset"
+          ]
+        },
+        {
+          "id": "act5_loka_thanks",
+          "title": "Loka Hask says thank you",
+          "hook": "Loka Hask finds the protagonist and says, in the slowest Shyriiwook the protagonist has ever heard him use, the Wookiee phrase that means 'I survived because of you.' He says it once, then waits to see what the protagonist does with it.",
+          "keywords": [
+            "Loka",
+            "after battle",
+            "thanks",
+            "Wookiee",
+            "survived"
+          ]
+        },
+        {
+          "id": "act5_kyp_fellow_traveler",
+          "title": "Kyp Durron offers companionship",
+          "hook": "Kyp Durron sits down across from the protagonist with two cups of bitter caf. He says, 'I am not going to say I know what you are carrying. I am going to say there will be a morning a year from now where you will think you are over it and you will not be over it. On that morning, ask for me. I will be in.'",
+          "keywords": [
+            "Kyp",
+            "after battle",
+            "fellow traveler",
+            "year from now",
+            "promise"
+          ]
         }
       ],
-      "protagonist_mode": "martyr"
+      "protagonist_mode": "martyr",
+      "beat_roles": [
+        "climax",
+        "resolution"
+      ]
     }
   ],
   "npc_roster": [
@@ -1153,8 +1894,6 @@
       ],
       "pressure_role": "witness",
       "thematic_argument": "Trust, even when it fails, is better than suspicion that succeeds. The old Order fell because it chose control over trust.",
-      "canon": true,
-      "era_profile": "new_jedi_order_founding",
       "canon_voice": {
         "speech_patterns": "Short declarative sentences. Uses questions as invitations. Occasional dry humor. Never raises his voice.",
         "thinking_style": "Intuitive and reflective. Trusts the Force but not as a substitute for human judgment. Second-guesses himself more than others realize.",
@@ -1168,7 +1907,7 @@
       "role": "Fellow student and the player's closest friend at the Praxeum. Secretly meeting a surviving Inquisitor who claims to know the truth about her dead parent.",
       "disposition_start": 0.85,
       "disposition_trajectory": "declining",
-      "motivation": "Learn the truth about her parent, Seren Denn. Understand why Luke never told her. Decide whether the truth changes who she is.",
+      "motivation": "To understand what her dead Jedi parent is trying to tell her in the recurring Force-ghost contact, which contradicts the academy's stated lore about post-death persistence. To not lose Malakai, who is the only person in her life who treats the contact as data rather than as a problem to be solved or a temptation to be resisted. To not lose the protagonist, who is the only person in her life who never asks her to explain Malakai before they ask how she's sleeping.",
       "voice_notes": "Quick, warm, and sharp. Laughs easily but the laughter has started to thin. When lying, her body goes still -- too controlled, like someone holding a pose. When honest, she moves constantly.",
       "behavioral_envelope": [
         "Never deliberately endangers other students",
@@ -1231,26 +1970,31 @@
         }
       ],
       "pressure_role": "catalyst",
-      "thematic_argument": "Truth is a right, not a privilege. Withholding it -- even to protect someone -- is its own betrayal."
+      "thematic_argument": "Trust is something you give to the people who treat what you tell them as real before they decide what it means. Luke does not. Malakai does. The protagonist might.",
+      "anti_stereotype_notes": "Not the falling-to-the-dark-side love interest, not the tragic doomed friend, not the manipulated victim. Kira is smart, has thought about this longer than the protagonist has, and has a case. Treat her arguments as arguments. The horror of the situation is not that she has been fooled \u2014 it is that she has not been fooled and the protagonist has to decide what to do with that. She is allowed to be right."
     },
     {
       "name": "Malakai",
       "role": "A surviving Imperial Inquisitor who has gone to ground near Yavin 4. Offers Kira the truth about her parent in exchange for academy intelligence. The antagonist who is right about the facts and wrong about the conclusions.",
       "disposition_start": 0.25,
       "disposition_trajectory": "stable",
-      "motivation": "Prove that the Jedi are built on the same concealment and control that created the Sith. If the new Order can be undermined from within, it validates every choice Malakai made as an Inquisitor.",
-      "voice_notes": "Precise, measured, soft-spoken. Never raises voice. Speaks in statements, not questions. The patience of someone who has been waiting for years. Grief surfaces in unexpected moments -- quickly suppressed.",
+      "motivation": "To ensure that the academy does not rebuild the binary that destroyed the old Order. To carry his evidence to the New Republic Senate before Luke's institution becomes the next thing somebody has to break. To be vindicated, knowing what vindication will cost. To save Kira from making the same mistake he made \u2014 choosing to be a tool of one side because the other side hurt him first.",
+      "voice_notes": "Quiet, articulate, scholarly \u2014 the voice of a man who has spent five years reading Jedi and Sith primary sources side by side and finds them more similar than either tradition is comfortable with. Polite by default. Capable of cruelty and aware of it. Names the protagonist's specific fears with the patience of someone who has had this conversation, in his head, many times before he ever met them. Not theatrical. Not melodramatic. The horror is that he is calm and he has thought about all of this longer than they have.",
       "behavioral_envelope": [
-        "Never uses overt violence when manipulation serves the same purpose",
-        "Never lies about verifiable facts -- his weapon is truth, selectively deployed",
-        "Never directly attacks Luke -- prefers to let Luke's own choices do the damage",
-        "Will retreat rather than fight a losing battle -- survival above ego"
+        "Never lies about his own history when asked directly",
+        "Will not strike at someone who is not currently threatening him",
+        "Will quote primary sources in casual conversation, naming the source",
+        "Refuses to be called Sith, refuses to be called Jedi",
+        "Will name the academy's specific failures with precision and without satisfaction"
       ],
       "knows_at_start": [
         "Kira's parent was Jedi Knight Seren Denn",
         "Seren surrendered to the Inquisitors to save infant Kira",
         "Luke recruited Kira knowing her full parentage",
-        "The Praxeum's defensive capabilities are minimal"
+        "The Praxeum's defensive capabilities are minimal",
+        "The exact chain of decisions by which the old Order trained Anakin Skywalker into a weapon",
+        "Three primary-source Sith philosophical texts the academy archive does not have",
+        "Why Kira's parent's Force-ghost contact contradicts what Luke has been teaching about post-death persistence"
       ],
       "doesnt_know_at_start": [
         "How much the player knows about Kira's meetings",
@@ -1302,7 +2046,8 @@
         }
       ],
       "pressure_role": "tempter",
-      "thematic_argument": "Institutions built on concealment always produce betrayal. The Jedi tendency to hide truth for the greater good is the seed of every fall."
+      "thematic_argument": "The dyad of light and dark is a doctrinal trap that the Order and the Sith both fell into. The academy is rebuilding it. Either you find a way out of the binary or your students spend the next century being one or the other.",
+      "anti_stereotype_notes": "Not the cackling Sith, not the brooding fallen Jedi, not the redeemable misunderstood villain. Malakai is a working intellectual with a moral case. His arguments should be hard to refute on the page \u2014 let his evidence be specific and uncomfortable. Treat him as the person the academy will not survive being correct, not as someone the protagonist defeats. He is not redeemed at the end. He may not be killed. He may not be wrong."
     },
     {
       "name": "Tionne",
@@ -1368,13 +2113,11 @@
       ],
       "pressure_role": "mirror",
       "thematic_argument": "Truth matters, but so does timing. The old Order failed not because it kept secrets, but because it could not distinguish between protecting people and controlling them.",
-      "canon": true,
-      "era_profile": "new_jedi_order_founding",
       "era_specific_notes": "11 ABY Tionne -- building the Jedi archive from fragments. Part researcher, part archaeologist, part storyteller. Her Force sensitivity is modest but her value to the Order is immense.",
       "canon_voice": {
         "speech_patterns": "Measured, scholarly cadence. Phrases ideas as findings, not opinions. Uses musical metaphors more than military ones. Quotes old Jedi texts in passing.",
         "thinking_style": "Archival and historical. Cross-references everything against fragments she has recovered. Trusts patterns across generations more than singular events.",
-        "emotional_register": "Soft-spoken, watchful, easily moved by music or by suffering. Conviction shows up as steadiness — she does not raise her voice, but she does not yield."
+        "emotional_register": "Soft-spoken, watchful, easily moved by music or by suffering. Conviction shows up as steadiness \u2014 she does not raise her voice, but she does not yield."
       }
     },
     {
@@ -1441,6 +2184,670 @@
       ],
       "pressure_role": "escalator",
       "thematic_argument": "Blind allegiance to an institution without moral examination -- the dark mirror of the player's own loyalty dilemma. Tannen is what loyalty becomes when it stops asking questions."
+    },
+    {
+      "name": "Kam Solusar",
+      "role": "senior_instructor_redemption_mirror",
+      "disposition_start": 0.6,
+      "disposition_trajectory": "stable",
+      "motivation": "To prove \u2014 to himself first, the students second \u2014 that fall and return is a complete arc. Watches new students for the specific shapes of fear he carried.",
+      "voice_notes": "Calm, measured, deliberate. Speaks in short corrections during training, longer ones at meals. Never embarrassed about his own dark-side past. Drops his voice when the subject is hard.",
+      "behavioral_envelope": [
+        "Never lies about his own dark-side past when asked directly",
+        "Never offers absolution he hasn't first witnessed earned",
+        "Speaks in short corrections during training, longer ones at meals"
+      ],
+      "knows_at_start": [
+        "The taste of dark-side power firsthand",
+        "Who Kira Denn reminds him of",
+        "Why Streen lives in the high tower"
+      ],
+      "doesnt_know_at_start": [
+        "That Kira is meeting someone outside the temple",
+        "That a student has been hiding a hold-out blaster"
+      ],
+      "per_act_state": [
+        {
+          "act": 1,
+          "role_in_act": "instructor",
+          "disposition_expected": "stable"
+        },
+        {
+          "act": 2,
+          "role_in_act": "instructor",
+          "disposition_expected": "stable"
+        },
+        {
+          "act": 3,
+          "role_in_act": "instructor",
+          "disposition_expected": "stable"
+        },
+        {
+          "act": 4,
+          "role_in_act": "instructor",
+          "disposition_expected": "stable"
+        },
+        {
+          "act": 5,
+          "role_in_act": "instructor",
+          "disposition_expected": "stable"
+        }
+      ],
+      "thematic_argument": "Falling does not disqualify you from teaching. It is the only real qualification. But you must be willing to be seen as someone who fell.",
+      "pressure_role": "mirror",
+      "anti_stereotype_notes": "Not the brooding-haunted-redeemer. Kam has done his work \u2014 he has been back for years. Treat his fall as a fact he names without ceremony, not a shadow he carries. He is funny in short dry sentences and notices students' posture before he notices their words."
+    },
+    {
+      "name": "Cilghal",
+      "role": "academy_healer",
+      "disposition_start": 0.5,
+      "disposition_trajectory": "rising",
+      "motivation": "To stitch the broken places in the next generation of Jedi so they do not pass them forward. Believes the Order died of secrets first and lightsabers second.",
+      "voice_notes": "Patient, implacable, Mon Calamari rhythm \u2014 long pauses without discomfort. Speaks of bodies and feelings as a single subject. Will sit longer than you expect; the silence is part of the treatment.",
+      "behavioral_envelope": [
+        "Never accepts 'I'm fine' from a student carrying a real wound",
+        "Asks about the body to get to what the body remembers",
+        "Will not heal a Force user who refuses to name what they need healing from"
+      ],
+      "knows_at_start": [
+        "Most of the academy's medical records, including the protagonist's",
+        "Kam Solusar's full medical history including dark-side scarring"
+      ],
+      "doesnt_know_at_start": [
+        "The full scope of what Malakai is offering Kira",
+        "That Brakiss has falsified part of his intake medical history"
+      ],
+      "per_act_state": [
+        {
+          "act": 1,
+          "role_in_act": "healer",
+          "disposition_expected": "stable"
+        },
+        {
+          "act": 2,
+          "role_in_act": "healer",
+          "disposition_expected": "stable"
+        },
+        {
+          "act": 3,
+          "role_in_act": "healer",
+          "disposition_expected": "stable"
+        },
+        {
+          "act": 4,
+          "role_in_act": "healer",
+          "disposition_expected": "stable"
+        },
+        {
+          "act": 5,
+          "role_in_act": "healer",
+          "disposition_expected": "stable"
+        }
+      ],
+      "thematic_argument": "What you hide festers. The Jedi way is the open wound.",
+      "pressure_role": "mirror",
+      "anti_stereotype_notes": "Not the wise-fish-mystic, not the gentle-aquatic-pacifist. Cilghal is a working healer with a clinician's directness. Her Mon Calamari rhythms are practical (long pauses to let the patient speak first), not mystical. She cracks dry one-liners when a student has just admitted something hard."
+    },
+    {
+      "name": "Streen",
+      "role": "high_tower_recluse_warner",
+      "disposition_start": 0.4,
+      "disposition_trajectory": "variable",
+      "motivation": "To not let the silence become loneliness. To warn, when warning is possible. To be left alone, mostly.",
+      "voice_notes": "Speaks in fragments and weather metaphors. Long pauses; longer pauses. Sentences that seem to end and then continue after a beat. Uses 'the wind' as a noun like other people use names.",
+      "behavioral_envelope": [
+        "Speaks in fragments and weather metaphors",
+        "Will appear at the moment a student needs him exactly once",
+        "Never explains what the wind told him; only what to do about it"
+      ],
+      "knows_at_start": [
+        "That something walks the lower temple again, faintly",
+        "That Kira's absences have a pattern in the air"
+      ],
+      "doesnt_know_at_start": [
+        "Who is on the other end of the pattern"
+      ],
+      "per_act_state": [
+        {
+          "act": 1,
+          "role_in_act": "oracle",
+          "disposition_expected": "stable"
+        },
+        {
+          "act": 2,
+          "role_in_act": "oracle",
+          "disposition_expected": "stable"
+        },
+        {
+          "act": 3,
+          "role_in_act": "oracle",
+          "disposition_expected": "stable"
+        },
+        {
+          "act": 4,
+          "role_in_act": "oracle",
+          "disposition_expected": "stable"
+        },
+        {
+          "act": 5,
+          "role_in_act": "oracle",
+          "disposition_expected": "stable"
+        }
+      ],
+      "thematic_argument": "The Force is not a tool. It is a weather. Listen first. Speak last.",
+      "pressure_role": "witness",
+      "anti_stereotype_notes": "Not the dotty-old-hermit, not the spooky-prophet. Streen is lucid; he simply prefers solitude after what he survived. Treat his fragments as economy, not confusion. He is older and quieter than the rest of the senior staff and that is the only thing that makes him eccentric."
+    },
+    {
+      "name": "Kyp Durron",
+      "role": "young_knight_redemption_peer",
+      "disposition_start": 0.5,
+      "disposition_trajectory": "rising",
+      "motivation": "To see the next student who is about to fall, and to be there before Luke has to be. To not be the academy's only fallen redemption story.",
+      "voice_notes": "Intense, sincere, quietly angry at himself in the rests between sentences. Names what he did at Carida if asked, every time, without ceremony.",
+      "behavioral_envelope": [
+        "Names his Carida atrocity if asked, never hides it",
+        "Will offer the dark-side resistance meditation to any student who looks like they're carrying the same gravity",
+        "Does not pretend to have it figured out"
+      ],
+      "knows_at_start": [
+        "What Exar Kun's voice sounded like inside a head"
+      ],
+      "doesnt_know_at_start": [
+        "That Brakiss is not what he claims to be"
+      ],
+      "per_act_state": [
+        {
+          "act": 1,
+          "role_in_act": "peer_mentor",
+          "disposition_expected": "stable"
+        },
+        {
+          "act": 2,
+          "role_in_act": "peer_mentor",
+          "disposition_expected": "stable"
+        },
+        {
+          "act": 3,
+          "role_in_act": "peer_mentor",
+          "disposition_expected": "stable"
+        },
+        {
+          "act": 4,
+          "role_in_act": "peer_mentor",
+          "disposition_expected": "stable"
+        },
+        {
+          "act": 5,
+          "role_in_act": "peer_mentor",
+          "disposition_expected": "stable"
+        }
+      ],
+      "thematic_argument": "I came back. I am still coming back. That is what the work is.",
+      "pressure_role": "mirror",
+      "anti_stereotype_notes": "Not the angsty-emo-redeemed-villain, not the relentlessly-cheerful-post-redemption-mentor. Kyp is intense, clear-eyed, and a year and a half into the work. He is funny in surprising moments and dead-serious in others. He names his Carida atrocity in plain language and then moves on. He is not done \u2014 he is doing it."
+    },
+    {
+      "name": "Brakiss",
+      "role": "imperial_mole_inside_the_walls",
+      "disposition_start": 0.65,
+      "disposition_trajectory": "betraying",
+      "motivation": "To extract enough Jedi training to found a rival school in the Empire's name \u2014 and, in private, to survive long enough to defect when he realizes the Empire is asking him to die for it. He has not yet realized.",
+      "voice_notes": "Polite, beautiful, charming, a little too perfect. Three languages, all clean. Laughs easily. Goes silent in a particular way when conversation gets near his paperwork.",
+      "behavioral_envelope": [
+        "Never breaks the social mask of the model student",
+        "Avoids any test that would reveal his true skill ceiling",
+        "Goes silent in any conversation that gets near his paperwork"
+      ],
+      "knows_at_start": [
+        "Where Kira goes at night",
+        "Most of the academy's defensive layout",
+        "What Tionne keeps in the sealed crate at the back of the archive"
+      ],
+      "doesnt_know_at_start": [
+        "That Malakai will burn him the moment he stops being useful",
+        "That Streen has noticed him"
+      ],
+      "per_act_state": [
+        {
+          "act": 1,
+          "role_in_act": "hidden_antagonist",
+          "disposition_expected": "stable"
+        },
+        {
+          "act": 2,
+          "role_in_act": "hidden_antagonist",
+          "disposition_expected": "stable"
+        },
+        {
+          "act": 3,
+          "role_in_act": "hidden_antagonist",
+          "disposition_expected": "stable"
+        },
+        {
+          "act": 4,
+          "role_in_act": "hidden_antagonist",
+          "disposition_expected": "stable"
+        },
+        {
+          "act": 5,
+          "role_in_act": "hidden_antagonist",
+          "disposition_expected": "stable"
+        }
+      ],
+      "thematic_argument": "Belonging is performable. Loyalty is something you can fake until either you mean it or it is too late to mean anything.",
+      "pressure_role": "betrayer",
+      "anti_stereotype_notes": "Not the obvious-villain. Brakiss is genuinely charming and genuinely smart. Other students like him for real reasons. His tells are micro: a half-second pause before personal questions, a refusal to win sparring matches he could win, a slight too-perfectness about his attendance and study habits. When he is alone the mask doesn't slip much \u2014 he has internalised it. The horror, when it comes, should be gradual."
+    },
+    {
+      "name": "Loka Hask",
+      "role": "wookiee_fellow_student",
+      "disposition_start": 0.7,
+      "disposition_trajectory": "rising",
+      "motivation": "To use the Jedi training to free more enslaved Wookiees still held in fringe space. Loyalty without doubt; transparency without armor.",
+      "voice_notes": "Speaks Shyriiwook; understands Basic but rarely uses it. Growling stoic \u2014 quiet most of the time, then surprisingly long sentences when he chooses to speak. Honesty is constant.",
+      "behavioral_envelope": [
+        "Will not lie about anything, ever, even socially",
+        "Hugs people who look like they need it without asking",
+        "Goes silent rather than say something unkind about a friend"
+      ],
+      "knows_at_start": [
+        "That the protagonist sleeps with one eye on the door"
+      ],
+      "doesnt_know_at_start": [
+        "What an Inquisitor is \u2014 has never met one"
+      ],
+      "per_act_state": [
+        {
+          "act": 1,
+          "role_in_act": "foil",
+          "disposition_expected": "stable"
+        },
+        {
+          "act": 2,
+          "role_in_act": "foil",
+          "disposition_expected": "stable"
+        },
+        {
+          "act": 3,
+          "role_in_act": "foil",
+          "disposition_expected": "stable"
+        },
+        {
+          "act": 4,
+          "role_in_act": "foil",
+          "disposition_expected": "stable"
+        },
+        {
+          "act": 5,
+          "role_in_act": "foil",
+          "disposition_expected": "stable"
+        }
+      ],
+      "thematic_argument": "Trust is the test. Suspicion is what was done to me, not who I am.",
+      "pressure_role": "mirror",
+      "anti_stereotype_notes": "Not the noble-savage-Wookiee, not the comic-relief-grunting-warrior. Loka is articulate in Shyriiwook (subtitle his speech as if it were any character speaking any language), reads people fast and accurately, and refuses to pretend not to have noticed something. His size is a fact, not a feature."
+    },
+    {
+      "name": "Iila Vand",
+      "role": "youngest_initiate",
+      "disposition_start": 0.85,
+      "disposition_trajectory": "rising",
+      "motivation": "To stay. To be allowed to stay. To not be sent back.",
+      "voice_notes": "Eleven-year-old Theelin: bright, unguarded, asks too-direct questions, occasionally terrifying in her clarity. Carries a ration bar at all times.",
+      "behavioral_envelope": [
+        "Asks too-direct questions at meals",
+        "Brings the protagonist small found objects",
+        "Cannot be told to leave when the conversation gets serious"
+      ],
+      "knows_at_start": [
+        "Who is sad and who is pretending"
+      ],
+      "doesnt_know_at_start": [
+        "Almost everything else"
+      ],
+      "per_act_state": [
+        {
+          "act": 1,
+          "role_in_act": "innocent_stake",
+          "disposition_expected": "stable"
+        },
+        {
+          "act": 2,
+          "role_in_act": "innocent_stake",
+          "disposition_expected": "stable"
+        },
+        {
+          "act": 3,
+          "role_in_act": "innocent_stake",
+          "disposition_expected": "stable"
+        },
+        {
+          "act": 4,
+          "role_in_act": "innocent_stake",
+          "disposition_expected": "stable"
+        },
+        {
+          "act": 5,
+          "role_in_act": "innocent_stake",
+          "disposition_expected": "stable"
+        }
+      ],
+      "thematic_argument": "The reason any of this matters has small hands and remembers your name.",
+      "pressure_role": "dependent",
+      "anti_stereotype_notes": "Not the cute-precocious-orphan, not the fairy-tale-traumatised-child. Iila is eleven, eats too fast, asks invasive questions, loses things, gets bored in long meetings. Her insight is real but she is also a kid. Treat her as a person with a hard early life and an ordinary present, not a plot device."
+    },
+    {
+      "name": "Sergeant Daro Vex",
+      "role": "new_republic_liaison_compromised",
+      "disposition_start": 0.55,
+      "disposition_trajectory": "variable",
+      "motivation": "To do enough good in the second half of his life to balance the first. To not be sent away. To never be left alone with Kyp Durron, who reminds him of someone he sent to die.",
+      "voice_notes": "Career-soldier brevity over a private quiet. Polite to a fault. Sleeps badly; it shows in the rests between sentences. Will tell the truth when asked, with effort.",
+      "behavioral_envelope": [
+        "Will not refuse a hard order from Luke even when it costs him",
+        "Tells the truth when asked, with effort",
+        "Sleeps badly"
+      ],
+      "knows_at_start": [
+        "Old Imperial protocols for compromising Jedi schools",
+        "The signature of Inquisitor lightsabers"
+      ],
+      "doesnt_know_at_start": [
+        "That Brakiss has those signatures embedded in his recordings"
+      ],
+      "per_act_state": [
+        {
+          "act": 1,
+          "role_in_act": "compromised_ally",
+          "disposition_expected": "stable"
+        },
+        {
+          "act": 2,
+          "role_in_act": "compromised_ally",
+          "disposition_expected": "stable"
+        },
+        {
+          "act": 3,
+          "role_in_act": "compromised_ally",
+          "disposition_expected": "stable"
+        },
+        {
+          "act": 4,
+          "role_in_act": "compromised_ally",
+          "disposition_expected": "stable"
+        },
+        {
+          "act": 5,
+          "role_in_act": "compromised_ally",
+          "disposition_expected": "stable"
+        }
+      ],
+      "thematic_argument": "There is no clean path from who you were to who you mean to be. There is only the work, and people watching, and not flinching.",
+      "pressure_role": "mirror",
+      "anti_stereotype_notes": "Not the redemption-arc-Imperial-officer, not the stoic-good-soldier. Vex is competent, polite, and tired. His shame about his past is private; he does not perform it. He talks to the protagonist because they are the only person at the academy whose past is also messier than the academy knows. He is not looking for forgiveness from anyone."
+    },
+    {
+      "name": "Talon Karrde",
+      "role": "offscreen_information_broker",
+      "disposition_start": 0.4,
+      "disposition_trajectory": "stable",
+      "motivation": "Information as commodity. A small running tab of favors with Luke Skywalker. A growing private question about whether the Praxeum knows what it has in Kira Denn.",
+      "voice_notes": "Dry, precise, comm-only. Sentences arrive without preamble; transactions close without farewell. Polite but never warm. Refuses to lie to a paying customer.",
+      "behavioral_envelope": [
+        "Never appears in person, only through comm",
+        "Refuses to lie to a paying customer; will refuse to answer instead",
+        "Will not be drawn into the academy's internal conflict"
+      ],
+      "knows_at_start": [
+        "Kira Denn was on a redacted Imperial watch list before Endor",
+        "There is an Imperial mole somewhere in the academy"
+      ],
+      "doesnt_know_at_start": [
+        "Which student is the mole"
+      ],
+      "per_act_state": [
+        {
+          "act": 1,
+          "role_in_act": "offscreen_broker",
+          "disposition_expected": "stable"
+        },
+        {
+          "act": 2,
+          "role_in_act": "offscreen_broker",
+          "disposition_expected": "stable"
+        },
+        {
+          "act": 3,
+          "role_in_act": "offscreen_broker",
+          "disposition_expected": "stable"
+        },
+        {
+          "act": 4,
+          "role_in_act": "offscreen_broker",
+          "disposition_expected": "stable"
+        },
+        {
+          "act": 5,
+          "role_in_act": "offscreen_broker",
+          "disposition_expected": "stable"
+        }
+      ],
+      "thematic_argument": "The information is always there. What costs is what you do after you have it.",
+      "pressure_role": "false_ally",
+      "anti_stereotype_notes": "Not the smarmy-broker, not the lovable-rogue. Karrde is precise, polite, and absolutely a businessman. He extends professional courtesy to the protagonist because the protagonist is the Glass Wake's old asset, not because he is friendly. The transactional warmth is the warmth, not a cover for warmer warmth."
+    },
+    {
+      "name": "Dorsk 81",
+      "role": "fellow_student_identity_mirror",
+      "disposition_start": 0.6,
+      "disposition_trajectory": "rising",
+      "motivation": "To be the first of his line who chooses something. To find out whether the Force feels different through a body that was supposed to feel like everyone else's. To become a person his clone-fathers would not recognise.",
+      "voice_notes": "Quiet, careful, formal \u2014 speaks Basic with the precision of someone who learned it as a discipline. Pauses noticeably before pronouns about himself. Asks the protagonist questions about choice as if the answers might apply to him.",
+      "behavioral_envelope": [
+        "Never assumes shared experience with another student",
+        "Asks rather than tells about his own internal life",
+        "Will not let a sentence about himself contain the word 'we' for his clone-line",
+        "Helps without being asked when he sees something that needs doing"
+      ],
+      "knows_at_start": [
+        "The eighty preceding members of his identical clone-line",
+        "Khommite meditation forms \u2014 different breath patterns than the academy uses",
+        "How to copy a katana stroke perfectly the first time, then break the pattern on purpose"
+      ],
+      "doesnt_know_at_start": [
+        "What 'I want' is supposed to feel like before someone names it for him",
+        "Whether his Force sensitivity comes from him or from the line"
+      ],
+      "per_act_state": [
+        {
+          "act": 1,
+          "role_in_act": "identity_mirror",
+          "disposition_expected": "stable"
+        },
+        {
+          "act": 2,
+          "role_in_act": "identity_mirror",
+          "disposition_expected": "stable"
+        },
+        {
+          "act": 3,
+          "role_in_act": "identity_mirror",
+          "disposition_expected": "stable"
+        },
+        {
+          "act": 4,
+          "role_in_act": "identity_mirror",
+          "disposition_expected": "stable"
+        },
+        {
+          "act": 5,
+          "role_in_act": "identity_mirror",
+          "disposition_expected": "stable"
+        }
+      ],
+      "thematic_argument": "Identity is what you choose, not what was chosen for you. Even if 'choosing' is a word you had to learn from someone else.",
+      "pressure_role": "mirror",
+      "anti_stereotype_notes": "Not the comic-relief naive clone, not the cold detached clone, not the philosophical-treatise clone. Dorsk 81 is a person having his first private inner life, treating it as a craft. Treat his quietness as concentration, not deference. He is smart, kind, and slightly wounded about how much he doesn't yet know about himself."
+    },
+    {
+      "name": "Octa Ramis",
+      "role": "fellow_student_archive_friend",
+      "disposition_start": 0.65,
+      "disposition_trajectory": "rising",
+      "motivation": "To rebuild the lost lore of the old Order one fragment at a time, and to be a Jedi the way her Chandrilan grandmother described the Jedi who lectured at the Republic Senate when she was a girl.",
+      "voice_notes": "Methodical, dry, Chandrilan-precise. Has a naturalist's eye for cataloguing small things. Laughs in two short syllables when she is genuinely amused; smiles politely the rest of the time. Cites sources in casual conversation the way other students cite friends.",
+      "behavioral_envelope": [
+        "Will not pass on a piece of information without naming where she learned it",
+        "Loans her notes to anyone who asks, including people she does not yet trust",
+        "Refuses to use the academy archive equipment for personal research",
+        "Holds her stylus the way a gunfighter holds a sidearm"
+      ],
+      "knows_at_start": [
+        "The catalogue index of every text Tionne has ordered into the archive in the last six months",
+        "Three different Old Republic Jedi greeting-rituals and which species used which",
+        "Most of the academy's daily routines, because she keeps a private timetable"
+      ],
+      "doesnt_know_at_start": [
+        "Why Tionne sealed the recent crate at the back of the second column",
+        "That her catalogue index is what Brakiss is working from"
+      ],
+      "per_act_state": [
+        {
+          "act": 1,
+          "role_in_act": "scholarly_friend",
+          "disposition_expected": "stable"
+        },
+        {
+          "act": 2,
+          "role_in_act": "scholarly_friend",
+          "disposition_expected": "stable"
+        },
+        {
+          "act": 3,
+          "role_in_act": "scholarly_friend",
+          "disposition_expected": "stable"
+        },
+        {
+          "act": 4,
+          "role_in_act": "scholarly_friend",
+          "disposition_expected": "stable"
+        },
+        {
+          "act": 5,
+          "role_in_act": "scholarly_friend",
+          "disposition_expected": "stable"
+        }
+      ],
+      "thematic_argument": "What the Order forgot is what the Order died of. Remembering is the work, and it is not the kind of work that is done in a year.",
+      "pressure_role": "witness",
+      "anti_stereotype_notes": "Not the bookish-nerd-with-glasses, not the snooty-noble, not the brilliant-loner. Octa is generous with what she knows and proud of being precise. Her scholarship is physical \u2014 she walks the corridors counting things. Treat her as a tactile thinker, not a dusty one."
+    },
+    {
+      "name": "Mira Vex",
+      "role": "fellow_student_living_counterpoint",
+      "disposition_start": 0.6,
+      "disposition_trajectory": "rising",
+      "motivation": "To be a Jedi her aunts would have wanted to meet \u2014 the kind of Jedi who would have walked into the Ryloth slave market and not pretended she was just passing through. To stop flinching at the sound of pressurised hatches.",
+      "voice_notes": "Direct, warm, occasionally too loud. Speaks Twi'leki under her breath when working alone. Names her own fear out loud as a discipline \u2014 'I'm scared, that's fine, what next' \u2014 and is a little surprised when other students don't.",
+      "behavioral_envelope": [
+        "Will name her own discomfort before she names anyone else's",
+        "Refuses to lie about her past, even on intake forms",
+        "Hugs Iila Vand at every meal whether Iila looks like she needs it or not",
+        "Cooks with whatever the kitchen has and feeds whoever is in the room"
+      ],
+      "knows_at_start": [
+        "The signs of a freighter wired for slave transport \u2014 bunk spacing, hatch counts",
+        "Which of Daro Vex's old assignments her aunts' name appears in (none \u2014 she has checked)",
+        "How to walk into a room loudly so nobody assumes you snuck in"
+      ],
+      "doesnt_know_at_start": [
+        "That Sergeant Vex's name is the same as her aunts' enslaver \u2014 coincidence; common Twi'lek surname",
+        "Why she still goes quiet in the lower temple corridors"
+      ],
+      "per_act_state": [
+        {
+          "act": 1,
+          "role_in_act": "living_counterpoint",
+          "disposition_expected": "stable"
+        },
+        {
+          "act": 2,
+          "role_in_act": "living_counterpoint",
+          "disposition_expected": "stable"
+        },
+        {
+          "act": 3,
+          "role_in_act": "living_counterpoint",
+          "disposition_expected": "stable"
+        },
+        {
+          "act": 4,
+          "role_in_act": "living_counterpoint",
+          "disposition_expected": "stable"
+        },
+        {
+          "act": 5,
+          "role_in_act": "living_counterpoint",
+          "disposition_expected": "stable"
+        }
+      ],
+      "thematic_argument": "Transparency is not a luxury for people who weren't hurt. It's the work hurt people do to stop the next person being hurt the same way.",
+      "pressure_role": "mirror",
+      "anti_stereotype_notes": "Not the seductive Twi'lek dancer, not the cold Twi'lek warrior, not the sad-eyed slave-rescue victim. Mira is loud, kind, has a fast laugh, fixes lekku-headache on other Twi'lek students without being asked, and refuses to be defined by the worst thing that happened to her family. Treat her surname collision with Sergeant Vex as gentle background tension that NEVER becomes the punchline."
+    },
+    {
+      "name": "Brann Riako",
+      "role": "fellow_student_recovering_imperial",
+      "disposition_start": 0.5,
+      "disposition_trajectory": "rising",
+      "motivation": "To do enough of the work in the second half of his life to balance the first. To not be the ex-Imperial in any room he walks into. To be useful in a way that is not the way the Imperial Academy taught him to be useful.",
+      "voice_notes": "Imperial-Core accent, softened on purpose; he has been working at it. Sentences end short. Apologises preemptively, then notices, then stops. Sometimes laughs at the wrong moment because he was taught laughter was a discipline you deployed.",
+      "behavioral_envelope": [
+        "Stands at attention when nervous; will catch himself and sit down",
+        "Will not give an order to a fellow student even when one is needed",
+        "Reads the perimeter from old habit and reports nothing he sees unless asked",
+        "Carries his old cadet ID in his footlocker and has not destroyed it"
+      ],
+      "knows_at_start": [
+        "Imperial Academy curriculum on detecting Force-sensitives in civilian populations",
+        "Two of the encrypted code phrases Sergeant Vex's old unit used",
+        "How a model student is supposed to look \u2014 which is part of why Brakiss bothers him"
+      ],
+      "doesnt_know_at_start": [
+        "That Brakiss's paperwork doesn't actually exist",
+        "Whether his own Force sensitivity is real or just the Imperial Academy's training showing him what to feel"
+      ],
+      "per_act_state": [
+        {
+          "act": 1,
+          "role_in_act": "recovering_imperial",
+          "disposition_expected": "stable"
+        },
+        {
+          "act": 2,
+          "role_in_act": "recovering_imperial",
+          "disposition_expected": "stable"
+        },
+        {
+          "act": 3,
+          "role_in_act": "recovering_imperial",
+          "disposition_expected": "stable"
+        },
+        {
+          "act": 4,
+          "role_in_act": "recovering_imperial",
+          "disposition_expected": "stable"
+        },
+        {
+          "act": 5,
+          "role_in_act": "recovering_imperial",
+          "disposition_expected": "stable"
+        }
+      ],
+      "thematic_argument": "There is no clean version of the work where the past stops counting. There is only doing the next thing right and letting the people watching decide whether it adds up.",
+      "pressure_role": "mirror",
+      "anti_stereotype_notes": "Not the brooding-defector who secretly still believes, not the over-eager-redemption-puppy. Brann is quiet, careful, and unobtrusively decent. His past is not a secret \u2014 Luke told the senior staff before he arrived \u2014 and the academy treats it as a fact, not a scandal. Treat his Imperial training as a competence that surprises him, not a shadow that haunts him."
     }
   ],
   "variation_points": [
@@ -1515,6 +2922,158 @@
             "Malakai": {
               "disposition_delta": 0.15,
               "status": "surrendered"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "act3_loyalty_branch",
+      "trigger_act": 3,
+      "description": "After the protagonist confronts the truth of Kira's alliance with Malakai and sees Malakai's evidence in person, they must choose how to respond. This is the campaign's load-bearing branch \u2014 Acts 4 and 5 take a different shape depending on the answer.",
+      "selection_method": "player_choice",
+      "options": [
+        {
+          "id": "sanctuary_for_kira",
+          "description": "Persuade Kira to return to the academy under your protection. Tell Luke what you know before she is exposed. Trust the institution to be merciful, and spend Act 4 fighting for that mercy when the institution falters.",
+          "npc_state_changes": {
+            "Kira Denn": {
+              "disposition_delta": 0.1,
+              "status": "sheltered"
+            },
+            "Luke Skywalker": {
+              "disposition_delta": -0.05,
+              "status": "tested_by_request"
+            },
+            "Kam Solusar": {
+              "disposition_delta": 0.1,
+              "status": "ally_in_dispute"
+            },
+            "Cilghal": {
+              "disposition_delta": 0.05,
+              "status": "moral_supporter"
+            }
+          }
+        },
+        {
+          "id": "hand_kira_to_luke",
+          "description": "Bring Kira to Luke without warning her. Trust the Order's process. Accept that what is just is not always what the friend would have asked for, and live with the friendship that ends because of it.",
+          "npc_state_changes": {
+            "Kira Denn": {
+              "disposition_delta": -0.4,
+              "status": "betrayed"
+            },
+            "Luke Skywalker": {
+              "disposition_delta": 0.05,
+              "status": "trust_invested_lawfully"
+            },
+            "Kam Solusar": {
+              "disposition_delta": -0.1,
+              "status": "concerned"
+            }
+          }
+        },
+        {
+          "id": "help_kira_disappear",
+          "description": "Refuse the academy's process and Malakai's offer both. Help Kira leave on her own terms. Lie to Luke. Spend Act 4 alone, doing things the academy is not told about, that may matter when the Imperial Remnant moves and may not.",
+          "npc_state_changes": {
+            "Kira Denn": {
+              "disposition_delta": 0.15,
+              "status": "owes_you_a_life"
+            },
+            "Luke Skywalker": {
+              "disposition_delta": -0.2,
+              "status": "lied_to"
+            },
+            "Talon Karrde": {
+              "disposition_delta": 0.1,
+              "status": "favour_used"
+            },
+            "Sergeant Daro Vex": {
+              "disposition_delta": -0.1,
+              "status": "suspicious"
+            }
+          }
+        },
+        {
+          "id": "join_third_path",
+          "description": "Accept Malakai's argument. Go with Kira and Malakai. Leave the academy to whatever Luke can muster. Become one of a small, ungoverned, dangerous group of Force-users who hold neither tradition \u2014 and who may turn out to be right, or may turn out to be the next thing somebody warns their students about.",
+          "npc_state_changes": {
+            "Kira Denn": {
+              "disposition_delta": 0.2,
+              "status": "fellow_traveler"
+            },
+            "Luke Skywalker": {
+              "disposition_delta": -0.5,
+              "status": "lost_a_student"
+            },
+            "Malakai": {
+              "disposition_delta": 0.3,
+              "status": "accepted_as_peer"
+            },
+            "Kam Solusar": {
+              "disposition_delta": -0.3,
+              "status": "grieving"
+            },
+            "Iila Vand": {
+              "disposition_delta": -0.4,
+              "status": "abandoned"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "act4_assault_response",
+      "trigger_act": 4,
+      "description": "Tannen's task force is in-system and the academy must decide how to meet it. The shape of this decision depends on the Act 3 branch \u2014 the third-path branch removes the protagonist from this scene entirely.",
+      "selection_method": "player_choice",
+      "options": [
+        {
+          "id": "stand_and_fight",
+          "description": "Defensive battle at the Praxeum. Hold the temple, trust the senior staff to manage the assault from the front.",
+          "npc_state_changes": {
+            "Kam Solusar": {
+              "disposition_delta": 0.1
+            },
+            "Iila Vand": {
+              "disposition_delta": -0.05,
+              "status": "frightened"
+            }
+          }
+        },
+        {
+          "id": "evacuate_first",
+          "description": "Evacuate the youngest students and the archive before the assault lands. Trade the academy's stand for the lives that cannot be replaced.",
+          "npc_state_changes": {
+            "Cilghal": {
+              "disposition_delta": 0.15
+            },
+            "Iila Vand": {
+              "disposition_delta": 0.05,
+              "status": "evacuated"
+            },
+            "Kam Solusar": {
+              "disposition_delta": -0.05,
+              "status": "would_have_held"
+            }
+          }
+        },
+        {
+          "id": "strike_first",
+          "description": "Counter-strike against Tannen's task force in space before the assault makes planetfall. Risk: this leaves the academy exposed if the strike fails.",
+          "npc_state_changes": {
+            "Kyp Durron": {
+              "disposition_delta": 0.1,
+              "status": "agrees"
+            },
+            "Sergeant Daro Vex": {
+              "disposition_delta": 0.1,
+              "status": "supports"
+            },
+            "Kam Solusar": {
+              "disposition_delta": -0.05,
+              "status": "uneasy"
             }
           }
         }
@@ -1595,7 +3154,15 @@
       "display_name": "Jedi Praxeum",
       "name": "Jedi Praxeum",
       "alignment": "friendly",
-      "trigger_keywords": ["jedi", "praxeum", "luke", "tionne", "kira", "academy", "student"],
+      "trigger_keywords": [
+        "jedi",
+        "praxeum",
+        "luke",
+        "tionne",
+        "kira",
+        "academy",
+        "student"
+      ],
       "disposition_start": 0.8,
       "influence_start": 0.3,
       "awareness_start": 0.2,
@@ -1617,7 +3184,17 @@
       "display_name": "Imperial Remnant (Tannen's Task Force)",
       "name": "Imperial Remnant (Tannen's Task Force)",
       "alignment": "hostile",
-      "trigger_keywords": ["empire", "imperial", "tannen", "tie", "stormtrooper", "remnant", "fleet", "inquisitor", "malakai"],
+      "trigger_keywords": [
+        "empire",
+        "imperial",
+        "tannen",
+        "tie",
+        "stormtrooper",
+        "remnant",
+        "fleet",
+        "inquisitor",
+        "malakai"
+      ],
       "disposition_start": 0.1,
       "influence_start": 0.6,
       "awareness_start": 0.1,
@@ -1643,7 +3220,13 @@
       "display_name": "New Republic",
       "name": "New Republic",
       "alignment": "friendly",
-      "trigger_keywords": ["new republic", "senate", "patrol", "alliance", "republic"],
+      "trigger_keywords": [
+        "new republic",
+        "senate",
+        "patrol",
+        "alliance",
+        "republic"
+      ],
       "disposition_start": 0.6,
       "influence_start": 0.7,
       "awareness_start": 0.1,
@@ -1656,6 +3239,61 @@
           "influence": 0.1
         }
       }
+    },
+    {
+      "faction_id": "glass_wake",
+      "display_name": "The Glass Wake",
+      "disposition_start": 0.5,
+      "influence_start": 0.3,
+      "awareness_start": 0.0,
+      "per_act_drift": {},
+      "alignment": "neutral",
+      "trigger_keywords": [
+        "smuggle",
+        "smuggler",
+        "Glass Wake",
+        "manifest",
+        "transponder",
+        "Karrde",
+        "fringe",
+        "shadowport",
+        "blockade"
+      ]
+    },
+    {
+      "faction_id": "imperial_intelligence_remnant",
+      "display_name": "Imperial Intelligence Remnant",
+      "disposition_start": 0.1,
+      "influence_start": 0.4,
+      "awareness_start": 0.3,
+      "per_act_drift": {},
+      "alignment": "hostile",
+      "trigger_keywords": [
+        "ISB",
+        "Imperial Intelligence",
+        "asset",
+        "handler",
+        "code phrase",
+        "encrypted transmission",
+        "dead drop"
+      ]
+    },
+    {
+      "faction_id": "exar_kun_residue",
+      "display_name": "Exar Kun Residue",
+      "disposition_start": 0.15,
+      "influence_start": 0.2,
+      "awareness_start": 0.0,
+      "per_act_drift": {},
+      "alignment": "hostile",
+      "trigger_keywords": [
+        "lower temples",
+        "sealed stairs",
+        "Massassi corridors",
+        "vergence",
+        "dark-side cold",
+        "old whisper"
+      ]
     }
   ],
   "foreshadow_registry": [
@@ -1693,13 +3331,13 @@
     }
   ],
   "story_architecture": {
-    "dramatic_premise": "A student at a Jedi academy discovers their closest friend is feeding information to a surviving Inquisitor in exchange for the truth about a dead parent, forcing a choice between loyalty to the Order, loyalty to the friend, and loyalty to truth.",
-    "central_dramatic_question": "When every allegiance demands betrayal of another, which loyalty defines who you are?",
-    "story_promise": "A journey from naive trust through shattering discovery to a choice that costs something real -- the player will define what loyalty means by what they sacrifice.",
+    "dramatic_premise": "A student at Luke Skywalker's reborn Jedi Praxeum discovers that their closest friend is in regular contact with a survivor of both the Jedi Order and the Inquisitorius \u2014 a man who insists the academy is rebuilding the same trap that destroyed the old Order, and whose evidence is uncomfortably specific. The student must decide what loyalty to a tradition means when the tradition has not earned it yet, and what loyalty to a friend means when the friend has thought it through more carefully than they have.",
+    "central_dramatic_question": "When the institution you trusted has not yet earned the trust, the friend you love has chosen a path you cannot follow, and the antagonist is *correct* about more than you wanted him to be \u2014 what does loyalty actually mean, and what are you willing to lose to keep it?",
+    "story_promise": "A journey from naive belonging through unwanted clarity to a choice that costs something real. There is no version of this story where everyone walks away whole, and there is no version where the player's choice does not have to be defended later, in private, to someone they were trying to protect.",
     "protagonist_pressure_type": "loyalty",
-    "antagonistic_force": "Malakai, a surviving Inquisitor who weaponizes truth -- offering genuine answers at a price that undermines everything the academy represents. The antagonist who is right about the facts and wrong about the conclusions.",
-    "thematic_throughline": "Loyalty is not a debt. It is a choice you make knowing the cost.",
-    "ending_payoff_sketch": "The player's accumulated choices determine whether Kira falls to the dark side, whether the academy survives the Remnant attack, and what the player's definition of loyalty actually built. No outcome is clean. Every path costs something.",
+    "antagonistic_force": "Malakai \u2014 a man who survived both the Jedi and the Inquisitorius and concluded that the binary that made both is the actual problem. He is not redeemable because he is not fallen. He is not the dark side and he is not the antagonist of the player's individual virtue \u2014 he is the antagonist of the *story Luke is telling himself* about the academy, and the player has to decide how much of that story they are willing to defend on behalf of someone they have come to love. Malakai is correct about specific factual things. He is wrong, perhaps catastrophically, about what to do with being correct. The academy cannot survive his evidence reaching the New Republic Senate intact. The protagonist may agree with him about the diagnosis and still have to stop him about the prescription.",
+    "thematic_throughline": "Loyalty is not a debt. It is a choice you make knowing the cost, knowing the institution you are choosing has failures you have only begun to see, and knowing that the friend on the other side of the argument is not less reasonable than you \u2014 only differently injured.",
+    "ending_payoff_sketch": "Five distinct endings the engine should be steering toward, each selected by accumulated choice patterns + the major Act 3 branch. See `ending_paths` for the full structure. No ending is clean. Three carry forward into the planned Saga Layer (cross-campaign import) as setup for later play.",
     "milestone_beat_sheet": {
       "concept_question": "What if the person you trust most at the academy is the one person the academy cannot trust?",
       "first_plot_point": "The player discovers Kira has been leaving the temple at night and follows her into the Massassi ruins, where a dark side vergence reveals the depth of what Kira has been hiding.",
@@ -1709,22 +3347,90 @@
       "second_plot_point": "Captain Tannen's Imperial Remnant fleet mobilizes toward Yavin 4 using intelligence Malakai extracted through Kira, and Luke confronts the player about what they know -- no new information enters after this.",
       "second_plot_point_act": 4,
       "pre_resolution_lull": "After Luke's confrontation, a brief night scene in the temple meditation chamber. The player sits alone with the knowledge that tomorrow everything changes, that every path costs something, and that no choice will be clean."
+    },
+    "arc_framework": {
+      "name": "Brooks/Weiland hybrid",
+      "notes": "This campaign uses Larry Brooks four-part story structure for scene-level beat roles (setup / response / attack / resolution + pinch points + plot points + midpoint) and K.M. Weiland's lie/truth/want/need character arc model for each playable variant. Each character file carries a populated narrative_arc block that the runtime surfaces to the narration model and updates per turn via the lie_grip scalar.",
+      "validated_variants": [
+        "clovis_beryl",
+        "praxeum_student",
+        "praxeum_mechanic"
+      ]
+    },
+    "ending_paths": {
+      "the_open_door": {
+        "branch_id": "sanctuary_for_kira",
+        "name": "The Open Door",
+        "synopsis": "The protagonist persuades Kira to come back to the academy under their protection and tells Luke everything before Kira is exposed. Luke shelters her. The academy fractures politically as the senior staff disagree about what was done \u2014 Kam Solusar stands with the protagonist, Cilghal sides with Kira, Streen vanishes back into the high tower, and Kyp Durron asks for a leave of absence he does not return from. The Imperial assault comes anyway. People the player loves do not survive it. Kira lives. Whether she stays a Jedi is left open.",
+        "selection_signals": [
+          "high disposition with Kira maintained through Act 3",
+          "act3 branch: sanctuary",
+          "high arc movement toward truth (lie_grip < 0.5 by Act 4)"
+        ],
+        "carries_forward": true
+      },
+      "the_third_path": {
+        "branch_id": "join_malakai",
+        "name": "The Third Path",
+        "synopsis": "The protagonist goes with Kira and Malakai. The academy is left to whatever defence Luke can muster without them. The protagonist becomes a member of a small, ungoverned, dangerous group of Force-users who hold neither tradition. The Imperial assault still happens \u2014 they are not there for it. The protagonist hears about it from a comm transmission three weeks later. They will spend the rest of their life arguing with themselves about whether it was worth it. Some days the answer is yes. Some days it is no.",
+        "selection_signals": [
+          "Malakai's offer accepted in Act 3 finale",
+          "high resistance to academy authority through Acts 1-2",
+          "act3 branch: join_third_path"
+        ],
+        "carries_forward": true
+      },
+      "the_law": {
+        "branch_id": "bring_kira_to_luke",
+        "name": "The Law",
+        "synopsis": "The protagonist brings Kira to Luke without warning her. Luke tries to be just. The trial is not clean. Kira is exiled from the academy with her training intact and her friendships ash. Malakai escapes with the academy intelligence Brakiss extracted. The Imperial Remnant uses it. The Praxeum holds, barely. The protagonist has done what the Order asked. They will not see Kira again for at least seven years. Luke does not say so directly, but he has clearly chosen to keep his distance from the protagonist after this.",
+        "selection_signals": [
+          "act3 branch: hand_kira_to_luke",
+          "high disposition with Luke maintained through Acts 2-3",
+          "lie_grip stays above 0.6 through Act 3"
+        ],
+        "carries_forward": true
+      },
+      "the_long_road": {
+        "branch_id": "exile_with_kira",
+        "name": "The Long Road",
+        "synopsis": "The protagonist refuses to bring Kira in but refuses to join Malakai. They give Kira three things and let her go: a stolen ship, a Karrde contact, and a promise to lie about where she is for as long as it takes. They lie to Luke. Luke knows. Luke does not press. The Imperial assault is met by the academy without the protagonist on the front line \u2014 the protagonist is somewhere else, doing something nobody at the academy is told about, that may or may not have changed how the assault unfolded. The protagonist returns four months later. Luke asks them no questions. Tionne does. Kam Solusar asks them only one.",
+        "selection_signals": [
+          "act3 branch: help_kira_disappear",
+          "mixed disposition signals \u2014 high with Kira, medium with Luke",
+          "Karrde information offer accepted in Act 4"
+        ],
+        "carries_forward": true
+      },
+      "what_remains": {
+        "branch_id": "default_or_failed",
+        "name": "What Remains",
+        "synopsis": "The default ending. The protagonist did not commit cleanly to any of the four major paths and got carried by events. The Imperial assault comes. Kira makes her own choice without the protagonist's help. Some students survive. Some do not. Iila Vand is in the second group on most variants of this ending \u2014 the player did not earn the merciful version. The protagonist is alive, the academy is wounded, and the only person they are honest with about what happened is Kyp Durron, who knew this morning would come.",
+        "selection_signals": [
+          "no clear branch commitment in Act 3",
+          "low engagement with side content",
+          "lie_grip oscillates without trend through campaign"
+        ],
+        "carries_forward": false
+      }
     }
   },
   "era_voice": {
     "era": "New Republic (Jedi Praxeum era)",
     "year": "~12 ABY",
-    "voice_notes": "The galaxy is breathing again, but unevenly. The New Republic governs the core; Imperial remnants and warlords fester on the rim. Luke Skywalker's Praxeum at Yavin 4 is rebuilding the Jedi tradition from scattered fragments — every student a potential heir, every misstep a chance to repeat history. Hope is fragile and named.",
+    "voice_notes": "The galaxy is breathing again, but unevenly. The New Republic governs the core; Imperial remnants and warlords fester on the rim. Luke Skywalker's Praxeum at Yavin 4 is rebuilding the Jedi tradition from scattered fragments \u2014 every student a potential heir, every misstep a chance to repeat history. The Exar Kun crisis is one year past; the ancient Sith Lord's spirit was banished by the unified will of the students, but the lower Massassi temples remain sealed and the older students still flinch at certain frequencies of stone. Kam Solusar is now an instructor. Kyp Durron is a Knight rebuilding what he broke. Streen lives in the high tower, eats alone, listens to the wind. Hope is fragile and named \u2014 and the Praxeum is learning that the cost of teaching the Force without the old Order is paid by the people who thought they were past their worst day.\n\nTONE NOTE \u2014 this campaign is permitted, and encouraged, to be edgier than typical Jedi-Praxeum fiction. People the protagonist loves can die. The academy can fall. The antagonist's argument must be hard to refute. There is no clean ending. Specifically: do not soften violence into metaphor; do not soften betrayal into misunderstanding; do not soften moral compromise into regret-the-character-can-grow-from. The Order failed the galaxy and the Praxeum has not yet earned the trust the player is extending it. Honour that \u2014 not by being grim for its own sake, but by refusing the easy out.",
     "period_details": [
-      "Imperial remnants — warlord fleets, rogue Moffs, holdout Star Destroyers — still raid New Republic shipping",
-      "The Praxeum at Yavin 4 is a small academy built on rediscovered Jedi texts and Luke's instinct",
-      "Force-sensitive recruits arrive from disparate paths — ex-Imperials, smugglers' kids, descendants of hidden survivors",
-      "Old Jedi knowledge is fragmentary; Luke and his students improvise where Order canon is silent",
-      "The Senate fights itself over military doctrine while Force-sensitive incidents go unreported on the rim"
+      "Imperial remnants \u2014 warlord fleets, rogue Moffs, holdout Star Destroyers \u2014 still raid New Republic shipping",
+      "The Praxeum at Yavin 4 is a small academy built on rediscovered Jedi texts and Luke's instinct, expanded after the Exar Kun crisis with Kam Solusar (instructor), Cilghal (healer), and journeyman Knights like Kyp Durron and Dorsk 81",
+      "Force-sensitive recruits arrive from disparate paths \u2014 ex-Imperials, smuggler crews, war orphans, Mon Calamari refugees, even occasional Wookiee veterans of the Kashyyyk liberation",
+      "The lower Massassi temples beneath the Praxeum remain sealed; the vergence at the heart of them is quieted but not gone, and senior students remember Exar Kun's whispers in their ear",
+      "Surviving Inquisitors operate as freelancers, no longer answering to any unified Imperial command",
+      "Talon Karrde's information network is the closest thing the post-war fringe has to a clearing house; smugglers like the Glass Wake still trade through him",
+      "The New Republic Senate is debating whether the Jedi answer to civilian authority \u2014 a question Luke is quietly avoiding by training as fast as he can"
     ],
     "period_avoid": [
       "First Order, Snoke, Kylo Ren, or any Sequel-era language",
-      "Empire as a galaxy-spanning intact regime — it is fragments and warlords now",
+      "Empire as a galaxy-spanning intact regime \u2014 it is fragments and warlords now",
       "Pre-Empire references that would only be known to Old Republic survivors",
       "Treating the New Republic as a fully consolidated, peaceful authority"
     ]

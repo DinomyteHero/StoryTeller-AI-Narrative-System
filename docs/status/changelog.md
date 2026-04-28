@@ -2,6 +2,298 @@
 
 All notable changes to Storyteller V3 are documented here.
 
+## [Unreleased] — 2026-04-28 — Brooks/Weiland Pass II — Branching, Length, Edge
+
+A follow-up pass extending the Brooks/Weiland framework into:
+real branching paths, multiple endings, Choice-of-Games-comparable
+campaign length, edgier and more original framing of the antagonist,
+and four new academy students.
+
+### Real branching + 5 endings
+- **Two new variation_points** ([data/campaigns/shadows_of_the_praxeum.json](data/campaigns/shadows_of_the_praxeum.json)):
+  - **`act3_loyalty_branch`** — load-bearing Act 3 → Act 4 branch
+    with four options: `sanctuary_for_kira`, `hand_kira_to_luke`,
+    `help_kira_disappear`, `join_third_path`. Each option
+    rewires NPC dispositions, statuses, and the shape of Acts 4–5.
+  - **`act4_assault_response`** — three-option choice at the
+    Imperial assault (`stand_and_fight`, `evacuate_first`,
+    `strike_first`).
+- **`story_architecture.ending_paths`** — five named endings
+  (The Open Door / The Third Path / The Law / The Long Road / What
+  Remains) with branch_id, synopsis, selection signals, and
+  `carries_forward` flag for cross-campaign import. Default ending
+  is reserved for low-engagement playthroughs and explicitly costs
+  the player something.
+
+### Edgier + more original framing
+- **Malakai reframed**. No longer a "surviving Inquisitor who
+  weaponises truth." He is a survivor of *both* the Jedi and the
+  Inquisitorius who has concluded the binary is the actual problem.
+  His motivation, voice_notes, behavioral_envelope,
+  thematic_argument, knows_at_start, and pressure_role all
+  rewritten. New `anti_stereotype_notes` block locks out the
+  cackling-Sith / brooding-fallen-Jedi / redeemable-villain
+  defaults: "He may not be killed. He may not be wrong."
+- **Kira reframed**. Her parent's "ghost" is canonical
+  Force-ghost contact, not a metaphor. Malakai is the only person
+  in her life treating it as data. Her "betrayal" is, from her
+  view, a research alliance.
+- **Tone directive added** to era_voice — campaign is permitted
+  and encouraged to be edgier than typical Praxeum fiction. People
+  the protagonist loves can die. The academy can fall. The
+  antagonist's argument must be hard to refute. No clean ending.
+
+### Choice-of-Games-comparable length
+- **Per-act `expected_turns` bumped**: Act 1 [22, 28], Act 2
+  [16, 22], Act 3 [20, 26], Act 4 [20, 26], Act 5 [16, 22].
+  Total target band: **94–124 turns per playthrough** (was 48–68).
+  Lands in the Hosted-Games range without bloating to
+  full-Tally-Ho 500K word counts.
+- **+25 new side-content seeds** spanning all five acts —
+  morning runs with Loka Hask, kitchen duty with Kira, Iila Vand
+  teaching the protagonist a Cilghal breath exercise, Mira Vex's
+  field kitchen on the eve of battle, Kyp Durron's promise of
+  companionship one year from now, Iila's "are you going to come
+  back" pre-battle question, Loka's Wookiee thank-you. Total
+  side-content: 71 seeds across 5 acts.
+
+### Four new academy students
+- **Dorsk 81** — canon Khommite clone, identity-themed mirror.
+  His arc is "I am the eighty-first identical copy and I will be
+  the first to be different."
+- **Octa Ramis** — canon Chandrilan archive-focused friend.
+  Methodical, dry, generous with what she knows. Tactile thinker.
+- **Mira Vex** — original Twi'lek slaver-survivor. Loud, kind,
+  refuses to be defined by the worst thing that happened. Living
+  counterpoint to Clovis: came from worse, chose transparency.
+- **Brann Riako** — original ex-Imperial-cadet defector. Quiet,
+  careful, unobtrusively decent. His past is a fact, not a
+  scandal. Treats his Imperial training as a competence that
+  surprises him, not a shadow.
+
+Each student carries full `voice_notes`, `behavioral_envelope`,
+`knows_at_start`, `doesnt_know_at_start`, `per_act_state`,
+`thematic_argument`, `pressure_role`, and `anti_stereotype_notes`.
+
+### Anti-stereotype notes added to all new canon NPCs
+Eleven NPCs now carry `anti_stereotype_notes` that explicitly
+lock out the LLM's default interpretations — Brakiss (not the
+obvious-villain), Cilghal (not the wise-fish-mystic), Streen (not
+the dotty-old-hermit), Kyp Durron (not the angsty-emo-redeemed-
+villain), Kam Solusar (not the brooding-haunted-redeemer), Talon
+Karrde (not the lovable-rogue), Iila Vand (not the cute-
+precocious-orphan), Sergeant Vex (not the redemption-arc-
+Imperial-officer), Loka Hask (not the noble-savage-Wookiee),
+Dorsk 81 (not the comic-relief-naive-clone), Octa Ramis (not the
+bookish-nerd).
+
+### Per-choice arc alignment
+- **`annotate_choice` extended** to receive a `narrative_arc_block`
+  parameter and classify each chosen option as `lie | truth |
+  neutral` against the protagonist's arc.
+- **`ANNOTATION_SCHEMA` extended** with `arc_alignment` (enum)
+  and `arc_evidence` fields.
+- **Annotation prompt rewritten** to instruct the model on how to
+  read for lie-defence vs truth-risking texture.
+- **`_run_annotation_background`** now passes
+  `build_narrative_arc_block(character)` through. The annotation
+  result lands in the `choice_implications` column on the turn
+  row, so arc honoring becomes queryable end-to-end.
+
+### Studio narrative_arc support
+- **`NarrativeArcSpec`** model added to [studio/schema.py](studio/schema.py).
+  Optional field on `CharacterVariant`. Carries lie / ghost /
+  truth / want / need / arc_type / lie_grip_initial.
+- **Gate 4 arc-coherence checks** added to
+  [studio/narrative_eval.py](studio/narrative_eval.py) —
+  validates that populated arcs have lie + ghost + truth, that
+  the ghost is concrete enough (≥ 60 chars) to land in prose,
+  that arc_type is valid, and that lie_grip_initial aligns with
+  the arc_type's expected starting range.
+- **Mode 1 generation prompt updated** ([studio/prompts/mode1_generate.txt](studio/prompts/mode1_generate.txt))
+  to require `narrative_arc` on every variant, with an
+  authoring note that the truth must directly negate the lie
+  (not be a parallel platitude) and that the ghost must
+  plausibly cause the lie.
+
+### Front-end character creation funnel
+- **Campaign cards** now expose the dramatic premise, central
+  question, and antagonistic force in an expandable "What this
+  story is about" section.
+- **Character cards** now surface the Brooks/Weiland inner
+  story — "What they believe (wrongly):", "The wound behind it:",
+  "What they want:", "What they need:" — so the player picks a
+  character understanding the inner story they are signing up
+  for, not just species + career.
+- **`renderSessionIntro`** displays a "YOU ARE ABOUT TO PLAY"
+  card before the opening narration on turn 1 with the campaign
+  premise, central question, and the chosen character's full
+  arc. The card stays visible alongside the opening passage.
+
+### Files touched (10 files, ~+800 net new lines)
+- [data/campaigns/shadows_of_the_praxeum.json](data/campaigns/shadows_of_the_praxeum.json)
+  (4 new students, expected_turns bumped, 25 new side-content
+  seeds, 2 new variation_points, 5-ending architecture, Malakai
+  + Kira reframed, anti-stereotype notes on 11 NPCs, edgy tone
+  directive)
+- [gm/local_gm.py](gm/local_gm.py) (arc_alignment in schema +
+  validator)
+- [gm/prompts/choice_annotation.txt](gm/prompts/choice_annotation.txt)
+  (arc_alignment field + narrative_arc_block placeholder)
+- [api/game_routes.py](api/game_routes.py) (annotation call site
+  passes narrative_arc_block; build_narrative_arc_block import)
+- [studio/schema.py](studio/schema.py) (NarrativeArcSpec model
+  + CharacterVariant.narrative_arc field)
+- [studio/narrative_eval.py](studio/narrative_eval.py) (Gate 4
+  arc coherence check)
+- [studio/prompts/mode1_generate.txt](studio/prompts/mode1_generate.txt)
+  (narrative_arc required field with authoring guidance)
+- [web/index.html](web/index.html) (campaign + character cards
+  expose architecture and arc; renderSessionIntro for the "you
+  are about to play" pre-turn card)
+- [docs/status/changelog.md](docs/status/changelog.md) (this entry)
+
+### Test impact
+- 121 pass on the focused regression suite
+  (CS-5/6 runtime + story engineering + schema + e2e).
+- Schema parses cleanly with all new NPC + faction + variation
+  point + ending_paths additions.
+
+---
+
+## [Unreleased] — 2026-04-28 — Brooks/Weiland Framework Pass
+
+A focused pass that gives the engine the *named* vocabulary the
+narration model expects when honoring story structure (Larry Brooks)
+and character arc (K.M. Weiland), and rebuilds *Shadows of the Praxeum*
+around it.
+
+### Schema
+- **`NarrativeArc` model** added to `engine/character.py` — `lie`,
+  `ghost`, `truth`, `want`, `need`, `arc_type` (positive | flat |
+  disillusionment | fall | corruption), `lie_grip` (0.0–1.0), and
+  per-turn `movements` ledger. Optional; existing characters
+  without it render identically.
+
+### Runtime surfaces
+- **`build_narrative_arc_block`** in `gm/context.py` renders the
+  inner story as a GM-only block in the narration prompt with a
+  lie-grip label (iron / loosening / cracking / broken) and arc-type-
+  specific guidance. New `{narrative_arc_block}` placeholder added
+  to both narration prompts.
+- **`build_beat_role_block`** in `gm/context.py` reads the active
+  act's `dramatic_function` + `protagonist_mode` + `act_progress`
+  and writes a Brooks beat cue ("PART 1 — SETUP. The world is still
+  recognizable…"; "ACT IS ENDING…"). New `{beat_role_block}`
+  placeholder under STORY POSITION in both prompts.
+
+### Lie-grip tracking
+- **`accumulate_contradiction_arc`** now also takes the protagonist
+  and nudges `narrative_arc.lie_grip` per turn from the same
+  `contradiction_tracking` movement that drives the contradiction-arc
+  ledger. Deltas: reinforced +0.05, cost_paid +0.02, resisted −0.05,
+  transformed −0.10. 16-entry rolling movements ledger with turn,
+  kind, delta, new grip, evidence note.
+- **Fast-path contradiction tracking** added to `_fast_reconciliation_result`
+  in `api/game_routes.py` — keyword-based heuristic that fires
+  when `RECONCILIATION_INLINE` is off (the default), so lie_grip
+  moves at default settings without per-turn LLM calls. The
+  slow LLM reconciler remains the calibrated path when enabled.
+
+### Choice-level pressure cue
+- Both narration prompts now carry a "LIE / TRUTH PRESSURE" block:
+  when `narrative_arc_block` is present, at least one choice each
+  turn should defend the Lie and at least one should risk the Truth.
+  Choices are never *labeled* — the texture does the work.
+
+### Reconciliation engagement
+- The CS-6 contradiction-tracking instruction was rewritten to
+  default toward flagging micro-engagement. A routine setup-act
+  turn where the protagonist hides / withholds / holds back is now
+  `reinforced` rather than `none`. Setup stretches accumulate
+  movements rather than sit flat.
+
+### Character creation funnel
+- **`GET /campaigns`** enriched: returns `dramatic_premise`,
+  `central_dramatic_question`, `story_promise`,
+  `protagonist_pressure_type`, `antagonistic_force`, `era_year`,
+  and per-character `narrative_arc` summaries.
+- **`GET /characters`** new endpoint: returns every character
+  file with name, species, career, background excerpt, voice
+  notes, throughline question, and full narrative arc.
+- **`POST /session`** response now carries a `session_intro`
+  block (campaign architecture + character arc surface) so the
+  opening UI can show a "you are about to play…" card before turn 1.
+- **`GET /session/{id}`** now returns the full character object,
+  exposing live `lie_grip` and movements ledger to harness/frontend.
+
+### Campaign deep-edit — *Shadows of the Praxeum*
+Pinned to **~12 ABY**, one year after the Exar Kun crisis is
+canonically resolved. Substantive content additions:
+- **9 new NPCs** (was 5; now 14): Kam Solusar, Cilghal, Streen,
+  Kyp Durron, Brakiss (Imperial mole — co-antagonist), Loka Hask,
+  Iila Vand (innocent stake), Sergeant Daro Vex, Talon Karrde
+  (offscreen). All with proper `voice_notes`,
+  `behavioral_envelope`, `knows_at_start`, `doesnt_know_at_start`,
+  `per_act_state`, `pressure_role`, and `thematic_argument`.
+- **3 new factions**: The Glass Wake, Imperial Intelligence
+  Remnant, Exar Kun Residue.
+- **9 new side-content seeds** spanning Acts 1–5 (Kyp's resistance
+  meditation offer, Iila's gift, Streen's tower-stair warning,
+  perimeter walk with Vex, Glass Wake encrypted job, archive
+  sealed crate, Brakiss's late-night practice, Cilghal's medical
+  evaluation, Karrde's information offer, Streen leaving the
+  tower, Iila's pre-battle question).
+- **Sharpened opening** — Act 1 now opens *in medias res* with
+  Kira's first on-screen absence at morning meditation; the
+  mystery begins as a missed lesson, not a slow build.
+- **Per-act `beat_roles`** explicit (`["setup", "inciting"]`,
+  `["response", "first_plot_point"]`, `["midpoint", "pinch1"]`,
+  `["attack", "pinch2", "second_plot_point"]`,
+  `["climax", "resolution"]`).
+- **Lore seed enrichments** for the post-Exar-Kun feel
+  (sealed-stairway draft, salt-iron taste after meditation,
+  twelve-second silence at the start of the noon meal, Kyp Durron's
+  evening loop, Luke's scorched Massassi-stone fragment, Tionne's
+  sealed crate, Streen's whittled wood that never finishes).
+
+### Inner story populated
+Each of the three character files now carries a hand-authored
+`narrative_arc` block with `lie`, `ghost`, `truth`, `want`,
+`need`, `arc_type=positive`, and a starting `lie_grip` (Clovis
+0.9, Praxeum Student 0.85, Praxeum Mechanic 0.88).
+
+### Playtest
+- 30 cloud turns as Clovis Beryl: 0 errors, reached Act 3 @ 50%,
+  57 threads, 11 unique memorable moments, 13 side-content engaged
+  (3 of them new entries). Median latency 15.9 s, max 25.0 s.
+- A 15-turn validation pass with the fast-path contradiction
+  heuristic loaded confirms `lie_grip` moves with player choices
+  (see `docs/research/brooks-weiland-pass-2026-04.md`).
+
+### Test impact
+- 210 pass + 11 cleanly skip on the focused suite.
+- 2 pre-existing destiny-narrative-note ASCII em-dash failures
+  unrelated to this pass.
+- 1 brittle `test_shadows_of_praxeum_loads` assertion relaxed
+  from `== 5 NPCs` to `>= 5 NPCs` so future enrichment doesn't
+  break it.
+
+### Files touched (15 files, ~+550 net new lines + spine enrichment)
+`engine/character.py`, `gm/context.py`, `gm/cloud_gm.py`,
+`gm/prompts/narration.txt`, `gm/prompts/narration_literary.txt`,
+`engine/reconciliation.py`, `api/game_routes.py`,
+`data/characters/clovis_beryl.json`,
+`data/characters/praxeum_student.json`,
+`data/characters/praxeum_mechanic.json`,
+`data/campaigns/shadows_of_the_praxeum.json`,
+`eval/playtest_long.py`,
+`tests/test_cs6_story_engineering.py`,
+`docs/research/brooks-weiland-pass-2026-04.md`,
+`docs/status/changelog.md`.
+
+---
+
 ## [Unreleased] — 2026-04-26 — Depth & Enjoyment Pass
 
 A six-phase pass that addresses the deepest gaps in player-felt experience

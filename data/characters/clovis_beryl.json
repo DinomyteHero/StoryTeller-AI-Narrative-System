@@ -147,5 +147,15 @@
   "active_commitments": [],
   "throughline_question": "What does loyalty cost when every allegiance demands a different piece of you?",
   "voice_notes": "Guarded, dry, and observant. Speaks like someone editing himself in real time. Uses smuggler slang when startled or comfortable, then notices he has done it. Polite with teachers, quietly funny with peers, ruthless about exits and contingencies.",
-  "active_injuries": []
+  "active_injuries": [],
+  "narrative_arc": {
+    "lie": "Disappearing is how you protect the people you love. Belonging is how you get them killed.",
+    "ghost": "Twelve years old, watching the bonded cargo chute close on the lights of his family's ship six hours before his parents were marched out for public execution. The Glass Wake saved him by lying, hiding, and moving faster than Imperial truth. He learned, on the day visibility killed his parents, that being seen is what kills.",
+    "truth": "Trust is a kind of armor. Not because it protects from harm, but because it gives you a reason worth bleeding for. The people who saved his parents weren't strangers — they were people who chose to be visible alongside them. Hiding kept Clovis breathing; only being seen will let him fight for anyone else.",
+    "want": "To learn enough Jedi discipline to protect Kira from whatever she's hiding, while staying invisible inside the Praxeum's structure. To become powerful enough to make a difference without ever having to choose a side again.",
+    "need": "To stop running. To let himself be seen by the people who already know what he is — Luke, Kira, Tionne — and to trust that they would rather have him whole than gone. To say his real name out loud and not flinch.",
+    "arc_type": "positive",
+    "lie_grip": 0.9,
+    "movements": []
+  }
 }

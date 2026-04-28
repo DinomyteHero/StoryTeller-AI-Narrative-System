@@ -86,6 +86,10 @@ class TurnSnapshot:
     pivots_fired: list[str] = field(default_factory=list)
     foreshadow_payoffs: list[str] = field(default_factory=list)
     side_content_engaged: list[str] = field(default_factory=list)
+    # Brooks/Weiland arc tracking (added with the framework integration)
+    lie_grip: float | None = None
+    arc_movements_count: int = 0
+    arc_recent_kind: str = ""
 
 
 def _excerpt(text: str | None, n: int = 240) -> str:
@@ -102,6 +106,7 @@ def snapshot_from(
     elapsed: float,
     turn_payload: dict,
     arc_state: dict,
+    character: dict | None = None,
 ) -> TurnSnapshot:
     snap = TurnSnapshot(turn_number=turn_number, label=label, elapsed_sec=elapsed)
 
@@ -126,6 +131,17 @@ def snapshot_from(
     snap.pivots_fired = list(arc_state.get("pivots_fired") or [])
     snap.foreshadow_payoffs = list(arc_state.get("foreshadow_payoffs_delivered") or [])
     snap.side_content_engaged = list(arc_state.get("side_content_engaged") or [])
+    if isinstance(character, dict):
+        nar = character.get("narrative_arc") or {}
+        if nar:
+            try:
+                snap.lie_grip = float(nar.get("lie_grip"))
+            except (TypeError, ValueError):
+                snap.lie_grip = None
+            mv = nar.get("movements") or []
+            snap.arc_movements_count = len(mv)
+            if mv:
+                snap.arc_recent_kind = str(mv[-1].get("kind", ""))
     return snap
 
 
@@ -242,13 +258,14 @@ def run(
     base: str = DEFAULT_BASE,
     turns: int = 35,
     log_path: Path = DEFAULT_LOG,
+    character_id: str = "praxeum_student",
 ) -> list[TurnSnapshot]:
     engine = Engine(base)
-    print(f"[playtest] base={base} turns={turns} log={log_path}")
+    print(f"[playtest] base={base} turns={turns} character={character_id} log={log_path}")
 
     sess = engine.post("/session", {
         "campaign_name": "shadows_of_the_praxeum",
-        "character_id":  "praxeum_student",
+        "character_id":  character_id,
     })
     sid = sess["session_id"]
     last_choices = sess.get("choices", [])
@@ -259,12 +276,14 @@ def run(
     log_path.parent.mkdir(parents=True, exist_ok=True)
     with log_path.open("w", encoding="utf-8") as logf:
         # opening as turn 0
+        sess_full = engine.get(f"/session/{sid}")
         opening_snap = snapshot_from(
             turn_number=0,
             label="opening",
             elapsed=0.0,
             turn_payload=sess,
-            arc_state=engine.get(f"/session/{sid}").get("arc_state", {}),
+            arc_state=sess_full.get("arc_state", {}),
+            character=sess_full.get("character", {}),
         )
         snapshots.append(opening_snap)
         logf.write(json.dumps(opening_snap.__dict__) + "\n")
@@ -302,11 +321,15 @@ def run(
 
             elapsed = time.time() - t0
 
-            # Pull arc_state via GET so we always have the canonical post-turn view
+            # Pull arc_state + character via GET so we always have the
+            # canonical post-turn view, including the live narrative_arc.
             try:
-                arc_state = engine.get(f"/session/{sid}").get("arc_state", {})
+                full_session = engine.get(f"/session/{sid}")
+                arc_state = full_session.get("arc_state", {})
+                char_dict = full_session.get("character", {})
             except Exception as e:  # noqa: BLE001
                 arc_state = {}
+                char_dict = {}
                 err = err or f"arc_state fetch failed: {e}"
 
             snap = snapshot_from(
@@ -315,6 +338,7 @@ def run(
                 elapsed=elapsed,
                 turn_payload=data,
                 arc_state=arc_state,
+                character=char_dict,
             )
             snap.error = err
             snapshots.append(snap)
@@ -553,12 +577,20 @@ def main() -> int:
     parser.add_argument("--turns", type=int, default=35)
     parser.add_argument("--log", type=Path, default=DEFAULT_LOG)
     parser.add_argument(
+        "--character",
+        default="praxeum_student",
+        help="Character ID (clovis_beryl | praxeum_student | praxeum_mechanic)",
+    )
+    parser.add_argument(
         "--report", type=Path, default=None,
         help="Optional markdown report path. If not set, only the JSONL log is written.",
     )
     args = parser.parse_args()
 
-    snapshots = run(base=args.base, turns=args.turns, log_path=args.log)
+    snapshots = run(
+        base=args.base, turns=args.turns, log_path=args.log,
+        character_id=args.character,
+    )
     if args.report:
         write_report(snapshots=snapshots, out_path=args.report)
     print(f"[playtest] wrote {len(snapshots)} snapshots to {args.log}")

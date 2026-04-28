@@ -63,6 +63,8 @@ LOADOUT:
 
 {depth_card_block}
 
+{narrative_arc_block}
+
 {growth_recognition_block}
 
 ═══════════════════════════════════════════
@@ -72,6 +74,8 @@ CAMPAIGN: {campaign_name}
 STORY POSITION: {story_position}
 THROUGHLINE: {throughline_question}
 TENSION LEVEL: {tension_level}
+
+{beat_role_block}
 
 {era_voice_block}
 
@@ -214,6 +218,13 @@ Then provide 2-4 choices following these rules:
   moment to process, at least one choice should be reflective — an internal
   decision about what the moment means, not what to do next. These choices
   have no skill tag. They shape who the character is becoming.
+- LIE / TRUTH PRESSURE: When the CHARACTER INNER STORY block is present,
+  at least one choice each turn should push the character toward defending
+  the LIE (the easier, more familiar move that confirms the wound) and at
+  least one should risk the TRUTH (the harder move that costs something but
+  loosens the lie's grip). The player should feel — without being told —
+  that they are choosing who this character becomes, not just what they do
+  next. Never label choices as "lie" or "truth"; let the texture do the work.
   Examples of introspection choice texture:
   "Sit with it. Let the silence hold the weight of what just happened."
   "Push it down. There will be time to think later — right now there is

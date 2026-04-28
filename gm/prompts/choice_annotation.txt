@@ -19,6 +19,8 @@ RECENT BEHAVIORAL PATTERN (last 3-5 turns):
 THROUGHLINE QUESTION:
 {throughline_question}
 
+{narrative_arc_block}
+
 Analyze what this choice MEANS — not what skill it uses, but what it reveals
 about the player's values and priorities. The rejected alternatives are
 crucial context: what the player chose NOT to do is as important as what
@@ -36,5 +38,22 @@ Return a JSON object with these fields:
 - "throughline_direction": Which direction the choice pushes the throughline answer
 - "behavioral_tags": Array of 2-5 free-form tags characterizing the choice
   (e.g. "protective", "deceptive", "risk_taking", "loyal", "pragmatic")
+- "arc_alignment": One of "lie", "truth", or "neutral".
+    "lie" — the choice defends the protagonist's Lie (the easier, more
+            familiar move that confirms the wound). Examples for a
+            "stay-hidden" lie: choosing to observe rather than speak,
+            keeping information back, withdrawing from a relationship.
+    "truth" — the choice risks the Truth (the harder move that costs
+            something but loosens the lie's grip). Examples: speaking up
+            when the lie says keep quiet, trusting when the lie says
+            don't, naming a fear out loud.
+    "neutral" — the choice has no clear bearing on the arc this turn.
+                Use sparingly: most meaningful choices touch the lie
+                in some direction. If the protagonist's narrative_arc
+                is not provided above, return "neutral".
+- "arc_evidence": One short clause naming the specific element of the
+                  choice that justifies the arc_alignment label. E.g.
+                  "asked Kira plainly rather than from cover" or
+                  "stayed at the door rather than entering".
 
 Return ONLY valid JSON. No explanation.

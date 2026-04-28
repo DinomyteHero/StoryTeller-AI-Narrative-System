@@ -460,17 +460,38 @@ def reconcile_turn(
 
         if protagonist_contradiction:
             contradiction_tracking_block = (
-                f'\nPROTAGONIST CONTRADICTION: "{protagonist_contradiction}"\n'
+                f'\nPROTAGONIST CONTRADICTION (the LIE the character believes): '
+                f'"{protagonist_contradiction}"\n'
             )
             if contradiction_origin:
-                contradiction_tracking_block += f'Origin: "{contradiction_origin}"\n'
+                contradiction_tracking_block += (
+                    f'Origin (the GHOST that planted it): "{contradiction_origin}"\n'
+                )
             contradiction_tracking_block += (
-                "\nWas this contradiction relevant to what just happened? If yes:\n"
-                '- "reinforced": The character acted FROM the contradiction\n'
-                '- "resisted": The character actively fought the contradiction\n'
-                '- "transformed": The character found a new relationship with it\n'
-                '- "cost_paid": The contradiction caused a tangible negative consequence\n'
-                '- "none": The contradiction wasn\'t relevant this turn.'
+                "\nThis contradiction is the engine of the protagonist's "
+                "character arc. Almost every meaningful choice tests it in "
+                "some direction — even small ones. Be generous about flagging "
+                "engagement. A character who avoids visibility, hides "
+                "information, holds back from someone they love, or chooses "
+                "the cautious path IS engaging the contradiction even if "
+                "they're not naming it. Flag the micro-movement.\n"
+                "\n"
+                "Did this turn touch the contradiction? Pick one:\n"
+                '- "reinforced": The character acted FROM the lie '
+                '(stayed invisible, withheld, defaulted to the wound). '
+                'Default for routine turns where the character did nothing '
+                'to challenge their pattern.\n'
+                '- "resisted": The character actively fought the lie — '
+                "spoke up when the lie said keep quiet, stayed when the lie "
+                "said leave, trusted when the lie said don't.\n"
+                '- "transformed": The character found a new relationship '
+                "with the contradiction — a moment of real seeing, even small.\n"
+                '- "cost_paid": The contradiction visibly cost the character '
+                "this turn — a missed connection, a hidden need, a relationship "
+                "edge frayed by the protagonist's pattern.\n"
+                '- "none": Reserve this only for turns where the contradiction '
+                "had no plausible bearing on the action (e.g. pure mechanical "
+                "scenes with no relational dimension). Use sparingly."
             )
     except Exception as e:
         logging.warning(f"Contradiction tracking block skipped: {e}")
