@@ -90,6 +90,7 @@ from gm.context import (
     ThreadState,
     TurnMemory,
     build_era_voice_block,
+    build_narrative_arc_block,
 )
 from engine.reconciliation import (
     ReconciliationResult,
@@ -859,6 +860,67 @@ def _thread_states_for_context(current_act: dict, arc_state: dict) -> list[Threa
     return threads
 
 
+# Movement-keyword heuristics for fast-path contradiction tracking. These are
+# deliberately broad; the fast reconciler trades precision for latency. The
+# slow LLM reconciler is what calibrates accurately when RECONCILIATION_INLINE=1.
+_RESIST_LIE_KEYWORDS = (
+    "tell", "admit", "confess", "reveal", "say it out loud", "say it plain",
+    "trust", "ask for help", "step into the light", "stand with",
+    "name them", "stop hiding", "open the door", "share", "out loud",
+    "show", "show your hand", "let them see", "step forward",
+    "make myself visible", "make myself seen",
+)
+_REINFORCE_LIE_KEYWORDS = (
+    "hide", "vanish", "step back", "stay quiet", "say nothing", "withhold",
+    "keep it to myself", "watch from", "stay hidden", "stay invisible",
+    "back off", "lie", "deceive", "deflect", "deny", "cover", "slip away",
+    "ghost", "duck out", "mask",
+)
+_COST_PAID_KEYWORDS = (
+    "she pulled away", "they noticed", "luke's eyes", "kira's eyes",
+    "caught", "exposed", "the silence cost", "too late",
+)
+
+
+def _fast_contradiction_tracking(player_action: str, narration: str) -> dict:
+    """Heuristic contradiction-tracking signal for the fast reconciler.
+
+    The slow LLM reconciler returns this object as JSON; the fast path
+    infers it from keyword presence in the player action + narration so
+    `lie_grip` still moves at default settings without a per-turn LLM call.
+    Defaults to `reinforced` (the protagonist defaults to their pattern
+    on a routine turn) and only flips to `resisted` when an explicit
+    truth-aligned action keyword fires.
+    """
+    haystack = f"{player_action} {narration}".lower()
+    if any(kw in haystack for kw in _RESIST_LIE_KEYWORDS):
+        return {
+            "contradiction_engaged": True,
+            "arc_movement": "resisted",
+            "arc_evidence": (player_action or "")[:160],
+        }
+    if any(kw in haystack for kw in _COST_PAID_KEYWORDS):
+        return {
+            "contradiction_engaged": True,
+            "arc_movement": "cost_paid",
+            "arc_evidence": (narration or "")[:160],
+        }
+    if any(kw in haystack for kw in _REINFORCE_LIE_KEYWORDS):
+        return {
+            "contradiction_engaged": True,
+            "arc_movement": "reinforced",
+            "arc_evidence": (player_action or "")[:160],
+        }
+    # Default: routine engagement that defaults to reinforcement (the
+    # character operating inside their pattern). Use a slightly weaker
+    # weight by tagging "reinforced" anyway — lie_grip already caps at 1.0.
+    return {
+        "contradiction_engaged": True,
+        "arc_movement": "reinforced",
+        "arc_evidence": "routine — character acted from existing pattern",
+    }
+
+
 def _fast_reconciliation_result(**kwargs) -> ReconciliationResult:
     player_action = kwargs.get("player_action", "")
     narration = kwargs.get("narration", "")
@@ -897,6 +959,7 @@ def _fast_reconciliation_result(**kwargs) -> ReconciliationResult:
             "reasoning": "Deterministic fast-mode coherence update.",
         },
         dramatic_mission=_fast_dramatic_mission(scene_type, player_action, check_result),
+        contradiction_tracking=_fast_contradiction_tracking(player_action, narration),
     )
 
 
@@ -983,9 +1046,11 @@ def _compute_dynamic_context_fields(
     from gm.context import (
         accumulate_contradiction_arc,
         advance_tactical_state,
+        build_beat_role_block,
         build_contradiction_arc_block,
         build_depth_card_block,
         build_lore_seeds_block,
+        build_narrative_arc_block,
         build_tactical_state_block,
         compute_closure_heartbeat_instruction,
         compute_foreshadow_instruction,
@@ -1067,6 +1132,11 @@ def _compute_dynamic_context_fields(
         "introspection_trigger":   introspection,
         "pinch_point_instruction": pinch_inst,
         "depth_card_block":        depth_card,
+        "narrative_arc_block":     build_narrative_arc_block(character),
+        "beat_role_block":         build_beat_role_block(
+            current_act,
+            float(arc_state.get("act_progress", 0.0) or 0.0),
+        ),
         "voice_mode_instruction":  voice_mode,
         "closure_heartbeat_instruction": closure_heartbeat,
         "foreshadow_instruction":        foreshadow_inst,
@@ -1131,6 +1201,7 @@ def _post_reconciliation_cs6_hook(
     turn_number: int = 0,
     foreshadow_instruction: str = "",
     spine: Optional[dict] = None,
+    character=None,
 ) -> None:
     """After reconciliation, capture cross-turn CS-6 state.
 
@@ -1138,6 +1209,8 @@ def _post_reconciliation_cs6_hook(
       - dramatic_mission → next turn's voice mode
       - contradiction_arc → multi-turn ledger of how the protagonist relates
         to their core contradiction
+      - narrative_arc.lie_grip → Brooks/Weiland lie-grip scalar updated from
+        the same per-turn signal
       - foreshadow_setups_delivered / payoffs_delivered → ensure each
         foreshadow link only surfaces once
       - turns_since_last_thread_change → drives the closure heartbeat
@@ -1147,12 +1220,13 @@ def _post_reconciliation_cs6_hook(
     if selected:
         arc_state["last_dramatic_mission"] = selected
 
-    # Contradiction arc accumulation (CS-6 Phase 6 — closes audit gap)
+    # Contradiction arc accumulation (CS-6 Phase 6) + lie_grip update
     from gm.context import accumulate_contradiction_arc
     accumulate_contradiction_arc(
         arc_state=arc_state,
         contradiction_tracking=getattr(recon_result, "contradiction_tracking", {}) or {},
         turn_number=turn_number,
+        character=character,
     )
 
     # Foreshadow setup/payoff delivery tracking (CS-6 Phase 5 — closes audit gap)
@@ -1712,32 +1786,147 @@ def _detect_memorable_callback_in_passage(
 
 @router.get("/campaigns")
 async def list_campaigns():
-    """List available campaigns with their character variants."""
+    """List available campaigns with story-architecture summaries.
+
+    Designed for character-creation-funnel UIs: returns the dramatic premise,
+    central question, story promise, antagonistic force, era voice, and the
+    available character variants (each with their pitch + narrative arc lie /
+    ghost / want / need so the player can pick a character understanding the
+    inner story they are signing up for, not just the species/career stats).
+    """
     from pathlib import Path
 
     campaigns_dir = Path("data/campaigns")
+    characters_dir = Path("data/characters")
+
+    # Pre-load standalone character files keyed by id for quick lookup
+    standalone: dict[str, dict] = {}
+    for cpath in characters_dir.glob("*.json"):
+        try:
+            with open(cpath, encoding="utf-8") as f:
+                standalone[cpath.stem] = json.load(f)
+        except Exception:
+            continue
+
     result = []
     for path in sorted(campaigns_dir.glob("*.json")):
         with open(path, encoding="utf-8") as f:
             spine = json.load(f)
-        characters = []
+        sa = spine.get("story_architecture", {}) or {}
+        ev = spine.get("era_voice", {}) or {}
+
+        characters: list[dict] = []
+        seen_ids: set[str] = set()
+
+        # Spine-side variants (allegiance.character_variants)
         for allegiance in spine.get("allegiances", []):
             for cv in allegiance.get("character_variants", []):
+                cid = cv.get("id")
+                if not cid or cid in seen_ids:
+                    continue
+                seen_ids.add(cid)
+                # Pull the standalone file (if present) for the live arc data
+                live = standalone.get(cid, {})
+                arc = live.get("narrative_arc") or {}
                 characters.append({
-                    "id": cv["id"],
-                    "name": cv["id"].replace("_", " ").title(),
-                    "pitch": cv.get("pitch", ""),
-                    "career": cv.get("career", ""),
-                    "species": cv.get("species", ""),
+                    "id":      cid,
+                    "name":    live.get("name", cid.replace("_", " ").title()),
+                    "pitch":   cv.get("pitch", ""),
+                    "career":  cv.get("career", live.get("career", "")),
+                    "species": cv.get("species", live.get("species", "")),
+                    "voice_notes": live.get("voice_notes", ""),
+                    "narrative_arc": {
+                        "lie":      arc.get("lie", ""),
+                        "ghost":    arc.get("ghost", ""),
+                        "truth":    arc.get("truth", ""),
+                        "want":     arc.get("want", ""),
+                        "need":     arc.get("need", ""),
+                        "arc_type": arc.get("arc_type", ""),
+                    } if arc else None,
                 })
+
+        # Standalone character files not represented in any allegiance — still
+        # offer them as choices so newly-authored arcs surface in the funnel.
+        for cid, live in sorted(standalone.items()):
+            if cid in seen_ids:
+                continue
+            arc = live.get("narrative_arc") or {}
+            characters.append({
+                "id":      cid,
+                "name":    live.get("name", cid.replace("_", " ").title()),
+                "pitch":   "",
+                "career":  live.get("career", ""),
+                "species": live.get("species", ""),
+                "voice_notes": live.get("voice_notes", ""),
+                "narrative_arc": {
+                    "lie":      arc.get("lie", ""),
+                    "ghost":    arc.get("ghost", ""),
+                    "truth":    arc.get("truth", ""),
+                    "want":     arc.get("want", ""),
+                    "need":     arc.get("need", ""),
+                    "arc_type": arc.get("arc_type", ""),
+                } if arc else None,
+            })
+
         result.append({
             "campaign_name": path.stem,
-            "display_name": spine.get("name", path.stem),
-            "era": spine.get("era", ""),
-            "throughline": spine.get("throughline_question", ""),
-            "characters": characters,
+            "display_name":  spine.get("name", path.stem),
+            "era":           spine.get("era", ""),
+            "era_year":      ev.get("year", ""),
+            "era_voice_notes": ev.get("voice_notes", ""),
+            "throughline":   spine.get("throughline_question", ""),
+            # Story architecture summary — Brooks/Weiland setup
+            "dramatic_premise":         sa.get("dramatic_premise", ""),
+            "central_dramatic_question": sa.get("central_dramatic_question", ""),
+            "story_promise":            sa.get("story_promise", ""),
+            "protagonist_pressure_type": sa.get("protagonist_pressure_type", ""),
+            "antagonistic_force":       sa.get("antagonistic_force", ""),
+            "thematic_throughline":     sa.get("thematic_throughline", ""),
+            "characters":               characters,
         })
     return result
+
+
+@router.get("/characters")
+async def list_characters():
+    """List all standalone character files with their narrative arcs.
+
+    Powers the character-selection step of the creation funnel. Each entry
+    surfaces the lie / ghost / truth / want / need so a UI can present the
+    inner story the player would be agreeing to play — the WHY beneath
+    the species/career numbers.
+    """
+    from pathlib import Path
+
+    characters_dir = Path("data/characters")
+    out: list[dict] = []
+    for cpath in sorted(characters_dir.glob("*.json")):
+        try:
+            with open(cpath, encoding="utf-8") as f:
+                live = json.load(f)
+        except Exception:
+            continue
+        arc = live.get("narrative_arc") or {}
+        out.append({
+            "id":               cpath.stem,
+            "name":             live.get("name", cpath.stem.replace("_", " ").title()),
+            "species":          live.get("species", ""),
+            "career":           live.get("career", ""),
+            "specializations":  live.get("specializations", []),
+            "background_excerpt": (live.get("background", "") or "")[:520],
+            "voice_notes":      live.get("voice_notes", ""),
+            "throughline_question": live.get("throughline_question", ""),
+            "narrative_arc": {
+                "lie":      arc.get("lie", ""),
+                "ghost":    arc.get("ghost", ""),
+                "truth":    arc.get("truth", ""),
+                "want":     arc.get("want", ""),
+                "need":     arc.get("need", ""),
+                "arc_type": arc.get("arc_type", "positive"),
+                "lie_grip": arc.get("lie_grip", 1.0),
+            } if arc else None,
+        })
+    return out
 
 
 # Phase 8.5: Social skill → NPC emotion mapping (§25.2)
@@ -2085,10 +2274,14 @@ def _run_annotation_background(
     npc_states: list,
     recent_turns: list,
     throughline_question: str,
+    narrative_arc_block: str = "",
 ) -> str | None:
     """Run choice annotation and return JSON string or None.
 
-    Called as a background thread so it doesn't block narration.
+    Called as a background thread so it doesn't block narration. When
+    `narrative_arc_block` is non-empty, the annotator also classifies
+    the choice as `lie | truth | neutral` against the protagonist's
+    Brooks/Weiland arc.
     """
     rejected = [c for i, c in enumerate(all_choices) if i != choice_index]
 
@@ -2110,6 +2303,7 @@ def _run_annotation_background(
         npc_summary=npc_summary,
         recent_pattern=recent_pattern,
         throughline_question=throughline_question,
+        narrative_arc_block=narrative_arc_block,
     )
 
     if annotation:
@@ -2295,8 +2489,42 @@ async def create_session_route(
         context_json=_context_audit_json(ctx),
     )
 
+    # ── Build a "who you are about to play" preamble for the funnel ──
+    # Surfaces the dramatic premise + protagonist arc up-front so the player
+    # commits with eyes open to the inner story they have just signed up for.
+    sa = spine.get("story_architecture", {}) or {}
+    arc_obj = getattr(character, "narrative_arc", None)
+    arc_summary = None
+    if arc_obj and (getattr(arc_obj, "lie", "") or "").strip():
+        arc_summary = {
+            "lie":      arc_obj.lie,
+            "ghost":    arc_obj.ghost,
+            "truth":    arc_obj.truth,
+            "want":     arc_obj.want,
+            "need":     arc_obj.need,
+            "arc_type": arc_obj.arc_type,
+            "lie_grip": arc_obj.lie_grip,
+        }
+    session_intro = {
+        "campaign_display_name":     spine.get("name", req.campaign_name),
+        "era":                       spine.get("era", ""),
+        "dramatic_premise":          sa.get("dramatic_premise", ""),
+        "central_dramatic_question": sa.get("central_dramatic_question", ""),
+        "story_promise":             sa.get("story_promise", ""),
+        "protagonist_pressure_type": sa.get("protagonist_pressure_type", ""),
+        "antagonistic_force":        sa.get("antagonistic_force", ""),
+        "throughline":               spine.get("throughline_question", ""),
+        "character": {
+            "name":               character.name,
+            "voice_notes":        character.voice_notes,
+            "throughline_question": character.throughline_question,
+            "narrative_arc":      arc_summary,
+        },
+    }
+
     return {
         "session_id": session_id,
+        "session_intro": session_intro,
         "opening_narration": narration_result.passage,
         "choices": narration_result.choices,
         "streaming_enabled": STREAMING_ENABLED,
@@ -2635,6 +2863,7 @@ async def handle_turn(
             npc_states=load_npc_states(session_id, spine),
             recent_turns=recent_turns,
             throughline_question=spine.get("throughline_question", ""),
+            narrative_arc_block=build_narrative_arc_block(character),
         )
 
     annotation_thread = None
@@ -2827,6 +3056,7 @@ async def handle_turn(
         turn_number=turn_number,
         foreshadow_instruction=dyn_fields.get("foreshadow_instruction", ""),
         spine=spine,
+        character=character,
     )
     _post_turn_memorable_moments_hook(
         arc_state,
@@ -3079,6 +3309,10 @@ async def get_session_route(session_id: str):
             "current_location": arc_state.get("current_location", ""),
         },
         "arc_state": arc_state,
+        # Full character object — lets harnesses and the frontend read the
+        # live narrative_arc (lie_grip, movements) and any state that mutates
+        # turn-to-turn (Conflict, Morality, Force commitments, talents).
+        "character": json.loads(character.model_dump_json()),
         "recent_turns": [
             {
                 "turn_number": t.turn_number,
@@ -3427,6 +3661,7 @@ async def handle_turn_stream(
             npc_states=load_npc_states(session_id, spine),
             recent_turns=recent_turns,
             throughline_question=spine.get("throughline_question", ""),
+            narrative_arc_block=build_narrative_arc_block(character),
         )
 
     annotation_thread_s = None
@@ -3679,6 +3914,7 @@ async def handle_turn_stream(
             turn_number=turn_number,
             foreshadow_instruction=dyn_fields_s.get("foreshadow_instruction", ""),
             spine=spine,
+            character=character,
         )
         _post_turn_memorable_moments_hook(
             arc_state,
@@ -4093,6 +4329,7 @@ async def handle_temptation(
         turn_number=turn_number,
         foreshadow_instruction=dyn_fields_t.get("foreshadow_instruction", ""),
         spine=spine,
+        character=character,
     )
     _post_turn_memorable_moments_hook(
         arc_state,
@@ -4447,6 +4684,7 @@ async def handle_intervention(
         turn_number=turn_number,
         foreshadow_instruction=dyn_fields_iv.get("foreshadow_instruction", ""),
         spine=spine,
+        character=character,
     )
     _post_turn_memorable_moments_hook(
         arc_state,

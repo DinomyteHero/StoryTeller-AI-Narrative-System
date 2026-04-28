@@ -135,5 +135,15 @@
   "active_commitments": [],
   "throughline_question": "What does loyalty cost when every allegiance demands a different piece of you?",
   "voice_notes": "Laconic, practical. Speaks in declarative sentences and workshop metaphors. Expresses affection through acts of service, not words. Uncomfortable with sincerity but incapable of dishonesty.",
-  "active_injuries": []
+  "active_injuries": [],
+  "narrative_arc": {
+    "lie": "If you fix every system before anyone gets hurt, no one has to grieve. Maintenance is love; words are wasted air.",
+    "ghost": "Three friends dead from preventable systems failures aboard the Mon Cala carrier — drag links, coolant tolerances, things that 'sufficient' had been called good enough for. And before that, the father staying behind to face the buyers in the Tatooine chop shop. The protagonist did the inventory that morning. Did not check the back room. Has not stopped checking the back room of every life since.",
+    "truth": "Some systems cannot be checked early enough. People die in ways that have nothing to do with whether you tightened the line. Telling the people you love what they mean — out loud, in words, before the failure mode arrives — is not redundancy. It is the only redundancy that matters.",
+    "want": "To keep every salvaged Praxeum generator and Y-wing simulator and perimeter lantern running through the jungle humidity. To make 'sufficient' a word no one trusts. To prevent the next preventable thing.",
+    "need": "To use words. To say to Tionne, to Luke, to the Force-sensitives the protagonist has slowly grown to love — that they matter. To stop repairing the people they love through their machines and start being seen as a person who chose them.",
+    "arc_type": "positive",
+    "lie_grip": 0.88,
+    "movements": []
+  }
 }

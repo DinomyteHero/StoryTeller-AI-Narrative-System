@@ -146,6 +146,27 @@ class MotivationTrack(BaseModel):
     conflict:         int = 0
 
 
+class NarrativeArc(BaseModel):
+    """Brooks/Weiland character arc fields.
+
+    The Lie is what the character believes wrongly about themselves or the world.
+    The Ghost is the wound that planted it. The Truth is what the story will teach.
+    Want is the external goal; Need is what the character actually requires inside.
+    lie_grip (0..1) tracks how strongly the lie still rules — updated turn by turn
+    by reconciliation from the per-turn contradiction movement signal.
+    """
+    lie:        str = ""
+    ghost:      str = ""
+    truth:      str = ""
+    want:       str = ""
+    need:       str = ""
+    # positive | flat | disillusionment | fall | corruption
+    arc_type:   str = "positive"
+    lie_grip:   float = Field(ge=0.0, le=1.0, default=1.0)
+    # Per-turn telemetry. Each entry: {turn, kind, weight, note}
+    movements:  list[dict] = Field(default_factory=list)
+
+
 class Character(BaseModel):
     name:               str
     species:            Species
@@ -176,6 +197,7 @@ class Character(BaseModel):
     throughline_question: str = ""
     voice_notes:          str = ""
     active_injuries:      list[str] = Field(default_factory=list)  # narrative injury descriptions (Game Mechanics §3)
+    narrative_arc:        Optional[NarrativeArc] = None  # Brooks/Weiland arc — opt-in
 
     def get_characteristic(self, name: str) -> int:
         return getattr(self.characteristics, name)

@@ -48,6 +48,8 @@ LOADOUT:
 
 {depth_card_block}
 
+{narrative_arc_block}
+
 {growth_recognition_block}
 
 ═══════════════════════════════════════════
@@ -57,6 +59,8 @@ CAMPAIGN: {campaign_name}
 STORY POSITION: {story_position}
 THROUGHLINE: {throughline_question}
 TENSION LEVEL: {tension_level}
+
+{beat_role_block}
 
 {era_voice_block}
 
@@ -205,6 +209,13 @@ Then provide 2-4 choices following these rules:
   still work to do."
   "Turn the name over in your mind. You know what it means. You are not
   ready to say it out loud yet."
+- LIE / TRUTH PRESSURE: When the CHARACTER INNER STORY block is present,
+  at least one choice each turn should push the character toward defending
+  the LIE (the easier, more familiar move that confirms the wound) and at
+  least one should risk the TRUTH (the harder move that costs something but
+  loosens the lie's grip). The player should feel — without being told —
+  that they are choosing who this character becomes, not just what they do
+  next. Never label choices as "lie" or "truth"; let the texture do the work.
 
 {behavioral_availability_block}
 

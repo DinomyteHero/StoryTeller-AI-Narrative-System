@@ -272,6 +272,14 @@ ANNOTATION_SCHEMA = {
             "type": "array",
             "items": {"type": "string"},
         },
+        # Brooks/Weiland arc alignment per choice. "neutral" when the
+        # protagonist has no narrative_arc populated or when the choice
+        # has no clear bearing on the lie this turn.
+        "arc_alignment": {
+            "type": "string",
+            "enum": ["lie", "truth", "neutral"],
+        },
+        "arc_evidence": {"type": "string"},
     },
     "required": [
         "choice_target", "priority_revealed",
@@ -287,12 +295,15 @@ def annotate_choice(
     npc_summary: str,
     recent_pattern: str,
     throughline_question: str,
+    narrative_arc_block: str = "",
 ) -> Optional[dict]:
     """
     Extract behavioral meaning from the player's choice (§24).
 
     Runs via local model. Returns structured annotation dict or None on failure.
     Designed to run in parallel with check decision — not on critical path.
+    When `narrative_arc_block` is provided, the annotator also classifies
+    the choice as `lie | truth | neutral` against the protagonist's arc.
     """
     template = ANNOTATION_PROMPT_PATH.read_text(encoding="utf-8")
     prompt = template.format(
@@ -302,6 +313,7 @@ def annotate_choice(
         npc_summary=npc_summary[:300],
         recent_pattern=recent_pattern[:400],
         throughline_question=throughline_question,
+        narrative_arc_block=narrative_arc_block or "",
     )
 
     try:
@@ -341,6 +353,14 @@ def _validate_annotation(data: dict) -> dict:
     # Ensure npc_impact is a dict
     if not isinstance(data.get("npc_impact"), dict):
         data["npc_impact"] = {}
+
+    # Brooks/Weiland arc alignment — default to neutral if missing or invalid
+    arc_alignment = data.get("arc_alignment", "neutral")
+    if arc_alignment not in ("lie", "truth", "neutral"):
+        arc_alignment = "neutral"
+    data["arc_alignment"] = arc_alignment
+    if not isinstance(data.get("arc_evidence"), str):
+        data["arc_evidence"] = ""
 
     return data
 

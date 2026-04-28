@@ -131,5 +131,15 @@
   "active_commitments": [],
   "throughline_question": "What does loyalty cost when every allegiance demands a different piece of you?",
   "voice_notes": "Earnest, precise, occasionally wry. Speaks in complete sentences. Thinks before responding but sometimes the thinking shows. Uses humor to deflect vulnerability. Deeply observant of others, less honest about themselves.",
-  "active_injuries": []
+  "active_injuries": [],
+  "narrative_arc": {
+    "lie": "Knowledge held back is a way of loving people. The most important things she sees, she must keep to herself — that is how she protects the people she would lose.",
+    "ghost": "She watched her older sibling pack to leave Mirial and share their Force gifts beyond the high-altitude city of Yeb. She felt the day before that something would go wrong and said nothing — assumed the feeling was her own fear of losing them. The sibling never returned. The aunt has never confirmed what happened. She has carried, since, the silent conviction that she could have warned them and chose not to.",
+    "truth": "Sharing what she sees is not what kills people. The world is what kills people. Holding the truth back from those she loves does not save them — it only ensures she never gets to know them whole, and they never get to choose what to do with the warning. The Jedi way is to speak the difficult thing, and then to stand in what comes next.",
+    "want": "To master the Sense power well enough to read what's coming for Kira before it lands. To protect Kira before it's too late this time. To keep one person whole.",
+    "need": "To say what she sees, out loud, even when it costs her, even when she might be wrong. To trust that being honest with Kira — and with Luke — is more loving than being prepared. To stop trying to be the silent witness of someone else's life and become a presence in it.",
+    "arc_type": "positive",
+    "lie_grip": 0.85,
+    "movements": []
+  }
 }

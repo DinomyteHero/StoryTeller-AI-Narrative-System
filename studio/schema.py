@@ -139,6 +139,22 @@ class ForcePowerStart(BaseModel):
 # ── Character variant ─────────────────────────────────────────────────
 
 
+class NarrativeArcSpec(BaseModel):
+    """Brooks/Weiland inner-story fields for the protagonist (Apr 2026).
+
+    Optional — the runtime renders identically when not present, but
+    populated arcs unlock the LIE / TRUTH choice-pressure cue, the
+    `lie_grip` scalar, and Gate 4 arc-coherence validation.
+    """
+    lie:       str = ""
+    ghost:     str = ""
+    truth:     str = ""
+    want:      str = ""
+    need:      str = ""
+    arc_type:  str = "positive"   # positive | flat | disillusionment | fall | corruption
+    lie_grip_initial: float = Field(ge=0.0, le=1.0, default=1.0)
+
+
 class CharacterVariant(BaseModel):
     id: str
     allegiance: str
@@ -169,6 +185,8 @@ class CharacterVariant(BaseModel):
     # ── CS-6 Story Engineering fields ──
     contradiction_origin: str = ""  # Phase 6: WHY the contradiction exists
     depth_card: Optional[CharacterDepthCard] = None  # Phase 9: GM-facing enrichment
+    # ── Brooks/Weiland fields (Apr 2026 pass) ──
+    narrative_arc: Optional[NarrativeArcSpec] = None
 
 
 class Allegiance(BaseModel):

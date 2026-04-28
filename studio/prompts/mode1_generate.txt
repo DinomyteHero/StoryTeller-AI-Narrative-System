@@ -42,6 +42,14 @@ Each major NPC must include a **thematic_argument** field — what this NPC's ex
 Each character variant must include:
 - **protagonist_contradiction** — what the character believes about themselves vs. who they actually are
 - **pressure_revealed_identity** — who they become under maximum pressure
+- **narrative_arc** — Brooks/Weiland inner-story object with these fields:
+  - `lie` — the wrong thing the character believes (typically a wound-shaped survival rule, e.g. "Disappearing is how you protect the people you love")
+  - `ghost` — the specific past moment that planted the lie. Concrete: name a place, a relationship, a sensory detail. Length ≥ 60 chars. The ghost must plausibly *cause* the lie.
+  - `truth` — the lesson the campaign will teach. The truth must directly negate the lie, not be a parallel platitude. (Lie: "Trust is a death sentence" → Truth: "Trust is a kind of armor — only being seen will let you fight for anyone else." NOT a generic "love conquers all.")
+  - `want` — the external goal the character thinks will solve their pain
+  - `need` — the internal change they actually require
+  - `arc_type` — one of: positive, flat, disillusionment, fall, corruption
+  - `lie_grip_initial` — float 0.0–1.0. Positive/fall/corruption arcs start in [0.7, 1.0]. Flat arcs (truth held from start) start in [0.0, 0.3].
 
 ### Anti-Default Rules (CRITICAL):
 

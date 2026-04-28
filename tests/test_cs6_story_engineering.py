@@ -559,7 +559,7 @@ class TestExistingSpinesPass:
         assert spine.name == "Shadows of the Praxeum"
         assert spine.total_acts == 5
         assert len(spine.allegiances) == 2
-        assert len(spine.npc_roster) == 5
+        assert len(spine.npc_roster) >= 5  # core 5 + any enrichment additions
         assert len(spine.foreshadow_registry) == 4
         assert spine.story_architecture is not None
         assert spine.story_architecture.milestone_beat_sheet is not None

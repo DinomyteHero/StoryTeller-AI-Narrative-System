@@ -223,6 +223,169 @@ def build_depth_card_block(spine: dict, variant_id: str) -> str:
     return "\n".join(lines)
 
 
+def build_narrative_arc_block(character) -> str:
+    """Render the Brooks/Weiland inner-story fields for the protagonist.
+
+    Surfaces Lie / Ghost / Truth / Want / Need + arc_type + lie_grip to the
+    narration model so prose can test the lie, echo the wound, and let the
+    truth fight for ground. GM-only — never shown to the player.
+
+    Returns empty string when narrative_arc is not populated.
+    """
+    arc = getattr(character, "narrative_arc", None)
+    if not arc:
+        return ""
+    lie = (getattr(arc, "lie", "") or "").strip()
+    if not lie:
+        return ""
+    ghost   = (getattr(arc, "ghost",  "") or "").strip()
+    truth   = (getattr(arc, "truth",  "") or "").strip()
+    want    = (getattr(arc, "want",   "") or "").strip()
+    need    = (getattr(arc, "need",   "") or "").strip()
+    arc_type = (getattr(arc, "arc_type", "positive") or "positive").strip().lower()
+    grip    = float(getattr(arc, "lie_grip", 1.0))
+    grip = max(0.0, min(1.0, grip))
+    grip_pct = round(grip * 100)
+
+    if   grip > 0.85: grip_label = "iron"
+    elif grip > 0.55: grip_label = "loosening"
+    elif grip > 0.30: grip_label = "cracking"
+    else:             grip_label = "broken"
+
+    arc_directions = {
+        "positive": "Truth is winning over time. The Lie should weaken under "
+                    "sustained pressure; the prose can let cracks show.",
+        "flat":     "The character holds the Truth from the start. The world "
+                    "tries to break them — the prose tests their conviction "
+                    "rather than their belief.",
+        "disillusionment": "The character will trade their Lie for a darker, "
+                           "more honest Truth. Prose can let the old comfort "
+                           "fall away in pieces.",
+        "fall":     "The character clings harder to the Lie until it consumes "
+                    "them. The prose lets each defense narrow them further.",
+        "corruption": "The character is abandoning a Truth they once held for "
+                      "a Lie that promises power. The prose can let small "
+                      "compromises ladder.",
+    }
+    arc_dir = arc_directions.get(arc_type, arc_directions["positive"])
+
+    lines = [
+        "═══════════════════════════════════════════",
+        "CHARACTER INNER STORY (GM-only — NEVER quote to the player):",
+        "═══════════════════════════════════════════",
+        f"  LIE the character believes:   {lie}",
+    ]
+    if ghost: lines.append(f"  GHOST (the wound behind it): {ghost}")
+    if truth: lines.append(f"  TRUTH the story will teach:  {truth}")
+    if want:  lines.append(f"  WANT  (the external goal):    {want}")
+    if need:  lines.append(f"  NEED  (the internal need):    {need}")
+    lines.append(f"  ARC TYPE: {arc_type} — {arc_dir}")
+    lines.append(f"  CURRENT LIE GRIP: {grip_pct}% ({grip_label})")
+    lines.append("")
+    lines.append("HOW TO USE THIS:")
+    lines.append("- The Lie shapes how this character interprets every "
+                 "situation. It is the unconscious pattern.")
+    lines.append("- The Ghost is the original wound. Reference it through "
+                 "gesture, hesitation, or sensory echo — never explain it.")
+    if grip_label == "iron":
+        lines.append("- GRIP is iron: the character defends the Lie reflexively. "
+                     "Resisting it should cost strain or feel physically wrong.")
+    elif grip_label == "loosening":
+        lines.append("- GRIP is loosening: small cracks show — a hesitation "
+                     "before a reflexive choice, a flicker of doubt.")
+    elif grip_label == "cracking":
+        lines.append("- GRIP is cracking: the character glimpses the Truth in "
+                     "flashes. They notice their own pattern but can't yet name it.")
+    else:
+        lines.append("- GRIP is broken: the character is acting on the Truth, "
+                     "but the Lie still echoes — old reflexes surface under stress.")
+    lines.append("- Choices should TEST the Lie. At least one choice each turn "
+                 "should let the character either defend the Lie (the easier "
+                 "path) or risk the Truth (the path that costs something).")
+    lines.append("- Never exposit the Lie or Truth. Show them through behavior, "
+                 "reaction, and the small refusals the character makes "
+                 "without realizing they're refusing anything.")
+    return "\n".join(lines)
+
+
+_BEAT_ROLE_CUES = {
+    # Brooks four-part structure
+    "setup":         "PART 1 — SETUP. The world is still recognizable. The hook "
+                     "must seed disturbance even when nothing has officially "
+                     "broken. The inciting incident sits within reach.",
+    "inciting":      "INCITING INCIDENT WINDOW. The disturbance arrives on "
+                     "screen this act. The status quo is no longer tenable.",
+    "first_plot_point": "FIRST PLOT POINT WINDOW (~25%). The protagonist must "
+                        "cross into the new world. Old options begin to close. "
+                        "No going back.",
+    "response":      "PART 2A — RESPONSE. The protagonist is reactive, "
+                     "wandering, learning the new rules. They are still the "
+                     "orphan finding their footing.",
+    "pinch1":        "PINCH POINT 1 WINDOW (~37%). The antagonistic force "
+                     "demonstrates power on screen and wins something — a "
+                     "resource, an ally, an option.",
+    "midpoint":      "MIDPOINT WINDOW (~50%). An information shift. The "
+                     "protagonist moves from wanderer to warrior. Earlier "
+                     "scenes are recontextualized.",
+    "attack":        "PART 3 — ATTACK. The protagonist is now proactive, "
+                     "initiating, but still mistaking what victory looks like. "
+                     "The Lie still rules their methods.",
+    "pinch2":        "PINCH POINT 2 WINDOW (~62%). The antagonistic force "
+                     "wins again, harder. The cost of the Lie becomes visible.",
+    "second_plot_point": "SECOND PLOT POINT WINDOW (~75%). The final piece of "
+                         "information. All-is-lost. No new information enters "
+                         "after this — the rest of the story is choice and "
+                         "consequence.",
+    "climax":        "CLIMAX. The thematic decision. The protagonist must "
+                     "choose between honoring the Lie (easier mechanically) "
+                     "or honoring the Truth (the harder path that costs).",
+    "resolution":    "PART 4 — RESOLUTION. The new equilibrium. What the "
+                     "choices built. No new pressure introduced; only "
+                     "consequence and recognition.",
+    "destabilization": "DESTABILIZATION. The world tilts. Routine fractures.",
+    "launch":        "LAUNCH. The protagonist commits and the new arena opens.",
+    "midpoint_shift": "MIDPOINT SHIFT. Information reframes the story.",
+    "escalation":    "ESCALATION. Stakes raise; the antagonist tightens grip.",
+    "confrontation": "CONFRONTATION. Direct collision with the antagonistic force.",
+    "consequence":   "CONSEQUENCE. The cost of choices is paid.",
+}
+
+
+def build_beat_role_block(spine_act: dict, act_progress: float) -> str:
+    """Surface the Brooks beat the act + current progress is in.
+
+    Reads `dramatic_function` (CS-6 field) and the milestone_beat_sheet
+    in story_architecture to produce a one-line "story position" cue.
+    Empty when no beat data is authored.
+    """
+    if not spine_act:
+        return ""
+    function = (spine_act.get("dramatic_function") or "").strip().lower()
+    mode     = (spine_act.get("protagonist_mode") or "").strip().lower()
+    cue = _BEAT_ROLE_CUES.get(function, "").strip()
+    lines = []
+    if cue:
+        lines.append(f"STORY BEAT: {cue}")
+    if mode:
+        mode_hint = {
+            "orphan":   "Protagonist is an ORPHAN — does not yet know the rules of this world.",
+            "wanderer": "Protagonist is a WANDERER — reactive, still finding footing.",
+            "warrior":  "Protagonist is a WARRIOR — proactive, initiating, but methods are imperfect.",
+            "martyr":   "Protagonist is a MARTYR — acting in service of something larger than themselves.",
+        }.get(mode, "")
+        if mode_hint:
+            lines.append(f"PROTAGONIST STANCE: {mode_hint}")
+    # Layer on percentile cue for the climax / lull at the very end of the act
+    try:
+        progress = float(act_progress or 0.0)
+    except (TypeError, ValueError):
+        progress = 0.0
+    if progress >= 0.85:
+        lines.append("ACT IS ENDING: the act-level reveal or pivot must "
+                     "land within the next two turns. Land it.")
+    return "\n".join(lines)
+
+
 def compute_pinch_point_instruction(
     spine_act: dict,
     act_progress: float,
@@ -325,10 +488,24 @@ def compute_foreshadow_instruction(
     return ""
 
 
+# Per-movement deltas applied to the protagonist's lie_grip (Weiland arc).
+# The Lie is the same construct as the campaign's protagonist_contradiction;
+# the same per-turn signal that updates the contradiction arc also nudges
+# the lie_grip scalar toward 0 (Truth wins) or 1 (Lie wins). Magnitudes are
+# small so a full act bends the arc rather than snapping it.
+_LIE_GRIP_DELTAS = {
+    "reinforced":  +0.05,  # leaned into the lie
+    "cost_paid":   +0.02,  # the lie's cost surfaced but the lie still rules
+    "resisted":    -0.05,  # acted against the lie
+    "transformed": -0.10,  # explicit movement toward the truth
+}
+
+
 def accumulate_contradiction_arc(
     arc_state: dict,
     contradiction_tracking: dict,
     turn_number: int,
+    character=None,
 ) -> None:
     """Aggregate per-turn contradiction tracking into the per-act arc block.
 
@@ -337,6 +514,10 @@ def accumulate_contradiction_arc(
     multi-turn ledger on `arc_state["contradiction_arc"]` so the next turn's
     narration can see how the protagonist has been relating to their core
     contradiction across the act so far.
+
+    When `character` is provided and has a populated `narrative_arc`, the
+    same movement signal nudges the protagonist's `lie_grip` scalar so the
+    Brooks/Weiland arc tracks live during play.
     """
     if not isinstance(contradiction_tracking, dict):
         return
@@ -360,6 +541,32 @@ def accumulate_contradiction_arc(
     counts = arc.setdefault("counts", {})
     counts[movement] = int(counts.get(movement, 0)) + 1
     arc["last_engaged_turn"] = int(turn_number)
+
+    # Update lie_grip on the protagonist's narrative_arc if present. Negative
+    # arcs (fall, corruption) invert the deltas — leaning into the lie still
+    # raises lie_grip, but the arc *trajectory* is opposite. We apply the
+    # magnitude as authored; the arc_type is informative to the prose, not a
+    # math toggle on the scalar itself.
+    nar = getattr(character, "narrative_arc", None) if character else None
+    if not nar or not getattr(nar, "lie", ""):
+        return
+    delta = _LIE_GRIP_DELTAS.get(movement, 0.0)
+    if delta == 0.0:
+        return
+    new_grip = max(0.0, min(1.0, float(nar.lie_grip) + delta))
+    nar.lie_grip = new_grip
+    if nar.movements is None:
+        nar.movements = []
+    nar.movements.append({
+        "turn":   int(turn_number),
+        "kind":   movement,
+        "delta":  round(delta, 3),
+        "grip":   round(new_grip, 3),
+        "note":   evidence[:160],
+    })
+    # Keep telemetry compact — most recent 16 movements is enough for two acts.
+    if len(nar.movements) > 16:
+        del nar.movements[: len(nar.movements) - 16]
 
 
 def build_contradiction_arc_block(
@@ -1396,6 +1603,12 @@ class ContextPackage:
     # spine pivot point, prompts the LLM to make the choices feel weighty
     # and the consequences explicit.
     pivot_warning_block: str = ""
+    # Brooks/Weiland inner-story block — Lie/Ghost/Truth/Want/Need + lie_grip.
+    # Empty when the active character has no narrative_arc populated.
+    narrative_arc_block: str = ""
+    # Brooks beat-role + protagonist-stance cue derived from the active act's
+    # dramatic_function and protagonist_mode. Empty when act has no role data.
+    beat_role_block: str = ""
 
     def build_dice_result_block(self) -> str:
         if self.roll_result is None:
