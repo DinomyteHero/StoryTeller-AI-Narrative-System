@@ -97,11 +97,11 @@
     "acts": 5,
     "allegiances": 2,
     "variants": 3,
-    "npc_count": 5,
-    "faction_count": 3,
-    "vehicle_count": 2,
-    "variation_point_count": 2,
-    "foreshadow_link_count": 4,
+    "npc_count": 26,
+    "faction_count": 8,
+    "vehicle_count": 6,
+    "variation_point_count": 5,
+    "foreshadow_link_count": 17,
     "prologue_scene_sets": 0,
     "primary_force_power": "sense",
     "sample_characters": [
@@ -114,12 +114,12 @@
     "current_allegiances": [
       {
         "id": "jedi_order",
-          "display_name": "Jedi Order",
-          "current_variants": [
-            "praxeum_student",
-            "clovis_beryl"
-          ],
-          "content_assessment": "Playable with two distinct Force-sensitive starts: an intuitive Seer and a guarded Sentinel/Shadow survivor. Further variants can deepen the funnel but the Jedi side is no longer single-path."
+        "display_name": "Jedi Order",
+        "current_variants": [
+          "praxeum_student",
+          "clovis_beryl"
+        ],
+        "content_assessment": "Playable with two distinct Force-sensitive starts: an intuitive Seer and a guarded Sentinel/Shadow survivor. Further variants can deepen the funnel but the Jedi side is no longer single-path."
       },
       {
         "id": "academy_support",
@@ -491,11 +491,11 @@
       "impact": "The sample campaign now has a reusable New Republic / Jedi Praxeum era pack, but the Campaign Studio and runtime do not load era pack guidance automatically yet.",
       "recommended_action": "Add a Studio loader that can resolve era_pack_id, inject era voice and terminology guidance into generation, and validate that campaign content remains era-consistent."
     },
-      {
-        "gap": "thin_funnel",
-        "impact": "The Jedi Order now has two variants, but Academy Support still has one variant, so the sample demonstrates only partial funnel breadth.",
-        "recommended_action": "Add one additional Academy Support variant next, then consider a third Jedi-aligned variant if needed."
-      },
+    {
+      "gap": "thin_funnel",
+      "impact": "The Jedi Order now has two variants, but Academy Support still has one variant, so the sample demonstrates only partial funnel breadth.",
+      "recommended_action": "Add one additional Academy Support variant next, then consider a third Jedi-aligned variant if needed."
+    },
     {
       "gap": "missing_prologue_sets",
       "impact": "The spine has no prologue_scenes, so Phase 18 cannot use this sample as a full prologue demonstration yet.",

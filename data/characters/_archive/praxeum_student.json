@@ -1,0 +1,145 @@
+{
+  "name": "Praxeum Student",
+  "species": "mirialan",
+  "career": "mystic",
+  "specializations": [
+    "seer"
+  ],
+  "primary_game_line": "force_and_destiny",
+  "background": "Born in the high-altitude city of Yeb on Mirial, where the air is thin and the families painted their children's first geometric tattoo at the moment they took their first independent breath. Raised by an aunt who ran a textile cooperative — bolts of dyed cotton hung from the rafters of the workshop, casting colored shadows that the protagonist still associates with safety. Felt the Force as a child the way other children feel music: as a presence in rooms, a tilt in the day. Could not name it. The aunt assumed it was visions and wrote them down in a small notebook the protagonist still carries. A New Republic recruiter — a Bothan woman named Soriya — recognized the signs during an inspection visit and stayed three days speaking with the aunt before the protagonist understood what was being decided. The day they left for Yavin 4, the aunt did not cry. She gave the protagonist the prayer beads that had been her own teacher's, and three blank ones, and said: 'You will earn the rest.' At the Praxeum, the protagonist met Kira on the second day. They were both lonely, both quietly sceptical of certainty, and both convinced they were faking belonging. They talked for six hours straight that first night. The friendship became the thing the academy was actually for. Recurring dream since arriving: standing at the edge of a flooded temple, water at the ankles, someone whose face is just out of view calling the protagonist's Mirialan name — the formal one, the one only the aunt used. Recurring waking gesture: when uncertain, the protagonist runs a thumb across the three blank prayer beads.",
+  "characteristics": {
+    "brawn": 2,
+    "agility": 2,
+    "intellect": 3,
+    "cunning": 2,
+    "willpower": 3,
+    "presence": 3
+  },
+  "skills": {
+    "astrogation": 0,
+    "athletics": 0,
+    "charm": 0,
+    "coercion": 0,
+    "computers": 0,
+    "cool": 1,
+    "coordination": 0,
+    "deception": 0,
+    "discipline": 2,
+    "leadership": 0,
+    "mechanics": 0,
+    "medicine": 0,
+    "negotiation": 0,
+    "perception": 2,
+    "piloting_planetary": 0,
+    "piloting_space": 0,
+    "resilience": 0,
+    "skulduggery": 0,
+    "stealth": 0,
+    "streetwise": 0,
+    "survival": 0,
+    "vigilance": 1,
+    "brawl": 0,
+    "gunnery": 0,
+    "melee": 0,
+    "ranged_light": 0,
+    "ranged_heavy": 0,
+    "core_worlds": 0,
+    "education": 0,
+    "lore": 1,
+    "outer_rim": 0,
+    "underworld": 0,
+    "warfare": 0,
+    "xenology": 0,
+    "lightsaber": 1
+  },
+  "wound_threshold": 12,
+  "strain_threshold": 13,
+  "current_wounds": 0,
+  "current_strain": 0,
+  "soak": 2,
+  "total_xp": 110,
+  "available_xp": 0,
+  "motivation": {
+    "obligation_type": null,
+    "obligation_value": 0,
+    "duty_type": null,
+    "duty_value": 0,
+    "morality": 50,
+    "conflict": 0
+  },
+  "force_rating": 1,
+  "force_committed": 0,
+  "loadout": {
+    "weapons": [
+      {
+        "name": "Training lightsaber (blue crystal)",
+        "skill": "lightsaber",
+        "damage_bonus": 6,
+        "critical_rating": 2,
+        "qualities": [
+          "breach_1",
+          "sunder"
+        ],
+        "narrative_note": "Built under Luke's guidance from a salvaged crystal. The blade hums low and steady. It feels like an extension of the arm, not a weapon."
+      }
+    ],
+    "armor": {
+      "name": "Praxeum training robes",
+      "soak_bonus": 1,
+      "defense": 0,
+      "narrative_note": "Simple, undyed fabric. Designed for movement, not protection. Smells like jungle rain and temple stone."
+    },
+    "tools": [
+      {
+        "category": "medical",
+        "name": "Two stimpacks",
+        "mechanical_effect": "Can heal 5 wounds per stimpack. Two uses before resupply needed.",
+        "narrative_note": "Alliance surplus, stored in a belt pouch."
+      },
+      {
+        "category": "knowledge",
+        "name": "Jedi archive datapad",
+        "mechanical_effect": "Adds 1 boost die to Lore checks when consulting the archive.",
+        "narrative_note": "Preloaded with Tionne's curated fragments of Jedi history. Scratched screen. Borrowed, not owned."
+      }
+    ],
+    "special_items": [
+      {
+        "name": "Mirialan prayer beads",
+        "mechanical_effect": "Once per session, adds 1 boost die to a Discipline check.",
+        "narrative_note": "Hand-carved from Mirialwood. Each bead represents a lesson learned. Three are blank, waiting."
+      }
+    ]
+  },
+  "career_skills": [],
+  "reserved_xp": 0,
+  "advancement_log": [],
+  "acquired_talents": [],
+  "talent_uses": {},
+  "force_powers": [
+    {
+      "power_id": "sense",
+      "name": "Sense",
+      "category": "perception_knowledge",
+      "base_pips_required": 1,
+      "active_upgrades": [],
+      "narrative_capability": "Can sense the emotions and intentions of nearby beings. With concentration, can detect danger before it arrives.",
+      "gm_choice_guidance": "Offer sensing choices when the character could read emotions, detect lies, feel danger, or perceive hidden threats. Particularly relevant when interacting with Kira or approaching the Massassi ruins.",
+      "dark_side_flavor": "Dark side Sense is invasive -- not reading but ripping. The emotions come raw and unfiltered. Using it on Kira would feel like a betrayal of trust."
+    }
+  ],
+  "active_commitments": [],
+  "throughline_question": "What does loyalty cost when every allegiance demands a different piece of you?",
+  "voice_notes": "Earnest, precise, occasionally wry. Speaks in complete sentences. Thinks before responding but sometimes the thinking shows. Uses humor to deflect vulnerability. Deeply observant of others, less honest about themselves.",
+  "active_injuries": [],
+  "narrative_arc": {
+    "lie": "Knowledge held back is a way of loving people. The most important things she sees, she must keep to herself — that is how she protects the people she would lose.",
+    "ghost": "She watched her older sibling pack to leave Mirial and share their Force gifts beyond the high-altitude city of Yeb. She felt the day before that something would go wrong and said nothing — assumed the feeling was her own fear of losing them. The sibling never returned. The aunt has never confirmed what happened. She has carried, since, the silent conviction that she could have warned them and chose not to.",
+    "truth": "Sharing what she sees is not what kills people. The world is what kills people. Holding the truth back from those she loves does not save them — it only ensures she never gets to know them whole, and they never get to choose what to do with the warning. The Jedi way is to speak the difficult thing, and then to stand in what comes next.",
+    "want": "To master the Sense power well enough to read what's coming for Kira before it lands. To protect Kira before it's too late this time. To keep one person whole.",
+    "need": "To say what she sees, out loud, even when it costs her, even when she might be wrong. To trust that being honest with Kira — and with Luke — is more loving than being prepared. To stop trying to be the silent witness of someone else's life and become a presence in it.",
+    "arc_type": "positive",
+    "lie_grip": 0.85,
+    "movements": []
+  }
+}

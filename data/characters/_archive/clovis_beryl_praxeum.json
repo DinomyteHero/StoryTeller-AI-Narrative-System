@@ -6,7 +6,7 @@
     "shadow"
   ],
   "primary_game_line": "force_and_destiny",
-  "background": "Clovis Beryl was born to a respectable human family on the Mid Rim trade route of Brentaal space, in a household that believed good records, good manners, and quiet New Republic sympathies could keep danger at a distance. The Empire proved otherwise. In 4 ABY, his parents were listed for public execution after an Imperial governor discovered that the family had been moving fugitives through its shipping accounts. Clovis was supposed to die with them. A smuggler crew called the Glass Wake took him out through a bonded cargo chute six hours before the executions began. He was twelve. He grew up in holds, maintenance shafts, customs queues, and rented rooms above landing bays, learning which lies kept people alive and which lies got them spaced. The Force first came to him as warnings: a customs officer about to turn, a crate too quiet, a hyperlane that felt wrong before the navicomputer agreed. The crew called it luck. Clovis called it owing the dead. Talon Karrde noticed before Luke Skywalker did — flagged the Wake's young Force-sensitive in the network's intelligence chain, kept patient, did nothing. When a New Republic contact eventually recognized what he was and arranged passage to Luke Skywalker's Praxeum at sixteen ABY, Karrde let him go without comment, then dropped aboard the Wake on Clovis's last night to ask one question. Clovis arrives at the Praxeum with one bag, two false names he has not quite stopped answering to, the Glass Wake's transponder tag in his pocket, and a goodbye still unfinished. He wants to learn the Jedi way. He does not yet trust peace enough to believe it can protect anyone.",
+  "background": "Clovis Beryl was born to a respectable human family on the Mid Rim trade route of Brentaal space, in a household that believed good records, good manners, and quiet New Republic sympathies could keep danger at a distance. The Empire proved otherwise. In 4 ABY, his parents were listed for public execution after an Imperial governor discovered that the family had been moving fugitives through its shipping accounts. Clovis was supposed to die with them. A smuggler crew called the Glass Wake took him out through a bonded cargo chute six hours before the executions began. He was twelve. He grew up in holds, maintenance shafts, customs queues, and rented rooms above landing bays, learning which lies kept people alive and which lies got them spaced. The Force first came to him as warnings: a customs officer about to turn, a crate too quiet, a hyperlane that felt wrong before the navicomputer agreed. The crew called it luck. Clovis called it owing the dead. A New Republic contact eventually recognized what he was and arranged passage to Luke Skywalker's Praxeum. Clovis arrived with one bag, two false names he has not quite stopped answering to, and the habit of checking every exit before sitting down. He wants to learn the Jedi way. He does not yet trust peace enough to believe it can protect anyone. Kira Denn became his first real friend at the academy after catching him mapping blind spots in the temple corridors. She did not report him. She asked where the best hiding place was.",
   "characteristics": {
     "brawn": 2,
     "agility": 3,
@@ -104,7 +104,7 @@
         "category": "security",
         "name": "Compact bypass kit",
         "mechanical_effect": "Enables Skulduggery checks against simple mechanical locks and adds 1 boost die when bypassing civilian access panels.",
-        "narrative_note": "Too clean for a smuggler kit, too illegal for a student tool roll. Gift from Renn."
+        "narrative_note": "Too clean for a smuggler kit, too illegal for a student tool roll."
       },
       {
         "category": "navigation",
@@ -123,7 +123,7 @@
       {
         "name": "Glass Wake transponder tag",
         "mechanical_effect": "Once per session, adds 1 boost die to a Streetwise or Deception check involving smugglers, false identities, or old Imperial patrol habits.",
-        "narrative_note": "A thumb-sized strip of hull transponder with the crew's private mark scratched under the casing. The casing is warm in his pocket more nights than it isn't."
+        "narrative_note": "A thumb-sized strip of hull transponder with the crew's private mark scratched under the casing."
       }
     ]
   },
@@ -140,22 +140,22 @@
       "base_pips_required": 1,
       "active_upgrades": [],
       "narrative_capability": "Can sense the emotions and immediate intentions of nearby beings. For Clovis, this often arrives as a survival instinct before it feels like a sacred discipline.",
-      "gm_choice_guidance": "Offer sensing choices when Clovis could read fear, notice a lie, feel danger before it becomes visible, or distinguish genuine trust from practiced misdirection. Especially relevant around Joran, Luke's trust exercises, and the lower Massassi corridors.",
+      "gm_choice_guidance": "Offer sensing choices when Clovis could read fear, notice a lie, feel danger before it becomes visible, or distinguish genuine trust from practiced misdirection. Especially relevant around Kira, Luke's trust exercises, and the lower Massassi ruins.",
       "dark_side_flavor": "Dark side Sense feels like casing a room by tearing the truth out of everyone in it. It works, and that is why Clovis should be afraid of wanting it."
     }
   ],
   "active_commitments": [],
-  "throughline_question": "When the friend you trust is also the betrayer you need to stop, when the institution has not earned the loyalty it asks for, and when the life you came from is still offering you a place to land — what does belonging actually mean, and what are you willing to lose to claim it?",
+  "throughline_question": "What does loyalty cost when every allegiance demands a different piece of you?",
   "voice_notes": "Guarded, dry, and observant. Speaks like someone editing himself in real time. Uses smuggler slang when startled or comfortable, then notices he has done it. Polite with teachers, quietly funny with peers, ruthless about exits and contingencies.",
   "active_injuries": [],
   "narrative_arc": {
-    "lie": "Trust is what gets you killed. The world is full of people who pretend to be safe and turn out not to be. Survival means keeping your real self in the back room of every conversation, and the Force is just one more skill to keep there.",
-    "ghost": "His family died because they trusted that legal process would protect them when their shipping accounts were misused. Public law called them criminals before any court did. The Glass Wake saved him at twelve by teaching him to never be findable. He has not stopped checking exits since.",
-    "truth": "Trust is not the absence of caution. It is choosing what caution serves. The Glass Wake taught him to survive; the academy is asking him to live. Both can be true. Both require an honesty he was not capable of when he arrived. The version of himself he keeps in the back room is not safer there — it is just lonelier.",
-    "want": "To find a place that holds his real self without demanding he stop being the kid who got out by lying. To make the Praxeum that place, if he can. To make the Glass Wake still be that place too, if he must.",
-    "need": "To stop performing competence for the people who already love him. To let Tarsh see him scared. To let Lirah see him grieve. To name the Glass Wake out loud at the academy and not be smaller for having done so. To risk being known by one true name.",
+    "lie": "Disappearing is how you protect the people you love. Belonging is how you get them killed.",
+    "ghost": "Twelve years old, watching the bonded cargo chute close on the lights of his family's ship six hours before his parents were marched out for public execution. The Glass Wake saved him by lying, hiding, and moving faster than Imperial truth. He learned, on the day visibility killed his parents, that being seen is what kills.",
+    "truth": "Trust is a kind of armor. Not because it protects from harm, but because it gives you a reason worth bleeding for. The people who saved his parents weren't strangers — they were people who chose to be visible alongside them. Hiding kept Clovis breathing; only being seen will let him fight for anyone else.",
+    "want": "To learn enough Jedi discipline to protect Kira from whatever she's hiding, while staying invisible inside the Praxeum's structure. To become powerful enough to make a difference without ever having to choose a side again.",
+    "need": "To stop running. To let himself be seen by the people who already know what he is — Luke, Kira, Tionne — and to trust that they would rather have him whole than gone. To say his real name out loud and not flinch.",
     "arc_type": "positive",
-    "lie_grip": 0.85,
+    "lie_grip": 0.9,
     "movements": []
   }
 }

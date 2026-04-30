@@ -546,7 +546,7 @@ class TestExistingSpinesPass:
         assert spine.name  # loaded successfully
 
     def test_shadows_of_praxeum_loads(self):
-        """Shadows of the Praxeum — CS-6 reference spine with all features populated."""
+        """Shadows of the Custodian — CS-6 reference spine with all features populated."""
         import json
         from pathlib import Path
         spine_path = Path(__file__).parent.parent / "data" / "campaigns" / "shadows_of_the_praxeum.json"
@@ -556,11 +556,11 @@ class TestExistingSpinesPass:
         from studio.narrative_eval import _check_cs6_structural
         data = json.loads(spine_path.read_text(encoding="utf-8"))
         spine = CampaignSpine(**data)
-        assert spine.name == "Shadows of the Praxeum"
+        assert spine.name == "Shadows of the Custodian"
         assert spine.total_acts == 5
         assert len(spine.allegiances) == 2
         assert len(spine.npc_roster) >= 5  # core 5 + any enrichment additions
-        assert len(spine.foreshadow_registry) == 4
+        assert len(spine.foreshadow_registry) >= 4
         assert spine.story_architecture is not None
         assert spine.story_architecture.milestone_beat_sheet is not None
         # CS-6 fields populated

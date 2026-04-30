@@ -277,7 +277,7 @@ class TestV1SuccessCriteria:
         """V1.1: Player starts as Keth Varso."""
         res = client.post("/session", json={
             "campaign_name": "shadows_of_the_praxeum",
-            "character_id": "praxeum_student",
+            "character_id": "clovis_beryl",
         })
         assert res.status_code == 200
         data = res.json()
@@ -292,7 +292,7 @@ class TestV1SuccessCriteria:
         """V1.2: Opening passage of The Nar Shaddaa Job appears."""
         res = client.post("/session", json={
             "campaign_name": "shadows_of_the_praxeum",
-            "character_id": "praxeum_student",
+            "character_id": "clovis_beryl",
         })
         data = res.json()
         assert "opening_narration" in data
@@ -304,7 +304,7 @@ class TestV1SuccessCriteria:
         """V1.3: Player selects a choice."""
         res = client.post("/session", json={
             "campaign_name": "shadows_of_the_praxeum",
-            "character_id": "praxeum_student",
+            "character_id": "clovis_beryl",
         })
         session_id = res.json()["session_id"]
 
@@ -320,7 +320,7 @@ class TestV1SuccessCriteria:
         """V1.4: Local model correctly decides check/no-check."""
         res = client.post("/session", json={
             "campaign_name": "shadows_of_the_praxeum",
-            "character_id": "praxeum_student",
+            "character_id": "clovis_beryl",
         })
         session_id = res.json()["session_id"]
 
@@ -337,7 +337,7 @@ class TestV1SuccessCriteria:
         """V1.5-6: Dice pool built correctly and rolled with correct symbols."""
         res = client.post("/session", json={
             "campaign_name": "shadows_of_the_praxeum",
-            "character_id": "praxeum_student",
+            "character_id": "clovis_beryl",
         })
         session_id = res.json()["session_id"]
 
@@ -359,7 +359,7 @@ class TestV1SuccessCriteria:
         """V1.7: Cloud GM narrates honoring the dice result."""
         res = client.post("/session", json={
             "campaign_name": "shadows_of_the_praxeum",
-            "character_id": "praxeum_student",
+            "character_id": "clovis_beryl",
         })
         session_id = res.json()["session_id"]
 
@@ -376,7 +376,7 @@ class TestV1SuccessCriteria:
         """V1.8: Dice panel shows actual roll on demand."""
         res = client.post("/session", json={
             "campaign_name": "shadows_of_the_praxeum",
-            "character_id": "praxeum_student",
+            "character_id": "clovis_beryl",
         })
         session_id = res.json()["session_id"]
 
@@ -393,7 +393,7 @@ class TestV1SuccessCriteria:
         """V1.9: New choices are scene-specific."""
         res = client.post("/session", json={
             "campaign_name": "shadows_of_the_praxeum",
-            "character_id": "praxeum_student",
+            "character_id": "clovis_beryl",
         })
         data = res.json()
 
@@ -407,7 +407,7 @@ class TestV1SuccessCriteria:
         """V1.10: Loop repeats 5+ turns without errors."""
         res = client.post("/session", json={
             "campaign_name": "shadows_of_the_praxeum",
-            "character_id": "praxeum_student",
+            "character_id": "clovis_beryl",
         })
         session_id = res.json()["session_id"]
         completed_turns = 0
@@ -434,7 +434,7 @@ class TestV1SuccessCriteria:
         """V1.11: Session persists across restart."""
         res = client.post("/session", json={
             "campaign_name": "shadows_of_the_praxeum",
-            "character_id": "praxeum_student",
+            "character_id": "clovis_beryl",
         })
         session_id = res.json()["session_id"]
 
@@ -458,7 +458,7 @@ class TestV1SuccessCriteria:
 
         res = client.post("/session", json={
             "campaign_name": "shadows_of_the_praxeum",
-            "character_id": "praxeum_student",
+            "character_id": "clovis_beryl",
         })
         assert res.status_code == 200
         session_id = res.json()["session_id"]
@@ -497,7 +497,7 @@ class TestGameMechanics:
         with open("data/characters/praxeum_student.json") as f:
             char = Character.model_validate_json(f.read())
 
-        assert char.name == "Praxeum Student"
+        assert char.name == "Clovis Beryl"
         assert char.species.value == "mirialan"
         assert char.career.value == "mystic"
         assert char.characteristics.willpower == 3
@@ -745,7 +745,7 @@ class TestAPIRoutes:
         """Invalid choice index returns 400."""
         res = client.post("/session", json={
             "campaign_name": "shadows_of_the_praxeum",
-            "character_id": "praxeum_student",
+            "character_id": "clovis_beryl",
         })
         session_id = res.json()["session_id"]
 
@@ -758,7 +758,7 @@ class TestAPIRoutes:
         """Non-existent campaign returns 404."""
         res = client.post("/session", json={
             "campaign_name": "nonexistent_campaign",
-            "character_id": "praxeum_student",
+            "character_id": "clovis_beryl",
         })
         assert res.status_code == 404
 
@@ -778,7 +778,7 @@ class TestFrontendIntegration:
         """Verify session creation returns expected fields."""
         res = client.post("/session", json={
             "campaign_name": "shadows_of_the_praxeum",
-            "character_id": "praxeum_student",
+            "character_id": "clovis_beryl",
         })
         data = res.json()
         assert "session_id" in data
@@ -790,7 +790,7 @@ class TestFrontendIntegration:
         """Verify turn response returns expected fields."""
         res = client.post("/session", json={
             "campaign_name": "shadows_of_the_praxeum",
-            "character_id": "praxeum_student",
+            "character_id": "clovis_beryl",
         })
         session_id = res.json()["session_id"]
 
@@ -811,7 +811,7 @@ class TestFrontendIntegration:
         """Verify session load returns expected fields for resume."""
         res = client.post("/session", json={
             "campaign_name": "shadows_of_the_praxeum",
-            "character_id": "praxeum_student",
+            "character_id": "clovis_beryl",
         })
         session_id = res.json()["session_id"]
 
