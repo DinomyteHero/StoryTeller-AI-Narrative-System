@@ -238,7 +238,7 @@ class TestFinalize:
         spine, report = finalize_spine(nar_shaddaa_data)
         assert report.passed
         assert isinstance(spine, CampaignSpine)
-        assert spine.name == "Shadows of the Praxeum"
+        assert spine.name == "Shadows of the Custodian"
 
     def test_finalize_with_seed(self, nar_shaddaa_data):
         """Finalize attaches generation metadata when seed provided."""
@@ -359,8 +359,8 @@ class TestStudioRoutes:
         resp = client.get(f"/studio/campaigns/{campaign_id}")
         assert resp.status_code == 200
         data = resp.json()
-        assert data["name"] == "Shadows of the Praxeum"
-        assert data["spine"]["name"] == "Shadows of the Praxeum"
+        assert data["name"] == "Shadows of the Custodian"
+        assert data["spine"]["name"] == "Shadows of the Custodian"
 
     def test_campaign_not_found(self, client):
         """GET /studio/campaigns/{id} with non-existent ID returns 404."""

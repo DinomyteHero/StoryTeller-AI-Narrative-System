@@ -38,9 +38,9 @@ def praxeum_spine():
 # ── resolve_variant ────────────────────────────────────────────────────
 
 def test_resolve_variant_finds_existing(praxeum_spine):
-    v = resolve_variant(praxeum_spine, "praxeum_student")
+    v = resolve_variant(praxeum_spine, "clovis_beryl")
     assert v is not None
-    assert v["id"] == "praxeum_student"
+    assert v["id"] == "clovis_beryl"
 
 
 def test_resolve_variant_returns_none_for_missing(praxeum_spine):
@@ -54,7 +54,7 @@ def test_resolve_variant_handles_empty_id(praxeum_spine):
 # ── depth_card_block ───────────────────────────────────────────────────
 
 def test_depth_card_block_renders_for_praxeum_student(praxeum_spine):
-    block = build_depth_card_block(praxeum_spine, "praxeum_student")
+    block = build_depth_card_block(praxeum_spine, "clovis_beryl")
     assert "CHARACTER DEPTH CARD" in block
     # At least some of the 8 fields should be populated.
     assert any(label in block for label in (
@@ -70,7 +70,7 @@ def test_depth_card_block_empty_when_no_depth_card(praxeum_spine):
     """If a variant has no depth_card data, return empty (graceful)."""
     spine_copy = json.loads(json.dumps(praxeum_spine))
     spine_copy["allegiances"][0]["character_variants"][0]["depth_card"] = None
-    block = build_depth_card_block(spine_copy, "praxeum_student")
+    block = build_depth_card_block(spine_copy, "clovis_beryl")
     assert block == ""
 
 

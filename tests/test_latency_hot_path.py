@@ -37,7 +37,7 @@ def test_narration_prompts_require_concrete_terms_for_major_mysteries():
 
 
 def test_force_choice_tag_becomes_pure_force_decision():
-    character = load_character("praxeum_student")
+    character = load_character("clovis_beryl")
 
     decision = _decision_from_choice_tag(
         "force:sense",
@@ -58,7 +58,7 @@ def test_force_choice_tag_becomes_pure_force_decision():
 
 
 def test_empty_choice_tag_is_no_check_decision():
-    character = load_character("praxeum_student")
+    character = load_character("clovis_beryl")
 
     decision = _decision_from_choice_tag(
         None,
@@ -77,7 +77,7 @@ def test_empty_choice_tag_is_no_check_decision():
 
 
 def test_empty_dialogue_choice_tag_uses_social_scene_type():
-    character = load_character("praxeum_student")
+    character = load_character("clovis_beryl")
 
     decision = _decision_from_choice_tag(
         None,
@@ -94,7 +94,7 @@ def test_empty_dialogue_choice_tag_uses_social_scene_type():
 
 
 def test_unknown_choice_tag_falls_back_to_decision_model():
-    character = load_character("praxeum_student")
+    character = load_character("clovis_beryl")
 
     decision = _decision_from_choice_tag(
         "mystery_skill",

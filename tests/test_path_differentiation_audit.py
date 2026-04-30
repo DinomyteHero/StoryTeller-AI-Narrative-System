@@ -111,7 +111,7 @@ def test_gate1_flags_missing_anchor_adaptation(praxeum_spine_dict):
     spine = deepcopy(praxeum_spine_dict)
     variant = spine["allegiances"][0]["character_variants"][0]
     # Drop one anchor adaptation — should flag as missing.
-    variant["integration_layer"]["anchor_adaptations"].pop("academy_arrival")
+    variant["integration_layer"]["anchor_adaptations"].pop("arrivals")
     report = _validate(spine)
     assert "integration_anchor_adaptation_missing" in _warning_codes(report)
 
@@ -165,8 +165,8 @@ def test_gate3_flags_identical_anchor_adaptations(praxeum_spine_dict):
         "The protagonist arrives at the academy with mixed feelings about "
         "what they have left behind and what awaits inside the walls."
     )
-    variants[0]["integration_layer"]["anchor_adaptations"]["academy_arrival"] = same_text
-    variants[1]["integration_layer"]["anchor_adaptations"]["academy_arrival"] = same_text
+    variants[0]["integration_layer"]["anchor_adaptations"]["arrivals"] = same_text
+    variants[1]["integration_layer"]["anchor_adaptations"]["arrivals"] = same_text
     report = _validate(spine)
     assert "allegiance_anchor_adaptations_too_similar" in _warning_codes(report)
 

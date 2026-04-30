@@ -49,7 +49,7 @@ class TestSchemaParsing:
     def test_nar_shaddaa_parses(self, praxeum_data):
         """The canonical campaign spine parses without error."""
         spine = CampaignSpine(**praxeum_data)
-        assert spine.name == "Shadows of the Praxeum"
+        assert spine.name == "Shadows of the Custodian"
         assert spine.era == "new_republic"
         assert spine.total_acts >= 2
         assert len(spine.acts) == spine.total_acts
@@ -76,9 +76,10 @@ class TestSchemaParsing:
     def test_variant_loadout_parsed(self, praxeum_spine):
         """Character variant loadout is correctly parsed."""
         student = praxeum_spine.allegiances[0].character_variants[0]
-        assert student.id == "praxeum_student"
-        # Praxeum student is a Mystic — loadout focuses on Force tools, not weapons
+        assert student.id == "clovis_beryl"
+        # Clovis is a Sentinel/Shadow — loadout includes saber and hold-out blaster
         assert student.starting_loadout is not None
+        assert len(student.starting_loadout.weapons) >= 1
 
     def test_xp_bonus_conditions_parsed(self, praxeum_spine):
         """Act XP bonus conditions are correctly parsed."""
@@ -114,6 +115,73 @@ class TestSchemaParsing:
         first = praxeum_spine.factions[0]
         assert first.faction_id  # non-empty id
         assert 0.0 <= first.disposition_start <= 1.0
+
+
+class TestBondEvents:
+    """Bond events parse and reference real cohort members."""
+
+    def test_bond_events_parsed(self, praxeum_spine):
+        """Bond events are parsed when present."""
+        if not praxeum_spine.bond_events:
+            pytest.skip("Spine has no bond events")
+        first = praxeum_spine.bond_events[0]
+        assert first.id
+        assert first.title
+        assert first.cohort_member
+        assert 1 <= first.act_window[0] <= first.act_window[1] <= praxeum_spine.total_acts
+        assert 0.0 <= first.bond_weight <= 1.0
+        assert len(first.keywords) >= 1
+        assert len(first.hook) >= 20
+
+    def test_bond_event_ids_unique(self, praxeum_spine):
+        """Bond event ids are unique within the spine."""
+        ids = [be.id for be in praxeum_spine.bond_events]
+        assert len(ids) == len(set(ids)), "Duplicate bond event ids"
+
+    def test_bond_event_cohort_members_in_roster(self, praxeum_spine):
+        """Every bond event references an NPC in the roster."""
+        roster_names = {npc.name for npc in praxeum_spine.npc_roster}
+        for be in praxeum_spine.bond_events:
+            assert be.cohort_member in roster_names, (
+                f"Bond event {be.id} references unknown NPC {be.cohort_member!r}"
+            )
+
+    def test_bond_event_prerequisites_resolve(self, praxeum_spine):
+        """Every prerequisite id refers to another bond event in the spine."""
+        all_ids = {be.id for be in praxeum_spine.bond_events}
+        for be in praxeum_spine.bond_events:
+            for prereq in be.prerequisites:
+                assert prereq in all_ids, (
+                    f"Bond event {be.id} prerequisite {prereq!r} not found"
+                )
+
+    def test_bond_event_act_windows_valid(self, praxeum_spine):
+        """All act_windows fall within the campaign's act range."""
+        for be in praxeum_spine.bond_events:
+            start, end = be.act_window
+            assert 1 <= start <= end <= praxeum_spine.total_acts, (
+                f"Bond event {be.id} has invalid act_window {be.act_window}"
+            )
+
+    def test_bond_event_max_weight_per_npc_capped(self, praxeum_spine):
+        """No single character's bond events sum above the system cap."""
+        if not praxeum_spine.bond_event_system:
+            pytest.skip("Spine has no bond_event_system")
+        cap = praxeum_spine.bond_event_system.max_bond_weight_per_relationship
+        totals: dict[str, float] = {}
+        for be in praxeum_spine.bond_events:
+            totals[be.cohort_member] = totals.get(be.cohort_member, 0.0) + be.bond_weight
+        for member, total in totals.items():
+            assert total <= cap + 0.01, (  # tolerance for floating point
+                f"{member} bond_weight total {total} exceeds cap {cap}"
+            )
+
+    def test_bond_event_system_threshold_reasonable(self, praxeum_spine):
+        """Climax-protection threshold is between 0 and the per-character cap."""
+        if not praxeum_spine.bond_event_system:
+            pytest.skip("Spine has no bond_event_system")
+        sys = praxeum_spine.bond_event_system
+        assert 0.0 < sys.bond_weight_threshold_for_climax_protection <= sys.max_bond_weight_per_relationship
 
 
 # ── Validation gate tests ────────────────────────────────────────────

@@ -1,0 +1,149 @@
+{
+  "name": "Praxeum Mechanic",
+  "species": "zabrak",
+  "career": "technician",
+  "specializations": [
+    "mechanic"
+  ],
+  "primary_game_line": "edge_of_empire",
+  "background": "Born to a Zabrak shipwright's family on Iridonia who relocated to the Outer Rim when the Empire began consolidating heavy industry. Grew up in a chop shop in the Tatooine fringe — the kind of place that survived by knowing which questions not to ask and which pieces of equipment never to install in the same vehicle. Learned engine work at six, ion timing at nine, and how to tell when a customer was Imperial Intelligence at twelve. The family lost the shop in 6 ABY when a deal went wrong; the protagonist's father stayed behind to face the buyers and never came home. The protagonist took a Rebel Alliance contract a week later, partly because the cause meant something and partly because Alliance bunks have locking doors. Served as a deck mechanic on a Mon Cala carrier through the last campaigns of the Civil War. Saw three friends die from preventable systems failures and learned to hate the word 'sufficient.' The Praxeum hired the protagonist in 10 ABY when Tionne needed someone who could keep the academy's salvaged generators running in jungle humidity without parts. Initially treated the Force-sensitives with the wary professionalism of a medic working on people who keep insisting they will heal themselves. Slowly grew to like them — slowly enough that it surprised the protagonist when it happened. Carries a stripped Imperial blaster the father had owned, never fires it, refuses to throw it away. Recurring habit: hums old Iridonian work-songs while elbow-deep in machinery — most loudly when scared. Signature scar: a thin diagonal across the left palm, from a coolant line that failed during evac at Bakura.",
+  "characteristics": {
+    "brawn": 3,
+    "agility": 3,
+    "intellect": 4,
+    "cunning": 2,
+    "willpower": 2,
+    "presence": 2
+  },
+  "skills": {
+    "astrogation": 0,
+    "athletics": 0,
+    "charm": 0,
+    "coercion": 0,
+    "computers": 2,
+    "cool": 0,
+    "coordination": 0,
+    "deception": 0,
+    "discipline": 0,
+    "leadership": 0,
+    "mechanics": 2,
+    "medicine": 0,
+    "negotiation": 0,
+    "perception": 1,
+    "piloting_planetary": 0,
+    "piloting_space": 1,
+    "resilience": 1,
+    "skulduggery": 0,
+    "stealth": 0,
+    "streetwise": 0,
+    "survival": 0,
+    "vigilance": 1,
+    "brawl": 0,
+    "gunnery": 0,
+    "melee": 0,
+    "ranged_light": 0,
+    "ranged_heavy": 0,
+    "core_worlds": 0,
+    "education": 0,
+    "lore": 0,
+    "outer_rim": 0,
+    "underworld": 0,
+    "warfare": 0,
+    "xenology": 0,
+    "lightsaber": 0
+  },
+  "wound_threshold": 14,
+  "strain_threshold": 12,
+  "current_wounds": 0,
+  "current_strain": 0,
+  "soak": 3,
+  "total_xp": 100,
+  "available_xp": 0,
+  "motivation": {
+    "obligation_type": null,
+    "obligation_value": 0,
+    "duty_type": null,
+    "duty_value": 0,
+    "morality": 50,
+    "conflict": 0
+  },
+  "force_rating": 0,
+  "force_committed": 0,
+  "loadout": {
+    "weapons": [
+      {
+        "name": "Heavy hydrospanner",
+        "skill": "melee",
+        "damage_bonus": 3,
+        "critical_rating": 5,
+        "qualities": [
+          "disorient_1"
+        ],
+        "narrative_note": "Not a weapon. A tool. The fact that it can crack a skull is incidental."
+      },
+      {
+        "name": "Hold-out blaster",
+        "skill": "ranged_light",
+        "damage_bonus": 5,
+        "critical_rating": 4,
+        "qualities": [
+          "stun_setting"
+        ],
+        "narrative_note": "Kept in a thigh holster under the coveralls. Luke does not approve. Luke also does not ask."
+      }
+    ],
+    "armor": {
+      "name": "Reinforced mechanic's coveralls",
+      "soak_bonus": 1,
+      "defense": 0,
+      "narrative_note": "Burn-resistant weave. Oil stains that will never come out. More pockets than strictly necessary."
+    },
+    "tools": [
+      {
+        "category": "mechanics",
+        "name": "Comprehensive tool kit",
+        "mechanical_effect": "Enables Mechanics checks. Removes 1 setback die from repair attempts.",
+        "narrative_note": "Custom-organized case. Every tool in its place. Touch nothing."
+      },
+      {
+        "category": "slicing",
+        "name": "Diagnostic scanner with slicer module",
+        "mechanical_effect": "Adds 1 boost die to Computer checks for system diagnostics.",
+        "narrative_note": "Modified from Imperial surplus. Can read any standard protocol. The slicer module is not strictly legal."
+      },
+      {
+        "category": "medical",
+        "name": "Two stimpacks",
+        "mechanical_effect": "Can heal 5 wounds per stimpack. Two uses before resupply needed.",
+        "narrative_note": "Stashed in the tool kit. Priorities."
+      }
+    ],
+    "special_items": [
+      {
+        "name": "Salvaged Imperial comm scanner",
+        "mechanical_effect": "Once per act, a Computers check can intercept unencrypted Imperial military communications within system range.",
+        "narrative_note": "Pulled from the Lambda shuttle's original comm suite before the conversion. The frequencies are still programmed."
+      }
+    ]
+  },
+  "career_skills": [],
+  "reserved_xp": 0,
+  "advancement_log": [],
+  "acquired_talents": [],
+  "talent_uses": {},
+  "force_powers": [],
+  "active_commitments": [],
+  "throughline_question": "What does loyalty cost when every allegiance demands a different piece of you?",
+  "voice_notes": "Laconic, practical. Speaks in declarative sentences and workshop metaphors. Expresses affection through acts of service, not words. Uncomfortable with sincerity but incapable of dishonesty.",
+  "active_injuries": [],
+  "narrative_arc": {
+    "lie": "If you fix every system before anyone gets hurt, no one has to grieve. Maintenance is love; words are wasted air.",
+    "ghost": "Three friends dead from preventable systems failures aboard the Mon Cala carrier — drag links, coolant tolerances, things that 'sufficient' had been called good enough for. And before that, the father staying behind to face the buyers in the Tatooine chop shop. The protagonist did the inventory that morning. Did not check the back room. Has not stopped checking the back room of every life since.",
+    "truth": "Some systems cannot be checked early enough. People die in ways that have nothing to do with whether you tightened the line. Telling the people you love what they mean — out loud, in words, before the failure mode arrives — is not redundancy. It is the only redundancy that matters.",
+    "want": "To keep every salvaged Praxeum generator and Y-wing simulator and perimeter lantern running through the jungle humidity. To make 'sufficient' a word no one trusts. To prevent the next preventable thing.",
+    "need": "To use words. To say to Tionne, to Luke, to the Force-sensitives the protagonist has slowly grown to love — that they matter. To stop repairing the people they love through their machines and start being seen as a person who chose them.",
+    "arc_type": "positive",
+    "lie_grip": 0.88,
+    "movements": []
+  }
+}

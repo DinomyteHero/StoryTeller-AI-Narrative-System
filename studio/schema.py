@@ -624,6 +624,44 @@ class CharacterDepthCard(BaseModel):
     moral_line: str = ""
 
 
+# ── Bond Events (Trails-of-Cold-Steel-style relationship deepening) ──
+
+
+class BondEvent(BaseModel):
+    """
+    Optional one-on-one scene that deepens a specific cohort relationship
+    and weights the climax mechanically. Cohort survival in the final act
+    is determined by accumulated bond_weight per character.
+
+    The runtime engine offers a bond event when:
+      - the act_window includes the current act
+      - all prerequisites (bond ids) have fired
+      - player drift matches keywords
+    """
+    id: str = Field(min_length=1)
+    title: str = Field(min_length=1)
+    cohort_member: str = Field(min_length=1)
+    act_window: tuple[int, int]
+    prerequisites: list[str] = []
+    hook: str = Field(min_length=20)
+    keywords: list[str] = Field(min_length=1)
+    subversion_payoff: str = ""
+    bond_weight: float = Field(ge=0.0, le=1.0, default=0.0)
+    branch_consequences: list[str] = []
+
+
+class BondEventSystem(BaseModel):
+    """Configuration for the bond-event runtime."""
+    purpose: str = ""
+    bond_weight_threshold_for_climax_protection: float = Field(
+        ge=0.0, le=1.0, default=0.6
+    )
+    max_bond_weight_per_relationship: float = Field(
+        ge=0.0, le=2.0, default=1.0
+    )
+    stacking: str = "additive"  # "additive" | "max" | "replace"
+
+
 # ── Story architecture (CS-5) ────────────────────────────────────────
 
 
@@ -721,6 +759,9 @@ class CampaignSpine(BaseModel):
     foreshadow_registry: list[ForeshadowLink] = []  # Phase 5
     # ── Star Wars era voice anchoring ──
     era_voice: Optional[EraVoice] = None
+    # ── Bond-event runtime (Trails-of-Cold-Steel pattern) ──
+    bond_events: list[BondEvent] = []
+    bond_event_system: Optional[BondEventSystem] = None
 
     @field_validator("acts")
     @classmethod
