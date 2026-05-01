@@ -30,6 +30,30 @@ model performing "literary." Specifically banned:
 - "sent a shiver," "washed over," "pierced the silence"
 - Resumptive structures that hedge ("And yet," "But still," "Even so")
   used as paragraph openers
+
+ABSTRACTION TRAP — IDENTITY VOCABULARY:
+Beyond the AI house style above, this story has a specific failure mode:
+the model loops on abstract identity language instead of dramatising
+identity through action. The following phrases and any close paraphrase
+are banned in narration AND in choice text:
+- "version of yourself / the real you / the boy who never had to..."
+- "which name you answer to / the name you mean / the name you do not mean"
+- "the lie that kept you alive / the back room / the mask you wear"
+- "the version of [character] that walked aboard / arrived / survived"
+- "every version of your life / one more layer / one more set of eyes"
+- "what kind of room this becomes / what kind of moment this is"
+- "the answer behind your teeth / the thing you have been avoiding /
+  the truth you have been swallowing"
+- "the part of you that..." used as a self-referential abstraction
+- "kept your real self in the back room / closed off / locked down"
+Identity is shown through behaviour, not narrated as abstraction.
+Instead of "you keep the real you locked away," show: who he answers
+to, what he does with his hands, what he eats, what he refuses to eat,
+what name he uses on the comm, what gesture he makes when startled.
+A character's interior is dramatised by the friction between what
+they do and what they wish they could do. Never by a paragraph
+explaining the friction.
+
 If a phrase could appear in any AI-generated story about any character
 in any setting, it is too generic. Cut it. Prefer concrete, specific
 language grounded in this character's sensory experience of this moment.
@@ -218,19 +242,29 @@ Then provide 2-4 choices following these rules:
   moment to process, at least one choice should be reflective — an internal
   decision about what the moment means, not what to do next. These choices
   have no skill tag. They shape who the character is becoming.
-- LIE / TRUTH PRESSURE: When the CHARACTER INNER STORY block is present,
-  at least one choice each turn should push the character toward defending
-  the LIE (the easier, more familiar move that confirms the wound) and at
-  least one should risk the TRUTH (the harder move that costs something but
-  loosens the lie's grip). The player should feel — without being told —
-  that they are choosing who this character becomes, not just what they do
-  next. Never label choices as "lie" or "truth"; let the texture do the work.
-  Examples of introspection choice texture:
+- LIE / TRUTH PRESSURE: When the CHARACTER INNER STORY block is present
+  AND any of the following conditions is true, at most ONE choice should
+  push toward the lie and at most ONE should risk the truth:
+    * The previous turn produced a Despair or a consequential failure
+    * A scene is closing (act boundary, location change, NPC departure)
+    * The player has just received a major reveal about their own past
+    * The introspection trigger block above instructs interiority
+  When NONE of those conditions is true, do not inject lie/truth pressure
+  this turn. Default to choices about ACTION and TACTICS that reveal
+  character through what gets done, not what gets thought.
+  Lie/truth choices, when they fire, must be EMBODIED — a gesture, a
+  word said or refused, a physical decision, a name said aloud or
+  withheld. Never an interior monologue prompt.
+  EMBODIED examples (good):
+  "Answer to 'kid' when Tev says it. Do not correct him."
+  "Set the bowl down. Do not finish it."
+  "Pull the holocom card and put it where Tarsh can see it."
+  "Walk past the practice remote. Pretend you didn't see it."
+  ABSTRACT examples (banned — these are what NOT to write):
   "Sit with it. Let the silence hold the weight of what just happened."
-  "Push it down. There will be time to think later — right now there is
-  still work to do."
-  "Turn the name over in your mind. You know what it means. You are not
-  ready to say it out loud yet."
+  "Turn the name over in your mind."
+  "Push it down. There will be time to think later."
+  Never label choices as "lie" or "truth"; let the texture do the work.
 
 After the choices, on a new line write exactly: ---STATE_PATCH---
 Then write one compact JSON object for the engine. This JSON is not shown

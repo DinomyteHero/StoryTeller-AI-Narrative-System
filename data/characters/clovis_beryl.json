@@ -122,8 +122,8 @@
     "special_items": [
       {
         "name": "Glass Wake transponder tag",
-        "mechanical_effect": "Once per session, adds 1 boost die to a Streetwise or Deception check involving smugglers, false identities, or old Imperial patrol habits.",
-        "narrative_note": "A thumb-sized strip of hull transponder with the crew's private mark scratched under the casing. The casing is warm in his pocket more nights than it isn't."
+        "mechanical_effect": "An encrypted one-burst distress beacon. Once per campaign, Clovis can activate it to send a single-pulse call for help to the Glass Wake. The Wake will respond if it can: a ride, a route, a favor that cannot be unspent. Activation guarantees attention, not rescue. While dormant, the tag also adds 1 boost die once per session to a Streetwise or Deception check involving smugglers, false identities, or old Imperial patrol habits.",
+        "narrative_note": "A thumb-sized strip of hull transponder with the Wake's private mark scratched into the casing. Tev pressed it into Clovis's hand on the docking ramp the morning the Horizon arrived: 'If it goes bad on Yavin, you press it once and we come.' Dormant until used."
       }
     ]
   },
