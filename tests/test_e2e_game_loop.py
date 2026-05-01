@@ -276,7 +276,7 @@ class TestV1SuccessCriteria:
     def test_criterion_1_player_starts_as_praxeum_student(self, client, mock_llms):
         """V1.1: Player starts as Keth Varso."""
         res = client.post("/session", json={
-            "campaign_name": "shadows_of_the_praxeum",
+            "campaign_name": "shadows_of_the_custodian",
             "character_id": "clovis_beryl",
         })
         assert res.status_code == 200
@@ -291,7 +291,7 @@ class TestV1SuccessCriteria:
     def test_criterion_2_opening_passage_appears(self, client, mock_llms):
         """V1.2: Opening passage of The Nar Shaddaa Job appears."""
         res = client.post("/session", json={
-            "campaign_name": "shadows_of_the_praxeum",
+            "campaign_name": "shadows_of_the_custodian",
             "character_id": "clovis_beryl",
         })
         data = res.json()
@@ -303,7 +303,7 @@ class TestV1SuccessCriteria:
     def test_criterion_3_player_selects_choice(self, client, mock_llms):
         """V1.3: Player selects a choice."""
         res = client.post("/session", json={
-            "campaign_name": "shadows_of_the_praxeum",
+            "campaign_name": "shadows_of_the_custodian",
             "character_id": "clovis_beryl",
         })
         session_id = res.json()["session_id"]
@@ -319,7 +319,7 @@ class TestV1SuccessCriteria:
     def test_criterion_4_check_decision(self, client, mock_llms):
         """V1.4: Local model correctly decides check/no-check."""
         res = client.post("/session", json={
-            "campaign_name": "shadows_of_the_praxeum",
+            "campaign_name": "shadows_of_the_custodian",
             "character_id": "clovis_beryl",
         })
         session_id = res.json()["session_id"]
@@ -336,7 +336,7 @@ class TestV1SuccessCriteria:
     def test_criterion_5_and_6_dice_pool_and_roll(self, client, mock_llms):
         """V1.5-6: Dice pool built correctly and rolled with correct symbols."""
         res = client.post("/session", json={
-            "campaign_name": "shadows_of_the_praxeum",
+            "campaign_name": "shadows_of_the_custodian",
             "character_id": "clovis_beryl",
         })
         session_id = res.json()["session_id"]
@@ -358,7 +358,7 @@ class TestV1SuccessCriteria:
     def test_criterion_7_narration_honors_dice(self, client, mock_llms):
         """V1.7: Cloud GM narrates honoring the dice result."""
         res = client.post("/session", json={
-            "campaign_name": "shadows_of_the_praxeum",
+            "campaign_name": "shadows_of_the_custodian",
             "character_id": "clovis_beryl",
         })
         session_id = res.json()["session_id"]
@@ -375,7 +375,7 @@ class TestV1SuccessCriteria:
     def test_criterion_8_dice_panel(self, client, mock_llms):
         """V1.8: Dice panel shows actual roll on demand."""
         res = client.post("/session", json={
-            "campaign_name": "shadows_of_the_praxeum",
+            "campaign_name": "shadows_of_the_custodian",
             "character_id": "clovis_beryl",
         })
         session_id = res.json()["session_id"]
@@ -392,7 +392,7 @@ class TestV1SuccessCriteria:
     def test_criterion_9_choices_scene_specific(self, client, mock_llms):
         """V1.9: New choices are scene-specific."""
         res = client.post("/session", json={
-            "campaign_name": "shadows_of_the_praxeum",
+            "campaign_name": "shadows_of_the_custodian",
             "character_id": "clovis_beryl",
         })
         data = res.json()
@@ -406,7 +406,7 @@ class TestV1SuccessCriteria:
     def test_criterion_10_five_plus_turns(self, client, mock_llms):
         """V1.10: Loop repeats 5+ turns without errors."""
         res = client.post("/session", json={
-            "campaign_name": "shadows_of_the_praxeum",
+            "campaign_name": "shadows_of_the_custodian",
             "character_id": "clovis_beryl",
         })
         session_id = res.json()["session_id"]
@@ -433,7 +433,7 @@ class TestV1SuccessCriteria:
     def test_criterion_11_session_persists(self, client, mock_llms):
         """V1.11: Session persists across restart."""
         res = client.post("/session", json={
-            "campaign_name": "shadows_of_the_praxeum",
+            "campaign_name": "shadows_of_the_custodian",
             "character_id": "clovis_beryl",
         })
         session_id = res.json()["session_id"]
@@ -457,7 +457,7 @@ class TestV1SuccessCriteria:
         assert os.environ.get("NARRATIVE_BACKEND") == "local"
 
         res = client.post("/session", json={
-            "campaign_name": "shadows_of_the_praxeum",
+            "campaign_name": "shadows_of_the_custodian",
             "character_id": "clovis_beryl",
         })
         assert res.status_code == 200
@@ -491,17 +491,17 @@ class TestGameMechanics:
         assert isinstance(result.despairs, int)
 
     def test_character_model_loads(self):
-        """Verify the Praxeum student character JSON loads correctly."""
+        """Verify the active Custodian protagonist character JSON loads correctly."""
         from engine.character import Character
 
-        with open("data/characters/praxeum_student.json") as f:
+        with open("data/characters/clovis_beryl.json") as f:
             char = Character.model_validate_json(f.read())
 
         assert char.name == "Clovis Beryl"
-        assert char.species.value == "mirialan"
-        assert char.career.value == "mystic"
+        assert char.species.value == "human"
+        assert char.career.value == "sentinel"
         assert char.characteristics.willpower == 3
-        assert char.skills.discipline == 2
+        assert char.skills.discipline == 1
         assert char.wound_threshold >= 10
         assert char.strain_threshold >= 10
 
@@ -524,10 +524,10 @@ class TestGameMechanics:
 
     def test_campaign_spine_loads(self):
         """Verify the Praxeum spine loads correctly."""
-        with open("data/campaigns/shadows_of_the_praxeum.json") as f:
+        with open("data/campaigns/shadows_of_the_custodian.json") as f:
             spine = json.load(f)
 
-        assert spine["name"] == "Shadows of the Praxeum"
+        assert spine["name"] == "Shadows of the Custodian"
         assert spine["total_acts"] >= 2
         assert len(spine["acts"]) == spine["total_acts"]
         assert "throughline_question" in spine
@@ -600,7 +600,7 @@ class TestDatabaseIntegrity:
         from state.session import create_session, get_session
 
         sid = create_session(
-            campaign_name="shadows_of_the_praxeum",
+            campaign_name="shadows_of_the_custodian",
             character_json='{"test": true}',
             arc_state_json='{"current_act": 1}',
         )
@@ -608,7 +608,7 @@ class TestDatabaseIntegrity:
 
         session = get_session(sid)
         assert session is not None
-        assert session["campaign_name"] == "shadows_of_the_praxeum"
+        assert session["campaign_name"] == "shadows_of_the_custodian"
 
     def test_turn_logging(self, temp_db):
         """Verify turns are logged and retrievable."""
@@ -736,6 +736,21 @@ class TestAPIRoutes:
         assert res.status_code == 200
         assert "Storyteller V3" in res.text
 
+    def test_campaigns_endpoint_exposes_intended_protagonist_only(self, client):
+        """The active campaign funnel offers Clovis, not support-only variants."""
+        res = client.get("/campaigns")
+        assert res.status_code == 200
+        campaigns = res.json()
+
+        custodian = next(
+            c for c in campaigns
+            if c["campaign_name"] == "shadows_of_the_custodian"
+        )
+        assert custodian["intended_protagonist_id"] == "clovis_beryl"
+        character_ids = {c["id"] for c in custodian["characters"]}
+        assert character_ids == {"clovis_beryl"}
+        assert custodian["characters"][0]["intended_protagonist"] is True
+
     def test_invalid_session_returns_404(self, client):
         """Non-existent session returns 404."""
         res = client.get("/session/nonexistent")
@@ -744,7 +759,7 @@ class TestAPIRoutes:
     def test_invalid_choice_index_returns_400(self, client, mock_llms):
         """Invalid choice index returns 400."""
         res = client.post("/session", json={
-            "campaign_name": "shadows_of_the_praxeum",
+            "campaign_name": "shadows_of_the_custodian",
             "character_id": "clovis_beryl",
         })
         session_id = res.json()["session_id"]
@@ -765,7 +780,7 @@ class TestAPIRoutes:
     def test_invalid_character_returns_404(self, client, mock_llms):
         """Non-existent character returns 404."""
         res = client.post("/session", json={
-            "campaign_name": "shadows_of_the_praxeum",
+            "campaign_name": "shadows_of_the_custodian",
             "character_id": "nonexistent_character",
         })
         assert res.status_code == 404
@@ -777,7 +792,7 @@ class TestFrontendIntegration:
     def test_session_response_contract(self, client, mock_llms):
         """Verify session creation returns expected fields."""
         res = client.post("/session", json={
-            "campaign_name": "shadows_of_the_praxeum",
+            "campaign_name": "shadows_of_the_custodian",
             "character_id": "clovis_beryl",
         })
         data = res.json()
@@ -789,7 +804,7 @@ class TestFrontendIntegration:
     def test_turn_response_contract(self, client, mock_llms):
         """Verify turn response returns expected fields."""
         res = client.post("/session", json={
-            "campaign_name": "shadows_of_the_praxeum",
+            "campaign_name": "shadows_of_the_custodian",
             "character_id": "clovis_beryl",
         })
         session_id = res.json()["session_id"]
@@ -810,7 +825,7 @@ class TestFrontendIntegration:
     def test_session_load_response_contract(self, client, mock_llms):
         """Verify session load returns expected fields for resume."""
         res = client.post("/session", json={
-            "campaign_name": "shadows_of_the_praxeum",
+            "campaign_name": "shadows_of_the_custodian",
             "character_id": "clovis_beryl",
         })
         session_id = res.json()["session_id"]

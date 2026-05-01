@@ -148,7 +148,7 @@ class TestShipLoading:
     def test_campaign_spine_has_vehicle_registry(self):
         """The active spine includes a populated vehicle registry."""
         path = os.path.join(
-            os.path.dirname(__file__), "..", "data", "campaigns", "shadows_of_the_praxeum.json"
+            os.path.dirname(__file__), "..", "data", "campaigns", "shadows_of_the_custodian.json"
         )
         with open(path) as f:
             spine = json.load(f)

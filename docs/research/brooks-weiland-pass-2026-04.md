@@ -128,7 +128,7 @@ opening UI can show a "you are about to play…" card before turn 1.
 `GET /session/{id}` now returns the full character object, exposing
 the live `lie_grip` and movements ledger to harness and frontend.
 
-### 7. Campaign deep-edit — `Shadows of the Praxeum` (post-Exar Kun)
+### 7. Campaign deep-edit — `Shadows of the Custodian` (post-Exar Kun)
 
 The campaign was pinned to **~12 ABY**, one year after the Exar Kun
 crisis is canonically resolved (`era_voice` updated to reflect "the
@@ -399,7 +399,7 @@ api/game_routes.py                                   +85 lines (endpoints + sess
 data/characters/clovis_beryl.json                    +12 lines (narrative_arc)
 data/characters/praxeum_student.json                 +12 lines (narrative_arc)
 data/characters/praxeum_mechanic.json                +12 lines (narrative_arc)
-data/campaigns/shadows_of_the_praxeum.json           ~360 lines net new (NPCs, factions, side content, opening, beat roles)
+data/campaigns/shadows_of_the_custodian.json           ~360 lines net new (NPCs, factions, side content, opening, beat roles)
 eval/playtest_long.py                                +30 lines (--character flag, arc tracking)
 tests/test_cs6_story_engineering.py                   +1 line  (relax NPC-count assertion)
 docs/research/brooks-weiland-pass-2026-04.md         (this file)

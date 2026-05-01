@@ -33,7 +33,7 @@ CAMPAIGN_DIR = Path(__file__).parent.parent / "data" / "campaigns"
 
 @pytest.fixture
 def nar_shaddaa_data() -> dict:
-    path = CAMPAIGN_DIR / "shadows_of_the_praxeum.json"
+    path = CAMPAIGN_DIR / "shadows_of_the_custodian.json"
     with open(path) as f:
         return json.load(f)
 

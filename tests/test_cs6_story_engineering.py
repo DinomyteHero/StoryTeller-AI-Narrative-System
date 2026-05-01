@@ -160,7 +160,7 @@ def _make_minimal_spine(**overrides):
     from pathlib import Path
     from studio.schema import CampaignSpine
 
-    spine_path = Path(__file__).parent.parent / "data" / "campaigns" / "shadows_of_the_praxeum.json"
+    spine_path = Path(__file__).parent.parent / "data" / "campaigns" / "shadows_of_the_custodian.json"
     data = json.loads(spine_path.read_text(encoding="utf-8"))
 
     # Apply overrides — particularly for acts and npc_roster
@@ -534,12 +534,12 @@ class TestCharacterDepthCard:
 class TestExistingSpinesPass:
     """Verify existing campaign spines pass validation with new fields."""
 
-    def test_shadows_of_the_praxeum_loads(self):
+    def test_shadows_of_the_custodian_loads(self):
         import json
         from pathlib import Path
-        spine_path = Path(__file__).parent.parent / "data" / "campaigns" / "shadows_of_the_praxeum.json"
+        spine_path = Path(__file__).parent.parent / "data" / "campaigns" / "shadows_of_the_custodian.json"
         if not spine_path.exists():
-            pytest.skip("shadows_of_the_praxeum.json not found")
+            pytest.skip("shadows_of_the_custodian.json not found")
         from studio.schema import CampaignSpine
         data = json.loads(spine_path.read_text(encoding="utf-8"))
         spine = CampaignSpine(**data)
@@ -549,9 +549,9 @@ class TestExistingSpinesPass:
         """Shadows of the Custodian — CS-6 reference spine with all features populated."""
         import json
         from pathlib import Path
-        spine_path = Path(__file__).parent.parent / "data" / "campaigns" / "shadows_of_the_praxeum.json"
+        spine_path = Path(__file__).parent.parent / "data" / "campaigns" / "shadows_of_the_custodian.json"
         if not spine_path.exists():
-            pytest.skip("shadows_of_the_praxeum.json not found")
+            pytest.skip("shadows_of_the_custodian.json not found")
         from studio.schema import CampaignSpine
         from studio.narrative_eval import _check_cs6_structural
         data = json.loads(spine_path.read_text(encoding="utf-8"))
@@ -586,9 +586,9 @@ class TestExistingSpinesPass:
     def test_echoes_of_force_loads(self):
         import json
         from pathlib import Path
-        spine_path = Path(__file__).parent.parent / "data" / "campaigns" / "shadows_of_the_praxeum.json"
+        spine_path = Path(__file__).parent.parent / "data" / "campaigns" / "shadows_of_the_custodian.json"
         if not spine_path.exists():
-            pytest.skip("shadows_of_the_praxeum.json not found")
+            pytest.skip("shadows_of_the_custodian.json not found")
         from studio.schema import CampaignSpine
         data = json.loads(spine_path.read_text(encoding="utf-8"))
         try:
@@ -596,7 +596,7 @@ class TestExistingSpinesPass:
             assert spine.name
         except Exception:
             # Pre-existing validation issues in this spine are not CS-6 regressions
-            pytest.skip("shadows_of_the_praxeum.json has pre-existing validation issues")
+            pytest.skip("shadows_of_the_custodian.json has pre-existing validation issues")
 
 
 # ═════════════════════════════════════════════════════════════════════

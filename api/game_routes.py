@@ -574,11 +574,15 @@ def _build_scene_description(
     current_act: dict,
 ) -> str:
     state = _initial_scene_state(arc_state, current_act)
-    return (
+    social_block = _active_social_scene_block(arc_state)
+    description = (
         f"{_scene_state_block(state)}\n\n"
         f"PREVIOUS FINAL BEAT: {_previous_final_beat(last_turn.get('narration', ''))}\n\n"
         f"THE PLAYER CHOSE: {player_action}"
     )
+    if social_block:
+        description += f"\n\n{social_block}"
+    return description
 
 
 def _select_active_scene_npcs(
@@ -1814,6 +1818,7 @@ async def list_campaigns():
             spine = json.load(f)
         sa = spine.get("story_architecture", {}) or {}
         ev = spine.get("era_voice", {}) or {}
+        intended_protagonist_id = spine.get("intended_protagonist_id", "")
 
         characters: list[dict] = []
         seen_ids: set[str] = set()
@@ -1823,6 +1828,12 @@ async def list_campaigns():
             for cv in allegiance.get("character_variants", []):
                 cid = cv.get("id")
                 if not cid or cid in seen_ids:
+                    continue
+                if intended_protagonist_id and cid != intended_protagonist_id:
+                    seen_ids.add(cid)
+                    continue
+                if cv.get("player_selectable") is False:
+                    seen_ids.add(cid)
                     continue
                 seen_ids.add(cid)
                 # Pull the standalone file (if present) for the live arc data
@@ -1834,6 +1845,10 @@ async def list_campaigns():
                     "pitch":   cv.get("pitch", ""),
                     "career":  cv.get("career", live.get("career", "")),
                     "species": cv.get("species", live.get("species", "")),
+                    "intended_protagonist": cv.get("intended_protagonist", False),
+                    "player_selectable": cv.get("player_selectable", True),
+                    "supporting_only": cv.get("supporting_only", False),
+                    "selection_note": cv.get("selection_note", ""),
                     "voice_notes": live.get("voice_notes", ""),
                     "narrative_arc": {
                         "lie":      arc.get("lie", ""),
@@ -1850,6 +1865,8 @@ async def list_campaigns():
         for cid, live in sorted(standalone.items()):
             if cid in seen_ids:
                 continue
+            if intended_protagonist_id and cid != intended_protagonist_id:
+                continue
             arc = live.get("narrative_arc") or {}
             characters.append({
                 "id":      cid,
@@ -1857,6 +1874,10 @@ async def list_campaigns():
                 "pitch":   "",
                 "career":  live.get("career", ""),
                 "species": live.get("species", ""),
+                "intended_protagonist": cid == intended_protagonist_id,
+                "player_selectable": True,
+                "supporting_only": False,
+                "selection_note": "Intended protagonist." if cid == intended_protagonist_id else "",
                 "voice_notes": live.get("voice_notes", ""),
                 "narrative_arc": {
                     "lie":      arc.get("lie", ""),
@@ -1871,6 +1892,7 @@ async def list_campaigns():
         result.append({
             "campaign_name": path.stem,
             "display_name":  spine.get("name", path.stem),
+            "intended_protagonist_id": intended_protagonist_id,
             "era":           spine.get("era", ""),
             "era_year":      ev.get("year", ""),
             "era_voice_notes": ev.get("voice_notes", ""),
@@ -2311,6 +2333,358 @@ def _run_annotation_background(
     return None
 
 
+def _social_runtime_state(arc_state: dict) -> dict:
+    """Mutable per-session social route state, stored inside arc_state_json."""
+    runtime = arc_state.setdefault("social_runtime", {})
+    for key in (
+        "offered_bond_ids",
+        "seen_bond_ids",
+        "offered_group_scene_ids",
+        "seen_group_scene_ids",
+        "pending_offers",
+    ):
+        value = runtime.get(key)
+        runtime[key] = value if isinstance(value, list) else []
+    for key in ("act_bond_offer_counts", "act_group_offer_counts"):
+        value = runtime.get(key)
+        runtime[key] = value if isinstance(value, dict) else {}
+    return runtime
+
+
+def _clear_pending_social_offers(arc_state: dict) -> None:
+    _social_runtime_state(arc_state)["pending_offers"] = []
+    arc_state.pop("active_social_scene", None)
+
+
+def _social_act_key(act_number: int) -> str:
+    return str(int(act_number or 1))
+
+
+def _coerce_int(value, default: int = 0) -> int:
+    try:
+        return int(value)
+    except (TypeError, ValueError):
+        return default
+
+
+def _append_unique(items: list, value: str) -> None:
+    if value and value not in items:
+        items.append(value)
+
+
+def _social_id_index(items: list[dict]) -> dict[str, dict]:
+    return {
+        str(item.get("id")): item
+        for item in items or []
+        if isinstance(item, dict) and item.get("id")
+    }
+
+
+def _bond_pacing_plan(spine: dict, act_number: int) -> dict:
+    matrix = spine.get("bond_pacing_matrix", {}) or {}
+    for plan in matrix.get("act_plans", []) or []:
+        if _coerce_int(plan.get("act"), -1) == act_number:
+            return plan
+    return {}
+
+
+def _bond_act_plan(spine: dict, act_number: int) -> dict:
+    for plan in spine.get("bond_act_plan", []) or []:
+        if _coerce_int(plan.get("act"), -1) == act_number:
+            return plan
+    return {}
+
+
+def _bond_event_in_act(event: dict, act_number: int) -> bool:
+    window = event.get("act_window") or []
+    if len(window) >= 2:
+        start = _coerce_int(window[0], act_number)
+        end = _coerce_int(window[1], act_number)
+        return start <= act_number <= end
+    event_act = _coerce_int(event.get("act"), act_number)
+    return event_act == act_number
+
+
+def _bond_prereqs_met(event: dict, seen_bond_ids: set[str]) -> bool:
+    prereqs = event.get("prerequisites", []) or []
+    return all(str(prereq) in seen_bond_ids for prereq in prereqs)
+
+
+def _next_bond_event_offer(spine: dict, arc_state: dict) -> dict | None:
+    act_number = _coerce_int(arc_state.get("current_act"), 1)
+    plan = _bond_pacing_plan(spine, act_number)
+    if not plan:
+        return None
+
+    runtime = _social_runtime_state(arc_state)
+    act_key = _social_act_key(act_number)
+    offer_counts = runtime["act_bond_offer_counts"]
+    max_offers = _coerce_int(plan.get("max_one_on_one_offers"), 0)
+    if max_offers <= 0:
+        max_offers = _coerce_int(_bond_act_plan(spine, act_number).get("slots"), 0)
+    if max_offers > 0 and _coerce_int(offer_counts.get(act_key), 0) >= max_offers:
+        return None
+
+    events_by_id = _social_id_index(spine.get("bond_events", []))
+    matrix = spine.get("bond_pacing_matrix", {}) or {}
+    hard_cut_ids = {str(item) for item in matrix.get("hard_cut_ids", []) or []}
+    seen_ids = {str(item) for item in runtime["seen_bond_ids"]}
+    offered_ids = {str(item) for item in runtime["offered_bond_ids"]}
+
+    priority_ids = []
+    for key in ("required_story", "priority_pool", "optional_pool"):
+        priority_ids.extend(str(item) for item in plan.get(key, []) or [])
+    rare_ids = [str(item) for item in plan.get("rare_pool", []) or []]
+
+    for candidate_ids in (priority_ids, rare_ids):
+        for event_id in candidate_ids:
+            if event_id in seen_ids or event_id in offered_ids or event_id in hard_cut_ids:
+                continue
+            event = events_by_id.get(event_id)
+            if not event:
+                continue
+            if not _bond_event_in_act(event, act_number):
+                continue
+            if not _bond_prereqs_met(event, seen_ids):
+                continue
+            return event
+    return None
+
+
+def _next_group_scene_offer(spine: dict, arc_state: dict) -> dict | None:
+    act_number = _coerce_int(arc_state.get("current_act"), 1)
+    runtime = _social_runtime_state(arc_state)
+    seen_ids = {str(item) for item in runtime["seen_group_scene_ids"]}
+    offered_ids = {str(item) for item in runtime["offered_group_scene_ids"]}
+    scenes_by_id = _social_id_index(spine.get("group_scenes", []))
+
+    act_plan = _bond_act_plan(spine, act_number)
+    scene_ids = [str(item) for item in act_plan.get("group_scene_ids", []) or []]
+    if not scene_ids:
+        scene_ids = [
+            str(scene.get("id"))
+            for scene in spine.get("group_scenes", []) or []
+            if _coerce_int(scene.get("act"), -1) == act_number and scene.get("id")
+        ]
+
+    for scene_id in scene_ids:
+        if scene_id in seen_ids or scene_id in offered_ids:
+            continue
+        scene = scenes_by_id.get(scene_id)
+        if scene:
+            return scene
+    return None
+
+
+def _bond_offer_choice_text(event: dict) -> str:
+    person = str(event.get("cohort_member") or "someone").strip()
+    title = str(event.get("title") or "a quiet moment").strip()
+    return f"Ask {person} for a quiet moment: {title}."
+
+
+def _group_offer_choice_text(scene: dict) -> str:
+    title = str(scene.get("title") or "the group scene").strip()
+    return f"Listen in with the group during {title}."
+
+
+def _bond_offer_payload(event: dict) -> dict:
+    return {
+        "kind": "bond_event",
+        "id": str(event.get("id", "")),
+        "title": str(event.get("title", "")),
+        "choice_text": _bond_offer_choice_text(event),
+        "cohort_member": str(event.get("cohort_member", "")),
+        "hook": str(event.get("hook", "")),
+        "choice_prompt": str(event.get("choice_prompt", "")),
+        "why_this_person": str(event.get("why_this_person", "")),
+        "why_now": str(event.get("why_now", "")),
+        "changes_after": str(event.get("changes_after", "")),
+        "bond_weight": event.get("bond_weight", 0.1),
+    }
+
+
+def _group_offer_payload(scene: dict) -> dict:
+    return {
+        "kind": "group_scene",
+        "id": str(scene.get("id", "")),
+        "title": str(scene.get("title", "")),
+        "choice_text": _group_offer_choice_text(scene),
+        "scene_type": str(scene.get("scene_type", "")),
+        "participants": list(scene.get("participants", []) or []),
+        "hook": str(scene.get("hook", "")),
+        "function": str(scene.get("function", "")),
+        "bond_payoffs": list(scene.get("bond_payoffs", []) or []),
+    }
+
+
+def _select_social_offers(
+    spine: dict,
+    arc_state: dict,
+    *,
+    existing_choice_count: int,
+    max_total_choices: int = 4,
+) -> list[dict]:
+    """Pick optional social offers that fit within the live choice list."""
+    room = max(0, max_total_choices - existing_choice_count)
+    if room <= 0:
+        return []
+
+    offers: list[dict] = []
+    bond_event = _next_bond_event_offer(spine, arc_state)
+    if bond_event:
+        offers.append(_bond_offer_payload(bond_event))
+
+    if len(offers) < room:
+        group_scene = _next_group_scene_offer(spine, arc_state)
+        if group_scene:
+            offers.append(_group_offer_payload(group_scene))
+
+    return offers[:room]
+
+
+def _mark_social_offer_displayed(runtime: dict, offer: dict, act_number: int) -> None:
+    act_key = _social_act_key(act_number)
+    if offer.get("kind") == "bond_event":
+        _append_unique(runtime["offered_bond_ids"], offer.get("id", ""))
+        counts = runtime["act_bond_offer_counts"]
+    else:
+        _append_unique(runtime["offered_group_scene_ids"], offer.get("id", ""))
+        counts = runtime["act_group_offer_counts"]
+    counts[act_key] = _coerce_int(counts.get(act_key), 0) + 1
+
+
+def _append_social_offers_to_narration(
+    narration_result,
+    spine: dict,
+    arc_state: dict,
+) -> list[dict]:
+    """Append optional free-time choices and persist pending offer metadata."""
+    runtime = _social_runtime_state(arc_state)
+    runtime["pending_offers"] = []
+
+    choices = getattr(narration_result, "choices", None)
+    skill_tags = getattr(narration_result, "skill_tags", None)
+    if not isinstance(choices, list) or not isinstance(skill_tags, list):
+        return []
+
+    while len(skill_tags) < len(choices):
+        skill_tags.append(None)
+
+    offers = _select_social_offers(
+        spine, arc_state, existing_choice_count=len(choices)
+    )
+    if not offers:
+        return []
+
+    act_number = _coerce_int(arc_state.get("current_act"), 1)
+    pending = []
+    for offer in offers:
+        if not offer.get("id"):
+            continue
+        choice_index = len(choices)
+        offer["choice_index"] = choice_index
+        offer["act"] = act_number
+        choices.append(offer["choice_text"])
+        skill_tags.append(None)
+        pending.append(dict(offer))
+        _mark_social_offer_displayed(runtime, offer, act_number)
+
+    runtime["pending_offers"] = pending
+    return pending
+
+
+def _consume_selected_social_offer(arc_state: dict, choice_index: int) -> dict | None:
+    runtime = _social_runtime_state(arc_state)
+    pending = list(runtime.get("pending_offers", []) or [])
+    runtime["pending_offers"] = []
+    arc_state.pop("active_social_scene", None)
+
+    selected = None
+    for offer in pending:
+        if _coerce_int(offer.get("choice_index"), -1) == choice_index:
+            selected = dict(offer)
+            break
+    if not selected:
+        return None
+
+    act_number = _coerce_int(
+        selected.get("act"), _coerce_int(arc_state.get("current_act"), 1)
+    )
+    if selected.get("kind") == "bond_event":
+        _append_unique(runtime["seen_bond_ids"], selected.get("id", ""))
+        member = selected.get("cohort_member", "")
+        if member:
+            bond_points = runtime.setdefault("bond_points", {})
+            try:
+                weight = float(selected.get("bond_weight", 0.1) or 0.1)
+            except (TypeError, ValueError):
+                weight = 0.1
+            prior = float(bond_points.get(member, 0.0) or 0.0)
+            bond_points[member] = round(prior + weight, 3)
+        runtime["last_selected_bond_id"] = selected.get("id", "")
+    elif selected.get("kind") == "group_scene":
+        _append_unique(runtime["seen_group_scene_ids"], selected.get("id", ""))
+        runtime["last_selected_group_scene_id"] = selected.get("id", "")
+
+    selected["selected_in_act"] = act_number
+    arc_state["active_social_scene"] = selected
+    return selected
+
+
+def _finish_active_social_scene(arc_state: dict) -> None:
+    active = arc_state.pop("active_social_scene", None)
+    if active:
+        runtime = _social_runtime_state(arc_state)
+        runtime["last_social_scene"] = {
+            "kind": active.get("kind", ""),
+            "id": active.get("id", ""),
+            "title": active.get("title", ""),
+            "act": active.get("selected_in_act", active.get("act", "")),
+        }
+
+
+def _active_social_scene_block(arc_state: dict) -> str:
+    active = arc_state.get("active_social_scene") or {}
+    if not isinstance(active, dict) or not active.get("id"):
+        return ""
+
+    if active.get("kind") == "bond_event":
+        lines = [
+            "SELECTED BOND SCENE:",
+            f"Bond event: {active.get('title', '')} ({active.get('id', '')})",
+            f"Person: {active.get('cohort_member', '')}",
+            f"Hook: {active.get('hook', '')}",
+            f"Choice prompt: {active.get('choice_prompt', '')}",
+            f"Why this person: {active.get('why_this_person', '')}",
+            f"Why now: {active.get('why_now', '')}",
+            f"What changes afterward: {active.get('changes_after', '')}",
+            (
+                "Run this as a focused RPG social scene. Let the player-facing "
+                "choice shape the relationship; do not treat it as filler."
+            ),
+        ]
+        return "\n".join(line for line in lines if line.strip())
+
+    if active.get("kind") == "group_scene":
+        participants = ", ".join(str(p) for p in active.get("participants", []) if p)
+        payoffs = ", ".join(str(p) for p in active.get("bond_payoffs", []) if p)
+        lines = [
+            "SELECTED GROUP SCENE:",
+            f"Group scene: {active.get('title', '')} ({active.get('id', '')})",
+            f"Participants: {participants}",
+            f"Hook: {active.get('hook', '')}",
+            f"Function: {active.get('function', '')}",
+            f"Potential bond payoffs: {payoffs}",
+            (
+                "Run this as party texture with clear character dynamics. "
+                "Keep it playable and present-tense, not exposition."
+            ),
+        ]
+        return "\n".join(line for line in lines if line.strip())
+
+    return ""
+
+
 # ── Routes ──────────────────────────────────────────────────────────────
 
 @router.post("/session")
@@ -2357,6 +2731,7 @@ async def create_session_route(
         "variant_id": req.character_id,
         **motivation_flags,
     }
+    _social_runtime_state(arc_state)
 
     # ── Create session in database ────────────────────────────────────
     session_id = create_session(
@@ -2588,6 +2963,10 @@ async def handle_turn(
             if req.choice_index < len(previous_skill_tags)
             else None
         )
+    if free_form:
+        _clear_pending_social_offers(arc_state)
+    else:
+        _consume_selected_social_offer(arc_state, req.choice_index)
     update_session_state(session_id, character, arc_state)
 
     # ── Step 2: Build scene description for local GM ──────────────────
@@ -3148,6 +3527,10 @@ async def handle_turn(
     if annotation_thread:
         annotation_thread.join(timeout=ANNOTATION_JOIN_TIMEOUT_SEC)
     choice_implications_json = annotation_result[0]
+    if act_boundary_reached:
+        _clear_pending_social_offers(arc_state)
+    else:
+        _append_social_offers_to_narration(narration_result, spine, arc_state)
 
     # ── Step 10: Persist ─────────────────────────────────────────────
     log_turn(
@@ -3170,6 +3553,7 @@ async def handle_turn(
             json.dumps(asdict(force_result)) if force_result else None
         ),
     )
+    _finish_active_social_scene(arc_state)
 
     # ── Step 11: Update session state ─────────────────────────────────
     update_session_state(session_id, character, arc_state)
@@ -3384,6 +3768,10 @@ async def handle_turn_stream(
             if req.choice_index < len(previous_skill_tags_s)
             else None
         )
+    if free_form_s:
+        _clear_pending_social_offers(arc_state)
+    else:
+        _consume_selected_social_offer(arc_state, req.choice_index)
 
     # ── Step 2: Build scene description for local GM ──────────────────
     scene_description = _build_scene_description(
@@ -3953,6 +4341,10 @@ async def handle_turn_stream(
         if annotation_thread_s:
             annotation_thread_s.join(timeout=ANNOTATION_JOIN_TIMEOUT_SEC)
         choice_implications_json_s = annotation_result_stream[0]
+        if act_boundary_reached:
+            _clear_pending_social_offers(arc_state)
+        else:
+            _append_social_offers_to_narration(narration_result, spine, arc_state)
 
         # ── Step 10: Persist ──────────────────────────────────────────
         log_turn(
@@ -3979,6 +4371,7 @@ async def handle_turn_stream(
                 json.dumps(asdict(force_result)) if force_result else None
             ),
         )
+        _finish_active_social_scene(arc_state)
 
         # ── Step 11: Update session state ─────────────────────────────
         update_session_state(session_id, character, arc_state)

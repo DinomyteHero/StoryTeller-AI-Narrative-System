@@ -2,7 +2,7 @@
 Campaign Studio schema and validation tests — Phase CS-1.
 
 Success criteria:
-1. The Shadows of the Praxeum spine passes all four validation gates.
+1. The Shadows of the Custodian spine passes all four validation gates.
 2. Deliberately malformed spines fail with specific, actionable errors.
 """
 
@@ -23,15 +23,15 @@ CAMPAIGN_DIR = Path(__file__).parent.parent / "data" / "campaigns"
 
 @pytest.fixture
 def praxeum_data() -> dict:
-    """Load the Shadows of the Praxeum campaign spine JSON."""
-    path = CAMPAIGN_DIR / "shadows_of_the_praxeum.json"
+    """Load the Shadows of the Custodian campaign spine JSON."""
+    path = CAMPAIGN_DIR / "shadows_of_the_custodian.json"
     with open(path) as f:
         return json.load(f)
 
 
 @pytest.fixture
 def praxeum_spine(praxeum_data) -> CampaignSpine:
-    """Parse Shadows of the Praxeum as a CampaignSpine model."""
+    """Parse Shadows of the Custodian as a CampaignSpine model."""
     return CampaignSpine(**praxeum_data)
 
 
@@ -182,6 +182,205 @@ class TestBondEvents:
             pytest.skip("Spine has no bond_event_system")
         sys = praxeum_spine.bond_event_system
         assert 0.0 < sys.bond_weight_threshold_for_climax_protection <= sys.max_bond_weight_per_relationship
+
+
+class TestSocialRpgPartyStructure:
+    """Core party and bond-pacing data for the Clovis route."""
+
+    def test_core_party_prioritizes_clovis_joran_and_rann(self, praxeum_spine):
+        """The intended route has a small, explicit party focus."""
+        assert praxeum_spine.intended_protagonist_id == "clovis_beryl"
+        names = [member.name for member in praxeum_spine.core_party]
+        assert names[0] == "Clovis Beryl"
+        assert {
+            "Joran Veska",
+            "Rann Veska",
+            "Tarsh Voll",
+            "Brann Riako",
+            "Cassen Vell",
+            "Inya Vorn",
+            "Lirah Tann",
+        }.issubset(names)
+
+        highest_priority = {
+            member.name for member in praxeum_spine.core_party
+            if member.bond_priority == 1
+        }
+        assert {"Clovis Beryl", "Joran Veska", "Rann Veska"}.issubset(
+            highest_priority
+        )
+        assert all(member.table_function for member in praxeum_spine.core_party)
+
+    def test_core_party_dossiers_are_complete(self, praxeum_spine):
+        """Core party members should have compact GM-facing handles."""
+        variants = [
+            variant
+            for allegiance in praxeum_spine.allegiances
+            for variant in allegiance.character_variants
+        ]
+        clovis = next(variant for variant in variants if variant.id == "clovis_beryl")
+        required_fields = (
+            "rpg_function",
+            "act1_player_feel",
+            "utility",
+            "best_case_ending_payoff",
+            "worst_case_ending_payoff",
+            "avoid",
+        )
+
+        assert clovis.party_dossier is not None
+        for field in required_fields:
+            assert getattr(clovis.party_dossier, field)
+        assert set(clovis.party_dossier.social_bond_arc) == {
+            "act1", "act2", "act3", "act4", "act5"
+        }
+
+        core_npcs = {
+            "Joran Veska",
+            "Rann Veska",
+            "Tarsh Voll",
+            "Brann Riako",
+            "Cassen Vell",
+            "Inya Vorn",
+            "Lirah Tann",
+        }
+        by_name = {npc.name: npc for npc in praxeum_spine.npc_roster}
+        for name in core_npcs:
+            dossier = by_name[name].party_dossier
+            assert dossier is not None, name
+            for field in required_fields:
+                assert getattr(dossier, field), name
+            assert set(dossier.social_bond_arc) == {
+                "act1", "act2", "act3", "act4", "act5"
+            }
+
+    def test_bond_act_plan_covers_every_act_with_limited_slots(self, praxeum_spine):
+        """Bond pacing should support slower play without sprawling."""
+        by_act = {plan.act: plan for plan in praxeum_spine.bond_act_plan}
+        assert set(by_act) == set(range(1, praxeum_spine.total_acts + 1))
+        assert [by_act[act].slots for act in range(1, 6)] == [2, 3, 2, 2, 1]
+        assert "No new social arcs" in by_act[5].pacing_note
+
+    def test_expected_turn_ranges_leave_room_for_social_play(self, praxeum_spine):
+        """The campaign should breathe early and focus at the end."""
+        ranges = [tuple(act.expected_turns) for act in praxeum_spine.acts]
+        assert ranges == [(24, 32), (22, 30), (18, 24), (22, 28), (16, 22)]
+        assert sum(low for low, _ in ranges) >= 100
+        assert sum(high for _, high in ranges) <= 140
+
+    def test_legends_era_voice_keeps_16_aby_constraints(
+        self, praxeum_data, praxeum_spine
+    ):
+        """The 16 ABY pass should avoid anachronistic or overbroad anchors."""
+        raw = json.dumps(praxeum_data)
+        assert "six-year" not in raw
+        assert "six years" not in raw
+        assert "Sadow holocron" not in raw
+
+        voice = praxeum_spine.era_voice
+        assert voice is not None
+        assert voice.year == "16 ABY"
+        assert "five years old" in voice.voice_notes
+        assert "three years from treaty peace" in voice.voice_notes
+        assert any("not yet Mara Skywalker" in note for note in voice.period_details)
+
+        npcs = {npc.name: npc for npc in praxeum_spine.npc_roster}
+        assert "Sadow-line holocron fragment" in npcs["Vornn"].role
+        assert any(
+            "quarantined Old Sith Wars crate" in known
+            for known in npcs["Luke Skywalker"].knows_at_start
+        )
+        assert not any(
+            "sealed crate contains" in unknown
+            for unknown in npcs["Luke Skywalker"].doesnt_know_at_start
+        )
+        assert "Mara Skywalker" in npcs["Mara Jade"].era_specific_notes
+        assert "part of Luke's wider academy circle" in npcs["Kyle Katarn"].role
+
+    def test_group_scene_references_resolve(self, praxeum_spine):
+        """Group scenes should reference real scene ids and bond payoffs."""
+        scene_ids = {scene.id for scene in praxeum_spine.group_scenes}
+        bond_ids = {event.id for event in praxeum_spine.bond_events}
+
+        for plan in praxeum_spine.bond_act_plan:
+            for scene_id in plan.group_scene_ids:
+                assert scene_id in scene_ids
+
+        for scene in praxeum_spine.group_scenes:
+            for payoff_id in scene.bond_payoffs:
+                assert payoff_id in bond_ids
+
+    def test_act_one_scene_beats_have_rpg_functions(self, praxeum_spine):
+        """Act 1 should read as playable scenes, not loose notes."""
+        act_one = praxeum_spine.acts[0]
+        assert len(act_one.side_content) >= 12
+        for beat in act_one.side_content:
+            assert beat.phase
+            assert beat.scene_type
+            assert beat.rpg_function
+            assert beat.player_choice
+            assert beat.payoff_or_change
+
+    def test_bonds_answer_why_now_and_what_changes(self, praxeum_spine):
+        """Bond events should be purposeful, not nice-conversation filler."""
+        assert praxeum_spine.bond_events
+        for event in praxeum_spine.bond_events:
+            assert event.choice_prompt
+            assert event.why_this_person
+            assert event.why_now
+            assert event.changes_after
+
+    def test_bond_pacing_matrix_classifies_every_event_once(self, praxeum_spine):
+        """Large bond library should be curated through offer priorities."""
+        matrix = praxeum_spine.bond_pacing_matrix
+        assert matrix is not None
+        assert matrix.recommended_playthrough_target == [12, 16]
+        assert matrix.hard_cut_ids == []
+
+        all_bond_ids = {event.id for event in praxeum_spine.bond_events}
+        classified: list[str] = []
+        for plan in matrix.act_plans:
+            assert 0 <= plan.max_one_on_one_offers <= 3
+            assert plan.guidance
+            classified.extend(plan.required_story)
+            classified.extend(plan.priority_pool)
+            classified.extend(plan.optional_pool)
+            classified.extend(plan.rare_pool)
+
+        assert set(classified) == all_bond_ids
+        assert len(classified) == len(set(classified))
+
+    def test_bond_pacing_matrix_has_manageable_default_surface(self, praxeum_spine):
+        """Required plus priority offers should stay below completionist scale."""
+        matrix = praxeum_spine.bond_pacing_matrix
+        assert matrix is not None
+
+        default_surface = 0
+        rare_surface = 0
+        for plan in matrix.act_plans:
+            default_surface += len(plan.required_story) + len(plan.priority_pool)
+            rare_surface += len(plan.rare_pool)
+
+        assert default_surface <= 26
+        assert rare_surface >= 6
+
+    def test_ending_payoff_matrix_closes_and_hooks(self, praxeum_spine):
+        """Each ending should close emotionally while preserving future hooks."""
+        endings = {ending.id: ending for ending in praxeum_spine.ending_payoff_matrix}
+        assert set(endings) == {
+            "ending_open_door",
+            "ending_long_road",
+            "ending_law",
+            "ending_third_path",
+            "ending_what_remains",
+        }
+        for ending in endings.values():
+            assert ending.emotional_contract
+            assert ending.future_hook
+            assert ending.avoid_feeling
+            assert {"Joran Veska", "Rann Veska", "Tarsh Voll", "Brann Riako"}.issubset(
+                ending.relationship_payoffs
+            )
 
 
 # ── Validation gate tests ────────────────────────────────────────────

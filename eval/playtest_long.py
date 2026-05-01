@@ -1,6 +1,6 @@
 """Long-run playtest harness — depth-pass stress test through Acts 2-3.
 
-Plays 30-40 turns of Shadows of the Praxeum reaching at least Act 3, mixing
+Plays 30-40 turns of Shadows of the Custodian reaching at least Act 3, mixing
 authored choice picks with 2-3 free-form actions per act. After every turn it
 snapshots the parts of `arc_state` the depth pass added, so the resulting log
 is a frozen record of how the new mechanics behaved over a long session.
@@ -258,13 +258,13 @@ def run(
     base: str = DEFAULT_BASE,
     turns: int = 35,
     log_path: Path = DEFAULT_LOG,
-    character_id: str = "praxeum_student",
+    character_id: str = "clovis_beryl",
 ) -> list[TurnSnapshot]:
     engine = Engine(base)
     print(f"[playtest] base={base} turns={turns} character={character_id} log={log_path}")
 
     sess = engine.post("/session", {
-        "campaign_name": "shadows_of_the_praxeum",
+        "campaign_name": "shadows_of_the_custodian",
         "character_id":  character_id,
     })
     sid = sess["session_id"]
@@ -578,7 +578,7 @@ def main() -> int:
     parser.add_argument("--log", type=Path, default=DEFAULT_LOG)
     parser.add_argument(
         "--character",
-        default="praxeum_student",
+        default="clovis_beryl",
         help="Character ID (clovis_beryl | praxeum_student | praxeum_mechanic)",
     )
     parser.add_argument(

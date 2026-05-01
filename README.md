@@ -122,7 +122,7 @@ storyteller-v3/
 
 - **The Nar Shaddaa Job** — a smuggler campaign starring Keth Varso
 - **Echoes of the Force** — a Force-sensitive campaign starring Talia Ren
-- **Shadows of the Praxeum** — a Jedi academy campaign
+- **Shadows of the Custodian** — a Jedi academy campaign
 
 ## Milestone Status (last synced: 2026-04-08)
 

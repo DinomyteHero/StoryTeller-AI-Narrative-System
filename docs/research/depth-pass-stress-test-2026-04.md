@@ -1,7 +1,7 @@
 # Depth-pass stress test — long-run playtest through Act 4
 
 **Date:** April 26, 2026
-**Run:** 35 turns, single session, _Shadows of the Praxeum_, character
+**Run:** 35 turns, single session, _Shadows of the Custodian_, character
 `praxeum_student`. Models: `gpt-5.4-mini` (narration), `deepseek-v4-flash`
 (fast tier), `deepseek-v4-pro` (quality tier — DeepSeek pivot live).
 **Harness:** [eval/playtest_long.py](../../eval/playtest_long.py).

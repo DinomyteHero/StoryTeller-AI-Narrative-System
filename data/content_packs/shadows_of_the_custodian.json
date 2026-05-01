@@ -1,0 +1,534 @@
+{
+  "schema_version": "campaign_content_pack.v0.1",
+  "id": "shadows_of_the_custodian",
+  "display_name": "Shadows of the Custodian",
+  "status": "canonical_campaign_content_seed",
+  "continuity": "legends",
+  "source_spine": "data/campaigns/shadows_of_the_custodian.json",
+  "era_pack_id": "new_republic_praxeum",
+  "era_pack_status": "available",
+  "campaign_identity": {
+    "era": "New Republic / Praxeum maturation period",
+    "date": "16 ABY",
+    "location_core": "Luke Skywalker's maturing Jedi Praxeum on Yavin 4",
+    "genre_lanes": [
+      "Jedi academy institutional pressure",
+      "friendship and sleeper-agent betrayal",
+      "Force-sensitive belonging crisis",
+      "Karrde-network fringe intrigue",
+      "Massassi war-temple awakening"
+    ],
+    "dramatic_premise": "Clovis Beryl arrives at Luke Skywalker's five-year-old Praxeum and discovers that the friend helping him belong is also tied to a survivor cell trying to awaken an ancient war-temple.",
+    "central_dramatic_question": "When the friend you trust is also the betrayer you need to stop, what does belonging actually mean?",
+    "story_promise": "A hard-edged Praxeum campaign about chosen family, institutional compromise, and the price of claiming a place that may not be able to protect you.",
+    "thematic_throughline": "Belonging is not the same as safety; it is the choice to be accountable to a place and people even when leaving would be easier."
+  },
+  "design_contract": {
+    "must_feel_like": [
+      "a Jedi academy becoming an institution before it fully understands itself",
+      "sixteen ABY Legends with Karrde, Mara, Kyle, and Pellaeon's Remnant in the political weather",
+      "a friend group whose warmth makes betrayal hurt",
+      "a text-RPG party campaign where quiet bond scenes shape the final act",
+      "a Star Wars mystery where ancient Sith history has immediate human consequences",
+      "an edgier Praxeum story where beloved people can die and clean endings are unavailable"
+    ],
+    "must_not_feel_like": [
+      "the fragile first-year Praxeum of 11-12 ABY",
+      "the archived Kira/Malakai/Tannen 12 ABY iteration",
+      "a generic school mystery with Star Wars nouns",
+      "a simple Sith dungeon crawl",
+      "a story where Luke, Mara, Kyle, or Karrde solve the protagonist's central choice"
+    ],
+    "player_agency_boundary": "The player should not decide whether the Custodian threat exists or whether Joran's mission is real. The player should decide what belonging costs, who receives trust, who receives truth, and what kind of person Clovis becomes when both academy and old life ask for loyalty.",
+    "canon_boundary": "Canon and Legends figures create pressure and recognition, but the campaign must not overwrite the broad Legends timeline. Player choices decide personal, local, and cohort-level outcomes."
+  },
+  "terminology": {
+    "campaign_terms": [
+      {
+        "term": "The Custodian",
+        "definition": "The campaign's title pressure: a survivor-cell ideology and operational role built around guarding dangerous old knowledge until it can be used.",
+        "usage": "Use as a moral argument, not a monster label."
+      },
+      {
+        "term": "War-temple",
+        "definition": "A Massassi sister-site connected to ancient Sith violence and the Sadow-line holocron fragment's operational plan.",
+        "usage": "Use as a looming consequence of choices, not as a random dungeon."
+      },
+      {
+        "term": "Sadow-line holocron fragment",
+        "definition": "A restricted Old Sith Wars artifact fragment whose contents can transform Massassi/Sadow-line history into a present-tense strategic threat.",
+        "usage": "Treat as evidence, temptation, and engine of escalation. It is not Naga Sadow's one definitive holocron and should not overwrite Legends Sith history."
+      },
+      {
+        "term": "After-cohort",
+        "definition": "The first-year students who arrive in 16 ABY, after the Praxeum has survived its founding crises and begun to harden into an institution.",
+        "usage": "Use to show generational distance inside the academy."
+      },
+      {
+        "term": "Glass Wake",
+        "definition": "The smuggler crew that saved and raised Clovis after his family's Imperial execution order.",
+        "usage": "Use as Clovis's living old family, not as generic criminal color."
+      },
+      {
+        "term": "Karrde's network",
+        "definition": "Talon Karrde's information network, positioned in 16 ABY as a fringe clearing house with leverage the New Republic and Jedi do not always have.",
+        "usage": "Use for favors, intelligence, prices, and ambiguous rescue."
+      }
+    ],
+    "avoid_or_contextualize": [
+      {
+        "term": "Archived Praxeum title",
+        "guidance": "Archived 12 ABY identity only. Do not use that title for the active campaign."
+      },
+      {
+        "term": "Kira, Malakai, Tannen",
+        "guidance": "These belong to the archived 12 ABY campaign and should not be introduced into the active Custodian spine."
+      },
+      {
+        "term": "Jedi Council",
+        "guidance": "Avoid implying a prequel-style governing body. Luke has senior staff and growing institutional habits, not the old Council structure."
+      },
+      {
+        "term": "Imperial Remnant",
+        "guidance": "At 16 ABY, use Pellaeon's consolidated, Outer Rim-based Remnant and post-warlord discipline rather than a galaxy-spanning Empire or settled peace."
+      },
+      {
+        "term": "Shadow Academy",
+        "guidance": "Brakiss is operating and preparing, but the Shadow Academy should not be treated as fully operational yet."
+      }
+    ]
+  },
+  "runtime_assets_snapshot": {
+    "acts": 5,
+    "allegiances": 2,
+    "variants": 2,
+    "player_selectable_variants": 1,
+    "intended_protagonist": "clovis_beryl",
+    "core_party_count": 8,
+    "core_party_dossier_count": 8,
+    "supporting_cast_tier_count": 4,
+    "bond_act_plan_count": 5,
+    "bond_pacing_matrix": true,
+    "group_scene_count": 8,
+    "ending_payoff_matrix_count": 5,
+    "bond_event_count": 53,
+    "expected_turn_range": [102, 136],
+    "npc_count": 26,
+    "faction_count": 8,
+    "vehicle_count": 6,
+    "variation_point_count": 5,
+    "foreshadow_link_count": 17,
+    "prologue_scene_sets": 0,
+    "primary_force_power": "sense",
+    "sample_characters": [
+      "clovis_beryl"
+    ],
+    "supporting_character_variants": [
+      "tarsh_voll"
+    ]
+  },
+  "funnel_state": {
+    "social_rpg_model": "Clovis-only route with a Trails-style core party, limited bond slots, recurring group scenes, and ending payoffs tied to trust.",
+    "current_allegiances": [
+      {
+        "id": "jedi_order",
+        "display_name": "Jedi Order",
+        "current_variants": [
+          "clovis_beryl"
+        ],
+        "content_assessment": "Primary intended path. Clovis is the fully authored protagonist and should be treated as the canonical first-play route."
+      },
+      {
+        "id": "academy_support",
+        "display_name": "Academy Support",
+        "current_variants": [
+          "tarsh_voll"
+        ],
+        "content_assessment": "Supporting cohort material only. Tarsh should remain available to the story as Clovis's mechanic-coded peer bond, not as a player-facing protagonist."
+      }
+    ],
+    "expansion_variant_seeds": [
+      {
+        "id": "rann_vigil_student",
+        "allegiance": "jedi_order",
+        "pitch": "A student close to Rann whose campaign lens centers vigilance, trauma, and the cost of trusting late."
+      },
+      {
+        "id": "senate_liaison_aide",
+        "allegiance": "academy_support",
+        "pitch": "A young New Republic staffer attached to Senator Karro's oversight coalition, forced to decide whether the Praxeum deserves protection or exposure."
+      },
+      {
+        "id": "karrde_network_runner",
+        "allegiance": "fringe_support",
+        "pitch": "A courier from Karrde's network whose loyalty to information broker ethics collides with academy lives."
+      },
+      {
+        "id": "senior_student_guardian",
+        "allegiance": "jedi_order",
+        "pitch": "A near-Knight tasked with keeping younger students alive while doubting Luke's increasingly improvised institution."
+      }
+    ]
+  },
+  "npc_content_cards": [
+    {
+      "name": "Clovis Beryl",
+      "canon": false,
+      "pressure_role": "protagonist",
+      "thematic_argument": "Trust is not the absence of exits; it is choosing what the exits are for.",
+      "use_for": [
+        "old family versus new belonging",
+        "survival habits under Jedi discipline",
+        "Karrde-network and smuggler texture"
+      ],
+      "avoid": [
+        "generic brooding rogue",
+        "instant Jedi convert",
+        "forgetting the Glass Wake once the academy starts"
+      ]
+    },
+    {
+      "name": "Joran Veska",
+      "canon": false,
+      "pressure_role": "betrayer-friend",
+      "thematic_argument": "Love can be real even when the mission is also real.",
+      "use_for": [
+        "warmth that makes betrayal hurt",
+        "sleeper-agent pressure",
+        "brother loyalty to Rann"
+      ],
+      "avoid": [
+        "simple traitor",
+        "false friend with no genuine attachment",
+        "villain monologue logic"
+      ]
+    },
+    {
+      "name": "Rann Veska",
+      "canon": false,
+      "pressure_role": "wound",
+      "thematic_argument": "Survival does not make a person proof against being used.",
+      "use_for": [
+        "Order 66 aftermath",
+        "quiet suspicion",
+        "human cost of Vornn's control"
+      ],
+      "avoid": [
+        "helpless victim",
+        "mystery object",
+        "automatic dark-side fall"
+      ]
+    },
+    {
+      "name": "Vornn",
+      "canon": false,
+      "pressure_role": "custodian-tempter",
+      "thematic_argument": "Institutions waste dangerous truth because they fear what it can do.",
+      "use_for": [
+        "artifact-retrieval Inquisitor expertise",
+        "truth as operational leverage",
+        "ancient Sith history made practical"
+      ],
+      "avoid": [
+        "Sith cackling",
+        "generic dark mentor",
+        "lying when true facts are sharper"
+      ]
+    },
+    {
+      "name": "Luke Skywalker",
+      "canon": true,
+      "pressure_role": "institutional witness",
+      "thematic_argument": "A humane institution still has to answer for what it asks people to trust.",
+      "use_for": [
+        "warmth without omniscience",
+        "Praxeum compromises",
+        "teacher trying to build doctrine while still learning"
+      ],
+      "avoid": [
+        "serene all-knowing grandmaster",
+        "quest giver who solves the mystery",
+        "prequel-style institution voice"
+      ]
+    },
+    {
+      "name": "Talon Karrde",
+      "canon": true,
+      "pressure_role": "price-setter",
+      "thematic_argument": "Help is never free, but a price can still be honest.",
+      "use_for": [
+        "fringe intelligence",
+        "Glass Wake continuity",
+        "favors with consequences"
+      ],
+      "avoid": [
+        "simple benefactor",
+        "comic smuggler uncle",
+        "deus ex machina rescue"
+      ]
+    },
+    {
+      "name": "Mara Jade",
+      "canon": true,
+      "pressure_role": "observer",
+      "thematic_argument": "A person can stand near the Jedi without surrendering every old tool.",
+      "use_for": [
+        "Karrde courier pressure",
+        "sharp practical counsel",
+        "16 ABY not-yet-Luke-spouse continuity"
+      ],
+      "avoid": [
+        "future-marriage foreshadowing",
+        "softened generic Jedi voice",
+        "taking over Clovis's decision"
+      ]
+    },
+    {
+      "name": "Kyle Katarn",
+      "canon": true,
+      "pressure_role": "practical mentor",
+      "thematic_argument": "Survival skills do not become less moral because a Jedi uses them.",
+      "use_for": [
+        "practical Force application",
+        "combat and field training",
+        "contrast with Luke's contemplative style"
+      ],
+      "avoid": [
+        "main-character takeover",
+        "Jedi Outcast recap",
+        "solving the Custodian threat by force alone"
+      ]
+    }
+  ],
+  "faction_guidance": [
+    {
+      "faction_id": "jedi_praxeum",
+      "display_name": "Jedi Praxeum",
+      "use_for": "Home, institution, compromised sanctuary, and the place Clovis may choose to claim.",
+      "pressure": "Its need for trust can become a demand before it has earned that trust."
+    },
+    {
+      "faction_id": "karrde_network",
+      "display_name": "Karrde's Network",
+      "use_for": "Information, transport, favors, and old-life pressure on Clovis.",
+      "pressure": "It can help faster than the New Republic, but never without future reach."
+    },
+    {
+      "faction_id": "custodian_cell",
+      "display_name": "The Custodian Cell",
+      "use_for": "Vornn's operational threat and Joran's divided loyalty.",
+      "pressure": "It turns preservation into control and knowledge into a weapon."
+    },
+    {
+      "faction_id": "new_republic_oversight",
+      "display_name": "New Republic Oversight Coalition",
+      "use_for": "Political pressure on the academy's autonomy.",
+      "pressure": "It asks fair questions in ways that can expose vulnerable people."
+    }
+  ],
+  "act_content_guidance": [
+    {
+      "act": 1,
+      "name": "Arrivals",
+      "dramatic_job": "Make the academy and the Glass Wake both feel like real homes before either asks Clovis to choose.",
+      "scene_texture": [
+        "farewell night aboard the Glass Wake",
+        "Karrde's question",
+        "first dinner with the after-cohort",
+        "Joran's warmth",
+        "Yavin humidity and old Massassi stone"
+      ],
+      "choice_pressure": "Who receives Clovis's trust before he knows what the academy will ask of him?"
+    },
+    {
+      "act": 2,
+      "name": "The Long Watch",
+      "dramatic_job": "Turn belonging into surveillance pressure as small wrongness accumulates around Joran, Rann, and the academy.",
+      "scene_texture": [
+        "Senate oversight rumors",
+        "practice modules",
+        "Karrde-network pings",
+        "cohort meals",
+        "Massassi corridors that feel observed"
+      ],
+      "choice_pressure": "Does Clovis protect trust, report anomalies, or investigate like the person he was before Yavin?"
+    },
+    {
+      "act": 3,
+      "name": "Two Brothers",
+      "dramatic_job": "Reveal Joran's divided loyalty and make betrayal emotionally true rather than merely tactical.",
+      "scene_texture": [
+        "lower corridors",
+        "duel pressure",
+        "Rann's hidden history",
+        "Vornn's method",
+        "truth that arrives too late to stay clean"
+      ],
+      "choice_pressure": "What does Clovis do when the friend who helped him belong is also the threat?"
+    },
+    {
+      "act": 4,
+      "name": "The Custodian's Hand",
+      "dramatic_job": "Convert private truth into institutional and fringe-network consequences.",
+      "scene_texture": [
+        "Karrde terms",
+        "Mara as courier-observer",
+        "academy cover weakening",
+        "war-temple signals",
+        "students preparing for something adults cannot fully name"
+      ],
+      "choice_pressure": "What price is acceptable when Karrde can help and the Praxeum cannot protect itself alone?"
+    },
+    {
+      "act": 5,
+      "name": "What Remains",
+      "dramatic_job": "Pay off belonging through irreversible action, survival cost, and the final shape of Clovis's chosen family.",
+      "scene_texture": [
+        "war-temple awakening",
+        "Joran and Rann's final pressure",
+        "Glass Wake echoes",
+        "Praxeum defense",
+        "aftermath with no clean ledger"
+      ],
+      "choice_pressure": "Who does Clovis become when every available loyalty costs someone?"
+    }
+  ],
+  "ffg_scene_guidance": [
+    {
+      "scene_type": "force",
+      "advantage": "A feeling, warning, or emotional truth arrives without solving the whole secret.",
+      "threat": "The reading is invasive, incomplete, or costs strain and trust.",
+      "triumph": "The Force reveals a compassionate path through a fact that could become a weapon.",
+      "despair": "Clovis reaches too hard and gives Vornn or the war-temple a sharper hold."
+    },
+    {
+      "scene_type": "social",
+      "advantage": "An NPC reveals a tell, partial truth, or smaller confidence.",
+      "threat": "Someone notices Clovis's divided loyalty or a relationship cools.",
+      "triumph": "Truth can be spoken without immediately destroying the bond.",
+      "despair": "The right truth reaches the wrong person first."
+    },
+    {
+      "scene_type": "infiltration",
+      "advantage": "Clovis finds evidence, a route, or timing while preserving plausible deniability.",
+      "threat": "Logs, footprints, Force echoes, or cohort suspicion create a trace back to him.",
+      "triumph": "The investigation uncovers both the clue and its emotional meaning.",
+      "despair": "Following the trail becomes part of Vornn's plan."
+    },
+    {
+      "scene_type": "lore_artifact",
+      "advantage": "A Lore or Sense result identifies age, lineage, or danger without turning the artifact into exposition.",
+      "threat": "The reading costs strain, tempts overconfidence, or makes Tionne/Olm less willing to trust Clovis with the next step.",
+      "triumph": "The player learns what witness or counter-knowledge would make safe translation possible.",
+      "despair": "A correct read opens the wrong channel and gives the fragment, Vornn, or Threnn a clearer path back."
+    },
+    {
+      "scene_type": "combat",
+      "advantage": "The player protects a student, buys time, or turns terrain into cover.",
+      "threat": "A bystander, academy infrastructure, or a fragile alliance is endangered.",
+      "triumph": "A decisive action preserves people without erasing the cost.",
+      "despair": "A tactical mistake forces a belonging choice before the player is ready."
+    },
+    {
+      "scene_type": "space_combat",
+      "advantage": "The Glass Wake, Wild Karrde, or academy craft opens a brief lane for rescue, interception, or truth.",
+      "threat": "System strain, separated transports, or exposed comms raise pressure.",
+      "triumph": "A fringe or academy asset becomes a symbol of chosen loyalty.",
+      "despair": "The sky battle spills danger back onto the cohort below."
+    }
+  ],
+  "prologue_scene_seeds": [
+    {
+      "id": "glass_wake_farewell",
+      "usable_by": [
+        "clovis_beryl"
+      ],
+      "scene": "On Clovis's last night aboard the Glass Wake, someone asks what name he wants them to use after he leaves.",
+      "axes_tested": [
+        "identity",
+        "trust",
+        "old family"
+      ]
+    },
+    {
+      "id": "karrde_question",
+      "usable_by": [
+        "clovis_beryl"
+      ],
+      "scene": "Karrde appears with one quiet question: does Clovis understand what he is losing?",
+      "axes_tested": [
+        "cost",
+        "independence",
+        "future favors"
+      ]
+    },
+    {
+      "id": "first_after_cohort_meal",
+      "usable_by": [
+        "all"
+      ],
+      "scene": "The after-cohort's first shared meal turns awkward, funny, and too revealing when Joran makes room for Clovis at the table.",
+      "axes_tested": [
+        "belonging",
+        "vulnerability",
+        "humor"
+      ]
+    },
+    {
+      "id": "rann_long_watch",
+      "usable_by": [
+        "all"
+      ],
+      "scene": "Rann notices a small wrongness near the old stone and asks whether Clovis felt it too.",
+      "axes_tested": [
+        "risk",
+        "attention",
+        "shared suspicion"
+      ]
+    },
+    {
+      "id": "training_module_mismatch",
+      "usable_by": [
+        "all"
+      ],
+      "scene": "Kyle's practical Force module reveals that Clovis's survival instincts are useful, but not yet disciplined.",
+      "axes_tested": [
+        "control",
+        "competence",
+        "shame"
+      ]
+    }
+  ],
+  "content_gaps": [
+    {
+      "gap": "era_pack_runtime_integration",
+      "impact": "The campaign references reusable New Republic / Praxeum era guidance, but runtime and Studio loaders still do not consume era packs automatically.",
+      "recommended_action": "Resolve era_pack_id during Studio generation and runtime context assembly."
+    },
+    {
+      "gap": "thin_funnel",
+      "impact": "The active spine has a strong Clovis path and a Tarsh support stub, but the support path is not yet as deeply authored.",
+      "recommended_action": "Deepen Tarsh Voll or add a second Academy Support variant before advertising equal path breadth."
+    },
+    {
+      "gap": "missing_prologue_sets",
+      "impact": "The content pack has usable prologue seeds, but the spine does not yet expose full Phase 18 PrologueSet entries.",
+      "recommended_action": "Promote the prologue_scene_seeds into authored PrologueSet data when Phase 18 begins."
+    },
+    {
+      "gap": "canon_profile_directory",
+      "impact": "Luke, Mara, Kyle, Karrde, and Tionne are still represented inline rather than through reusable canon profiles.",
+      "recommended_action": "Extract reusable New Republic canon profiles during Phase 21."
+    },
+    {
+      "gap": "talent_tree_coverage",
+      "impact": "Clovis maps well to Sentinel/Shadow, but Tarsh and future support variants need matching talent-tree support.",
+      "recommended_action": "Add or align talent trees for Tarsh's eventual full build."
+    },
+    {
+      "gap": "content_pack_loader",
+      "impact": "This pack documents reusable campaign content but is not consumed by Campaign Studio generation or validation yet.",
+      "recommended_action": "Add a Studio loader that can use content packs for Mode 3 assist, gap checks, and future campaign expansion."
+    }
+  ]
+}

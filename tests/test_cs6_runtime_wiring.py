@@ -23,11 +23,18 @@ from gm.context import (
     compute_voice_mode_instruction,
     resolve_variant,
 )
+from gm.cloud_gm import NarrationResult
 from engine.character import Character
-from api.game_routes import _context_audit_json
+from api.game_routes import (
+    _active_social_scene_block,
+    _append_social_offers_to_narration,
+    _consume_selected_social_offer,
+    _context_audit_json,
+    _select_social_offers,
+)
 
 
-PRAXEUM_PATH = Path("data/campaigns/shadows_of_the_praxeum.json")
+PRAXEUM_PATH = Path("data/campaigns/shadows_of_the_custodian.json")
 
 
 @pytest.fixture
@@ -217,7 +224,7 @@ def test_npc_prompt_redacts_future_praxeum_spoilers_before_reveal_acts():
     ctx = ContextPackage(
         character=Character(name="Test", career="mystic", species="mirialan"),
         arc=ArcState(
-            campaign_name="Shadows of the Praxeum",
+            campaign_name="Shadows of the Custodian",
             current_act=1,
             total_acts=5,
             act_name="The New Students",
@@ -263,7 +270,7 @@ def test_npc_prompt_allows_praxeum_spoilers_after_reveal_acts():
     ctx = ContextPackage(
         character=Character(name="Test", career="mystic", species="mirialan"),
         arc=ArcState(
-            campaign_name="Shadows of the Praxeum",
+            campaign_name="Shadows of the Custodian",
             current_act=4,
             total_acts=5,
             act_name="The Betrayal",
@@ -297,3 +304,103 @@ def test_npc_prompt_allows_praxeum_spoilers_after_reveal_acts():
     assert "Seren Denn" in block
     assert "Malakai" in block
     assert "Tannen" in block
+
+
+# ── Social runtime offers ─────────────────────────────────────────
+
+def test_social_offer_selection_uses_act1_pacing_matrix(praxeum_spine):
+    arc_state = {"current_act": 1}
+
+    offers = _select_social_offers(
+        praxeum_spine,
+        arc_state,
+        existing_choice_count=2,
+    )
+
+    assert [offer["id"] for offer in offers] == [
+        "bond_joran_01_late_sweep",
+        "group_first_dinner",
+    ]
+    assert offers[0]["kind"] == "bond_event"
+    assert offers[1]["kind"] == "group_scene"
+
+
+def test_social_offer_selection_respects_choice_cap(praxeum_spine):
+    offers = _select_social_offers(
+        praxeum_spine,
+        {"current_act": 1},
+        existing_choice_count=4,
+    )
+
+    assert offers == []
+
+
+def test_social_offers_append_choices_and_track_offered(praxeum_spine):
+    result = NarrationResult(
+        passage="The academy meal hall hums.",
+        choices=["Follow Luke.", "Inspect the archive."],
+        skill_tags=["perception"],
+        raw_response="",
+    )
+    arc_state = {"current_act": 1}
+
+    pending = _append_social_offers_to_narration(
+        result, praxeum_spine, arc_state,
+    )
+
+    assert result.choices[-2].startswith("Ask Joran Veska")
+    assert result.choices[-1].startswith("Listen in with the group")
+    assert len(result.choices) == 4
+    assert len(result.skill_tags) == len(result.choices)
+
+    social = arc_state["social_runtime"]
+    assert social["offered_bond_ids"] == ["bond_joran_01_late_sweep"]
+    assert social["offered_group_scene_ids"] == ["group_first_dinner"]
+    assert social["act_bond_offer_counts"] == {"1": 1}
+    assert pending[0]["choice_index"] == 2
+    assert pending[1]["choice_index"] == 3
+
+
+def test_social_offer_selection_caps_bond_offers_by_act(praxeum_spine):
+    arc_state = {
+        "current_act": 1,
+        "social_runtime": {
+            "act_bond_offer_counts": {"1": 2},
+        },
+    }
+
+    offers = _select_social_offers(
+        praxeum_spine,
+        arc_state,
+        existing_choice_count=2,
+    )
+
+    assert offers
+    assert all(offer["kind"] != "bond_event" for offer in offers)
+
+
+def test_selecting_social_offer_marks_seen_and_builds_scene_block(praxeum_spine):
+    result = NarrationResult(
+        passage="Night insects sing outside the temple.",
+        choices=["Return to the dorm.", "Find Tionne.", "Stay outside."],
+        skill_tags=[None, None, None],
+        raw_response="",
+    )
+    arc_state = {"current_act": 1}
+    pending = _append_social_offers_to_narration(
+        result, praxeum_spine, arc_state,
+    )
+
+    selected = _consume_selected_social_offer(
+        arc_state, pending[0]["choice_index"],
+    )
+
+    social = arc_state["social_runtime"]
+    assert selected["id"] == "bond_joran_01_late_sweep"
+    assert social["seen_bond_ids"] == ["bond_joran_01_late_sweep"]
+    assert social["bond_points"]["Joran Veska"] == 0.15
+
+    block = _active_social_scene_block(arc_state)
+    assert "SELECTED BOND SCENE" in block
+    assert "The Late Sweep" in block
+    assert "Why now:" in block

@@ -234,7 +234,7 @@ def test_parse_response_strips_choice_annotation_parenthetical():
 
 def test_fast_reconciliation_updates_progress_and_mission():
     arc = ArcState(
-        campaign_name="Shadows of the Praxeum",
+        campaign_name="Shadows of the Custodian",
         current_act=1,
         total_acts=5,
         act_name="The New Students",

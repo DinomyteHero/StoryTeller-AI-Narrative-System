@@ -358,9 +358,9 @@ class TestSchemaNewFields:
         if not os.path.exists(data_dir):
             pytest.skip("Campaign data directory not found")
 
-        spine_path = os.path.join(data_dir, "shadows_of_the_praxeum.json")
+        spine_path = os.path.join(data_dir, "shadows_of_the_custodian.json")
         if not os.path.exists(spine_path):
-            pytest.skip("shadows_of_the_praxeum.json not found")
+            pytest.skip("shadows_of_the_custodian.json not found")
 
         with open(spine_path) as f:
             data = json.load(f)

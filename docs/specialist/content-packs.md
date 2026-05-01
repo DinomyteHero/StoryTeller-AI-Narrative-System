@@ -32,7 +32,7 @@ authors how to expand it.
 
 The first campaign content pack is:
 
-`data/content_packs/shadows_of_the_praxeum.json`
+`data/content_packs/shadows_of_the_custodian.json`
 
 It updates the current sample campaign's content foundation without changing
 runtime behavior.
@@ -56,7 +56,7 @@ runtime behavior.
 | `prologue_scene_seeds` | Candidate scenes for future Phase 18 prologue authoring. |
 | `content_gaps` | Known content gaps with recommended actions. |
 
-## Shadows of the Praxeum Audit
+## Shadows of the Custodian Audit
 
 The current spine is playable and structurally rich:
 

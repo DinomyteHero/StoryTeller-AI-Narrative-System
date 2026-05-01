@@ -155,6 +155,17 @@ class NarrativeArcSpec(BaseModel):
     lie_grip_initial: float = Field(ge=0.0, le=1.0, default=1.0)
 
 
+class PartyDossier(BaseModel):
+    """Compact GM/runtime handle for core party usage."""
+    rpg_function: str = ""
+    act1_player_feel: str = ""
+    social_bond_arc: dict[str, str] = {}
+    utility: str = ""
+    best_case_ending_payoff: str = ""
+    worst_case_ending_payoff: str = ""
+    avoid: str = ""
+
+
 class CharacterVariant(BaseModel):
     id: str
     allegiance: str
@@ -187,6 +198,13 @@ class CharacterVariant(BaseModel):
     depth_card: Optional[CharacterDepthCard] = None  # Phase 9: GM-facing enrichment
     # ── Brooks/Weiland fields (Apr 2026 pass) ──
     narrative_arc: Optional[NarrativeArcSpec] = None
+    party_dossier: Optional[PartyDossier] = None
+    # Campaigns may retain support variants for Studio analysis while only
+    # exposing the authored protagonist in the live play funnel.
+    player_selectable: bool = True
+    intended_protagonist: bool = False
+    supporting_only: bool = False
+    selection_note: str = ""
 
 
 class Allegiance(BaseModel):
@@ -251,6 +269,7 @@ class NPC(BaseModel):
     # ── CS-6 Story Engineering fields ──
     pressure_role: str = ""  # Phase 4: "tempter", "mirror", "skeptic", "dependent",
                               # "betrayer", "witness", "escalator", "false_ally", "catalyst"
+    party_dossier: Optional[PartyDossier] = None
     # ── Canon character fields (Game Mechanics §22) ──
     canon: bool = False
     era_profile: Optional[str] = None
@@ -386,6 +405,21 @@ class PinchPoint(BaseModel):
 # ── Acts ──────────────────────────────────────────────────────────────
 
 
+class ActSideContent(BaseModel):
+    """Optional scene beat available inside an act."""
+    id: str = Field(min_length=1)
+    title: str = Field(min_length=1)
+    hook: str = Field(min_length=20)
+    keywords: list[str] = Field(min_length=1)
+    phase: str = ""
+    scene_type: str = ""
+    spotlight: list[str] = []
+    rpg_function: str = ""
+    player_choice: str = ""
+    payoff_or_change: str = ""
+    foreshadows: list[str] = []
+
+
 class Act(BaseModel):
     number: int = Field(ge=1)
     name: str
@@ -413,6 +447,8 @@ class Act(BaseModel):
     # ── CS-6 Story Engineering fields ──
     pinch_point: Optional[PinchPoint] = None  # Phase 2: antagonist pressure beat
     protagonist_mode: str = ""  # Phase 3: "orphan"|"wanderer"|"warrior"|"martyr"
+    beat_roles: list[str] = []
+    side_content: list[ActSideContent] = []
 
 
 # ── Import interface (Game Mechanics §20) ─────────────────────────────
@@ -645,6 +681,10 @@ class BondEvent(BaseModel):
     prerequisites: list[str] = []
     hook: str = Field(min_length=20)
     keywords: list[str] = Field(min_length=1)
+    choice_prompt: str = ""
+    why_this_person: str = ""
+    why_now: str = ""
+    changes_after: str = ""
     subversion_payoff: str = ""
     bond_weight: float = Field(ge=0.0, le=1.0, default=0.0)
     branch_consequences: list[str] = []
@@ -653,6 +693,10 @@ class BondEvent(BaseModel):
 class BondEventSystem(BaseModel):
     """Configuration for the bond-event runtime."""
     purpose: str = ""
+    selection_model: str = ""
+    act_budgets: dict[str, int] = {}
+    priority_relationships: list[str] = []
+    ending_weight_notes: dict[str, str] = {}
     bond_weight_threshold_for_climax_protection: float = Field(
         ge=0.0, le=1.0, default=0.6
     )
@@ -660,6 +704,81 @@ class BondEventSystem(BaseModel):
         ge=0.0, le=2.0, default=1.0
     )
     stacking: str = "additive"  # "additive" | "max" | "replace"
+
+
+class BondPacingAct(BaseModel):
+    """Offer priorities for bond events that enter play in one act."""
+    act: int = Field(ge=1)
+    max_one_on_one_offers: int = Field(ge=0)
+    required_story: list[str] = []
+    priority_pool: list[str] = []
+    optional_pool: list[str] = []
+    rare_pool: list[str] = []
+    guidance: str = ""
+
+
+class BondPacingMatrix(BaseModel):
+    """Pacing/pruning layer for a large relationship-scene library."""
+    policy: str = ""
+    recommended_playthrough_target: list[int] = []
+    hard_cut_ids: list[str] = []
+    no_cut_reason: str = ""
+    act_plans: list[BondPacingAct] = []
+
+
+class CorePartyMember(BaseModel):
+    """Player-facing party member focus for social-RPG campaign structure."""
+    name: str = Field(min_length=1)
+    npc_ref: str = Field(min_length=1)
+    party_role: str = ""
+    table_function: str = ""
+    relationship_axis: str = ""
+    player_facing_question: str = ""
+    primary_payoff: str = ""
+    bond_priority: int = Field(ge=1, le=5, default=3)
+    act_focus: list[int] = []
+
+
+class SupportingCastTier(BaseModel):
+    """Cast triage so the runtime knows who may stay in the background."""
+    tier: str = Field(min_length=1)
+    purpose: str = ""
+    members: list[str] = []
+
+
+class BondActPlan(BaseModel):
+    """Per-act free-time/bonding budget."""
+    act: int = Field(ge=1)
+    slots: int = Field(ge=0)
+    required_story_bonds: list[str] = []
+    optional_party_bonds: list[str] = []
+    guest_bonds: list[str] = []
+    group_scene_ids: list[str] = []
+    pacing_note: str = ""
+
+
+class GroupScene(BaseModel):
+    """Recurring party scene that builds group texture, not just one-on-one bonds."""
+    id: str = Field(min_length=1)
+    title: str = Field(min_length=1)
+    act: int = Field(ge=1)
+    scene_type: str = ""
+    participants: list[str] = Field(min_length=2)
+    hook: str = Field(min_length=20)
+    function: str = ""
+    bond_payoffs: list[str] = []
+
+
+class EndingPayoff(BaseModel):
+    """How a resolution converts relationship state into emotional closure."""
+    id: str = Field(min_length=1)
+    title: str = Field(min_length=1)
+    ending_type: str = ""
+    requires: list[str] = []
+    relationship_payoffs: dict[str, str] = {}
+    emotional_contract: str = ""
+    future_hook: str = ""
+    avoid_feeling: str = ""
 
 
 # ── Story architecture (CS-5) ────────────────────────────────────────
@@ -734,6 +853,13 @@ class CampaignSpine(BaseModel):
     era: str
     total_acts: int = Field(ge=2)
     throughline_question: str
+    intended_protagonist_id: str = ""
+    core_party: list[CorePartyMember] = []
+    supporting_cast_tiers: list[SupportingCastTier] = []
+    bond_act_plan: list[BondActPlan] = []
+    bond_pacing_matrix: Optional[BondPacingMatrix] = None
+    group_scenes: list[GroupScene] = []
+    ending_payoff_matrix: list[EndingPayoff] = []
     allegiances: list[Allegiance] = Field(
         min_length=2, max_length=4
     )

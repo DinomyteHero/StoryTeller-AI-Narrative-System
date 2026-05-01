@@ -196,7 +196,7 @@ and called from each ContextPackage construction site:
 ### ✓ Spine `era_voice` schema + Praxeum populated
 `studio/schema.py` now has `EraVoice` Pydantic model with `era`, `year`,
 `voice_notes`, `period_details`, `period_avoid` fields.
-- `shadows_of_the_praxeum` → New Republic / ~12 ABY (Praxeum, fragile peace)
+- `shadows_of_the_custodian` → New Republic / 16 ABY (Praxeum maturation, Custodian threat)
 
 (Note: `nar_shaddaa_job` and `echoes_of_the_force` were also populated
 during the initial pivot, but were subsequently removed from the

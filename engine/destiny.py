@@ -194,7 +194,7 @@ def evaluate_destiny_spend(
             result.light_remaining = destiny.light
             result.dark_remaining = destiny.dark
             result.narrative_note = (
-                "DESTINY (LIGHT SIDE SPENT — REQUIRED BEAT): This check was "
+                "DESTINY (LIGHT SIDE SPENT) — REQUIRED BEAT: This check was "
                 "touched by fate. You MUST include exactly one sentence of "
                 "interior recognition where the protagonist NOTICES that "
                 "something just went better than it should have — a held breath, "
@@ -241,7 +241,7 @@ def evaluate_destiny_spend(
             result.dark_remaining = destiny.dark
 
             dark_note = (
-                "DESTINY (DARK SIDE SPENT — REQUIRED BEAT): Fate worked "
+                "DESTINY (DARK SIDE SPENT) — REQUIRED BEAT: Fate worked "
                 "against the character this time. You MUST include exactly "
                 "one sentence where the protagonist NOTICES the world tilting "
                 "wrong — a sudden chill, a piece of equipment betraying them, "

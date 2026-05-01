@@ -32,7 +32,7 @@ def _load_pack(path: Path) -> dict:
 
 
 def test_content_pack_directory_has_sample_campaign_pack():
-    assert (PACK_DIR / "shadows_of_the_praxeum.json").exists()
+    assert (PACK_DIR / "shadows_of_the_custodian.json").exists()
 
 
 def test_all_content_packs_have_required_shape():
@@ -64,7 +64,7 @@ def test_all_content_packs_have_required_shape():
 
 
 def test_shadows_pack_matches_sample_spine_counts():
-    pack = _load_pack(PACK_DIR / "shadows_of_the_praxeum.json")
+    pack = _load_pack(PACK_DIR / "shadows_of_the_custodian.json")
     spine = _load_pack(ROOT / pack["source_spine"])
 
     snapshot = pack["runtime_assets_snapshot"]
@@ -79,7 +79,7 @@ def test_shadows_pack_matches_sample_spine_counts():
 
 
 def test_shadows_pack_names_current_content_gaps():
-    pack = _load_pack(PACK_DIR / "shadows_of_the_praxeum.json")
+    pack = _load_pack(PACK_DIR / "shadows_of_the_custodian.json")
     gap_ids = {gap["gap"] for gap in pack["content_gaps"]}
 
     assert pack["era_pack_id"] == "new_republic_praxeum"
@@ -98,3 +98,33 @@ def test_shadows_pack_names_current_content_gaps():
 
     prologue_seeds = pack["prologue_scene_seeds"]
     assert len(prologue_seeds) >= 4
+
+
+def test_shadows_pack_preserves_legends_rpg_guardrails():
+    pack = _load_pack(PACK_DIR / "shadows_of_the_custodian.json")
+
+    premise = pack["campaign_identity"]["dramatic_premise"]
+    assert "five-year-old Praxeum" in premise
+
+    terms = {
+        term["term"]: term
+        for term in pack["terminology"]["campaign_terms"]
+    }
+    assert "Sadow-line holocron fragment" in terms
+    assert "not Naga Sadow's one definitive holocron" in (
+        terms["Sadow-line holocron fragment"]["usage"]
+    )
+
+    avoid_terms = {
+        term["term"]: term["guidance"]
+        for term in pack["terminology"]["avoid_or_contextualize"]
+    }
+    assert "Outer Rim-based Remnant" in avoid_terms["Imperial Remnant"]
+    assert "settled peace" in avoid_terms["Imperial Remnant"]
+
+    ffg_scene_types = {
+        entry["scene_type"]: entry
+        for entry in pack["ffg_scene_guidance"]
+    }
+    assert "lore_artifact" in ffg_scene_types
+    assert "strain" in ffg_scene_types["lore_artifact"]["threat"]

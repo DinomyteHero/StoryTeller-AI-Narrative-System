@@ -10,7 +10,7 @@ campaign length, edgier and more original framing of the antagonist,
 and four new academy students.
 
 ### Real branching + 5 endings
-- **Two new variation_points** ([data/campaigns/shadows_of_the_praxeum.json](data/campaigns/shadows_of_the_praxeum.json)):
+- **Two new variation_points** ([data/campaigns/shadows_of_the_custodian.json](data/campaigns/shadows_of_the_custodian.json)):
   - **`act3_loyalty_branch`** — load-bearing Act 3 → Act 4 branch
     with four options: `sanctuary_for_kira`, `hand_kira_to_luke`,
     `help_kira_disappear`, `join_third_path`. Each option
@@ -131,7 +131,7 @@ bookish-nerd).
   arc. The card stays visible alongside the opening passage.
 
 ### Files touched (10 files, ~+800 net new lines)
-- [data/campaigns/shadows_of_the_praxeum.json](data/campaigns/shadows_of_the_praxeum.json)
+- [data/campaigns/shadows_of_the_custodian.json](data/campaigns/shadows_of_the_custodian.json)
   (4 new students, expected_turns bumped, 25 new side-content
   seeds, 2 new variation_points, 5-ending architecture, Malakai
   + Kira reframed, anti-stereotype notes on 11 NPCs, edgy tone
@@ -165,7 +165,7 @@ bookish-nerd).
 
 A focused pass that gives the engine the *named* vocabulary the
 narration model expects when honoring story structure (Larry Brooks)
-and character arc (K.M. Weiland), and rebuilds *Shadows of the Praxeum*
+and character arc (K.M. Weiland), and rebuilds *Shadows of the Custodian*
 around it.
 
 ### Schema
@@ -227,7 +227,7 @@ around it.
 - **`GET /session/{id}`** now returns the full character object,
   exposing live `lie_grip` and movements ledger to harness/frontend.
 
-### Campaign deep-edit — *Shadows of the Praxeum*
+### Campaign deep-edit — *Shadows of the Custodian*
 Pinned to **~12 ABY**, one year after the Exar Kun crisis is
 canonically resolved. Substantive content additions:
 - **9 new NPCs** (was 5; now 14): Kam Solusar, Cilghal, Streen,
@@ -286,7 +286,7 @@ Each of the three character files now carries a hand-authored
 `data/characters/clovis_beryl.json`,
 `data/characters/praxeum_student.json`,
 `data/characters/praxeum_mechanic.json`,
-`data/campaigns/shadows_of_the_praxeum.json`,
+`data/campaigns/shadows_of_the_custodian.json`,
 `eval/playtest_long.py`,
 `tests/test_cs6_story_engineering.py`,
 `docs/research/brooks-weiland-pass-2026-04.md`,
@@ -449,7 +449,7 @@ prompts, scene grammar, character identity, and campaign data.
 
 ### Phase F — backstory deepening
 - **Lore seeds block.** `lore_seeds` added to `CampaignSpine`
-  (currently authored on Shadows of the Praxeum): 6 sensory anchors,
+  (currently authored on Shadows of the Custodian): 6 sensory anchors,
   4 rituals, 5 significant objects, 4 language conventions. Surfaced
   via `build_lore_seeds_block` + `{lore_seeds_block}` placeholder.
   Verified in playtest — opening passages now thread 5+ lore seeds
@@ -515,7 +515,7 @@ prompts, scene grammar, character identity, and campaign data.
 `engine/equipment.py`, `engine/reconciliation.py`, `gm/cloud_gm.py`,
 `gm/context.py`, `gm/prompts/milestone_reflection.txt`,
 `gm/prompts/narration.txt`, `gm/prompts/narration_literary.txt`,
-`web/index.html`, `data/campaigns/shadows_of_the_praxeum.json`,
+`web/index.html`, `data/campaigns/shadows_of_the_custodian.json`,
 `data/characters/praxeum_student.json`,
 `data/characters/praxeum_mechanic.json`, `.env.example`.
 
@@ -629,7 +629,7 @@ work than a quick wrap:
 - `EraVoice` schema field added to `CampaignSpine`; the active campaign
   populates it with New Republic / Praxeum-era anchoring.
 
-### Campaign repository narrowed to Shadows of the Praxeum
+### Campaign repository narrowed to Shadows of the Custodian
 - Deleted: `data/campaigns/nar_shaddaa_job.json`,
   `data/campaigns/echoes_of_the_force.json`,
   `data/characters/keth_varso.json`, `data/characters/talia_ren.json`.
@@ -722,7 +722,7 @@ Campaign Studio CS-1 through CS-6 complete.
 - NPC pressure roles (9 types)
 - Deterministic structural validation checks
 - Voice mode prose guidance system
-- Shadows of the Praxeum campaign
+- Shadows of the Custodian campaign
 
 ### Quality and Evaluation (April 2026)
 
@@ -743,6 +743,6 @@ Campaign Studio CS-1 through CS-6 complete.
 
 - **The Nar Shaddaa Job** — smuggler campaign (Keth Varso)
 - **Echoes of the Force** — Force-sensitive campaign (Talia Ren)
-- **Shadows of the Praxeum** — Jedi academy campaign
+- **Shadows of the Custodian** — Jedi academy campaign
 - 6 talent specialization trees, 5 Force powers, 55 Writer's Room
   personas

@@ -189,7 +189,7 @@ def test_context_audit_redacts_future_spoiler_fields():
     ctx = ContextPackage(
         character=Character(name="Test", career="mystic", species="mirialan"),
         arc=ArcState(
-            campaign_name="Shadows of the Praxeum",
+            campaign_name="Shadows of the Custodian",
             current_act=1,
             total_acts=5,
             act_name="The New Students",
@@ -253,7 +253,7 @@ def test_failed_social_dice_block_withholds_core_answer():
     ctx = ContextPackage(
         character=Character(name="Test", career="mystic", species="mirialan"),
         arc=ArcState(
-            campaign_name="Shadows of the Praxeum",
+            campaign_name="Shadows of the Custodian",
             current_act=1,
             total_acts=5,
             act_name="The New Students",
@@ -293,7 +293,7 @@ def test_failed_pure_force_block_forbids_exact_read():
     ctx = ContextPackage(
         character=Character(name="Test", career="mystic", species="mirialan"),
         arc=ArcState(
-            campaign_name="Shadows of the Praxeum",
+            campaign_name="Shadows of the Custodian",
             current_act=1,
             total_acts=5,
             act_name="The New Students",

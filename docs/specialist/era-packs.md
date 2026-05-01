@@ -37,7 +37,7 @@ War as the primary play window and the postwar era as sequel space.
 
 It covers the Star Wars Legends New Republic / Jedi Praxeum era, with broad
 support for 4-24 ABY and primary support for the 11-14 ABY Praxeum window
-used by `Shadows of the Praxeum`.
+used by `Shadows of the Custodian`.
 
 ## Pack Shape
 
@@ -98,7 +98,7 @@ fully restored." The intended texture is:
 The north-star sentence is: **the Jedi are returning, but not restored.**
 
 This pack is deliberately aligned with
-`data/content_packs/shadows_of_the_praxeum.json`, which now lists
+`data/content_packs/shadows_of_the_custodian.json`, which now lists
 `new_republic_praxeum` as an available era pack.
 
 ## New Jedi Order Notes

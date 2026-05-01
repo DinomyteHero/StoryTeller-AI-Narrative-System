@@ -156,12 +156,12 @@ class TestVignetteCount(unittest.TestCase):
 def _load_spine_with_time_skip():
     """Find an act in the canonical spine that has time_skip data, else None.
 
-    The active campaign (Shadows of the Praxeum) does not exercise the time
+    The active campaign (Shadows of the Custodian) does not exercise the time
     skip mechanic, so these integration tests are skipped when no time-skip
     fixture is present. The engine-level time_skip module is exercised by
     the synthetic-fixture tests below.
     """
-    spine_path = ROOT / "data" / "campaigns" / "shadows_of_the_praxeum.json"
+    spine_path = ROOT / "data" / "campaigns" / "shadows_of_the_custodian.json"
     if not spine_path.exists():
         return None, None
     spine = json.loads(spine_path.read_text(encoding="utf-8"))

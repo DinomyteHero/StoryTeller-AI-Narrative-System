@@ -27,7 +27,7 @@ from studio.validate import (
 )
 
 
-PRAXEUM_PATH = Path("data/campaigns/shadows_of_the_praxeum.json")
+PRAXEUM_PATH = Path("data/campaigns/shadows_of_the_custodian.json")
 
 
 @pytest.fixture
