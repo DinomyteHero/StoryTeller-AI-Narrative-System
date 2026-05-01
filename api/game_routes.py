@@ -439,10 +439,92 @@ def _referenced_npc_names_from_text(npc_states: list[NPCState], *texts: str) -> 
     return names
 
 
+# NPC location-eligibility table. Maps lowercase NPC name to the set of
+# location-keyword tokens where that NPC may plausibly be physically present.
+# The token "*" means any location (use sparingly — only for genuinely
+# roaming characters or disembodied mystic voices).
+#
+# This is a runtime safety filter to prevent the cloud GM from teleporting
+# Praxeum NPCs into Glass Wake scenes (or vice versa). Unknown NPCs are
+# not filtered, preserving compatibility with other campaigns.
+_NPC_LOCATION_DOMAINS: dict[str, frozenset[str]] = {
+    # Glass Wake crew and visitors
+    "captain tev": frozenset({"wake", "freighter", "shadowport", "horizon", "dock"}),
+    "talon karrde": frozenset({
+        "wake", "freighter", "shadowport", "horizon", "dock",
+        "praxeum", "yavin", "temple", "colonnade", "academy",
+        "courtyard", "great temple",
+    }),
+    # Praxeum cohort and staff. "horizon" is included so Joran/Tarsh can
+    # appear on the descent shuttle, which is the spine-authored intro.
+    "joran veska": frozenset({"praxeum", "yavin", "temple", "colonnade", "academy", "horizon", "shuttle"}),
+    "rann veska": frozenset({"praxeum", "yavin", "temple", "colonnade", "academy", "courtyard"}),
+    "tarsh voll": frozenset({"praxeum", "yavin", "temple", "colonnade", "academy", "horizon", "shuttle", "mess"}),
+    "cassen vell": frozenset({"praxeum", "yavin", "temple", "colonnade", "academy"}),
+    "olm sefa": frozenset({"praxeum", "yavin", "temple", "colonnade", "academy", "archive"}),
+    "inya vorn": frozenset({"praxeum", "yavin", "temple", "colonnade", "academy", "training"}),
+    "lirah tann": frozenset({"praxeum", "yavin", "temple", "colonnade", "academy", "kitchen", "medbay"}),
+    "vesh karro": frozenset({"praxeum", "yavin", "temple", "colonnade", "academy"}),
+    "loka hask": frozenset({"praxeum", "yavin", "temple", "colonnade", "academy"}),
+    "iila vand": frozenset({"praxeum", "yavin", "temple", "colonnade", "academy"}),
+    "brann riako": frozenset({"praxeum", "yavin", "temple", "colonnade", "academy", "perimeter", "watch"}),
+    "luke skywalker": frozenset({"praxeum", "yavin", "temple", "colonnade", "academy", "training"}),
+    "tionne": frozenset({"praxeum", "yavin", "temple", "colonnade", "academy", "archive", "great temple"}),
+    "kam solusar": frozenset({"praxeum", "yavin", "temple", "colonnade", "academy", "training", "sparring"}),
+    "cilghal": frozenset({"praxeum", "yavin", "temple", "colonnade", "academy", "medbay"}),
+    # Streen wanders the academy; his mystical drift is allowed to colour any
+    # scene through audible fragments, so we permit "*" as a special case.
+    "streen": frozenset({"*"}),
+    "kyp durron": frozenset({"praxeum", "yavin", "temple", "colonnade", "academy", "*"}),
+    "mara jade": frozenset({"*"}),
+    "kyle katarn": frozenset({"praxeum", "yavin", "temple", "colonnade", "academy", "*"}),
+    # Antagonist cell — off-world by default. They may appear at specific
+    # mission locations from Act 2 onward, but never at the Wake or Praxeum
+    # in Act 1 unless the spine explicitly stages an incursion.
+    "vornn": frozenset({"maradun", "khar delba", "off-world", "tion"}),
+    "captain sarek thane": frozenset({"maradun", "khar delba", "off-world", "tion", "ambush"}),
+    "doctor eilana threnn": frozenset({"maradun", "khar delba", "off-world"}),
+    "drel vass": frozenset({"maradun", "khar delba", "off-world", "tion"}),
+    "sona kress": frozenset({"maradun", "khar delba", "off-world", "tion"}),
+}
+
+
+def _npc_location_eligible(npc_name: str, current_location: str) -> bool:
+    """Return True if this NPC can plausibly be physically present at the
+    given location.
+
+    Prevents the cloud GM from importing Praxeum NPCs into Glass Wake scenes
+    or off-world antagonists into a goodbye dinner. Falls back to permissive
+    when the NPC is not in the domain table or the location is unknown — so
+    new campaigns are unaffected until they author their own table.
+    """
+    name_key = (npc_name or "").strip().lower()
+    domains = _NPC_LOCATION_DOMAINS.get(name_key)
+    if not domains:
+        return True
+    if "*" in domains:
+        return True
+    loc = (current_location or "").strip().lower()
+    if not loc:
+        return True
+    return any(token in loc for token in domains)
+
+
+def _filter_npcs_by_location(
+    names: list[str],
+    current_location: str,
+) -> list[str]:
+    """Drop any names that fail the location-eligibility check."""
+    if not current_location:
+        return names
+    return [n for n in names if _npc_location_eligible(n, current_location)]
+
+
 def _normalise_present_npcs(
     values,
     npc_states: list[NPCState],
     *fallback_texts: str,
+    current_location: str = "",
 ) -> list[str]:
     valid = {npc.name.lower(): npc.name for npc in npc_states or []}
     by_alias = {
@@ -459,6 +541,7 @@ def _normalise_present_npcs(
     for name in _referenced_npc_names_from_text(npc_states, *fallback_texts):
         if name not in names:
             names.append(name)
+    names = _filter_npcs_by_location(names, current_location)
     return names[:4]
 
 
@@ -592,11 +675,21 @@ def _select_active_scene_npcs(
     *texts: str,
 ) -> list[NPCState]:
     state = _initial_scene_state(arc_state, current_act)
+    current_location = str(
+        state.get("current_location")
+        or arc_state.get("current_location")
+        or current_act.get("opening_location", "")
+        or ""
+    )
     names = _normalise_present_npcs(
-        state.get("present_npcs", []), npc_states, *texts
+        state.get("present_npcs", []),
+        npc_states,
+        *texts,
+        current_location=current_location,
     )
     if not names:
         names = _referenced_npc_names_from_text(npc_states, *texts)
+        names = _filter_npcs_by_location(names, current_location)
     name_set = set(names)
     return [npc for npc in npc_states if npc.name in name_set]
 
@@ -748,9 +841,11 @@ def _apply_narration_scene_state(
         raw_present_npcs,
         npc_states,
         *fallback_texts,
+        current_location=location,
     )
     if not present_npcs:
-        present_npcs = list(prior.get("present_npcs", []))
+        carry = list(prior.get("present_npcs", []))
+        present_npcs = _filter_npcs_by_location(carry, location)
 
     patch_scene = _clean_state_string(patch.get("scene_type"), max_len=40)
     final_scene_type = _sanitize_scene_type(

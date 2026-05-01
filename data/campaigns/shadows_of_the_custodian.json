@@ -723,7 +723,7 @@
       "number": 1,
       "name": "Arrivals",
       "tension": "low",
-      "opening_situation": "Aboard the Glass Wake, dockside at a fringe shadowport, the night before Clovis Beryl departs for Yavin 4. The freighter's main hold has been cleared for a goodbye meal \u00e2\u20ac\u201d Mira has cooked the wrong stew, Renn has produced something illegal, the crew tells stories, nobody is acting like this is what it is. Captain Tev has the encrypted contact codes ready and is waiting for Clovis to name a recipient. The Praxeum's supply shuttle Horizon arrives at first light. The opening stretch should BREATHE \u00e2\u20ac\u201d the farewell, the quiet visit from Karrde, the contact-code choice, the departure, the descent toward Yavin Prime, the green canopy, the Great Temple, the intake interview with Tionne, the first dinner, the meal-share ritual, the third meditation note half a tone flat. The cohort forms by accretion: a fellow late-Force-bloomer named Tarsh recognizes Clovis at first dinner; a quiet new arrival named Joran shares the descent; a wired older student named Rann reacts in the colonnade to seeing Joran walk off the shuttle. Daily life takes hold over weeks \u00e2\u20ac\u201d chores, archive errands, training drills, perimeter-lantern duty at dusk. The first cracks are small: a coded chip in a ration crate, a corridor someone was not in, a sparring slip Kam Solusar files silently, an old man named Streen passing through the colonnade saying 'two breaths in one chest.' By the end of the act, a perimeter scout has ambushed Brann Riako, and Brann pulls Clovis into a conspiracy he cannot yet name.",
+      "opening_situation": "Aboard the Glass Wake, dockside at a fringe shadowport, the night before Clovis Beryl departs for Yavin 4. The freighter's main hold has been cleared for a goodbye meal that nobody is calling a goodbye meal. Three people share the table with him. Mira, the cook who has been on the Wake since Clovis was twelve, the one who learned at thirteen that he hated her cumin-sharp Karkaron stew and has cooked it on every birthday, every bad night, every farewell since, sets the wrong stew down with a flat face that says she will be fine and not to mention it. Renn, older brother in everything but blood, the one who taught Clovis how to walk past a customs queue without looking at the floor and how to lie about a name without flinching, leans in the doorway with a bottle of something illegal he produced from inside his jacket. He is making jokes about whether the Jedi let you keep your own haircut. Across the table sits Captain Tev, Corellian, late fifties, the man who pulled Clovis out of a bonded cargo chute six hours before the Imperial executions began and has been the closest thing to a father he has known since. Tev has the encrypted contact codes for the Wake's emergency network folded in his coat pocket. He has not put them on the table yet. He will, before morning. The Praxeum's supply shuttle Horizon arrives at first light, three hours from now. The opening stretch should BREATHE. This is the goodbye scene, not the inciting incident. Lean into smuggler-life-loss: the crew ribbing Clovis about respectable haircuts, jokes about Jedi celibacy that land different tonight, Mira refusing to admit the stew is on purpose, Renn telling a story about a job that went sideways and Clovis remembering how it really went. Tev's quiet authority anchors the room without filling it. The Glass Wake transponder tag in Clovis's pocket is the Wake's encrypted emergency beacon, a one-burst call for help if things go wrong on Yavin. It is a tool, not a thematic talisman. Do not have the prose dwell on it as warmth, memory, or identity. INTRODUCTIONS: Mira, Renn, and Tev are characters the player has not met yet. Introduce them through Clovis's inner voice on first appearance: short, embedded, in motion. Not exposition paragraphs. A line about who Mira was to him at thirteen as she sets the bowl down. A beat about Renn's posture as he leans in the doorway. A specific memory of Tev that lands the moment Tev does something small. After first introduction, drop the inner voice and let them act. Karrde does NOT appear on the Wake. He arrives later in the act, at the Praxeum, dropping off a supply shipment Tionne ordered, possibly using it as cover to see Mara Jade. Clovis encounters him in passing in the colonnade, and Karrde recognizes him from his network's intelligence chain. After the goodbye and the contact-code choice (which Tev offers gently, without pressing), the Horizon arrival, the descent toward Yavin Prime, the green canopy, the Great Temple, the intake interview with Tionne, the first dinner, the meal-share ritual, the third meditation note half a tone flat. The cohort forms by accretion: Tarsh recognizes Clovis at first dinner; Joran shares the descent; Rann reacts in the colonnade to seeing Joran walk off the shuttle. Daily life takes hold over weeks: chores, archive errands, training drills, perimeter-lantern duty at dusk. The first cracks are small: a coded chip in a ration crate, a corridor someone was not in, a sparring slip Kam Solusar files silently, an old man named Streen passing through the colonnade saying 'two breaths in one chest.' By the end of the act, a perimeter scout has ambushed Brann Riako, and Brann pulls Clovis into a conspiracy he cannot yet name.",
       "opening_location": "Glass Wake freighter, fringe shadowport (player's prior life)",
       "galactic_context": "16 ABY. The New Republic is twelve years old and increasingly bureaucratic. Pellaeon has consolidated much of the Imperial Remnant into a disciplined Outer Rim power, but the 19 ABY treaty is still three years away. Luke Skywalker's Praxeum at Yavin 4 is five years old, with thirty students, a small senior staff (Kam Solusar, Cilghal, Streen, Tionne, Kyle Katarn), and the political attention of a Senate oversight coalition led by Senator Karro. The Disciples of Ragnos crisis is two years past; Tavion's surviving disciples are dispersed but not extinct. Brakiss is operating quietly in the Outer Rim. Talon Karrde's information network is the closest thing the post-war fringe has to a clearing house.",
       "anchor": "arrivals",
@@ -801,22 +801,25 @@
           ]
         },
         {
-          "id": "glass_wake_karrde_visit",
-          "title": "Karrde aboard the Wake",
-          "hook": "Karrde arrives during dinner with no guards and no theatrical entrance. Tev gives him the good chair. Karrde asks Clovis one question: 'Do you know what you are losing?'",
-          "phase": "farewell",
-          "scene_type": "guest_pressure",
-          "spotlight": ["Clovis Beryl", "Talon Karrde", "Captain Tev"],
-          "rpg_function": "Make the fringe life seductive, competent, and emotionally real.",
-          "player_choice": "Answer Karrde honestly, perform confidence, challenge the premise, or ask what he thinks Clovis is gaining.",
-          "payoff_or_change": "Karrde files the answer and calibrates his later Act 4 price around it.",
+          "id": "praxeum_karrde_supply_drop",
+          "title": "Karrde at the Praxeum",
+          "hook": "A few days into Clovis's Praxeum life, Karrde lands at the Great Temple's lower pad with a supply shipment Tionne ordered (rare bound texts and a sensor calibrator). He is also there to see Mara Jade between her assignments. While Tionne signs for the crates, Karrde finds Clovis in the colonnade and stops for a brief, deliberate exchange. He does not lecture. He does not make demands. He notes that the Wake's young pickup grew up well, and asks one quiet question: 'Do you know what you are losing?' Then he goes.",
+          "phase": "praxeum_arrival",
+          "scene_type": "guest_recognition",
+          "spotlight": ["Clovis Beryl", "Talon Karrde"],
+          "rpg_function": "Establish Karrde as a recurring fringe presence in Clovis's Praxeum life. Make the smuggler world feel like it is still watching, still a door he can step back through if he chooses. Frame Karrde as an interested observer, not a recruiter.",
+          "player_choice": "Answer Karrde honestly, perform confidence, challenge the premise, or ask what he thinks Clovis is gaining. Optionally: ask after Mara Jade, after Tev, after the Wake's current run.",
+          "payoff_or_change": "Karrde files the answer and calibrates his later Act 4 price around it. Disposition delta tracks against his eventual willingness to extend a favor.",
           "foreshadows": ["Karrde Act 4 bargain", "Open Door ending"],
           "keywords": [
             "Karrde",
-            "wake",
+            "Praxeum",
+            "supply drop",
+            "colonnade",
+            "Mara Jade",
             "question",
             "losing",
-            "visit"
+            "recognition"
           ]
         },
         {
@@ -3667,7 +3670,7 @@
       "per_act_state": [
         {
           "act": 1,
-          "role_in_act": "aboard the Wake during goodbye dinner; asks one question; departs",
+          "role_in_act": "appears at the Praxeum on a supply drop a few days into Clovis's intake; brief colonnade exchange; asks one question; departs",
           "disposition_expected": 0.5
         },
         {
@@ -3866,7 +3869,7 @@
     {
       "id": "karrde_question_losing",
       "setup_act": 1,
-      "setup_description": "Karrde aboard the Wake asks Clovis: 'Do you know what you're losing?' Clovis answers or doesn't. Karrde files it.",
+      "setup_description": "At the Praxeum, during Karrde's supply drop, he finds Clovis in the colonnade and asks one question: 'Do you know what you're losing?' Clovis answers or doesn't. Karrde files it.",
       "payoff_act": 5,
       "payoff_description": "Karrde calls his favor in the post-campaign epilogue. The terms reflect what Clovis answered. The question was always the contract.",
       "payoff_type": "callback"
@@ -4231,7 +4234,7 @@
     {
       "id": "act1_karrde_question",
       "trigger_act": 1,
-      "description": "Karrde aboard the Wake asks: 'Do you know what you're losing?' Clovis's answer is filed and shapes Karrde's posture across the campaign.",
+      "description": "At the Praxeum, during Karrde's supply drop, he finds Clovis in the colonnade and asks one question: 'Do you know what you're losing?' Clovis's answer is filed and shapes Karrde's posture across the campaign.",
       "selection_method": "player_choice",
       "options": [
         {
@@ -4490,7 +4493,7 @@
       "the cracked obsidian disc Luke keeps on his desk \u00e2\u20ac\u201d a fragment from the Death Star's debris field",
       "the practice remotes Luke salvaged from a Clone Wars-era training ship",
       "a hand-drawn temple map in the student common room, wrong in three places",
-      "the Glass Wake transponder tag with the crew's mark scratched on the underside, kept in Clovis's pocket",
+      "the Glass Wake transponder tag in Clovis's pocket: a one-burst encrypted emergency beacon, the Wake's call-for-help device, a tool not a talisman",
       "the wooden shape Streen is whittling \u00e2\u20ac\u201d has been the same piece of wood for over a year",
       "Tionne's quarantined crate at the back of the archive \u00e2\u20ac\u201d content unspecified to students; senior staff know it holds a Sadow-line Old Sith Wars fragment she has chosen to restrict rather than destroy"
     ],

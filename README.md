@@ -38,8 +38,8 @@ The campaign spine JSON is the interface contract between them.
 ### Prerequisites
 
 - Python 3.11+
-- [Ollama](https://ollama.ai/) running locally with a model pulled (default: `qwen3.5:9b`)
-- An API key for your chosen cloud LLM provider (OpenAI, OpenRouter, etc.)
+- An API key for your cloud LLM provider — OpenRouter (default) or OpenAI
+- [Ollama](https://ollama.ai/) is optional. Only needed if you set `NARRATIVE_BACKEND=local` for offline play, or enable `CLOUD_FALLBACK_TO_LOCAL=true` as an emergency fallback.
 
 ### Installation
 
@@ -71,13 +71,18 @@ Key settings in `.env`:
 | Variable | Description | Default |
 |---|---|---|
 | `NARRATIVE_BACKEND` | `cloud` or `local` | `cloud` |
-| `CLOUD_PROVIDER` | `openai` or `openrouter` | `openai` |
-| `CLOUD_MODEL` | Cloud model for narration | `gpt-5.2` |
-| `OPENAI_API_KEY` | Your OpenAI API key | — |
-| `OLLAMA_URL` | Ollama endpoint | `http://localhost:11434` |
-| `LOCAL_MODEL` | Local model for check decisions | `qwen3.5:9b` |
+| `CLOUD_PROVIDER` | `openrouter` or `openai` | `openrouter` |
+| `OPENROUTER_API_KEY` | Your OpenRouter API key (default path) | — |
+| `OPENAI_API_KEY` | Your OpenAI API key (only if `CLOUD_PROVIDER=openai`) | — |
+| `FAST_MODEL` | High-volume tier — decisions, annotations, reconciliation | `deepseek/deepseek-v4-flash` |
+| `QUALITY_MODEL` | Quality-critical tier — milestones, time skips, studio | `deepseek/deepseek-v4-pro` |
+| `NARRATION_MODEL` | Per-call override for live narration | `deepseek/deepseek-v4-flash` |
+| `OLLAMA_URL` | Ollama endpoint (only used in local mode / fallback) | `http://localhost:11434` |
+| `LOCAL_FAST_MODEL` | Local model for check decisions (offline / fallback) | `qwen3.5:9b` |
 | `DB_PATH` | SQLite database path | `./data/storyteller.db` |
 | `PORT` | Server port | `8000` |
+
+See `.env.example` for the full set of tunables (token budgets, hot-path quality gates, OpenRouter provider routing, prose voice).
 
 ### Running
 
@@ -85,7 +90,7 @@ Key settings in `.env`:
 # Start the server
 uvicorn api.main:app --port 8000
 
-# Or run fully local (no cloud API key needed)
+# Or run fully local (no cloud API key needed — requires Ollama)
 NARRATIVE_BACKEND=local uvicorn api.main:app --port 8000
 ```
 
@@ -120,11 +125,11 @@ storyteller-v3/
 
 ## Included Content
 
-- **The Nar Shaddaa Job** — a smuggler campaign starring Keth Varso
-- **Echoes of the Force** — a Force-sensitive campaign starring Talia Ren
-- **Shadows of the Custodian** — a Jedi academy campaign
+- **Shadows of the Custodian** — the canonical campaign. A Jedi Praxeum mystery set in 16 ABY starring Clovis Beryl, a smuggler-raised Force-sensitive newly arrived at Luke Skywalker's academy. 5 acts, 26 NPCs, 53 bond events, 8 group scenes, 17 foreshadow threads, 5 distinct endings.
 
-## Milestone Status (last synced: 2026-04-08)
+Earlier campaigns (*The Nar Shaddaa Job*, *Echoes of the Force*) live in `data/campaigns/_archive/` for reference. They are not playable from the current build.
+
+## Milestone Status (last synced: 2026-05-01)
 
 | Milestone | Scope | Status |
 |---|---|---|

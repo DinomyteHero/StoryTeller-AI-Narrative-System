@@ -1853,6 +1853,46 @@ class ContextPackage:
                 "determine how they enter the anchor situation."
             )
 
+        # HARD scene-close override. When the anchor is imminent we have
+        # observed the model treating the soft pacing prose as suggestion and
+        # holding the scene open for many turns. This block is a non-soft
+        # instruction that must override the softer guidance above.
+        if str(self.arc.anchor_proximity).lower() == "imminent":
+            lines.append(
+                "HARD SCENE-CLOSE RULE (overrides any softer pacing note "
+                "above): the current scene must close in this passage. Pick "
+                "ONE closure and execute it visibly in the prose:\n"
+                "  1. Resolve the dramatic question of the scene with a "
+                "concrete answer or commitment.\n"
+                "  2. Transition the player to a new physical location — by "
+                "the last paragraph they are elsewhere, even if mid-step.\n"
+                "  3. Cut to a hard external development that breaks the "
+                "current frame (an arrival, a departure, a comm, a hatch "
+                "opening fully, a saber igniting, a ship lifting).\n"
+                "You may NOT continue the same dialogue beat into another "
+                "turn. You may NOT end on the same standoff, the same hatch "
+                "in motion, or the same NPC mid-question. The current "
+                "frame is closed by the end of this passage. The state_patch "
+                "current_location, present_npcs, and immediate_pressure must "
+                "reflect the new frame, not the one that just ended."
+            )
+
+        # Stall detection: scene is dragging past expected turns even though
+        # the anchor is not yet imminent. Push the GM to escalate motion.
+        elif (
+            isinstance(turns, list) and len(turns) == 2
+            and self.arc.turns_this_act > turns[1]
+        ):
+            lines.append(
+                "SCENE STALL DETECTED: this act has run past its expected "
+                "turn budget without reaching the anchor. The current scene "
+                "is over-extended. Within this passage, introduce a concrete "
+                "external development that forces the scene to advance — a "
+                "new arrival, a hard pressure, a location change, a "
+                "thread closure. Do not continue the same conversational "
+                "loop. End the passage in a different frame than it began."
+            )
+
         return "\n".join(lines)
 
     def build_motivation_block(self) -> str:
