@@ -1101,10 +1101,31 @@ def build_background_block(character, spine: Optional[dict] = None) -> str:
     and never changes — but it shapes what the protagonist notices, why
     certain images recur, what they instinctively reach for. This block
     makes that available as living context, not just metadata.
+
+    Phase 24 update: when `background` is a background_id (e.g.
+    "outer_rim_refugee") rather than free-text prose, look up the
+    matching Background spec on the spine and resolve to its
+    `story_seed` so the prompt receives the same biographical detail
+    either way.
     """
     if character is None:
         return ""
-    background = (getattr(character, "background", "") or "").strip()
+    background_field = (getattr(character, "background", "") or "").strip()
+    background_summary = (getattr(character, "background_summary", "") or "").strip()
+    background = background_summary or background_field
+
+    # Phase 24: if the field is a Background id, resolve to the spec's seed
+    if (
+        background_field
+        and " " not in background_field
+        and isinstance(spine, dict)
+        and len(background_field) <= 64
+    ):
+        for bg in (spine.get("backgrounds") or []):
+            if bg.get("background_id") == background_field:
+                background = bg.get("story_seed") or background
+                break
+
     if not background:
         return ""
     return (
@@ -1113,6 +1134,86 @@ def build_background_block(character, spine: Optional[dict] = None) -> str:
         "the background back at the player as exposition):\n"
         f"{background}"
     )
+
+
+def build_identity_state_block(character) -> str:
+    """Phase 24 — surface behavioral archetype, personality locks, and
+    pre-crystallization status in the narration prompt.
+
+    Pre-crystallization characters need explicit framing so the LLM
+    writes them as 'becoming' a Jedi rather than as a committed
+    Guardian/Consular/Sentinel. Personality locks act as voice
+    constraints that survive the prologue.
+    """
+    if character is None:
+        return ""
+    parts: list[str] = []
+
+    pre_cryst = False
+    try:
+        pre_cryst = bool(character.is_pre_crystallization())
+    except Exception:
+        pre_cryst = False
+
+    if pre_cryst:
+        parts.append(
+            "PRE-CRYSTALLIZATION (character is a Jedi Praxeum student):\n"
+            "  The protagonist is a first-year Praxeum student. They have "
+            "raw talent and a behavioral pattern, but no committed "
+            "discipline.\n"
+            "  Reference emergent leanings ('you find yourself naturally "
+            "drawn to...'), not committed paths.\n"
+            "  Other students and instructors observe the protagonist and "
+            "may speculate about their direction.\n"
+            "  Choices should sometimes test multiple disciplines "
+            "simultaneously to inform the eventual crystallization."
+        )
+    else:
+        parts.append(
+            "POST-CRYSTALLIZATION (character has chosen a discipline):\n"
+            f"  The protagonist has committed to {character.display_career()}. "
+            "Reference this as established identity.\n"
+            "  Specialization-flavored ability use is normal and expected."
+        )
+
+    archetype = getattr(character, "behavioral_archetype", None)
+    if archetype:
+        parts.append(
+            "BEHAVIORAL ARCHETYPE (inferred from prologue choices — "
+            "use to colour temperament, not to constrain agency):\n"
+            f"  {archetype}"
+        )
+
+    locks = getattr(character, "personality_locks", []) or []
+    if locks:
+        bullet_lines = []
+        for lock in locks:
+            axis = getattr(lock, "axis", "")
+            text = getattr(lock, "commitment_text", "")
+            if not text:
+                continue
+            bullet_lines.append(f"  - [{axis}] {text}")
+        if bullet_lines:
+            parts.append(
+                "PERSONALITY LOCKS (CoG-style multi-clause beliefs the "
+                "protagonist crystallized in the prologue — surface as "
+                "voice / interiority, never as quoted exposition):\n"
+                + "\n".join(bullet_lines)
+            )
+
+    pronouns = getattr(character, "pronouns", None)
+    if pronouns is not None:
+        parts.append(
+            "PRONOUNS:\n"
+            f"  subject: {pronouns.subject} | object: {pronouns.object} "
+            f"| possessive: {pronouns.possessive}"
+        )
+
+    flair = (getattr(character, "appearance_flair", "") or "").strip()
+    if flair:
+        parts.append(f"APPEARANCE FLAIR (player-supplied):\n  {flair}")
+
+    return "\n\n".join(parts)
 
 
 def build_lore_seeds_block(spine: Optional[dict]) -> str:

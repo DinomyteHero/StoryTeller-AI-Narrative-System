@@ -45,6 +45,15 @@ class Career(Enum):
     SEEKER   = "seeker"
     SENTINEL = "sentinel"
     WARRIOR  = "warrior"
+    # Phase 24 — pre-crystallization Praxeum student state
+    PRAXEUM_STUDENT = "praxeum_student"
+    JEDI_STUDENT    = "jedi_student"
+
+
+# Pre-crystallization sentinel values. The narration prompt branches on these
+# to write the protagonist as "becoming," not "being." Crystallization moves
+# the character to one of the F&D careers (Guardian / Consular / Sentinel).
+PRE_CRYSTALLIZATION_CAREERS = (Career.PRAXEUM_STUDENT, Career.JEDI_STUDENT)
 
 
 class Characteristics(BaseModel):
@@ -146,6 +155,28 @@ class MotivationTrack(BaseModel):
     conflict:         int = 0
 
 
+class Pronouns(BaseModel):
+    """Player-chosen pronouns (Phase 24 — character creation redesign).
+
+    The frontload offers 7 CoG-style options plus custom; the values are
+    stored verbatim here so the narration model uses what the player typed.
+    """
+    subject:    str = "they"   # she / he / they / custom
+    object:     str = "them"   # her / him / them / custom
+    possessive: str = "their"  # her / his / their / custom
+
+
+class BeliefCommitment(BaseModel):
+    """A multi-clause belief that crystallizes during the prologue.
+
+    CoG-style personality lock — written in first-person voice, surfaced in
+    the cloud GM context, used to constrain choices and tone going forward.
+    """
+    axis:            str           # which behavioral axis ("approach", "moral", etc.)
+    commitment_text: str           # player-facing belief statement
+    stat_effects:    dict[str, int] = Field(default_factory=dict)
+
+
 class NarrativeArc(BaseModel):
     """Brooks/Weiland character arc fields.
 
@@ -168,12 +199,22 @@ class NarrativeArc(BaseModel):
 
 
 class Character(BaseModel):
-    name:               str
-    species:            Species
-    career:             Career
+    # Phase 24: name / species become optional — the prologue's diegetic
+    # customization beats fill them if the player skipped refinement.
+    name:               Optional[str]      = None
+    species:            Optional[Species]  = None
+    career:             Career             = Career.PRAXEUM_STUDENT
     specializations:    list[str]       = Field(default_factory=list)
     primary_game_line:  GameLine        = GameLine.EDGE_OF_EMPIRE
+    # Phase 24: `background` now stores the background_id (e.g.
+    # "outer_rim_refugee"). Free-text biographical seed lives in
+    # `background_summary` so existing prose-rich character files remain
+    # backward-compatible — the loader carries either form.
     background:         str             = ""
+    background_summary: str             = ""
+    gender:             Optional[str]   = None  # Phase 24: optional gender
+    pronouns:           Optional[Pronouns] = None  # Phase 24: filled at refinement / prologue
+    appearance_flair:   str             = ""  # Phase 24: optional flavor text
     characteristics:    Characteristics = Field(default_factory=Characteristics)
     skills:             SkillRanks      = Field(default_factory=SkillRanks)
     wound_threshold:    int = 0
@@ -198,6 +239,14 @@ class Character(BaseModel):
     voice_notes:          str = ""
     active_injuries:      list[str] = Field(default_factory=list)  # narrative injury descriptions (Game Mechanics §3)
     narrative_arc:        Optional[NarrativeArc] = None  # Brooks/Weiland arc — opt-in
+    # ── Phase 24: Character Creation Redesign ──
+    behavioral_archetype: Optional[str] = None  # inferred archetype from prologue
+    skill_tilt:           dict[str, int] = Field(default_factory=dict)  # background tilt + archetype adjustment
+    personality_locks:    list[BeliefCommitment] = Field(default_factory=list)
+    crystallized:         bool = False  # True after profession crystallization beat
+    # Counter dict tracking pattern-of-use for Mechanism-3 talent unlocks.
+    # Keys are pattern_ids (e.g. "consular_influence_uses"), values are int counts.
+    use_pattern_counts:   dict[str, int] = Field(default_factory=dict)
 
     def get_characteristic(self, name: str) -> int:
         return getattr(self.characteristics, name)
@@ -213,15 +262,47 @@ class Character(BaseModel):
         armor_bonus = self.loadout.armor.soak_bonus if self.loadout.armor else 0
         return self.soak + armor_bonus
 
+    def is_pre_crystallization(self) -> bool:
+        """True when the protagonist has not yet committed to a discipline.
+
+        Pre-crystallization characters narrate as 'becoming,' not 'being';
+        their specialization tree is closed; the narration prompt receives
+        a flag to write them as a Praxeum student.
+        """
+        return (
+            self.career in PRE_CRYSTALLIZATION_CAREERS
+            and not self.crystallized
+        )
+
+    def display_name(self) -> str:
+        return self.name or "the protagonist"
+
+    def display_species(self) -> str:
+        if self.species is None:
+            return "Unknown"
+        return self.species.value.replace("_", " ").title()
+
+    def display_career(self) -> str:
+        if self.is_pre_crystallization():
+            return "Jedi Praxeum Student"
+        return self.career.value.replace("_", " ").title()
+
     def narrative_status(self) -> str:
         lines = [
-            f"{self.name} | "
-            f"{self.species.value.title()} "
-            f"{self.career.value.replace('_', ' ').title()}",
+            f"{self.display_name()} | "
+            f"{self.display_species()} "
+            f"{self.display_career()}",
             f"Wounds: {self.current_wounds}/{self.wound_threshold} | "
             f"Strain: {self.current_strain}/{self.strain_threshold} | "
             f"Soak: {self.effective_soak()}",
         ]
+        if self.is_pre_crystallization():
+            lines.append(
+                "Pre-crystallization — discipline not yet committed. "
+                "Narrate as becoming, not being."
+            )
+        if self.behavioral_archetype:
+            lines.append(f"Behavioral archetype: {self.behavioral_archetype}")
         if self.active_injuries:
             lines.append(f"Injuries: {'; '.join(self.active_injuries)}")
         if self.motivation.obligation_value > 0:

@@ -829,6 +829,131 @@ class StoryArchitecture(BaseModel):
         return v
 
 
+# ── Character Creation Redesign (Phase 24) ───────────────────────────
+
+
+class RelationshipSeed(BaseModel):
+    """Pre-filled NPC relationship that comes with a background."""
+    npc_name: str
+    npc_role: str
+    initial_disposition: float = Field(ge=0.0, le=1.0, default=0.5)
+    relationship_summary: str
+
+
+class UniqueUnlock(BaseModel):
+    """A background-specific unlock that becomes available during play."""
+    unlock_id: str
+    description: str
+    trigger_type: str = ""  # "dialogue_tone", "flashback_access",
+                            # "conditional_branch", "skill_bonus", etc.
+
+
+class PrologueTailoring(BaseModel):
+    """How a background flavors the psychometric prologue."""
+    cold_open_concept: str = ""
+    archetype_scene_flavor: str = ""
+    diegetic_slot_preferences: dict[str, str] = {}
+
+
+class ProfessionAffinities(BaseModel):
+    """Suggested profession paths for this background."""
+    strong_fit: str
+    possible_fit: list[str] = []
+    tense_fit: list[str] = []
+
+
+class Background(BaseModel):
+    """A biographical background the player picks at character creation.
+
+    Backgrounds replace the upfront commit-to-everything model with a
+    biographical seed plus a behavioral archetype inferred during the
+    prologue. Profession is committed later via the crystallization
+    beat (see ProfessionCrystallization).
+    """
+    background_id: str = Field(min_length=1)
+    display_name: str
+    story_seed: str = Field(min_length=20)
+    default_names: list[str] = Field(min_length=1)
+    default_species: list[str] = Field(min_length=1)
+    default_skill_tilt: dict[str, int] = {}
+    default_loadout: str = ""  # loadout_id or "" for spine default
+    pre_filled_relationship: RelationshipSeed
+    unique_unlocks: list[UniqueUnlock] = []
+    prologue_tailoring: PrologueTailoring = Field(default_factory=PrologueTailoring)
+    profession_affinities: ProfessionAffinities
+
+
+class BackgroundVariant(BaseModel):
+    """One background's version of a prologue scene."""
+    prose: str = Field(min_length=20)
+    npc_names: list[str] = []
+    choice_overrides: list[str] = []  # 0..N, parallel to PrologueScene.choices
+
+
+class DiegeticSlot(BaseModel):
+    """In-fiction customization beat hosted by a prologue scene."""
+    slot_type: str  # "name_pick", "gender_pick", "appearance_flair"
+    prompt: str = ""  # what NPC asks / form text
+    optional: bool = True
+
+
+class IdentityPrologueScene(BaseModel):
+    """A psychometric prologue scene with optional background variants
+    and an optional diegetic customization slot. Distinct from
+    PrologueScene which is the legacy spine prologue model."""
+    scene_id: str = Field(min_length=1)
+    situation: str = Field(min_length=20)
+    background_variants: dict[str, BackgroundVariant] = {}
+    axis_tags: list[str] = []  # which axes this scene measures
+    choices: list[PrologueChoice] = Field(min_length=2, max_length=4)
+    diegetic_slot: Optional[DiegeticSlot] = None
+
+
+class IdentityPrologueArc(BaseModel):
+    """The Identity Prologue arc (Phase 24b)."""
+    scene_library: list[IdentityPrologueScene] = Field(min_length=3, max_length=5)
+    expected_scene_count: int = Field(ge=3, le=5, default=4)
+    diegetic_slots_required: list[str] = []
+    closing_recognition: str = ""  # mentor cue at prologue close
+
+
+class ProfessionPath(BaseModel):
+    """One option in the crystallization beat."""
+    career_id: str
+    talent_tree_id: str = ""
+    prose_flavor: str = ""
+    background_specific_id: str = ""  # if set, only available for this background
+    display_name: str = ""
+    summary: str = ""
+
+
+class SuggestionAlgorithm(BaseModel):
+    """Weights for which path the mentor highlights."""
+    background_weight: int = 2
+    archetype_weight: int = 2
+    skill_match_weight: int = 1
+
+
+class ProfessionCrystallization(BaseModel):
+    """The mid-game beat where the protagonist commits to a discipline."""
+    anchor_act: int = Field(ge=1, default=3)
+    mentor_npc: str = "Master Skywalker"
+    background_overrides: dict[str, str] = {}
+    paths: list[ProfessionPath] = Field(min_length=2)
+    suggestion_algorithm: SuggestionAlgorithm = Field(
+        default_factory=SuggestionAlgorithm
+    )
+    scene_seed: str = ""  # author hint for the LLM rendering of the beat
+
+
+class BeliefCommitmentSpec(BaseModel):
+    """A multi-clause belief that crystallizes during the prologue
+    (CoG-style personality lock)."""
+    axis: str
+    commitment_text: str = Field(min_length=10)
+    stat_effects: dict[str, int] = {}
+
+
 # ── Top-level spine ───────────────────────────────────────────────────
 
 
@@ -888,6 +1013,10 @@ class CampaignSpine(BaseModel):
     # ── Bond-event runtime (Trails-of-Cold-Steel pattern) ──
     bond_events: list[BondEvent] = []
     bond_event_system: Optional[BondEventSystem] = None
+    # ── Character Creation Redesign (Phase 24) ──
+    backgrounds: list[Background] = []
+    identity_prologue: Optional[IdentityPrologueArc] = None
+    profession_crystallization: Optional[ProfessionCrystallization] = None
 
     @field_validator("acts")
     @classmethod

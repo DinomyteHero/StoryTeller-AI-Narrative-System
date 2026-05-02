@@ -385,6 +385,27 @@ header {
   border-color: var(--accent-dim) !important;
   background: var(--border) !important;
 }
+
+/* ── Phase 24: Refinement & background picker buttons ──────────── */
+.refine-mini-btn {
+  background: var(--surface);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  padding: 0.3rem 0.55rem;
+  margin: 0.15rem 0.2rem 0.15rem 0;
+  font-family: inherit;
+  font-size: 0.78rem;
+  cursor: pointer;
+}
+.refine-mini-btn:hover {
+  border-color: var(--accent-dim);
+  background: var(--surface-alt);
+}
+
+#background-picker > div:hover {
+  border-color: var(--accent-dim) !important;
+}
 </style>
 </head>
 <body>
@@ -404,12 +425,88 @@ header {
     </button>
   </div>
 
+  <!-- ── Background Picker ─────────────────────────────────────── -->
+  <div id="background-screen" style="display:none">
+    <h2 style="color:var(--accent); margin-bottom:0.5rem;">Choose your background</h2>
+    <p style="color:var(--text-dim); font-size:0.9rem; margin-bottom:1rem;">
+      The Praxeum has accepted you. The path you take inside it has not been chosen yet —
+      but the path you took to it has. Pick the life you arrived from.
+    </p>
+    <div id="background-picker" style="text-align:left;">
+      <p style="color:var(--text-dim);">Loading backgrounds...</p>
+    </div>
+    <button class="start-btn" id="background-back-btn" onclick="backToCampaign()" style="margin-top:0.5rem; background:transparent; border:1px solid var(--border);">
+      Back
+    </button>
+  </div>
+
+  <!-- ── Refinement Screen ─────────────────────────────────────── -->
+  <div id="refinement-screen" style="display:none">
+    <h2 style="color:var(--accent); margin-bottom:0.25rem;">Refine your protagonist</h2>
+    <p style="color:var(--text-dim); font-size:0.85rem; margin-bottom:1rem;">
+      Every field has a default. Skip any section you do not care about — the
+      Praxeum will fill it in for you. Or expand each one to make it yours.
+    </p>
+    <div id="refinement-content"></div>
+    <div style="display:flex; gap:0.5rem; margin-top:1.2rem;">
+      <button class="start-btn" id="refinement-back-btn" onclick="backToBackgrounds()" style="background:transparent; border:1px solid var(--border); flex:0 0 auto;">
+        Back
+      </button>
+      <button class="start-btn" id="refinement-begin-btn" onclick="beginPrologue()" style="flex:1;">
+        Begin Prologue
+      </button>
+    </div>
+  </div>
+
+  <!-- ── Identity Prologue Screen ──────────────────────────────── -->
+  <div id="prologue-screen" style="display:none">
+    <header>
+      <span class="campaign-name" id="prologue-campaign-name"></span>
+      <span class="session-info" id="prologue-progress"></span>
+    </header>
+    <div class="error-msg" id="prologue-error"></div>
+    <div class="passage" id="prologue-passage"></div>
+    <div id="prologue-diegetic" style="margin-bottom:0.8rem;"></div>
+    <div class="choices" id="prologue-choices"></div>
+    <div class="loading" id="prologue-loading">
+      <div class="spinner"></div>
+      <div>The Praxeum reads your shape...</div>
+    </div>
+  </div>
+
+  <!-- ── Prologue Summary / Pre-Game Recap ─────────────────────── -->
+  <div id="prologue-summary-screen" style="display:none">
+    <h2 style="color:var(--accent); margin-bottom:0.5rem;">What the Praxeum has read in you</h2>
+    <div id="prologue-summary-content" style="background:var(--surface); border-radius:6px; padding:1.2rem; margin-bottom:1rem;"></div>
+    <button class="start-btn" id="open-game-btn" onclick="openMainLoop()" style="margin-top:0.6rem;">
+      Step into the story
+    </button>
+  </div>
+
+  <!-- ── Crystallization Choice Screen ─────────────────────────── -->
+  <div id="crystallize-screen" style="display:none">
+    <h2 style="color:var(--accent); margin-bottom:0.25rem;">A discipline asks for you</h2>
+    <p style="color:var(--text-dim); font-size:0.85rem; margin-bottom:1rem;" id="crystallize-mentor-line">
+      Your mentor calls you aside.
+    </p>
+    <div class="passage" id="crystallize-seed"></div>
+    <div id="crystallize-paths" style="margin-top:0.8rem;"></div>
+    <button class="start-btn" id="crystallize-back-btn" onclick="closeCrystallizeScreen()" style="margin-top:0.6rem; background:transparent; border:1px solid var(--border);">
+      Not yet
+    </button>
+  </div>
+
   <!-- ── Game Screen ───────────────────────────────────────────── -->
   <div id="game-screen" style="display:none">
     <header>
       <span class="campaign-name" id="campaign-name"></span>
       <span class="session-info" id="session-info"></span>
     </header>
+    <div style="display:flex; justify-content:flex-end; margin-bottom:0.5rem;">
+      <button id="crystallize-trigger-btn" onclick="openCrystallizeScreen()" style="display:none; background:transparent; color:var(--accent); border:1px solid var(--accent-dim); padding:0.3rem 0.7rem; border-radius:3px; font-family:inherit; font-size:0.78rem; cursor:pointer;">
+        Choose your discipline
+      </button>
+    </div>
 
     <div class="local-warning" id="local-warning">
       Local narration — loop test only
@@ -543,17 +640,49 @@ function selectCampaign(campaignName, displayName, characterId) {
   // Enable start button
   const btn = document.getElementById('start-btn');
   btn.disabled = false;
-  btn.textContent = 'Begin ' + displayName;
+  btn.textContent = 'Continue → choose background';
 }
 
-/* ── Start session ─────────────────────────────────────────────── */
+/* ── Start session — Phase 24 routes through background picker ── */
 async function startSession() {
   if (!selectedCampaign) return;
   const btn = document.getElementById('start-btn');
   btn.disabled = true;
-  btn.textContent = 'Starting...';
+  btn.textContent = 'Loading backgrounds...';
   clearError();
 
+  try {
+    const res = await fetch(
+      API + '/backgrounds?campaign_name='
+      + encodeURIComponent(selectedCampaign.campaign_name)
+    );
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ detail: res.statusText }));
+      throw new Error(err.detail || 'Failed to load backgrounds');
+    }
+    const data = await res.json();
+    if (!data.backgrounds || data.backgrounds.length === 0) {
+      // Campaign has no backgrounds defined — fall back to the legacy session creator.
+      await legacyStartSession();
+      return;
+    }
+    backgroundCatalog = {
+      backgrounds:    data.backgrounds,
+      gender_menu:    data.gender_menu || [],
+      pronoun_presets: data.pronoun_presets || {},
+    };
+    document.getElementById('start-screen').style.display = 'none';
+    document.getElementById('background-screen').style.display = 'block';
+    renderBackgroundPicker(data.backgrounds);
+  } catch (e) {
+    btn.disabled = false;
+    btn.textContent = 'Continue → choose background';
+    showError(e.message);
+  }
+}
+
+async function legacyStartSession() {
+  // Direct path used when a campaign has no backgrounds defined yet.
   try {
     const res = await fetch(API + '/session', {
       method: 'POST',
@@ -563,38 +692,566 @@ async function startSession() {
         character_id: selectedCampaign.character_id,
       }),
     });
-
     if (!res.ok) {
       const err = await res.json().catch(() => ({ detail: res.statusText }));
       throw new Error(err.detail || 'Failed to create session');
     }
-
     const data = await res.json();
     sessionId = data.session_id;
     streamingEnabled = data.streaming_enabled || false;
-
-    // Switch to game screen
     document.getElementById('start-screen').style.display = 'none';
     document.getElementById('game-screen').style.display = 'block';
     document.getElementById('campaign-name').textContent = selectedCampaign.display_name;
     updateSessionInfo(0);
-
-    // Render the "you are about to play..." session intro before turn 1.
-    // The intro is GM-facing flavour the player commits to before the
-    // opening narration begins; it carries forward into the prose contract.
     renderSessionIntro(data.session_intro);
     renderPassage(data.opening_narration);
     renderChoices(data.choices);
     showStatus(0, 0, 0);
   } catch (e) {
-    btn.disabled = false;
-    btn.textContent = 'Begin ' + selectedCampaign.display_name;
     showError(e.message);
+    document.getElementById('start-btn').disabled = false;
+    document.getElementById('start-btn').textContent = 'Continue → choose background';
   }
 }
 
 // Load campaigns on page load
 document.addEventListener('DOMContentLoaded', loadCampaigns);
+
+/* ── Background picker (Phase 24) ─────────────────────────────── */
+let backgroundCatalog = { backgrounds: [], gender_menu: [], pronoun_presets: {} };
+let selectedBackground = null;
+let refinementDraft = {
+  name: null,
+  species_id: null,
+  gender_id: null,
+  custom_pronouns: null,
+  appearance_flair: null,
+  skill_tilt_override: null,
+};
+let activeSession = { id: null, stage: null };
+let activeProlougeScene = null;
+
+function backToCampaign() {
+  document.getElementById('background-screen').style.display = 'none';
+  document.getElementById('start-screen').style.display = 'block';
+  selectedBackground = null;
+  document.getElementById('start-btn').disabled = !selectedCampaign;
+  document.getElementById('start-btn').textContent = selectedCampaign
+    ? 'Continue → choose background'
+    : 'Select a campaign to begin';
+}
+
+function renderBackgroundPicker(backgrounds) {
+  const picker = document.getElementById('background-picker');
+  let html = '';
+  for (const bg of backgrounds) {
+    const aff = bg.profession_affinities || {};
+    const tiltKeys = Object.keys(bg.default_skill_tilt || {});
+    const tiltStr = tiltKeys.length
+      ? tiltKeys.map(k => `${(bg.default_skill_tilt[k] >= 0 ? '+' : '') + bg.default_skill_tilt[k]} ${k.replace(/_/g, ' ')}`).join(', ')
+      : '';
+    html += `<div style="background:var(--surface); border:1px solid var(--border); border-radius:6px; padding:1rem; margin-bottom:0.75rem; cursor:pointer;" onclick="selectBackground('${_esc(bg.background_id)}')" data-bg-id="${_esc(bg.background_id)}">`
+      + `<div style="color:var(--accent); font-weight:bold; font-size:1.05rem;">${_esc(bg.display_name)}</div>`
+      + `<div style="color:var(--text); font-size:0.88rem; margin-top:0.5rem; line-height:1.5;">${_esc(bg.story_seed)}</div>`;
+    if (tiltStr) {
+      html += `<div style="color:var(--text-dim); font-size:0.75rem; margin-top:0.5rem;">Skill tilt: ${_esc(tiltStr)}</div>`;
+    }
+    if (aff.strong_fit) {
+      html += `<div style="color:var(--text-dim); font-size:0.75rem; margin-top:0.2rem;">Natural path: <span style="color:var(--accent-dim);">${_esc(aff.strong_fit)}</span></div>`;
+    }
+    const rel = bg.pre_filled_relationship || {};
+    if (rel.npc_name) {
+      html += `<div style="color:var(--text-dim); font-size:0.75rem; margin-top:0.2rem;">Pre-filled relationship: ${_esc(rel.npc_name)} — ${_esc(rel.npc_role)}</div>`;
+    }
+    html += `</div>`;
+  }
+  picker.innerHTML = html;
+}
+
+function selectBackground(bgId) {
+  const bg = backgroundCatalog.backgrounds.find(b => b.background_id === bgId);
+  if (!bg) return;
+  selectedBackground = bg;
+  // Reset refinement
+  refinementDraft = {
+    name: null,
+    species_id: null,
+    gender_id: null,
+    custom_pronouns: null,
+    appearance_flair: null,
+    skill_tilt_override: null,
+  };
+  document.getElementById('background-screen').style.display = 'none';
+  document.getElementById('refinement-screen').style.display = 'block';
+  renderRefinementScreen();
+}
+
+function backToBackgrounds() {
+  document.getElementById('refinement-screen').style.display = 'none';
+  document.getElementById('background-screen').style.display = 'block';
+}
+
+function renderRefinementScreen() {
+  if (!selectedBackground) return;
+  const bg = selectedBackground;
+  const root = document.getElementById('refinement-content');
+
+  // Default name preview (random pick from default_names)
+  const defaultName = (bg.default_names || ['Cael'])[
+    Math.floor(Math.random() * (bg.default_names?.length || 1))
+  ];
+  if (!refinementDraft.name) refinementDraft.name = defaultName;
+  if (!refinementDraft.species_id) refinementDraft.species_id = (bg.default_species || ['human'])[0];
+
+  let html = '';
+  html += `<div style="background:var(--surface); border-left:3px solid var(--accent); padding:0.8rem 1rem; border-radius:0 4px 4px 0; margin-bottom:1rem;">`
+    + `<div style="color:var(--accent); font-weight:bold;">${_esc(bg.display_name)}</div>`
+    + `<div style="color:var(--text); font-size:0.85rem; margin-top:0.4rem; line-height:1.5;">${_esc(bg.story_seed)}</div>`
+    + `<a href="#" onclick="backToBackgrounds(); return false;" style="color:var(--text-dim); font-size:0.78rem; display:inline-block; margin-top:0.4rem;">Change background</a>`
+    + `</div>`;
+
+  // Name section
+  html += refinementSection(
+    'Name',
+    `<span id="refinement-name-current">${_esc(refinementDraft.name)}</span>`,
+    `<div style="margin-top:0.5rem;"><label style="font-size:0.8rem; color:var(--text-dim); display:block; margin-bottom:0.4rem;">Pick a suggested name or type your own:</label>`
+    + (bg.default_names || []).map(n => `<button class="refine-mini-btn" onclick="setRefinementName('${_esc(n)}')">${_esc(n)}</button>`).join(' ')
+    + `<input id="refinement-name-input" type="text" placeholder="Or type a custom name…" maxlength="32" style="display:block; margin-top:0.5rem; width:100%; padding:0.4rem; background:var(--surface-alt); color:var(--text); border:1px solid var(--border); border-radius:3px; font-family:inherit;" oninput="setRefinementName(this.value)">`
+    + `</div>`
+  );
+
+  // Species section
+  const allSpeciesOptions = (bg.default_species || ['human']).slice();
+  html += refinementSection(
+    'Species',
+    `<span id="refinement-species-current">${_esc(refinementDraft.species_id)}</span>`,
+    `<div style="margin-top:0.5rem;"><label style="font-size:0.8rem; color:var(--text-dim); display:block; margin-bottom:0.4rem;">Suggested for ${_esc(bg.display_name)}:</label>`
+    + allSpeciesOptions.map(s => `<button class="refine-mini-btn" onclick="setRefinementSpecies('${_esc(s)}')">${_esc(s.replace(/_/g, ' '))}</button>`).join(' ')
+    + `<details style="margin-top:0.6rem;"><summary style="color:var(--text-dim); cursor:pointer; font-size:0.8rem;">Show all species</summary>`
+    + ['human','bothan','twi_lek','rodian','wookiee','zabrak','togruta','nautolan','mirialan','droid','mon_calamari','sullustan','pantoran','cathar','ithorian','kel_dor']
+        .map(s => `<button class="refine-mini-btn" onclick="setRefinementSpecies('${_esc(s)}')">${_esc(s.replace(/_/g, ' '))}</button>`).join(' ')
+    + `</details></div>`
+  );
+
+  // Gender / Pronouns
+  const currentGenderLabel = refinementDraft.gender_id
+    ? (backgroundCatalog.gender_menu.find(g => g.id === refinementDraft.gender_id)?.label || refinementDraft.gender_id)
+    : 'Not set (the Praxeum will ask)';
+  html += refinementSection(
+    'Gender / Pronouns',
+    `<span id="refinement-gender-current">${_esc(currentGenderLabel)}</span>`,
+    `<div style="margin-top:0.5rem;">`
+    + backgroundCatalog.gender_menu.map(g =>
+        `<button class="refine-mini-btn" onclick="setRefinementGender('${_esc(g.id)}')">${_esc(g.label)}</button>`
+      ).join('<br>')
+    + `<div id="custom-pronouns-form" style="display:${refinementDraft.gender_id === 'custom' ? 'block' : 'none'}; margin-top:0.6rem; padding-top:0.5rem; border-top:1px dashed var(--border);">`
+    + `<label style="font-size:0.78rem; color:var(--text-dim);">Subject (e.g. they)</label>`
+    + `<input type="text" id="cp-subject" maxlength="32" style="display:block; width:100%; padding:0.3rem; background:var(--surface-alt); border:1px solid var(--border); color:var(--text); margin-bottom:0.4rem;" oninput="updateCustomPronouns()">`
+    + `<label style="font-size:0.78rem; color:var(--text-dim);">Object (e.g. them)</label>`
+    + `<input type="text" id="cp-object" maxlength="32" style="display:block; width:100%; padding:0.3rem; background:var(--surface-alt); border:1px solid var(--border); color:var(--text); margin-bottom:0.4rem;" oninput="updateCustomPronouns()">`
+    + `<label style="font-size:0.78rem; color:var(--text-dim);">Possessive (e.g. their)</label>`
+    + `<input type="text" id="cp-possessive" maxlength="32" style="display:block; width:100%; padding:0.3rem; background:var(--surface-alt); border:1px solid var(--border); color:var(--text);" oninput="updateCustomPronouns()">`
+    + `</div></div>`
+  );
+
+  // Skill tilt summary (read-only by default)
+  const tiltKeys = Object.keys(bg.default_skill_tilt || {});
+  const tiltDisplay = tiltKeys.map(k => `${(bg.default_skill_tilt[k] >= 0 ? '+' : '') + bg.default_skill_tilt[k]} ${k.replace(/_/g, ' ')}`).join(', ');
+  html += refinementSection(
+    'Skill tilt',
+    tiltDisplay || 'baseline',
+    `<div style="margin-top:0.4rem; color:var(--text-dim); font-size:0.78rem;">Background-optimal allocation. Power users can edit ranks individually after the prologue if needed.</div>`
+  );
+
+  // Equipment summary
+  html += refinementSection(
+    'Equipment',
+    'Praxeum training kit (background-themed)',
+    `<div style="margin-top:0.4rem; color:var(--text-dim); font-size:0.78rem;">Training lightsaber, robes, archive datapad, two stimpacks. Background-themed flavour added based on your pick.</div>`
+  );
+
+  // Appearance flair
+  html += refinementSection(
+    'Appearance flair (optional)',
+    refinementDraft.appearance_flair || '<span style="color:var(--text-dim);">unset</span>',
+    `<textarea id="refinement-flair-input" maxlength="240" placeholder="Optional — hair, posture, a notable scar, the way they move…" rows="2" style="width:100%; margin-top:0.4rem; padding:0.4rem; background:var(--surface-alt); border:1px solid var(--border); color:var(--text); border-radius:3px; font-family:inherit;" oninput="setRefinementFlair(this.value)">${_esc(refinementDraft.appearance_flair || '')}</textarea>`
+  );
+
+  root.innerHTML = html;
+}
+
+function refinementSection(label, currentDisplay, expanded) {
+  return `<details style="background:var(--surface); border:1px solid var(--border); border-radius:5px; padding:0.7rem 0.9rem; margin-bottom:0.6rem;">`
+    + `<summary style="cursor:pointer; display:flex; justify-content:space-between; align-items:center; user-select:none;">`
+    + `<span style="color:var(--text); font-weight:600; font-size:0.92rem;">${_esc(label)}</span>`
+    + `<span style="color:var(--text-dim); font-size:0.82rem; text-align:right; max-width:55%; word-break:break-word;">${currentDisplay}</span>`
+    + `</summary>${expanded}</details>`;
+}
+
+function setRefinementName(name) {
+  refinementDraft.name = (name || '').slice(0, 32) || refinementDraft.name;
+  const el = document.getElementById('refinement-name-current');
+  if (el) el.textContent = refinementDraft.name;
+}
+
+function setRefinementSpecies(speciesId) {
+  refinementDraft.species_id = speciesId;
+  const el = document.getElementById('refinement-species-current');
+  if (el) el.textContent = speciesId;
+}
+
+function setRefinementGender(genderId) {
+  refinementDraft.gender_id = genderId;
+  const entry = backgroundCatalog.gender_menu.find(g => g.id === genderId);
+  if (entry && entry.pronouns && backgroundCatalog.pronoun_presets[entry.pronouns]) {
+    refinementDraft.custom_pronouns = null;
+  }
+  const el = document.getElementById('refinement-gender-current');
+  if (el) el.textContent = entry ? entry.label : genderId;
+  document.getElementById('custom-pronouns-form').style.display
+    = (genderId === 'custom') ? 'block' : 'none';
+}
+
+function updateCustomPronouns() {
+  refinementDraft.custom_pronouns = {
+    subject:    (document.getElementById('cp-subject').value || 'they').slice(0, 32),
+    object:     (document.getElementById('cp-object').value || 'them').slice(0, 32),
+    possessive: (document.getElementById('cp-possessive').value || 'their').slice(0, 32),
+  };
+}
+
+function setRefinementFlair(text) {
+  refinementDraft.appearance_flair = (text || '').slice(0, 240);
+}
+
+/* ── Begin Prologue ───────────────────────────────────────────── */
+async function beginPrologue() {
+  if (!selectedBackground || !selectedCampaign) return;
+  const btn = document.getElementById('refinement-begin-btn');
+  btn.disabled = true;
+  btn.textContent = 'Starting...';
+
+  const body = {
+    campaign_name:    selectedCampaign.campaign_name,
+    background_id:    selectedBackground.background_id,
+    name:             refinementDraft.name,
+    species_id:       refinementDraft.species_id,
+    gender_id:        refinementDraft.gender_id,
+    custom_pronouns:  refinementDraft.custom_pronouns,
+    appearance_flair: refinementDraft.appearance_flair,
+    skill_tilt_override: refinementDraft.skill_tilt_override,
+  };
+
+  try {
+    const res = await fetch(API + '/refine_character', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ detail: res.statusText }));
+      throw new Error(err.detail || 'Failed to begin prologue');
+    }
+    const data = await res.json();
+    sessionId = data.session_id;
+    activeSession = { id: data.session_id, stage: 'identity_prologue' };
+    document.getElementById('refinement-screen').style.display = 'none';
+    document.getElementById('prologue-screen').style.display = 'block';
+    document.getElementById('prologue-campaign-name').textContent = selectedCampaign.display_name;
+    fetchPrologueScene();
+  } catch (e) {
+    btn.disabled = false;
+    btn.textContent = 'Begin Prologue';
+    showError(e.message);
+  }
+}
+
+/* ── Identity Prologue runner ─────────────────────────────────── */
+async function fetchPrologueScene() {
+  document.getElementById('prologue-loading').style.display = 'flex';
+  document.getElementById('prologue-choices').innerHTML = '';
+  document.getElementById('prologue-passage').innerHTML = '';
+  document.getElementById('prologue-diegetic').innerHTML = '';
+  try {
+    const res = await fetch(API + '/prologue/' + sessionId + '/scene', { method: 'POST' });
+    if (!res.ok) throw new Error('Failed to fetch prologue scene');
+    const data = await res.json();
+    document.getElementById('prologue-loading').style.display = 'none';
+    if (data.stage === 'complete' || !data.scene) {
+      finalizePrologue();
+      return;
+    }
+    activeProlougeScene = data.scene;
+    renderPrologueScene(data.scene, data.expected_total);
+  } catch (e) {
+    document.getElementById('prologue-loading').style.display = 'none';
+    document.getElementById('prologue-error').textContent = e.message;
+    document.getElementById('prologue-error').classList.add('visible');
+  }
+}
+
+function renderPrologueScene(scene, expectedTotal) {
+  const passage = document.getElementById('prologue-passage');
+  const choicesEl = document.getElementById('prologue-choices');
+  const diegeticEl = document.getElementById('prologue-diegetic');
+  const progressEl = document.getElementById('prologue-progress');
+
+  progressEl.textContent = 'Scene ' + (scene.scene_index + 1) + ' of ' + (expectedTotal || scene.scene_count);
+  passage.innerHTML = `<div style="margin-bottom:0.7rem; color:var(--text-dim); font-size:0.85rem; font-style:italic;">${_esc(scene.situation)}</div>`
+    + `<div style="white-space:pre-wrap;">${_esc(scene.prose)}</div>`;
+
+  // Diegetic slot UI
+  if (scene.diegetic_slot) {
+    diegeticEl.innerHTML = renderDiegeticSlot(scene.diegetic_slot);
+  } else {
+    diegeticEl.innerHTML = '';
+  }
+
+  // Choices
+  let html = '';
+  scene.choices.forEach((c, i) => {
+    html += `<button class="choice-btn" onclick="submitPrologueChoice(${i})">${_esc(c.text)}</button>`;
+  });
+  choicesEl.innerHTML = html;
+}
+
+function renderDiegeticSlot(slot) {
+  const t = slot.slot_type;
+  if (t === 'name_pick') {
+    const names = (selectedBackground.default_names || []).slice(0, 5);
+    return `<div style="background:var(--surface-alt); border:1px solid var(--border); border-radius:5px; padding:0.7rem 0.9rem;">`
+      + `<div style="color:var(--accent); font-size:0.82rem; margin-bottom:0.4rem;">${_esc(slot.prompt || 'Pick a name')}</div>`
+      + names.map(n => `<button class="refine-mini-btn" onclick="setDiegeticName('${_esc(n)}')">${_esc(n)}</button>`).join(' ')
+      + `<input id="diegetic-name-input" type="text" maxlength="32" placeholder="Or type your own…" style="display:block; width:100%; margin-top:0.5rem; padding:0.4rem; background:var(--surface); border:1px solid var(--border); color:var(--text); font-family:inherit;">`
+      + `</div>`;
+  }
+  if (t === 'gender_pick') {
+    return `<div style="background:var(--surface-alt); border:1px solid var(--border); border-radius:5px; padding:0.7rem 0.9rem;">`
+      + `<div style="color:var(--accent); font-size:0.82rem; margin-bottom:0.4rem;">${_esc(slot.prompt || 'Pick gender')}</div>`
+      + backgroundCatalog.gender_menu.map(g =>
+          `<button class="refine-mini-btn" onclick="setDiegeticGender('${_esc(g.id)}')">${_esc(g.label)}</button>`
+        ).join('<br>')
+      + `</div>`;
+  }
+  if (t === 'appearance_flair') {
+    return `<div style="background:var(--surface-alt); border:1px solid var(--border); border-radius:5px; padding:0.7rem 0.9rem;">`
+      + `<div style="color:var(--accent); font-size:0.82rem; margin-bottom:0.4rem;">${_esc(slot.prompt || 'Describe what they see')}</div>`
+      + `<textarea id="diegetic-flair-input" maxlength="240" rows="2" placeholder="Optional — hair, posture, scars…" style="width:100%; padding:0.4rem; background:var(--surface); border:1px solid var(--border); color:var(--text); border-radius:3px; font-family:inherit;"></textarea>`
+      + `</div>`;
+  }
+  return '';
+}
+
+let pendingDiegeticPayload = null;
+
+function setDiegeticName(name) {
+  pendingDiegeticPayload = { name: name };
+  document.getElementById('diegetic-name-input').value = name;
+}
+
+function setDiegeticGender(genderId) {
+  pendingDiegeticPayload = { gender_id: genderId };
+}
+
+function gatherDiegeticPayload(slot) {
+  if (!slot) return null;
+  if (slot.slot_type === 'name_pick') {
+    const input = document.getElementById('diegetic-name-input');
+    const typed = input ? (input.value || '').trim() : '';
+    if (typed) return { name: typed.slice(0, 32) };
+    return pendingDiegeticPayload || null;
+  }
+  if (slot.slot_type === 'gender_pick') {
+    return pendingDiegeticPayload || null;
+  }
+  if (slot.slot_type === 'appearance_flair') {
+    const ta = document.getElementById('diegetic-flair-input');
+    const txt = ta ? (ta.value || '').trim() : '';
+    if (!txt) return null;
+    return { appearance_flair: txt.slice(0, 240) };
+  }
+  return null;
+}
+
+async function submitPrologueChoice(chosenIndex) {
+  if (!activeProlougeScene) return;
+  const payload = gatherDiegeticPayload(activeProlougeScene.diegetic_slot);
+  pendingDiegeticPayload = null;
+  document.getElementById('prologue-loading').style.display = 'flex';
+  try {
+    const res = await fetch(API + '/prologue/' + sessionId + '/choose', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ chosen_index: chosenIndex, diegetic_payload: payload }),
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ detail: res.statusText }));
+      throw new Error(err.detail || 'Choice failed');
+    }
+    const data = await res.json();
+    document.getElementById('prologue-loading').style.display = 'none';
+    if (data.stage === 'complete') {
+      finalizePrologue();
+      return;
+    }
+    activeProlougeScene = data.next_scene;
+    if (data.next_scene) {
+      renderPrologueScene(data.next_scene, data.next_scene.scene_count);
+    }
+  } catch (e) {
+    document.getElementById('prologue-loading').style.display = 'none';
+    document.getElementById('prologue-error').textContent = e.message;
+    document.getElementById('prologue-error').classList.add('visible');
+  }
+}
+
+async function finalizePrologue() {
+  document.getElementById('prologue-loading').style.display = 'flex';
+  try {
+    const res = await fetch(API + '/prologue/' + sessionId + '/finalize', { method: 'POST' });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ detail: res.statusText }));
+      throw new Error(err.detail || 'Failed to finalize prologue');
+    }
+    const data = await res.json();
+    document.getElementById('prologue-loading').style.display = 'none';
+    document.getElementById('prologue-screen').style.display = 'none';
+    document.getElementById('prologue-summary-screen').style.display = 'block';
+    renderPrologueSummary(data);
+  } catch (e) {
+    document.getElementById('prologue-loading').style.display = 'none';
+    document.getElementById('prologue-error').textContent = e.message;
+    document.getElementById('prologue-error').classList.add('visible');
+  }
+}
+
+function renderPrologueSummary(data) {
+  const root = document.getElementById('prologue-summary-content');
+  const summary = data.summary || {};
+  const character = data.character || {};
+  let html = '';
+  html += `<div style="color:var(--accent); font-weight:bold; margin-bottom:0.4rem;">Behavioral archetype</div>`;
+  html += `<div style="font-size:0.95rem;">${_esc(summary.behavioral_archetype || '')}</div>`;
+  if (summary.archetype_description) {
+    html += `<div style="color:var(--text-dim); font-size:0.85rem; margin-top:0.3rem;">${_esc(summary.archetype_description)}</div>`;
+  }
+  if ((summary.personality_locks || []).length) {
+    html += `<div style="color:var(--accent); font-weight:bold; margin-top:0.9rem; margin-bottom:0.3rem;">What you have come to believe</div>`;
+    html += `<ul style="margin:0; padding-left:1.2rem;">`;
+    for (const l of summary.personality_locks) {
+      html += `<li style="margin-bottom:0.4rem; font-size:0.9rem;">${_esc(l.commitment_text)}<span style="color:var(--text-dim); margin-left:0.4rem; font-size:0.75rem;">[${_esc(l.axis)}]</span></li>`;
+    }
+    html += `</ul>`;
+  }
+  if (character.skill_tilt) {
+    const tiltKeys = Object.keys(character.skill_tilt);
+    if (tiltKeys.length) {
+      html += `<div style="color:var(--accent); font-weight:bold; margin-top:0.9rem; margin-bottom:0.3rem;">Skill tilt going forward</div>`;
+      html += `<div style="color:var(--text-dim); font-size:0.85rem;">${
+        tiltKeys.map(k => `${(character.skill_tilt[k] >= 0 ? '+' : '') + character.skill_tilt[k]} ${k.replace(/_/g, ' ')}`).join(' · ')
+      }</div>`;
+    }
+  }
+  html += `<div style="margin-top:1rem; color:var(--text-dim); font-size:0.82rem; font-style:italic;">No discipline yet. The Praxeum is asking you to become — not yet to be.</div>`;
+  root.innerHTML = html;
+}
+
+async function openMainLoop() {
+  const btn = document.getElementById('open-game-btn');
+  btn.disabled = true;
+  btn.textContent = 'The Praxeum opens its doors...';
+  try {
+    const res = await fetch(API + '/session/' + sessionId + '/start_main_loop', { method: 'POST' });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ detail: res.statusText }));
+      throw new Error(err.detail || 'Failed to start main loop');
+    }
+    const data = await res.json();
+    streamingEnabled = false;  // first turn already generated; subsequent turns can stream
+    document.getElementById('prologue-summary-screen').style.display = 'none';
+    document.getElementById('game-screen').style.display = 'block';
+    document.getElementById('campaign-name').textContent = selectedCampaign.display_name;
+    updateSessionInfo(0);
+    renderPassage(data.opening_narration);
+    renderChoices(data.choices);
+    showStatus(0, 0, 0);
+  } catch (e) {
+    btn.disabled = false;
+    btn.textContent = 'Step into the story';
+    showError(e.message);
+  }
+}
+
+/* ── Crystallization screen ───────────────────────────────────── */
+async function openCrystallizeScreen() {
+  if (!sessionId) return;
+  try {
+    const res = await fetch(API + '/session/' + sessionId + '/crystallize');
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ detail: res.statusText }));
+      throw new Error(err.detail || 'Failed to load crystallization options');
+    }
+    const data = await res.json();
+    document.getElementById('game-screen').style.display = 'none';
+    document.getElementById('crystallize-screen').style.display = 'block';
+    document.getElementById('crystallize-mentor-line').textContent = `${data.mentor_npc} calls you aside.`;
+    document.getElementById('crystallize-seed').textContent = data.scene_seed;
+    renderCrystallizePaths(data);
+  } catch (e) {
+    showError(e.message);
+  }
+}
+
+function renderCrystallizePaths(data) {
+  const root = document.getElementById('crystallize-paths');
+  let html = '';
+  for (const p of data.paths || []) {
+    const isSuggested = p.is_suggested;
+    const border = isSuggested ? '2px solid var(--accent)' : '1px solid var(--border)';
+    html += `<div style="background:var(--surface); border:${border}; border-radius:6px; padding:1rem; margin-bottom:0.7rem;">`;
+    html += `<div style="display:flex; justify-content:space-between; align-items:baseline;">`;
+    html += `<span style="color:var(--accent); font-weight:bold; font-size:1.05rem;">${_esc(p.display_name || p.career_id)}</span>`;
+    if (isSuggested) {
+      html += `<span style="color:var(--accent); font-size:0.75rem; font-style:italic;">— what your pattern points toward</span>`;
+    }
+    if (p.background_specific) {
+      html += `<span style="color:var(--accent-dim); font-size:0.7rem;">background-specific</span>`;
+    }
+    html += `</div>`;
+    html += `<div style="color:var(--text); font-size:0.9rem; margin-top:0.5rem; line-height:1.5;">${_esc(p.summary || '')}</div>`;
+    if (p.reasoning) {
+      html += `<div style="color:var(--text-dim); font-size:0.72rem; margin-top:0.4rem;">${_esc(p.reasoning)}</div>`;
+    }
+    html += `<button class="start-btn" style="margin-top:0.5rem;" onclick="commitCrystallize(${p.index})">Choose this path</button>`;
+    html += `</div>`;
+  }
+  root.innerHTML = html;
+}
+
+async function commitCrystallize(pathIndex) {
+  try {
+    const res = await fetch(API + '/session/' + sessionId + '/crystallize', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ chosen_path_index: pathIndex }),
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ detail: res.statusText }));
+      throw new Error(err.detail || 'Crystallization failed');
+    }
+    const data = await res.json();
+    document.getElementById('crystallize-screen').style.display = 'none';
+    document.getElementById('game-screen').style.display = 'block';
+    showError('You commit to the path of ' + (data.result.display_name || data.result.career) + '. The training tree opens.');
+  } catch (e) {
+    showError(e.message);
+  }
+}
+
+function closeCrystallizeScreen() {
+  document.getElementById('crystallize-screen').style.display = 'none';
+  document.getElementById('game-screen').style.display = 'block';
+}
 
 /* ── Take a turn ───────────────────────────────────────────────── */
 async function takeTurn(choiceIndex, freeFormText) {
@@ -947,6 +1604,29 @@ function showStatus(turn, wounds, strain) {
   document.getElementById('status-turn').textContent = 'Turn ' + turn;
   document.getElementById('status-wounds').textContent = 'Wounds: ' + wounds;
   document.getElementById('status-strain').textContent = 'Strain: ' + strain;
+  maybeSurfaceCrystallization();
+}
+
+/* ── Phase 24: surface the crystallization beat at the right time ─ */
+async function maybeSurfaceCrystallization() {
+  if (!sessionId) return;
+  try {
+    const res = await fetch(API + '/session/' + sessionId);
+    if (!res.ok) return;
+    const data = await res.json();
+    const character = data.character || {};
+    const arc = data.arc_state || {};
+    const btn = document.getElementById('crystallize-trigger-btn');
+    if (!btn) return;
+    const isStudent = character.career === 'praxeum_student' || character.career === 'jedi_student';
+    const crystallized = !!character.crystallized;
+    const act = parseInt(arc.current_act || 1, 10);
+    if (isStudent && !crystallized && act >= 3) {
+      btn.style.display = 'inline-block';
+    } else {
+      btn.style.display = 'none';
+    }
+  } catch (e) { /* Best-effort surface; don't break the game on failure. */ }
 }
 
 function updateSessionInfo(turn) {

@@ -14,7 +14,13 @@
       "player_facing_question": "Can I be known by one true name and still survive?",
       "primary_payoff": "Clovis's ending identity is defined by which people he lets matter before the war-temple.",
       "bond_priority": 1,
-      "act_focus": [1, 2, 3, 4, 5]
+      "act_focus": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ]
     },
     {
       "name": "Joran Veska",
@@ -25,7 +31,12 @@
       "player_facing_question": "Can the friend who betrays me still be someone I try to save?",
       "primary_payoff": "His bond state is the primary lever for Open Door, Long Road, The Law, and What Remains.",
       "bond_priority": 1,
-      "act_focus": [1, 2, 3, 5]
+      "act_focus": [
+        1,
+        2,
+        3,
+        5
+      ]
     },
     {
       "name": "Rann Veska",
@@ -36,7 +47,13 @@
       "player_facing_question": "Can hope survive being checked against the facts?",
       "primary_payoff": "Her trust defines whether the Third Path feels chosen, desperate, or impossible.",
       "bond_priority": 1,
-      "act_focus": [1, 2, 3, 4, 5]
+      "act_focus": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ]
     },
     {
       "name": "Tarsh Voll",
@@ -47,7 +64,12 @@
       "player_facing_question": "Can someone like us belong here without becoming polished first?",
       "primary_payoff": "High bond makes the Horizon, academy infrastructure, and early belonging feel earned.",
       "bond_priority": 2,
-      "act_focus": [1, 2, 4, 5]
+      "act_focus": [
+        1,
+        2,
+        4,
+        5
+      ]
     },
     {
       "name": "Brann Riako",
@@ -58,7 +80,11 @@
       "player_facing_question": "Can old Imperial habits be used to save people the Empire would have discarded?",
       "primary_payoff": "His Act 4 cost lands as witnessed sacrifice or lonely consequence.",
       "bond_priority": 2,
-      "act_focus": [1, 2, 4]
+      "act_focus": [
+        1,
+        2,
+        4
+      ]
     },
     {
       "name": "Cassen Vell",
@@ -69,7 +95,12 @@
       "player_facing_question": "Can privilege become protection instead of extraction?",
       "primary_payoff": "His refusal of family extraction shows the academy becoming a real home.",
       "bond_priority": 3,
-      "act_focus": [1, 2, 4, 5]
+      "act_focus": [
+        1,
+        2,
+        4,
+        5
+      ]
     },
     {
       "name": "Inya Vorn",
@@ -80,7 +111,11 @@
       "player_facing_question": "Is discipline what was given to me, or what I choose under pressure?",
       "primary_payoff": "Her bond affects who survives the Drel/Sona combat layer in Act 5.",
       "bond_priority": 3,
-      "act_focus": [2, 3, 5]
+      "act_focus": [
+        2,
+        3,
+        5
+      ]
     },
     {
       "name": "Lirah Tann",
@@ -91,117 +126,279 @@
       "player_facing_question": "Can a calling count if I am still angry about what it cost?",
       "primary_payoff": "Her bond determines whether triage in Acts 4-5 becomes collapse, competence, or grace.",
       "bond_priority": 3,
-      "act_focus": [1, 2, 4, 5]
+      "act_focus": [
+        1,
+        2,
+        4,
+        5
+      ]
     }
   ],
   "supporting_cast_tiers": [
     {
       "tier": "core_party",
       "purpose": "The recurring social-RPG party. These characters receive priority in ordinary-life scenes, bond slots, and Act 5 payoff.",
-      "members": ["Clovis Beryl", "Joran Veska", "Rann Veska", "Tarsh Voll", "Brann Riako", "Cassen Vell", "Inya Vorn", "Lirah Tann"]
+      "members": [
+        "Clovis Beryl",
+        "Joran Veska",
+        "Rann Veska",
+        "Tarsh Voll",
+        "Brann Riako",
+        "Cassen Vell",
+        "Inya Vorn",
+        "Lirah Tann"
+      ]
     },
     {
       "tier": "rotating_cohort",
       "purpose": "Optional social-link characters who add depth without needing equal screen time each playthrough.",
-      "members": ["Vesh Karro", "Olm Sefa", "Loka Hask", "Iila Vand"]
+      "members": [
+        "Vesh Karro",
+        "Olm Sefa",
+        "Loka Hask",
+        "Iila Vand"
+      ]
     },
     {
       "tier": "mentors_and_guests",
       "purpose": "Authority, instruction, and Legends texture. Use them when their function matters; do not let canon guests solve Clovis's story.",
-      "members": ["Luke Skywalker", "Tionne", "Kam Solusar", "Cilghal", "Streen", "Kyp Durron", "Mara Jade", "Kyle Katarn", "Captain Tev", "Talon Karrde"]
+      "members": [
+        "Luke Skywalker",
+        "Tionne",
+        "Kam Solusar",
+        "Cilghal",
+        "Streen",
+        "Kyp Durron",
+        "Mara Jade",
+        "Kyle Katarn",
+        "Captain Tev",
+        "Talon Karrde"
+      ]
     },
     {
       "tier": "antagonist_cell",
       "purpose": "Opposition pressure. Each antagonist should test a specific party value rather than simply increase danger.",
-      "members": ["Vornn", "Drel Vass", "Sona Kress", "Captain Sarek Thane", "Doctor Eilana Threnn"]
+      "members": [
+        "Vornn",
+        "Drel Vass",
+        "Sona Kress",
+        "Captain Sarek Thane",
+        "Doctor Eilana Threnn"
+      ]
     }
   ],
   "bond_act_plan": [
     {
       "act": 1,
       "slots": 2,
-      "required_story_bonds": ["Joran Veska"],
-      "optional_party_bonds": ["Tarsh Voll", "Rann Veska", "Cassen Vell", "Lirah Tann"],
-      "guest_bonds": ["Captain Tev", "Talon Karrde"],
-      "group_scene_ids": ["group_first_dinner", "group_archive_chore_day"],
+      "required_story_bonds": [
+        "Joran Veska"
+      ],
+      "optional_party_bonds": [
+        "Tarsh Voll",
+        "Rann Veska",
+        "Cassen Vell",
+        "Lirah Tann"
+      ],
+      "guest_bonds": [
+        "Captain Tev",
+        "Talon Karrde"
+      ],
+      "group_scene_ids": [
+        "group_first_dinner",
+        "group_archive_chore_day"
+      ],
       "pacing_note": "Slowest act. Prioritize first impressions, ordinary life, and one clear chosen peer bond."
     },
     {
       "act": 2,
       "slots": 3,
-      "required_story_bonds": ["Brann Riako", "Joran Veska"],
-      "optional_party_bonds": ["Tarsh Voll", "Rann Veska", "Inya Vorn", "Cassen Vell", "Lirah Tann"],
-      "guest_bonds": ["Cilghal", "Kyle Katarn"],
-      "group_scene_ids": ["group_training_rotation", "group_post_wound_medbay"],
+      "required_story_bonds": [
+        "Brann Riako",
+        "Joran Veska"
+      ],
+      "optional_party_bonds": [
+        "Tarsh Voll",
+        "Rann Veska",
+        "Inya Vorn",
+        "Cassen Vell",
+        "Lirah Tann"
+      ],
+      "guest_bonds": [
+        "Cilghal",
+        "Kyle Katarn"
+      ],
+      "group_scene_ids": [
+        "group_training_rotation",
+        "group_post_wound_medbay"
+      ],
       "pacing_note": "Investigation act. Let the player choose who becomes their practical party before suspicion hardens."
     },
     {
       "act": 3,
       "slots": 2,
-      "required_story_bonds": ["Joran Veska"],
-      "optional_party_bonds": ["Rann Veska", "Inya Vorn", "Cassen Vell", "Lirah Tann", "Brann Riako"],
-      "guest_bonds": ["Kyle Katarn", "Luke Skywalker"],
-      "group_scene_ids": ["group_dormitory_argument"],
+      "required_story_bonds": [
+        "Joran Veska"
+      ],
+      "optional_party_bonds": [
+        "Rann Veska",
+        "Inya Vorn",
+        "Cassen Vell",
+        "Lirah Tann",
+        "Brann Riako"
+      ],
+      "guest_bonds": [
+        "Kyle Katarn",
+        "Luke Skywalker"
+      ],
+      "group_scene_ids": [
+        "group_dormitory_argument"
+      ],
       "pacing_note": "Midpoint rupture. Social time narrows because the Joran truth must dominate."
     },
     {
       "act": 4,
       "slots": 2,
-      "required_story_bonds": ["Rann Veska", "Brann Riako"],
-      "optional_party_bonds": ["Tarsh Voll", "Cassen Vell", "Lirah Tann", "Vesh Karro"],
-      "guest_bonds": ["Talon Karrde", "Mara Jade", "Captain Tev"],
-      "group_scene_ids": ["group_mission_briefing", "group_breach_aftermath"],
+      "required_story_bonds": [
+        "Rann Veska",
+        "Brann Riako"
+      ],
+      "optional_party_bonds": [
+        "Tarsh Voll",
+        "Cassen Vell",
+        "Lirah Tann",
+        "Vesh Karro"
+      ],
+      "guest_bonds": [
+        "Talon Karrde",
+        "Mara Jade",
+        "Captain Tev"
+      ],
+      "group_scene_ids": [
+        "group_mission_briefing",
+        "group_breach_aftermath"
+      ],
       "pacing_note": "Consequence act. Bonds should pay off under stress rather than introduce many new threads."
     },
     {
       "act": 5,
       "slots": 1,
       "required_story_bonds": [],
-      "optional_party_bonds": ["Joran Veska", "Rann Veska", "Tarsh Voll", "Cassen Vell", "Inya Vorn", "Lirah Tann"],
-      "guest_bonds": ["Kyle Katarn"],
-      "group_scene_ids": ["group_final_hyperspace_lull"],
+      "optional_party_bonds": [
+        "Joran Veska",
+        "Rann Veska",
+        "Tarsh Voll",
+        "Cassen Vell",
+        "Inya Vorn",
+        "Lirah Tann"
+      ],
+      "guest_bonds": [
+        "Kyle Katarn"
+      ],
+      "group_scene_ids": [
+        "group_final_hyperspace_lull"
+      ],
       "pacing_note": "Final act. One last chosen conversation, then payoff. No new social arcs."
     }
   ],
   "bond_pacing_matrix": {
     "policy": "Keep the full bond library as authored material, but surface only required story bonds and a small priority pool by default. Optional and rare bonds should require clear player drift, prior attention, or a directly relevant scene context. A typical playthrough should feel curated, not completionist.",
-    "recommended_playthrough_target": [12, 16],
+    "recommended_playthrough_target": [
+      12,
+      16
+    ],
     "hard_cut_ids": [],
     "no_cut_reason": "No bond event is a hard cut yet. The library is large but every event now has a clear function, payoff, and route value. Pruning should happen at runtime offer priority rather than deleting authored routes.",
     "act_plans": [
       {
         "act": 1,
         "max_one_on_one_offers": 2,
-        "required_story": ["bond_joran_01_late_sweep"],
-        "priority_pool": ["bond_tarsh_01_first_dinner", "bond_rann_01_verifying", "bond_brann_01_cadet_id"],
-        "optional_pool": ["bond_rann_02_knife_lesson", "bond_cassen_01_senate_dinner", "bond_tarsh_02_engine_room", "bond_lirah_01_kitchen_rotation"],
-        "rare_pool": ["bond_olm_01_hand_gesture", "bond_olm_02_family_recipe", "bond_vesh_01_the_argument", "bond_loka_01_wordless", "bond_iila_01_ration_bar"],
+        "required_story": [
+          "bond_joran_01_late_sweep"
+        ],
+        "priority_pool": [
+          "bond_tarsh_01_first_dinner",
+          "bond_rann_01_verifying",
+          "bond_brann_01_cadet_id"
+        ],
+        "optional_pool": [
+          "bond_rann_02_knife_lesson",
+          "bond_cassen_01_senate_dinner",
+          "bond_tarsh_02_engine_room",
+          "bond_lirah_01_kitchen_rotation"
+        ],
+        "rare_pool": [
+          "bond_olm_01_hand_gesture",
+          "bond_olm_02_family_recipe",
+          "bond_vesh_01_the_argument",
+          "bond_loka_01_wordless",
+          "bond_iila_01_ration_bar"
+        ],
         "guidance": "Act 1 should breathe, but not scatter. Always build Joran. Then give the player one warm peer path and one chosen curiosity path."
       },
       {
         "act": 2,
         "max_one_on_one_offers": 3,
-        "required_story": ["bond_joran_02_sparring_bargain", "bond_brann_02_imperial_pattern"],
-        "priority_pool": ["bond_joran_03_letter_unsent", "bond_joran_04_three_drinks", "bond_rann_03_why_she_doesnt_sleep", "bond_inya_01_sparring_loss", "bond_cassen_02_holocomm_joke"],
-        "optional_pool": ["bond_tarsh_03_the_tune", "bond_inya_02_father_form", "bond_lirah_02_letter_arrives", "bond_olm_03_the_fragment"],
-        "rare_pool": ["bond_vesh_02_father_present_tense"],
+        "required_story": [
+          "bond_joran_02_sparring_bargain",
+          "bond_brann_02_imperial_pattern"
+        ],
+        "priority_pool": [
+          "bond_joran_03_letter_unsent",
+          "bond_joran_04_three_drinks",
+          "bond_rann_03_why_she_doesnt_sleep",
+          "bond_inya_01_sparring_loss",
+          "bond_cassen_02_holocomm_joke"
+        ],
+        "optional_pool": [
+          "bond_tarsh_03_the_tune",
+          "bond_inya_02_father_form",
+          "bond_lirah_02_letter_arrives",
+          "bond_olm_03_the_fragment"
+        ],
+        "rare_pool": [
+          "bond_vesh_02_father_present_tense"
+        ],
         "guidance": "Act 2 has the greatest offer pressure. Default to Joran, Brann, and one player-selected companion. Do not let side links delay the investigation."
       },
       {
         "act": 3,
         "max_one_on_one_offers": 2,
-        "required_story": ["bond_joran_05_what_he_wont_apologize_for"],
-        "priority_pool": ["bond_rann_04_telling_her", "bond_kyle_01_merc_story", "bond_loka_02_what_he_has_felt"],
-        "optional_pool": ["bond_cassen_03_bracelet", "bond_olm_04_telling_tionne", "bond_inya_03_surviving_practitioner", "bond_lirah_03_the_anger", "bond_iila_02_the_question"],
+        "required_story": [
+          "bond_joran_05_what_he_wont_apologize_for"
+        ],
+        "priority_pool": [
+          "bond_rann_04_telling_her",
+          "bond_kyle_01_merc_story",
+          "bond_loka_02_what_he_has_felt"
+        ],
+        "optional_pool": [
+          "bond_cassen_03_bracelet",
+          "bond_olm_04_telling_tionne",
+          "bond_inya_03_surviving_practitioner",
+          "bond_lirah_03_the_anger",
+          "bond_iila_02_the_question"
+        ],
         "rare_pool": [],
         "guidance": "Act 3 belongs to the Joran rupture. Other bonds should either clarify that rupture or help the player process it."
       },
       {
         "act": 4,
         "max_one_on_one_offers": 2,
-        "required_story": ["bond_brann_03_last_stand"],
-        "priority_pool": ["bond_rann_05_at_the_wake", "bond_tarsh_04_berris_alive", "bond_cassen_04_refusing_shuttle", "bond_lirah_04_triage_crack"],
-        "optional_pool": ["bond_kyle_02_two_traditions", "bond_vesh_03_three_things", "bond_vesh_04_mothers_politics"],
+        "required_story": [
+          "bond_brann_03_last_stand"
+        ],
+        "priority_pool": [
+          "bond_rann_05_at_the_wake",
+          "bond_tarsh_04_berris_alive",
+          "bond_cassen_04_refusing_shuttle",
+          "bond_lirah_04_triage_crack"
+        ],
+        "optional_pool": [
+          "bond_kyle_02_two_traditions",
+          "bond_vesh_03_three_things",
+          "bond_vesh_04_mothers_politics"
+        ],
         "rare_pool": [],
         "guidance": "Act 4 should pay off what the player already chose. Avoid opening fresh emotional lanes unless the player has been asking for them."
       },
@@ -209,9 +406,23 @@
         "act": 5,
         "max_one_on_one_offers": 1,
         "required_story": [],
-        "priority_pool": ["bond_rann_06_sister_by_choice", "bond_tarsh_05_pre_battle_rant", "bond_cassen_05_pre_temple", "bond_inya_04_pre_drel", "bond_lirah_05_before_temple"],
-        "optional_pool": ["bond_olm_05_remember_the_gesture", "bond_inya_05_after_drel", "bond_iila_03_normal_morning", "bond_kyle_03_war_temple"],
-        "rare_pool": ["bond_vesh_05_pre_battle", "bond_loka_03_wookiee_phrase"],
+        "priority_pool": [
+          "bond_rann_06_sister_by_choice",
+          "bond_tarsh_05_pre_battle_rant",
+          "bond_cassen_05_pre_temple",
+          "bond_inya_04_pre_drel",
+          "bond_lirah_05_before_temple"
+        ],
+        "optional_pool": [
+          "bond_olm_05_remember_the_gesture",
+          "bond_inya_05_after_drel",
+          "bond_iila_03_normal_morning",
+          "bond_kyle_03_war_temple"
+        ],
+        "rare_pool": [
+          "bond_vesh_05_pre_battle",
+          "bond_loka_03_wookiee_phrase"
+        ],
         "guidance": "Act 5 gets one last chosen conversation. Post-fight tags can appear only if they directly close a route the player clearly invested in."
       }
     ]
@@ -222,80 +433,170 @@
       "title": "First Dinner",
       "act": 1,
       "scene_type": "ordinary_life",
-      "participants": ["Clovis Beryl", "Joran Veska", "Rann Veska", "Tarsh Voll", "Cassen Vell", "Iila Vand"],
+      "participants": [
+        "Clovis Beryl",
+        "Joran Veska",
+        "Rann Veska",
+        "Tarsh Voll",
+        "Cassen Vell",
+        "Iila Vand"
+      ],
       "hook": "The welcome meal and meal-share ritual. Tarsh saves Clovis a seat, Joran is easy company, Rann watches too carefully, and the cohort becomes more than names.",
       "function": "Establish party texture and first impressions before the mystery takes over.",
-      "bond_payoffs": ["bond_tarsh_01_first_dinner", "bond_joran_01_late_sweep", "bond_rann_01_verifying"]
+      "bond_payoffs": [
+        "bond_tarsh_01_first_dinner",
+        "bond_joran_01_late_sweep",
+        "bond_rann_01_verifying"
+      ]
     },
     {
       "id": "group_archive_chore_day",
       "title": "Archive Chore Day",
       "act": 1,
       "scene_type": "chore_rotation",
-      "participants": ["Clovis Beryl", "Rann Veska", "Olm Sefa", "Tionne", "Joran Veska"],
+      "participants": [
+        "Clovis Beryl",
+        "Rann Veska",
+        "Olm Sefa",
+        "Tionne",
+        "Joran Veska"
+      ],
       "hook": "A routine archive chore puts Clovis near Rann's vigilance, Olm's preserved gestures, Tionne's restricted archive crate, and Joran's too-useful calm.",
       "function": "Make lore texture social instead of expositional, with Lore/Perception/Sense cues available if the player presses the restricted crate or Olm's gesture.",
-      "bond_payoffs": ["bond_rann_01_verifying", "bond_olm_01_hand_gesture"]
+      "bond_payoffs": [
+        "bond_rann_01_verifying",
+        "bond_olm_01_hand_gesture"
+      ]
     },
     {
       "id": "group_training_rotation",
       "title": "Training Rotation",
       "act": 2,
       "scene_type": "training",
-      "participants": ["Clovis Beryl", "Tarsh Voll", "Inya Vorn", "Cassen Vell", "Kam Solusar", "Joran Veska"],
+      "participants": [
+        "Clovis Beryl",
+        "Tarsh Voll",
+        "Inya Vorn",
+        "Cassen Vell",
+        "Kam Solusar",
+        "Joran Veska"
+      ],
       "hook": "A rotating practical drill pairs students who do not normally choose each other. Competence, class habits, and anger all show in motion.",
       "function": "Show the party as playable combat/social units and surface mechanical identities.",
-      "bond_payoffs": ["bond_inya_01_sparring_loss", "bond_cassen_01_senate_dinner", "bond_tarsh_02_engine_room"]
+      "bond_payoffs": [
+        "bond_inya_01_sparring_loss",
+        "bond_cassen_01_senate_dinner",
+        "bond_tarsh_02_engine_room"
+      ]
     },
     {
       "id": "group_post_wound_medbay",
       "title": "Post-Wound Medbay",
       "act": 2,
       "scene_type": "aftermath",
-      "participants": ["Clovis Beryl", "Iila Vand", "Lirah Tann", "Cilghal", "Tarsh Voll", "Brann Riako"],
+      "participants": [
+        "Clovis Beryl",
+        "Iila Vand",
+        "Lirah Tann",
+        "Cilghal",
+        "Tarsh Voll",
+        "Brann Riako"
+      ],
       "hook": "After Iila is wounded, the medbay becomes the cohort's first shared room of fear. Lirah holds steady, Tarsh wants to fix something, and Brann notices who cannot look at the door.",
       "function": "Make danger personal and convert plot threat into party care.",
-      "bond_payoffs": ["bond_iila_02_the_question", "bond_lirah_02_letter_arrives", "bond_brann_02_imperial_pattern"]
+      "bond_payoffs": [
+        "bond_iila_02_the_question",
+        "bond_lirah_02_letter_arrives",
+        "bond_brann_02_imperial_pattern"
+      ]
     },
     {
       "id": "group_dormitory_argument",
       "title": "Dormitory Argument",
       "act": 3,
       "scene_type": "conflict",
-      "participants": ["Clovis Beryl", "Joran Veska", "Rann Veska", "Cassen Vell", "Vesh Karro", "Tarsh Voll"],
+      "participants": [
+        "Clovis Beryl",
+        "Joran Veska",
+        "Rann Veska",
+        "Cassen Vell",
+        "Vesh Karro",
+        "Tarsh Voll"
+      ],
       "hook": "Suspicion makes ordinary living impossible. A dormitory argument about safety, privilege, and secrecy leaves everyone more honest than they meant to be.",
       "function": "Narrow the social field before the Joran reveal and clarify who trusts whom.",
-      "bond_payoffs": ["bond_joran_04_three_drinks", "bond_rann_04_telling_her", "bond_cassen_03_bracelet"]
+      "bond_payoffs": [
+        "bond_joran_04_three_drinks",
+        "bond_rann_04_telling_her",
+        "bond_cassen_03_bracelet"
+      ]
     },
     {
       "id": "group_mission_briefing",
       "title": "Mission Briefing",
       "act": 4,
       "scene_type": "planning",
-      "participants": ["Clovis Beryl", "Rann Veska", "Brann Riako", "Tarsh Voll", "Cassen Vell", "Luke Skywalker", "Tionne"],
+      "participants": [
+        "Clovis Beryl",
+        "Rann Veska",
+        "Brann Riako",
+        "Tarsh Voll",
+        "Cassen Vell",
+        "Luke Skywalker",
+        "Tionne"
+      ],
       "hook": "After the holocron crisis, the briefing table is no longer theoretical. The party chooses roles while the adults realize the students are already carrying the campaign.",
       "function": "Convert accumulated bonds into tactical roles for the heist aftermath and Maradun preparation.",
-      "bond_payoffs": ["bond_brann_03_last_stand", "bond_cassen_04_refusing_shuttle", "bond_tarsh_04_berris_alive"]
+      "bond_payoffs": [
+        "bond_brann_03_last_stand",
+        "bond_cassen_04_refusing_shuttle",
+        "bond_tarsh_04_berris_alive"
+      ]
     },
     {
       "id": "group_breach_aftermath",
       "title": "Breach Aftermath",
       "act": 4,
       "scene_type": "aftermath",
-      "participants": ["Clovis Beryl", "Tarsh Voll", "Lirah Tann", "Cassen Vell", "Brann Riako", "Captain Tev"],
+      "participants": [
+        "Clovis Beryl",
+        "Tarsh Voll",
+        "Lirah Tann",
+        "Cassen Vell",
+        "Brann Riako",
+        "Captain Tev"
+      ],
       "hook": "The academy damage leaves everyone doing small practical work: lights, water, transport, triage, family calls, and the first private admission that nobody feels ready.",
       "function": "Let bonds pay off through care work before the final mission narrows the story.",
-      "bond_payoffs": ["bond_tarsh_04_berris_alive", "bond_lirah_04_triage_crack", "bond_cassen_04_refusing_shuttle"]
+      "bond_payoffs": [
+        "bond_tarsh_04_berris_alive",
+        "bond_lirah_04_triage_crack",
+        "bond_cassen_04_refusing_shuttle"
+      ]
     },
     {
       "id": "group_final_hyperspace_lull",
       "title": "Final Hyperspace Lull",
       "act": 5,
       "scene_type": "pre_resolution_lull",
-      "participants": ["Clovis Beryl", "Joran Veska", "Rann Veska", "Tarsh Voll", "Cassen Vell", "Inya Vorn", "Lirah Tann", "Kyle Katarn"],
+      "participants": [
+        "Clovis Beryl",
+        "Joran Veska",
+        "Rann Veska",
+        "Tarsh Voll",
+        "Cassen Vell",
+        "Inya Vorn",
+        "Lirah Tann",
+        "Kyle Katarn"
+      ],
       "hook": "On the jump to the Maradun expanse, there is time for one last chosen conversation. Everyone knows it may decide what they can survive becoming.",
       "function": "Give the player one final social choice before the ending locks.",
-      "bond_payoffs": ["bond_lirah_05_before_temple", "bond_inya_05_after_drel", "bond_tarsh_05_pre_battle_rant", "bond_rann_06_sister_by_choice"]
+      "bond_payoffs": [
+        "bond_lirah_05_before_temple",
+        "bond_inya_05_after_drel",
+        "bond_tarsh_05_pre_battle_rant",
+        "bond_rann_06_sister_by_choice"
+      ]
     }
   ],
   "ending_payoff_matrix": [
@@ -303,7 +604,11 @@
       "id": "ending_open_door",
       "title": "Open Door",
       "ending_type": "hopeful cost",
-      "requires": ["High Joran bond or planted doubt", "Cohort survival stable", "Clovis stands with the academy without abandoning old family"],
+      "requires": [
+        "High Joran bond or planted doubt",
+        "Cohort survival stable",
+        "Clovis stands with the academy without abandoning old family"
+      ],
       "relationship_payoffs": {
         "Joran Veska": "Joran turns at the climax because doubt has been loved into him, not argued into him.",
         "Rann Veska": "Rann receives a living answer to her hope and must decide how to forgive slowly.",
@@ -318,7 +623,11 @@
       "id": "ending_long_road",
       "title": "Long Road",
       "ending_type": "bittersweet pursuit",
-      "requires": ["Joran sabotages the Custodian but disappears", "Trust with Joran exists but did not fully convert him", "Karrde claim is active"],
+      "requires": [
+        "Joran sabotages the Custodian but disappears",
+        "Trust with Joran exists but did not fully convert him",
+        "Karrde claim is active"
+      ],
       "relationship_payoffs": {
         "Joran Veska": "Joran chooses not to complete the mission but cannot yet choose the academy.",
         "Rann Veska": "Rann has a direction to follow and a reason not to collapse.",
@@ -333,7 +642,11 @@
       "id": "ending_law",
       "title": "The Law",
       "ending_type": "clean victory with relational cost",
-      "requires": ["Joran captured or handed to Luke early", "Academy institutions prioritized", "Rann trust damaged"],
+      "requires": [
+        "Joran captured or handed to Luke early",
+        "Academy institutions prioritized",
+        "Rann trust damaged"
+      ],
       "relationship_payoffs": {
         "Joran Veska": "Joran is stopped before he can choose, so safety is real and grief is unresolved.",
         "Rann Veska": "Rann does not forgive the speed or secrecy of the decision.",
@@ -348,7 +661,11 @@
       "id": "ending_third_path",
       "title": "Third Path",
       "ending_type": "chosen exile",
-      "requires": ["Clovis chooses Rann mid-climax", "Karrde route is available", "Cohort losses or academy rupture are accepted costs"],
+      "requires": [
+        "Clovis chooses Rann mid-climax",
+        "Karrde route is available",
+        "Cohort losses or academy rupture are accepted costs"
+      ],
       "relationship_payoffs": {
         "Joran Veska": "Joran's fate matters, but Rann becomes the living choice in front of Clovis.",
         "Rann Veska": "Rann is chosen without being made into a reward.",
@@ -363,7 +680,11 @@
       "id": "ending_what_remains",
       "title": "What Remains",
       "ending_type": "tragic consequence",
-      "requires": ["Low commitment or contradictory final choices", "Weak Joran/Rann clarity", "Cohort protection insufficient"],
+      "requires": [
+        "Low commitment or contradictory final choices",
+        "Weak Joran/Rann clarity",
+        "Cohort protection insufficient"
+      ],
       "relationship_payoffs": {
         "Joran Veska": "Joran remains unresolved because Clovis never forced the relationship into truth.",
         "Rann Veska": "Rann survives with unanswered verification or is lost to the consequence web.",
@@ -786,11 +1107,17 @@
           "hook": "Mira has cooked the Karkaron stew Clovis hated as a child. She does not mention she remembers. The room is laughing too loudly because everyone knows this is goodbye.",
           "phase": "farewell",
           "scene_type": "ordinary_life",
-          "spotlight": ["Clovis Beryl", "Glass Wake crew"],
+          "spotlight": [
+            "Clovis Beryl",
+            "Glass Wake crew"
+          ],
           "rpg_function": "Establish the old family as living people, not backstory.",
           "player_choice": "Eat it, joke about it, refuse it, or admit why the gesture lands.",
           "payoff_or_change": "Sets Clovis's first emotional posture: deflective, grateful, evasive, or openly attached.",
-          "foreshadows": ["Act 4 contact-code consequence", "Clovis's old-life pull"],
+          "foreshadows": [
+            "Act 4 contact-code consequence",
+            "Clovis's old-life pull"
+          ],
           "keywords": [
             "wake",
             "stew",
@@ -806,11 +1133,17 @@
           "hook": "A few days into Clovis's Praxeum life, Karrde lands at the Great Temple's lower pad with a supply shipment Tionne ordered (rare bound texts and a sensor calibrator). He is also there to see Mara Jade between her assignments. While Tionne signs for the crates, Karrde finds Clovis in the colonnade and stops for a brief, deliberate exchange. He does not lecture. He does not make demands. He notes that the Wake's young pickup grew up well, and asks one quiet question: 'Do you know what you are losing?' Then he goes.",
           "phase": "praxeum_arrival",
           "scene_type": "guest_recognition",
-          "spotlight": ["Clovis Beryl", "Talon Karrde"],
+          "spotlight": [
+            "Clovis Beryl",
+            "Talon Karrde"
+          ],
           "rpg_function": "Establish Karrde as a recurring fringe presence in Clovis's Praxeum life. Make the smuggler world feel like it is still watching, still a door he can step back through if he chooses. Frame Karrde as an interested observer, not a recruiter.",
           "player_choice": "Answer Karrde honestly, perform confidence, challenge the premise, or ask what he thinks Clovis is gaining. Optionally: ask after Mara Jade, after Tev, after the Wake's current run.",
           "payoff_or_change": "Karrde files the answer and calibrates his later Act 4 price around it. Disposition delta tracks against his eventual willingness to extend a favor.",
-          "foreshadows": ["Karrde Act 4 bargain", "Open Door ending"],
+          "foreshadows": [
+            "Karrde Act 4 bargain",
+            "Open Door ending"
+          ],
           "keywords": [
             "Karrde",
             "Praxeum",
@@ -828,11 +1161,17 @@
           "hook": "Tev gives Clovis the encrypted contact codes for the Wake's emergency network and asks who gets them if Clovis doesn't come back. The choice echoes hard in Act 4.",
           "phase": "farewell",
           "scene_type": "loyalty_choice",
-          "spotlight": ["Clovis Beryl", "Captain Tev"],
+          "spotlight": [
+            "Clovis Beryl",
+            "Captain Tev"
+          ],
           "rpg_function": "Turn old family loyalty into a mechanical-seeming promise before the academy appears; Deception, Streetwise, or Negotiation can change how cleanly Tev accepts the plan.",
           "player_choice": "Name a recipient, refuse to plan for failure, keep the codes private, or give Tev a condition.",
           "payoff_or_change": "Defines who can reach the Wake when Act 4 collapses into rescue logistics.",
-          "foreshadows": ["Act 4 Karrde/Wake extraction", "What Remains ending"],
+          "foreshadows": [
+            "Act 4 Karrde/Wake extraction",
+            "What Remains ending"
+          ],
           "keywords": [
             "codes",
             "Tev",
@@ -847,11 +1186,17 @@
           "hook": "Aboard the Horizon during the Yavin 4 descent, Joran Veska sits beside Clovis because the only other open seat is under a rattling conduit. He notices the old blaster-callus on Clovis's hand and asks where he learned to brace like that.",
           "phase": "arrival",
           "scene_type": "first_peer_contact",
-          "spotlight": ["Clovis Beryl", "Joran Veska"],
+          "spotlight": [
+            "Clovis Beryl",
+            "Joran Veska"
+          ],
           "rpg_function": "Make Joran likable through attention and practical kindness before he is suspicious; Perception/Sense can notice trained observation without naming betrayal.",
           "player_choice": "Tell the truth, give a smuggler half-answer, joke, or ask Joran the same question.",
           "payoff_or_change": "Creates Joran's first real friendship hook and gives the later betrayal something warm to damage.",
-          "foreshadows": ["Joran's trained observation", "Act 3 disclosure"],
+          "foreshadows": [
+            "Joran's trained observation",
+            "Act 3 disclosure"
+          ],
           "keywords": [
             "horizon",
             "Joran",
@@ -866,11 +1211,17 @@
           "hook": "The intake interview is brief and not what it seems. Tionne asks one question that depends on the farewell: what Clovis brought with him that the academy has no right to take.",
           "phase": "arrival",
           "scene_type": "institutional_welcome",
-          "spotlight": ["Clovis Beryl", "Tionne"],
+          "spotlight": [
+            "Clovis Beryl",
+            "Tionne"
+          ],
           "rpg_function": "Make the Praxeum feel humane but porous: it listens before it protects; Discipline or Cool can decide how much old-life truth Clovis gives away.",
           "player_choice": "Name the Wake, a skill, a fear, a debt, or nothing at all.",
           "payoff_or_change": "Tionne becomes a quiet witness to Clovis's old-life attachment and later reads him more accurately.",
-          "foreshadows": ["Tionne restricted crate", "academy as imperfect refuge"],
+          "foreshadows": [
+            "Tionne restricted crate",
+            "academy as imperfect refuge"
+          ],
           "keywords": [
             "Tionne",
             "intake",
@@ -885,11 +1236,18 @@
           "hook": "Walking back from the intake interview, Clovis passes through the colonnade. Rann Veska is watching the new arrivals' shuttle leave. She sees Joran laughing with another student, and her face becomes hope before discipline can stop it.",
           "phase": "arrival",
           "scene_type": "silent_reveal",
-          "spotlight": ["Clovis Beryl", "Rann Veska", "Joran Veska"],
+          "spotlight": [
+            "Clovis Beryl",
+            "Rann Veska",
+            "Joran Veska"
+          ],
           "rpg_function": "Make Rann observant and wounded, not cryptic for its own sake.",
           "player_choice": "Acknowledge what he saw, give her privacy, ask Joran later, or file the moment silently.",
           "payoff_or_change": "Positions Clovis as Rann's possible witness before he understands what he witnessed.",
-          "foreshadows": ["Rann/Joran sibling reveal", "bond_rann_01_verifying"],
+          "foreshadows": [
+            "Rann/Joran sibling reveal",
+            "bond_rann_01_verifying"
+          ],
           "keywords": [
             "Rann",
             "colonnade",
@@ -904,11 +1262,22 @@
           "hook": "At the welcome meal, each person names one small thing they were grateful for that day. Tarsh Voll has saved Clovis the seat next to him and greets him in spacer slang before anyone can make the table ceremonial.",
           "phase": "first_week",
           "scene_type": "group_bond",
-          "spotlight": ["Clovis Beryl", "Tarsh Voll", "Joran Veska", "Rann Veska", "Cassen Vell", "Iila Vand"],
+          "spotlight": [
+            "Clovis Beryl",
+            "Tarsh Voll",
+            "Joran Veska",
+            "Rann Veska",
+            "Cassen Vell",
+            "Iila Vand"
+          ],
           "rpg_function": "Turn the cohort into a table the player wants to return to.",
           "player_choice": "Choose what gratitude Clovis offers and whether to meet Tarsh's warmth, dodge it, or test it.",
           "payoff_or_change": "Establishes Tarsh as easy belonging and Joran as comfortable company while Rann watches too carefully.",
-          "foreshadows": ["group_first_dinner", "bond_tarsh_01_first_dinner", "Joran betrayal hurt"],
+          "foreshadows": [
+            "group_first_dinner",
+            "bond_tarsh_01_first_dinner",
+            "Joran betrayal hurt"
+          ],
           "keywords": [
             "meal share",
             "ritual",
@@ -923,11 +1292,18 @@
           "hook": "At dusk, Clovis sits with the cohort on the upper terrace for the first meditation chime. The third note is deliberately half a tone flat - Luke's tuning, meant to keep students from mistaking peace for prettiness. Joran finds Clovis in the corridor after.",
           "phase": "first_week",
           "scene_type": "training_reflection",
-          "spotlight": ["Clovis Beryl", "Joran Veska", "Luke Skywalker"],
+          "spotlight": [
+            "Clovis Beryl",
+            "Joran Veska",
+            "Luke Skywalker"
+          ],
           "rpg_function": "Introduce Jedi practice as strange, practical, and personal rather than generic mysticism.",
           "player_choice": "Admit the exercise irritated him, pretend it worked, ask about the flat note, or invite Joran to walk.",
           "payoff_or_change": "Creates the lane into Joran's late-sweep bond and shows Luke's Praxeum has local traditions.",
-          "foreshadows": ["bond_joran_01_late_sweep", "Luke's improvised pedagogy"],
+          "foreshadows": [
+            "bond_joran_01_late_sweep",
+            "Luke's improvised pedagogy"
+          ],
           "keywords": [
             "meditation",
             "chime",
@@ -942,11 +1318,19 @@
           "hook": "Tionne sends Clovis and Olm to retrieve a manuscript from the archive's lower shelves. Olm does a small hand-gesture before opening the sealed cabinet, casual as breathing. Tionne sees it and goes still for half a second.",
           "phase": "first_month",
           "scene_type": "lore_through_chore",
-          "spotlight": ["Clovis Beryl", "Olm Sefa", "Tionne"],
+          "spotlight": [
+            "Clovis Beryl",
+            "Olm Sefa",
+            "Tionne"
+          ],
           "rpg_function": "Deliver Old Republic/Order 66 texture through work, not lecture; Lore can identify the gesture's age while Discipline decides whether Clovis presses.",
           "player_choice": "Ask Olm about the gesture, ask Tionne later, remember without pressing, or ignore the oddity.",
           "payoff_or_change": "Sets up Olm's preserved tradition and Tionne's fear of what the archives still contain.",
-          "foreshadows": ["bond_olm_01_hand_gesture", "Tionne restricted crate", "Sadow-line holocron fragment"],
+          "foreshadows": [
+            "bond_olm_01_hand_gesture",
+            "Tionne restricted crate",
+            "Sadow-line holocron fragment"
+          ],
           "keywords": [
             "archive",
             "Olm",
@@ -961,11 +1345,18 @@
           "hook": "Clovis is assigned to walk the perimeter at dusk and light the carved glow-lanterns. Each lantern bears a student's mark, and the older students can tell who carved which line by touch.",
           "phase": "first_month",
           "scene_type": "ritual_chore",
-          "spotlight": ["Clovis Beryl", "Joran Veska", "Tarsh Voll"],
+          "spotlight": [
+            "Clovis Beryl",
+            "Joran Veska",
+            "Tarsh Voll"
+          ],
           "rpg_function": "Make the academy feel lived-in before the perimeter becomes dangerous.",
           "player_choice": "Carve a mark, refuse the permanence, ask whose marks are missing, or treat it as a patrol.",
           "payoff_or_change": "The same perimeter later becomes Brann's ambush site, changing a peaceful ritual into a threat.",
-          "foreshadows": ["bond_joran_01_late_sweep", "perimeter_scout_brann"],
+          "foreshadows": [
+            "bond_joran_01_late_sweep",
+            "perimeter_scout_brann"
+          ],
           "keywords": [
             "lantern",
             "perimeter",
@@ -980,11 +1371,19 @@
           "hook": "Clovis's first formal saber lesson with Kam is less graceful than the brochure version. Kam corrects his stance once and watches the smuggler-tricks resolve in real time. He says nothing in front of the class.",
           "phase": "first_month",
           "scene_type": "training",
-          "spotlight": ["Clovis Beryl", "Kam Solusar", "Inya Vorn", "Joran Veska"],
+          "spotlight": [
+            "Clovis Beryl",
+            "Kam Solusar",
+            "Inya Vorn",
+            "Joran Veska"
+          ],
           "rpg_function": "Surface Clovis's practical RPG skill identity and contrast it with formal Jedi training.",
           "player_choice": "Lean into improvisation, try to conform, joke through embarrassment, or ask Kam for private correction.",
           "payoff_or_change": "Kam notices Clovis's survival training and becomes a credible adult observer when Joran's form later slips.",
-          "foreshadows": ["kam_files_footwork", "Inya as discipline mirror"],
+          "foreshadows": [
+            "kam_files_footwork",
+            "Inya as discipline mirror"
+          ],
           "keywords": [
             "Kam",
             "Solusar",
@@ -999,11 +1398,18 @@
           "hook": "During ration unloading, Clovis sees Rann find a coded chip taped beneath a crate seam. She pockets it, shows it to no one, and notices Clovis noticing before either of them can pretend otherwise.",
           "phase": "first_pressure",
           "scene_type": "clue",
-          "spotlight": ["Clovis Beryl", "Rann Veska"],
+          "spotlight": [
+            "Clovis Beryl",
+            "Rann Veska"
+          ],
           "rpg_function": "Give Rann agency as an investigator before the plot explains her history.",
           "player_choice": "Confront her, offer help, quietly cover for her, or tell an adult.",
           "payoff_or_change": "Determines whether Rann sees Clovis as a witness, obstacle, or possible accomplice.",
-          "foreshadows": ["inside source", "bond_rann_01_verifying", "Act 2 investigation"],
+          "foreshadows": [
+            "inside source",
+            "bond_rann_01_verifying",
+            "Act 2 investigation"
+          ],
           "keywords": [
             "chip",
             "Rann",
@@ -1018,11 +1424,19 @@
           "hook": "A small inconsistency: Joran says he was in the archive during second bell, but Tionne is certain he was not, and Tarsh swears Joran helped him carry coolant at the same time. It is small, deniable, and easy to protect.",
           "phase": "first_pressure",
           "scene_type": "clue",
-          "spotlight": ["Clovis Beryl", "Joran Veska", "Tionne", "Tarsh Voll"],
+          "spotlight": [
+            "Clovis Beryl",
+            "Joran Veska",
+            "Tionne",
+            "Tarsh Voll"
+          ],
           "rpg_function": "Let the player choose whether affection edits evidence.",
           "player_choice": "Ask Joran directly, check the archive log, let it go, or mention it to Rann.",
           "payoff_or_change": "The first Joran suspicion can become trust, denial, or a private note the player carries into Act 3.",
-          "foreshadows": ["Act 3 Joran disclosure", "Joran's divided mission"],
+          "foreshadows": [
+            "Act 3 Joran disclosure",
+            "Joran's divided mission"
+          ],
           "keywords": [
             "Joran",
             "corridor",
@@ -1037,11 +1451,19 @@
           "hook": "During a sparring drill, Joran's footwork resolves into a defensive angle too trained to be accidental. Kam Solusar's eyes narrow, then soften before the younger students can see it.",
           "phase": "first_pressure",
           "scene_type": "training_clue",
-          "spotlight": ["Joran Veska", "Kam Solusar", "Clovis Beryl", "Inya Vorn"],
+          "spotlight": [
+            "Joran Veska",
+            "Kam Solusar",
+            "Clovis Beryl",
+            "Inya Vorn"
+          ],
           "rpg_function": "Make Joran's competence attractive and suspect at the same time.",
           "player_choice": "Admire the move, ask Joran to teach it, ask Kam what he saw, or compare it against Clovis's instincts.",
           "payoff_or_change": "Creates a fair-play clue that Joran has training he should not have.",
-          "foreshadows": ["bond_joran_02_sparring_bargain", "Inquisitorius training"],
+          "foreshadows": [
+            "bond_joran_02_sparring_bargain",
+            "Inquisitorius training"
+          ],
           "keywords": [
             "Kam",
             "footwork",
@@ -1056,11 +1478,18 @@
           "hook": "Streen, who almost never leaves the high tower, passes through the colonnade at midday. He stops when he sees Clovis and says, 'Two breaths in one chest. The wind has been telling me. I do not know whose.' Then he leaves before anyone can make it useful.",
           "phase": "first_pressure",
           "scene_type": "force_warning",
-          "spotlight": ["Clovis Beryl", "Streen"],
+          "spotlight": [
+            "Clovis Beryl",
+            "Streen"
+          ],
           "rpg_function": "Use Legends-era Praxeum weirdness as pressure, not exposition.",
           "player_choice": "Follow Streen, ask Luke, dismiss it as tower talk, or connect it to Joran/Rann.",
           "payoff_or_change": "Adds Force unease without answering whether the warning points to Joran, Rann, or Clovis.",
-          "foreshadows": ["Joran/Rann divided breath", "Clovis identity pressure", "war-temple resonance"],
+          "foreshadows": [
+            "Joran/Rann divided breath",
+            "Clovis identity pressure",
+            "war-temple resonance"
+          ],
           "keywords": [
             "Streen",
             "tower",
@@ -1075,11 +1504,18 @@
           "hook": "Late in the act, Clovis sees Tionne in the archive at dusk. She lays her hand on a quarantined crate behind the second column of cabinets without thinking, then pulls back as if the wood remembered her.",
           "phase": "first_pressure",
           "scene_type": "artifact_hint",
-          "spotlight": ["Clovis Beryl", "Tionne"],
+          "spotlight": [
+            "Clovis Beryl",
+            "Tionne"
+          ],
           "rpg_function": "Place the Sadow-line holocron fragment in emotional space before it becomes plot machinery; Lore/Sense can read danger, while Threat should cost trust or strain.",
           "player_choice": "Ask directly, offer to leave, mark the crate's location, or pretend he saw nothing.",
           "payoff_or_change": "Tionne's fear of completing the translation becomes legible, and the archive stops being a neutral safe room.",
-          "foreshadows": ["Sadow-line holocron fragment", "Tionne's archive burden", "Custodian target"],
+          "foreshadows": [
+            "Sadow-line holocron fragment",
+            "Tionne's archive burden",
+            "Custodian target"
+          ],
           "keywords": [
             "Tionne",
             "restricted crate",
@@ -1094,11 +1530,17 @@
           "hook": "Iila Vand finds Clovis somewhere he looks unsettled and offers her ration bar. She does not eat it. She offers it. The offer is the comfort, not the bar.",
           "phase": "first_pressure",
           "scene_type": "quiet_care",
-          "spotlight": ["Clovis Beryl", "Iila Vand"],
+          "spotlight": [
+            "Clovis Beryl",
+            "Iila Vand"
+          ],
           "rpg_function": "Show that not every supporting character needs a large arc to matter.",
           "player_choice": "Take the bar, refuse gently, ask why she noticed, or give her something back.",
           "payoff_or_change": "Makes Iila's Act 2 wound personal if the player accepted her kindness.",
-          "foreshadows": ["Iila Act 2 wound", "cohort care network"],
+          "foreshadows": [
+            "Iila Act 2 wound",
+            "cohort care network"
+          ],
           "keywords": [
             "Iila",
             "ration bar",
@@ -1113,11 +1555,18 @@
           "hook": "Tionne has a short recorded field note from Kyle Katarn waiting in the training archive: practical Force application, no mysticism, no patience for pretending fear is not data. Clovis recognizes the tone before meeting the man.",
           "phase": "first_pressure",
           "scene_type": "mentor_foreshadow",
-          "spotlight": ["Clovis Beryl", "Kyle Katarn", "Tionne"],
+          "spotlight": [
+            "Clovis Beryl",
+            "Kyle Katarn",
+            "Tionne"
+          ],
           "rpg_function": "Keep Kyle in the 16 ABY weather without bringing him onstage too early.",
           "player_choice": "Request the full module, dismiss it as mercenary thinking, ask Tionne why she saved it, or practice from the note.",
           "payoff_or_change": "Prepares Kyle's Act 2 usefulness while keeping Act 1 centered on the cohort.",
-          "foreshadows": ["Kyle Act 2 arrival", "fringe Force-user kinship"],
+          "foreshadows": [
+            "Kyle Act 2 arrival",
+            "fringe Force-user kinship"
+          ],
           "keywords": [
             "Kyle",
             "Katarn",
@@ -1132,11 +1581,18 @@
           "hook": "At the end of the act, a scout ambushes Brann Riako on perimeter watch. Brann survives, wounded and controlled in the way frightened soldiers get controlled. He recognizes the operational signature: Inquisitor cell tactics.",
           "phase": "act_turn",
           "scene_type": "first_plot_point",
-          "spotlight": ["Clovis Beryl", "Brann Riako"],
+          "spotlight": [
+            "Clovis Beryl",
+            "Brann Riako"
+          ],
           "rpg_function": "Convert academy texture into danger and pull Clovis into investigation through a peer, not a council briefing.",
           "player_choice": "Help Brann hide the panic, push for Luke immediately, inspect the ambush site, or ask why Brann recognizes it.",
           "payoff_or_change": "Launches Act 2 and makes Brann's Imperial pattern-reading useful before it becomes costly.",
-          "foreshadows": ["Act 2 investigation", "Brann Act 4 cost", "Inquisitor cell"],
+          "foreshadows": [
+            "Act 2 investigation",
+            "Brann Act 4 cost",
+            "Inquisitor cell"
+          ],
           "keywords": [
             "Brann",
             "perimeter",
@@ -5904,5 +6360,782 @@
     "bond_weight_threshold_for_climax_protection": 0.6,
     "max_bond_weight_per_relationship": 1.5,
     "stacking": "additive across events with the same cohort_member"
+  },
+  "backgrounds": [
+    {
+      "background_id": "outer_rim_refugee",
+      "display_name": "Outer Rim Refugee",
+      "story_seed": "Imperial occupation forced your family from your home world during the end-of-Empire chaos. You spent your formative years in a refugee convoy, then a New Republic resettlement camp. A Jedi recruiter found you when you instinctively shielded younger children from a collapsing roof.",
+      "default_names": [
+        "Sora",
+        "Jenn",
+        "Mira",
+        "Kestrel",
+        "Talen"
+      ],
+      "default_species": [
+        "human",
+        "twi_lek",
+        "mirialan"
+      ],
+      "default_skill_tilt": {
+        "resilience": 1,
+        "vigilance": 1,
+        "survival": 1,
+        "education": -1
+      },
+      "default_loadout": "",
+      "pre_filled_relationship": {
+        "npc_name": "Ren Vask",
+        "npc_role": "fellow refugee student at the Praxeum",
+        "initial_disposition": 0.65,
+        "relationship_summary": "Slightly older. Recognized the silence of someone who has lost what you have lost. Friendship took root in those first weeks because neither of you had to explain why you slept with the lights on."
+      },
+      "unique_unlocks": [
+        {
+          "unlock_id": "refugee_kinship",
+          "description": "Refugee NPCs across the galaxy treat you with shared recognition. Unlocks dialogue tone in social scenes with displaced populations.",
+          "trigger_type": "dialogue_tone"
+        },
+        {
+          "unlock_id": "homeworld_flashback",
+          "description": "Flashback access to your home world at major emotional beats. Surfaces as interiority during quiet moments.",
+          "trigger_type": "flashback_access"
+        },
+        {
+          "unlock_id": "trauma_anchored_surge",
+          "description": "When defending children, you surge above your trained capacity. +1 boost die when the protected party includes minors.",
+          "trigger_type": "skill_bonus"
+        }
+      ],
+      "prologue_tailoring": {
+        "cold_open_concept": "Arriving at the Praxeum still carrying a child's blanket from the convoy. The colours are wrong against the jungle green.",
+        "archetype_scene_flavor": "Frame psychometric tests as 'what you do when something familiar happens' rather than 'what you do under abstract pressure.' Trauma is recognised, not performed.",
+        "diegetic_slot_preferences": {
+          "name_pick": "intake_with_tionne",
+          "gender_pick": "intake_with_tionne",
+          "appearance_flair": "morning_after_first_dinner"
+        }
+      },
+      "profession_affinities": {
+        "strong_fit": "consular",
+        "possible_fit": [
+          "sentinel"
+        ],
+        "tense_fit": [
+          "guardian"
+        ]
+      }
+    },
+    {
+      "background_id": "imperial_defector",
+      "display_name": "Imperial Defector",
+      "story_seed": "Born inside the Empire's middle classes, raised on its propaganda. You served as a junior officer cadet (or COMPNOR youth corps, or Imperial academy student) before your Force-sensitivity manifested in a way that put you on the Inquisitor list. You ran. The New Republic intercepted you. You arrived at the Praxeum carrying real guilt and real Imperial training.",
+      "default_names": [
+        "Cael",
+        "Nyx",
+        "Vell",
+        "Doran",
+        "Ardin"
+      ],
+      "default_species": [
+        "human"
+      ],
+      "default_skill_tilt": {
+        "discipline": 1,
+        "warfare": 1,
+        "computers": 1,
+        "charm": -1
+      },
+      "default_loadout": "",
+      "pre_filled_relationship": {
+        "npc_name": "Master Tev",
+        "npc_role": "senior Praxeum instructor who chose to sponsor you",
+        "initial_disposition": 0.5,
+        "relationship_summary": "Watches you carefully. Took the unpopular position of vouching for your admission against quiet objections. The trust is conditional and he has not pretended otherwise."
+      },
+      "unique_unlocks": [
+        {
+          "unlock_id": "imperial_tech_recognition",
+          "description": "Imperial machinery, doctrine, and encrypted comms are legible to you. +1 boost die on Computers/Knowledge (Warfare) checks targeting Imperial systems.",
+          "trigger_type": "skill_bonus"
+        },
+        {
+          "unlock_id": "old_contacts",
+          "description": "One or two NPCs from your past exist in the world and may surface in later acts \u2014 possibly as antagonists.",
+          "trigger_type": "conditional_branch"
+        },
+        {
+          "unlock_id": "sith_curious_dialogue",
+          "description": "Some choices that other backgrounds cannot pick because they require Imperial framing become available \u2014 'I've read the propaganda; I know how this rhetoric works.'",
+          "trigger_type": "dialogue_tone"
+        }
+      ],
+      "prologue_tailoring": {
+        "cold_open_concept": "Standing in your former uniform on the day you ran. The creases are still pressed; the rank pin is in your hand.",
+        "archetype_scene_flavor": "Frame psychometric tests as 'what you do when ideology cracks.' High salience on the Moral axis; fast inference on Trust.",
+        "diegetic_slot_preferences": {
+          "name_pick": "intake_with_tionne",
+          "gender_pick": "intake_with_tionne",
+          "appearance_flair": "uniform_in_the_drawer"
+        }
+      },
+      "profession_affinities": {
+        "strong_fit": "sentinel",
+        "possible_fit": [
+          "consular"
+        ],
+        "tense_fit": [
+          "guardian"
+        ]
+      }
+    },
+    {
+      "background_id": "rebel_legacy",
+      "display_name": "Rebel Legacy",
+      "story_seed": "Your parents fought in the Rebellion. One of them may still be alive in the New Republic government or military; the other may have died at Endor or in the wars after. You grew up on hero stories and at hero funerals. Your Force sensitivity was expected. The pressure is heavier than the training.",
+      "default_names": [
+        "Riggs",
+        "Mara",
+        "Jarek",
+        "Kyla",
+        "Ben"
+      ],
+      "default_species": [
+        "human",
+        "mon_calamari",
+        "sullustan"
+      ],
+      "default_skill_tilt": {
+        "ranged_light": 1,
+        "discipline": 1,
+        "leadership": 1,
+        "coordination": -1
+      },
+      "default_loadout": "",
+      "pre_filled_relationship": {
+        "npc_name": "Master Tasha Vren",
+        "npc_role": "Jedi who fought alongside one of your parents",
+        "initial_disposition": 0.8,
+        "relationship_summary": "Has known you since you were a child. The warmth is familial; the expectation is heavier than either of you would admit."
+      },
+      "unique_unlocks": [
+        {
+          "unlock_id": "veteran_kinship",
+          "description": "War-veteran NPCs treat you as kin. Unlocked dialogue with Rebellion / New Republic veterans across the galaxy.",
+          "trigger_type": "dialogue_tone"
+        },
+        {
+          "unlock_id": "restless_meditation",
+          "description": "Your characteristic restlessness shows in the way you sit through meditation. The Praxeum tries to address it; the LLM should write it as a bodily quality.",
+          "trigger_type": "voice_flavor"
+        },
+        {
+          "unlock_id": "imperial_recognition_hostile",
+          "description": "Imperial holdouts who recognize your parents' name may react with hostility in later acts.",
+          "trigger_type": "conditional_branch"
+        }
+      ],
+      "prologue_tailoring": {
+        "cold_open_concept": "Sparring against upper-classmen with the saber form your parent used. You are good because you have practiced this since you were six.",
+        "archetype_scene_flavor": "Test what happens when expectations conflict with instinct.",
+        "diegetic_slot_preferences": {
+          "name_pick": "sparring_with_kam",
+          "gender_pick": "intake_with_tionne",
+          "appearance_flair": "father_or_mothers_calluses"
+        }
+      },
+      "profession_affinities": {
+        "strong_fit": "guardian",
+        "possible_fit": [
+          "sentinel"
+        ],
+        "tense_fit": [
+          "consular"
+        ]
+      }
+    },
+    {
+      "background_id": "discovered_late",
+      "display_name": "Discovered Late",
+      "story_seed": "Your Force-sensitivity emerged when you were already an adult \u2014 twenty-three, twenty-five, even older. You had a life: a career, possibly a partnership, a sense of who you were. The Force disrupted that. You arrived at the Praxeum older than every other first-year student, with adult competencies and adult anxieties.",
+      "default_names": [
+        "Margo",
+        "Tarn",
+        "Kael",
+        "Senna",
+        "Joren"
+      ],
+      "default_species": [
+        "human",
+        "pantoran",
+        "zabrak"
+      ],
+      "default_skill_tilt": {
+        "lore": 1,
+        "negotiation": 1,
+        "skulduggery": 1,
+        "athletics": -1
+      },
+      "default_loadout": "",
+      "pre_filled_relationship": {
+        "npc_name": "Vesper",
+        "npc_role": "younger Praxeum student (16-17)",
+        "initial_disposition": 0.7,
+        "relationship_summary": "Looks up to you because you are visibly an adult and treat them with respect rather than condescension. Admiration with a tinge of hero-worship."
+      },
+      "unique_unlocks": [
+        {
+          "unlock_id": "adult_experience",
+          "description": "The narration writes you as someone who has held jobs, paid rent, lost relationships. Beats land differently than they would for a teenager.",
+          "trigger_type": "voice_flavor"
+        },
+        {
+          "unlock_id": "informed_skepticism",
+          "description": "Choices that read as cynical for younger students read as informed-skeptical for you.",
+          "trigger_type": "dialogue_tone"
+        },
+        {
+          "unlock_id": "previous_career_contacts",
+          "description": "Contacts from your previous career surface in late-game scenes when your old field intersects the conspiracy.",
+          "trigger_type": "conditional_branch"
+        }
+      ],
+      "prologue_tailoring": {
+        "cold_open_concept": "Packing up your former life \u2014 a tool kit, a uniform, a key turned in. The hands move from habit; the mind has not caught up.",
+        "archetype_scene_flavor": "Test how an adult mind responds to being a beginner.",
+        "diegetic_slot_preferences": {
+          "name_pick": "intake_with_tionne",
+          "gender_pick": "intake_with_tionne",
+          "appearance_flair": "the_things_you_kept"
+        }
+      },
+      "profession_affinities": {
+        "strong_fit": "consular",
+        "possible_fit": [
+          "sentinel"
+        ],
+        "tense_fit": [
+          "guardian"
+        ]
+      }
+    },
+    {
+      "background_id": "frontier_world_native",
+      "display_name": "Frontier-World Native",
+      "story_seed": "You grew up on a Wild Space or Outer Rim world that the galaxy barely tracks \u2014 small population, no holonet, traditional livelihoods. The Force showed up as part of how the world worked, and a Jedi recruiter who happened through your settlement noticed what you were doing. You had never heard of the Jedi until they explained themselves to you.",
+      "default_names": [
+        "Cova",
+        "Den",
+        "Brae",
+        "Tova",
+        "Eli"
+      ],
+      "default_species": [
+        "human",
+        "togruta",
+        "zabrak"
+      ],
+      "default_skill_tilt": {
+        "survival": 1,
+        "perception": 1,
+        "resilience": 1,
+        "core_worlds": -1
+      },
+      "default_loadout": "",
+      "pre_filled_relationship": {
+        "npc_name": "Recruiter Adric",
+        "npc_role": "the Jedi who came through your settlement",
+        "initial_disposition": 0.75,
+        "relationship_summary": "Brought you to the Praxeum. Visits occasionally, checks on you. Mentor-like, slightly distant \u2014 a man who knows what it cost you to leave."
+      },
+      "unique_unlocks": [
+        {
+          "unlock_id": "wilderness_survival",
+          "description": "Shelter, food, and terrain reading are second nature. +1 boost die on Survival in unfamiliar environments; narrative bonuses in exploration scenes.",
+          "trigger_type": "skill_bonus"
+        },
+        {
+          "unlock_id": "cultural_stranger",
+          "description": "The Praxeum's politics are baffling. Some scenes are written observationally rather than participatorily \u2014 you are present without being conscripted.",
+          "trigger_type": "voice_flavor"
+        },
+        {
+          "unlock_id": "homeworld_anchor",
+          "description": "Your home world becomes a load-bearing late-game location.",
+          "trigger_type": "conditional_branch"
+        }
+      ],
+      "prologue_tailoring": {
+        "cold_open_concept": "Your home world's traditional dress on the day Adric arrives. The fabric remembers cold the jungle does not have.",
+        "archetype_scene_flavor": "Test responses to cultural-translation moments as much as ethical-pressure moments.",
+        "diegetic_slot_preferences": {
+          "name_pick": "asked_in_the_colonnade",
+          "gender_pick": "intake_with_tionne",
+          "appearance_flair": "what_you_brought"
+        }
+      },
+      "profession_affinities": {
+        "strong_fit": "guardian",
+        "possible_fit": [
+          "sentinel"
+        ],
+        "tense_fit": [
+          "consular"
+        ]
+      }
+    },
+    {
+      "background_id": "reformed_smuggler",
+      "display_name": "Reformed Smuggler",
+      "story_seed": "Your Force-sensitivity developed in the wrong neighborhood. You ran cargoes you shouldn't have, kept company with people you shouldn't have, and were pretty good at all of it. A botched job ended with someone dead and you in a Jedi-adjacent sanctuary. The Praxeum offered a path. You took it. Most of you.",
+      "default_names": [
+        "Kade",
+        "Loris",
+        "Talia",
+        "Jin",
+        "Ess"
+      ],
+      "default_species": [
+        "human",
+        "rodian",
+        "twi_lek"
+      ],
+      "default_skill_tilt": {
+        "streetwise": 1,
+        "skulduggery": 1,
+        "piloting_space": 1,
+        "discipline": -1
+      },
+      "default_loadout": "",
+      "pre_filled_relationship": {
+        "npc_name": "Hux",
+        "npc_role": "your old smuggling partner, still working",
+        "initial_disposition": 0.6,
+        "relationship_summary": "Has not been told you are at the Praxeum. Believes you took a quiet retirement after the bad job. Loyal but unaware \u2014 a thread waiting to pull."
+      },
+      "unique_unlocks": [
+        {
+          "unlock_id": "underworld_dialogue",
+          "description": "Underworld dialogue tone unlocked across the galaxy. Smugglers, fixers, and fringe contacts read you as one of theirs.",
+          "trigger_type": "dialogue_tone"
+        },
+        {
+          "unlock_id": "uniform_flinch",
+          "description": "You flinch at uniforms even when they are your own side. The narration writes this as a small, recurring tell.",
+          "trigger_type": "voice_flavor"
+        },
+        {
+          "unlock_id": "underground_contacts",
+          "description": "Underground contacts can be invoked for non-combat problem-solving when the Praxeum cannot help.",
+          "trigger_type": "conditional_branch"
+        }
+      ],
+      "prologue_tailoring": {
+        "cold_open_concept": "A Coruscant lower-level cantina the morning after the botched job. The lights are too bright for what just happened.",
+        "archetype_scene_flavor": "Test what happens when you are asked to trust a system you have spent your life dodging.",
+        "diegetic_slot_preferences": {
+          "name_pick": "asked_in_the_cantina",
+          "gender_pick": "intake_with_tionne",
+          "appearance_flair": "the_jacket_you_kept"
+        }
+      },
+      "profession_affinities": {
+        "strong_fit": "sentinel",
+        "possible_fit": [
+          "consular"
+        ],
+        "tense_fit": [
+          "guardian"
+        ]
+      }
+    }
+  ],
+  "identity_prologue": {
+    "scene_library": [
+      {
+        "scene_id": "arrival_at_praxeum",
+        "situation": "The supply shuttle Horizon descends through Yavin 4's high atmosphere. The viewport floods green. Cohort members in the seats around you \u2014 names you do not yet know \u2014 are doing what people always do during a long descent: breathing too carefully, pretending not to count exits, saying the small things that pass for okay.",
+        "background_variants": {
+          "outer_rim_refugee": {
+            "prose": "You still have the child's blanket folded inside your kit, the one you would not let the resettlement officers take. The fabric does not match anything in this jungle. The cohort has not asked. They will.",
+            "npc_names": [
+              "Joran Veska"
+            ],
+            "choice_overrides": []
+          },
+          "imperial_defector": {
+            "prose": "There is a seat across the aisle from a young woman who keeps glancing at the cut of your shoulders. Your bearing has not unlearned the uniform. You feel her notice. You feel her decide not to mention it.",
+            "npc_names": [
+              "Joran Veska"
+            ],
+            "choice_overrides": []
+          },
+          "rebel_legacy": {
+            "prose": "Two of the older students recognize your surname before you have introduced yourself. One stands up to greet you the way veterans greet a veteran's child. The other looks at the floor.",
+            "npc_names": [
+              "Joran Veska"
+            ],
+            "choice_overrides": []
+          },
+          "discovered_late": {
+            "prose": "You are the oldest body on the shuttle by at least four years. You feel your knees in a way the eighteen-year-olds will not understand for another decade. You also feel, for the first time in months, that you are not the only adult in the room \u2014 and you cannot tell yet whether that is comfort or threat.",
+            "npc_names": [
+              "Joran Veska"
+            ],
+            "choice_overrides": []
+          },
+          "frontier_world_native": {
+            "prose": "Your home world had no atmosphere this thick. The pressure presses on the ears in a way that feels animal, not technological. You watch the canopy and try to find a tree shape your village elders would have a name for.",
+            "npc_names": [
+              "Joran Veska"
+            ],
+            "choice_overrides": []
+          },
+          "reformed_smuggler": {
+            "prose": "The shuttle's manifest list is too clean. No false names, no padding, no cargo masking. Your hands keep wanting to look for the irregularity. A boy across the aisle smiles at you the way civilians smile, and you have to remember how that face is supposed to read.",
+            "npc_names": [
+              "Joran Veska"
+            ],
+            "choice_overrides": []
+          }
+        },
+        "axis_tags": [
+          "approach",
+          "social"
+        ],
+        "choices": [
+          {
+            "text": "Introduce yourself first \u2014 name the silence and break it.",
+            "axis_tags": {
+              "approach": "direct",
+              "social": "warm"
+            }
+          },
+          {
+            "text": "Wait. Watch how they handle the descent, and let the cohort form around you.",
+            "axis_tags": {
+              "approach": "indirect",
+              "social": "guarded"
+            }
+          },
+          {
+            "text": "Pull out your kit, do something useful with your hands, and let work make the introduction.",
+            "axis_tags": {
+              "approach": "indirect",
+              "social": "warm"
+            }
+          }
+        ],
+        "diegetic_slot": {
+          "slot_type": "appearance_flair",
+          "prompt": "What does the cohort see when they see you for the first time? (Optional \u2014 you can skip and let the Praxeum decide.)",
+          "optional": true
+        }
+      },
+      {
+        "scene_id": "intake_with_tionne",
+        "situation": "Tionne meets you in the small east room off the colonnade. Her silver hair is loose; her hands are around a cup of tea she has not touched. The intake form is on the desk between you, half-completed, and she is not in a hurry. She has read your file. She has questions the file did not answer. She begins with the one you can choose to answer fully, glancingly, or honestly.",
+        "background_variants": {
+          "outer_rim_refugee": {
+            "prose": "She has the convoy manifest from when your family was processed. She has not opened it. 'Some of this isn't mine to read,' she says. 'Tell me what you want me to know.'",
+            "npc_names": [
+              "Tionne"
+            ],
+            "choice_overrides": []
+          },
+          "imperial_defector": {
+            "prose": "She has your defection record. She has the annotations Mon Mothma's office added. She has the question: 'What did you do, in your service, that you would do again if you knew it would save someone?'",
+            "npc_names": [
+              "Tionne"
+            ],
+            "choice_overrides": []
+          },
+          "rebel_legacy": {
+            "prose": "She knew your parent. She tells you this without warmth and without coldness. 'You are not them,' she says. 'I will not pretend you are. Tell me what you came here for, in your words.'",
+            "npc_names": [
+              "Tionne"
+            ],
+            "choice_overrides": []
+          },
+          "discovered_late": {
+            "prose": "She has the dossier from your old job. She looks tired in a way that says she has read it twice. 'You have lived a life,' she says. 'I want to ask what you came here looking for. The honest version, not the application essay.'",
+            "npc_names": [
+              "Tionne"
+            ],
+            "choice_overrides": []
+          },
+          "frontier_world_native": {
+            "prose": "She speaks slowly, which you mistake for condescension until you realize she is choosing vocabulary you would understand. 'Your recruiter told me what you were doing on the day he found you. I want to hear it from you.'",
+            "npc_names": [
+              "Tionne"
+            ],
+            "choice_overrides": []
+          },
+          "reformed_smuggler": {
+            "prose": "She knows enough. She does not pretend not to. 'There is a name on this form,' she says. 'I do not know if it is yours. I would like to use the one you mean.'",
+            "npc_names": [
+              "Tionne"
+            ],
+            "choice_overrides": []
+          }
+        },
+        "axis_tags": [
+          "moral",
+          "social"
+        ],
+        "choices": [
+          {
+            "text": "Tell her the version that is true. The whole shape, even the parts you would rather edit.",
+            "axis_tags": {
+              "moral": "honest",
+              "social": "open"
+            }
+          },
+          {
+            "text": "Tell her the version that lets you stay. Truth at the level of the form, not the soul.",
+            "axis_tags": {
+              "moral": "guarded",
+              "social": "guarded"
+            }
+          },
+          {
+            "text": "Ask her, instead, what the Praxeum wants from you. Make her go first.",
+            "axis_tags": {
+              "moral": "neutral",
+              "social": "warm"
+            }
+          }
+        ],
+        "diegetic_slot": {
+          "slot_type": "name_pick",
+          "prompt": "Tionne is asking, gently, what name she should put on the intake form. (You can pick one of your background's names, type your own, or \u2014 if you already chose during refinement \u2014 just confirm.)",
+          "optional": false
+        }
+      },
+      {
+        "scene_id": "first_dinner",
+        "situation": "First dinner in the great hall. Long tables, mismatched bowls, the cohort arranging itself by the small gravities of who is willing to sit next to whom. Joran Veska saves you a seat without asking. Across from you, Rann Veska is eating in silence and watching the room. Tarsh Voll is louder than the room and louder than anyone trying to be loud. The food is honest. The conversation is the test.",
+        "background_variants": {
+          "outer_rim_refugee": {
+            "prose": "There is bread in the centre of the table that is the same shape as the bread the resettlement camp baked. You did not expect that. Joran sees the look on your face and says nothing, which is how you know he saw.",
+            "npc_names": [
+              "Joran Veska",
+              "Rann Veska",
+              "Tarsh Voll"
+            ],
+            "choice_overrides": []
+          },
+          "imperial_defector": {
+            "prose": "Tarsh \u2014 loud, fringe-raised, mouthy \u2014 makes a joke about Imperial mess halls without knowing where you came from. Joran does know, and watches you choose your laugh.",
+            "npc_names": [
+              "Joran Veska",
+              "Rann Veska",
+              "Tarsh Voll"
+            ],
+            "choice_overrides": []
+          },
+          "rebel_legacy": {
+            "prose": "Two seats down, an older student tells a story about your parent that is half true. The half that is wrong is the part that mattered. You have heard this story told wrong every year of your life. Joran reads your face and waits.",
+            "npc_names": [
+              "Joran Veska",
+              "Rann Veska",
+              "Tarsh Voll"
+            ],
+            "choice_overrides": []
+          },
+          "discovered_late": {
+            "prose": "The cohort is younger than you remembered they would be. Rann is the only person in the room who looks at you as a peer. Joran is making easy room for you, the way confident young people sometimes do for adults they have decided to be kind to.",
+            "npc_names": [
+              "Joran Veska",
+              "Rann Veska",
+              "Tarsh Voll"
+            ],
+            "choice_overrides": []
+          },
+          "frontier_world_native": {
+            "prose": "The food is unfamiliar. You watch how the cohort eats it before you try yourself. Joran notices, and shows you with his hands without comment. Tarsh laughs at something across the table, and the sound makes the room feel survivable.",
+            "npc_names": [
+              "Joran Veska",
+              "Rann Veska",
+              "Tarsh Voll"
+            ],
+            "choice_overrides": []
+          },
+          "reformed_smuggler": {
+            "prose": "You are the only person in the room who knows what the cook used to mask the missing protein. It is a Glass Wake trick. The recognition is automatic. Joran says something kind to you. You have to remember to be a person being spoken kindly to, not a smuggler reading a mark.",
+            "npc_names": [
+              "Joran Veska",
+              "Rann Veska",
+              "Tarsh Voll"
+            ],
+            "choice_overrides": []
+          }
+        },
+        "axis_tags": [
+          "social",
+          "risk"
+        ],
+        "choices": [
+          {
+            "text": "Speak. Tell the table something about yourself before the cohort decides who you are.",
+            "axis_tags": {
+              "social": "open",
+              "risk": "bold"
+            }
+          },
+          {
+            "text": "Listen. Let the loudest voices settle the shape of the room and find your place inside it.",
+            "axis_tags": {
+              "social": "guarded",
+              "risk": "cautious"
+            }
+          },
+          {
+            "text": "Turn to Joran specifically. Make this one connection real before you address the rest.",
+            "axis_tags": {
+              "social": "warm",
+              "risk": "cautious"
+            }
+          }
+        ],
+        "diegetic_slot": null
+      },
+      {
+        "scene_id": "the_test_in_the_courtyard",
+        "situation": "Two weeks in. Inya Vorn \u2014 a senior student with the saber form your file does not yet account for \u2014 stops you in the colonnade after midday meditation. There is a junior, smaller than both of you, in tears beside the fountain. Inya is asking the junior to say what happened. The junior cannot. Across the courtyard, an older student \u2014 Vesh Karro \u2014 is leaning against a pillar, watching. Vesh did something to the junior. Inya has not yet decided what to do about it. She looks at you. The decision becomes partly yours.",
+        "background_variants": {
+          "outer_rim_refugee": {
+            "prose": "The junior has the same posture you used to have in the resettlement queue. You recognize it before you have decided to recognize it. Your hands have already moved toward them; you have to choose, in this half-second, whether to follow.",
+            "npc_names": [
+              "Inya Vorn",
+              "Vesh Karro"
+            ],
+            "choice_overrides": []
+          },
+          "imperial_defector": {
+            "prose": "You know the kind of thing Vesh did. You know it by the way he is standing. You knew people who stood like that in the academy, and you know what they did to the cadets who admitted weakness. Inya is waiting to see if you will name it.",
+            "npc_names": [
+              "Inya Vorn",
+              "Vesh Karro"
+            ],
+            "choice_overrides": []
+          },
+          "rebel_legacy": {
+            "prose": "Your parent's saber form is the one that would answer this. You have practiced the opening strike since you were six. Your hand wants to. The Jedi part of you \u2014 the part that brought you here \u2014 is asking whether your hand is wanting the right thing.",
+            "npc_names": [
+              "Inya Vorn",
+              "Vesh Karro"
+            ],
+            "choice_overrides": []
+          },
+          "discovered_late": {
+            "prose": "You have managed people who use power like Vesh does. You know the script. You also know, as an adult, that the wrong adult intervention can make a young person's humiliation worse. You have less time to choose than you would like.",
+            "npc_names": [
+              "Inya Vorn",
+              "Vesh Karro"
+            ],
+            "choice_overrides": []
+          },
+          "frontier_world_native": {
+            "prose": "Where you grew up, an elder would not have asked you. They would have decided. The fact that Inya is including you means something you do not yet have the vocabulary for. You feel it before you read it.",
+            "npc_names": [
+              "Inya Vorn",
+              "Vesh Karro"
+            ],
+            "choice_overrides": []
+          },
+          "reformed_smuggler": {
+            "prose": "On the Wake, you would have known three different ways to handle Vesh, and two of them would have ended with him not in a position to do this again. The Praxeum is asking for the third way. You are not sure you have it.",
+            "npc_names": [
+              "Inya Vorn",
+              "Vesh Karro"
+            ],
+            "choice_overrides": []
+          }
+        },
+        "axis_tags": [
+          "moral",
+          "risk"
+        ],
+        "choices": [
+          {
+            "text": "Stand between Vesh and the junior. Speak first. Make the cost of cruelty visible to him in front of witnesses.",
+            "axis_tags": {
+              "moral": "principled",
+              "risk": "bold"
+            }
+          },
+          {
+            "text": "Tend to the junior. Let Inya handle Vesh. Triage the wound, not the wound-maker.",
+            "axis_tags": {
+              "moral": "compassionate",
+              "risk": "cautious"
+            }
+          },
+          {
+            "text": "Wait. Watch Inya. Learn how the Praxeum chooses to handle this, and follow her lead.",
+            "axis_tags": {
+              "moral": "guarded",
+              "risk": "cautious"
+            }
+          }
+        ],
+        "diegetic_slot": null
+      }
+    ],
+    "expected_scene_count": 4,
+    "diegetic_slots_required": [
+      "name_pick",
+      "appearance_flair"
+    ],
+    "closing_recognition": "After the courtyard scene, Master Skywalker finds you in the training annex. He does not interrogate. He recognises what you have already shown. The Praxeum has read your shape \u2014 not your discipline, not your future, but the way you reach for what reaches for you. He tells you that, in his own words, and lets you carry it forward."
+  },
+  "profession_crystallization": {
+    "anchor_act": 3,
+    "mentor_npc": "Luke Skywalker",
+    "background_overrides": {
+      "imperial_defector": "Master Tev"
+    },
+    "paths": [
+      {
+        "career_id": "guardian",
+        "talent_tree_id": "guardian_protector",
+        "display_name": "Guardian",
+        "summary": "The Jedi who steps between. Combat, defense, direct action. Your saber will be the first to ignite when the people you protect are in reach of harm.",
+        "prose_flavor": "Frame the Guardian path as the discipline of putting your body in the way. The hand that catches the falling beam. The one who walks the corridor first.",
+        "background_specific_id": ""
+      },
+      {
+        "career_id": "consular",
+        "talent_tree_id": "consular_sage",
+        "display_name": "Consular",
+        "summary": "The Jedi who listens. Mind-arts, diplomacy, healing. Your strength will not be the loudest in the room; it will be the one that ends the argument.",
+        "prose_flavor": "Frame the Consular path as the discipline of patience and the long view \u2014 sitting with someone's grief, talking the warlord out of the room before the warlord lights anything.",
+        "background_specific_id": ""
+      },
+      {
+        "career_id": "sentinel",
+        "talent_tree_id": "sentinel_shadow",
+        "display_name": "Sentinel",
+        "summary": "The Jedi who watches. Investigation, balance, hidden service. You will work in the seams the Order does not always admit it needs.",
+        "prose_flavor": "Frame the Sentinel path as the discipline of noticing \u2014 the listener at the edge of the room, the one who reads the trace and finds the cell before it strikes.",
+        "background_specific_id": ""
+      },
+      {
+        "career_id": "sentinel",
+        "talent_tree_id": "sentinel_shadow_imperial",
+        "display_name": "Shadow Sentinel",
+        "summary": "A sub-discipline available only to those with Imperial training. You learned the empire's grammar before you learned the Jedi's. The Order has uses for that knowledge that the Order does not always want to admit.",
+        "prose_flavor": "Frame the Shadow Sentinel path as the discipline of turning Imperial fluency into protection \u2014 the one who reads cell signatures from the inside.",
+        "background_specific_id": "imperial_defector"
+      }
+    ],
+    "suggestion_algorithm": {
+      "background_weight": 2,
+      "archetype_weight": 2,
+      "skill_match_weight": 1
+    },
+    "scene_seed": "Master Skywalker calls the protagonist aside after the events of Two Brothers. The room is the small east meditation chamber, the one the cohort thinks is for senior students only. He has watched what the protagonist did during the off-world mission, what they did during the courtyard moment in Act 1, what they have done in the cohort's politics. He has read the pattern. He names the leanings he has seen, in his own voice \u2014 quiet, specific, without pressure. Then he asks: 'What do you want to become?' The protagonist has three (sometimes four) answers visible. Skywalker will accept any of them. He will not pretend the suggested path and the chosen path are always the same."
   }
 }
