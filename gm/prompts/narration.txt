@@ -89,6 +89,10 @@ LOADOUT:
 
 {narrative_arc_block}
 
+{personality_axes_block}
+
+{personality_locks_block}
+
 {growth_recognition_block}
 
 ═══════════════════════════════════════════
@@ -153,6 +157,18 @@ GALACTIC CONTEXT:
 
 {scene_pacing}
 
+{set_piece_block}
+
+{stakes_block}
+
+{light_foreshadow_block}
+
+{available_codex_block}
+
+{glossary_terms_block}
+
+{personality_lock_moment_block}
+
 {tactical_state_block}
 
 {npc_counter_move_block}
@@ -204,12 +220,47 @@ Follow the PACING, VOICE TARGET, and SCENE CRAFT instructions in the
 CURRENT SCENE block above. They are calibrated to this turn's scene type.
 Word count target is in the pacing guidance.
 
+VISUAL PROSE FORMATTING (Phase 25 §3.4 — use sparingly):
+- *italic* for in-world holocron fragments, propaganda quotes, broadcast
+  text, or interior thoughts that need to feel separate from the
+  surrounding prose. Wrap the whole quoted phrase, not single words.
+- **bold** for emphasis on a single dramatic word at most once per scene.
+  Default behavior is plain prose — bold is the rare exception.
+- A line containing only `* * *` or `---` marks a sub-scene break within
+  a single passage when time skips a few minutes or the scene cuts to a
+  different location. Use at most one such break per passage.
+- Em-dashes (—) for dramatic interruption or interjection.
+These are typographic tools for rhythm, not cosmetics. Most paragraphs
+need none of them.
+
 After the passage, on a new line write exactly: ---CHOICES---
-Then provide 2-4 choices following these rules:
+Then provide 1-5 choices following these rules:
 - Each choice must be specific to this scene and this character
 - At least one choice should have lower risk
 - At least one choice should have higher risk
 - Choices may be actions, dialogue lines, or conversational approaches
+
+CHOICE COUNT GUIDANCE (Phase 25 §2.3 — match count to scene density):
+- 1 choice: pacing/continuation transitions ("the carriage rolls on",
+  "hours pass") — labelled as a continuation, not a decision.
+- 2 choices: binary moral or tactical commitments — help or stand down.
+- 3 choices: standard moments of agency. Use this most of the time.
+- 4 choices: density moments with multiple meaningful tactics
+  (combat with several approaches, faction meetings).
+- 5 choices: rare information-dense scenes, often with codex links
+  surfaced alongside plot choices.
+The default in normal scenes is 3. Choose more or fewer only when the
+moment warrants it.
+
+CHOICE FORMAT GUIDANCE (Phase 25 §2.4):
+- For tactical-action moments (combat, navigation, problem-solving),
+  use full-sentence choices with embedded tactic (~15-30 words).
+- For character-defining commitments, prefer short-phrase or single-word
+  verb choices that name the kind of person the protagonist is being.
+- For personality-lock moments (when explicitly invoked via the lock
+  prompt), use multi-clause belief statements the player signs onto.
+- Do not mix formats within a single node — all choices on one node
+  should share the same format type.
 - CHARACTER THROUGH TACTICS: the tactical decision and the identity
   decision must be the SAME choice. Each option should reveal something
   different about who the character is, not just accomplish a goal
@@ -224,8 +275,33 @@ Then provide 2-4 choices following these rules:
   missing friend, tactical caution)
 - If a choice would require a dice check, append the skill tag at the very
   end in square brackets, e.g. "Bluff your way past the checkpoint [Deception]"
-  The tag will be stripped before the player sees the choice.
-- Choices without a dice check have no tag
+  The skill tag will be stripped before the player sees the choice.
+- Choices without a dice check have no skill tag.
+- VISIBLE COST TAGS (Phase 25 §2.2): when a choice has a deterministic
+  numeric cost the player should see and weigh, append it in square
+  brackets in addition to (or in place of) the skill tag. The cost
+  remains visible to the player. Use these labels exactly:
+    [Force commit: 1]   — Force dice the protagonist must commit
+    [Strain: 2]         — guaranteed strain inflicted
+    [Wounds: 1]         — guaranteed wounds inflicted
+    [Morality: -3]      — morality shift toward Dark (negative) or Light (positive)
+    [Conflict: +2]      — Conflict gained on top of the choice
+    [Obligation: +5]    — Obligation gained
+    [Duty: +3]          — Duty gained
+    [Destiny: -1]       — Destiny pip cost
+  Only emit a visible cost tag when the cost is GUARANTEED (no dice
+  mediating it) and meaningful (>= 1 unit). Do not invent costs the
+  engine cannot apply. These tags appear inline at the end of the
+  choice; multiple are allowed.
+- CODEX LINK CHOICES (Phase 25 §2.1): when the AVAILABLE CODEX section
+  lists entries relevant to this scene, you may surface 0-2 codex links
+  alongside the plot choices. Format: a short title line followed by
+  the codex link tag. Example:
+    The Whispering Wakes [codex:whispering_wakes]
+  Codex link choices count toward the 5-max but read as italic sideways
+  navigation. Do not surface a codex link for a concept not introduced
+  in this scene. When no AVAILABLE CODEX block is present, do not invent
+  codex IDs.
 - Do not use generic action types (attack/defend/talk/run)
 - Write choices as actions or words the character would naturally consider
 - Use concrete established terms for important places, threats, and clues.
@@ -301,6 +377,8 @@ If uncertain, omit the field or use an empty list.
 {behavioral_availability_block}
 
 {voice_mode_instruction}
+
+{goal_priming_block}
 
 TONE: {tone_instruction}
 

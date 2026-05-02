@@ -449,6 +449,9 @@ class Act(BaseModel):
     protagonist_mode: str = ""  # Phase 3: "orphan"|"wanderer"|"warrior"|"martyr"
     beat_roles: list[str] = []
     side_content: list[ActSideContent] = []
+    # ── Phase 25 runtime experience fields ──
+    title_visible: str = ""  # Display title rendered to player at act transitions
+    foreshadowing_plants: list[ForeshadowingEntry] = []  # §2.9 lightweight
 
 
 # ── Import interface (Game Mechanics §20) ─────────────────────────────
@@ -829,6 +832,115 @@ class StoryArchitecture(BaseModel):
         return v
 
 
+# ── Runtime experience layer (Phase 25 — runtime-experience-redesign) ─
+
+
+class CodexSurfaceCondition(BaseModel):
+    """Conditions under which a codex entry's link can surface in choice slots."""
+    requires_npcs:        list[str] = Field(default_factory=list)
+    requires_locations:   list[str] = Field(default_factory=list)
+    requires_act_minimum: int = 0
+    requires_flags:       list[str] = Field(default_factory=list)
+
+
+class CodexEntry(BaseModel):
+    """A short authored lore page surfaced sideways in the choice slot.
+
+    Reading a codex entry does not advance the turn counter.
+    Tag families: "(Imperial Doctrine)", "(Reality)", "(Holocron Fragment)",
+    "(Reputation)", "(Crew Roster)", "(History Lesson)", "(Whispers)",
+    "(Dossier)". The studio chooses which tags a campaign uses.
+    """
+    entry_id: str = Field(min_length=1)
+    title:    str = Field(min_length=1)
+    tag:      str = Field(min_length=1)       # e.g. "(History Lesson)"
+    body:     str = Field(min_length=20)      # 150-600 word page
+    surface_when: CodexSurfaceCondition = Field(
+        default_factory=CodexSurfaceCondition
+    )
+
+
+class AchievementVisibility(str, Enum):
+    """How an achievement appears in the dashboard before being earned."""
+    ALWAYS_VISIBLE        = "always_visible"
+    HIDDEN_UNTIL_EARNED   = "hidden_until_earned"
+    PROGRESS_VISIBLE      = "progress_visible"
+
+
+class EarnCondition(BaseModel):
+    """Programmatic condition evaluated by the runtime to award an achievement."""
+    condition_type: str  # "milestone" | "pattern" | "codex" | "relationship"
+                          #  | "spine_anchor" | "force_power_milestone"
+    parameters: dict[str, Any] = Field(default_factory=dict)
+
+
+class Achievement(BaseModel):
+    achievement_id: str = Field(min_length=1)
+    title:         str = Field(min_length=1)
+    description:   str = Field(min_length=1)
+    visibility:    AchievementVisibility = AchievementVisibility.PROGRESS_VISIBLE
+    earn_condition: EarnCondition
+
+
+class GlossaryEntry(BaseModel):
+    """A definition used for hover tooltips in narration prose."""
+    term: str = Field(min_length=1)
+    short_definition: str = Field(min_length=1)
+    long_definition:  str = ""
+
+
+class SetPieceTreatment(str, Enum):
+    """Visual treatment applied to set-piece scenes."""
+    TITLE_CARD   = "title_card"
+    SCENE_BREAK  = "scene_break"
+    EPIGRAPH     = "epigraph"
+    NONE         = "none"
+
+
+class SetPieceDeclaration(BaseModel):
+    """Marks a scene anchor as a designated peak moment.
+
+    Set pieces get extra word budget, larger choice format, and a visual
+    treatment. The studio designates 5-8 per campaign.
+    """
+    anchor_id:                 str = Field(min_length=1)
+    scene_title:               str = Field(min_length=1)
+    word_budget_multiplier:    float = Field(ge=0.5, le=3.0, default=1.5)
+    visual_treatment:          SetPieceTreatment = SetPieceTreatment.SCENE_BREAK
+    choice_count_recommendation: int = Field(ge=1, le=5, default=5)
+
+
+class BeliefOption(BaseModel):
+    """One option in a personality-lock moment."""
+    belief_text:  str = Field(min_length=10)         # multi-clause statement
+    axis_effects: dict[str, int] = Field(default_factory=dict)
+    voice_tag:    str = ""                            # tag for narration prompts
+
+
+class PersonalityLockMoment(BaseModel):
+    """An anchor scene where the player commits to a belief.
+
+    The chosen belief enters character.personality_locks and biases future
+    narration and choice generation.
+    """
+    anchor_id:    str = Field(min_length=1)
+    prompt_text:  str = Field(min_length=10)
+    belief_options: list[BeliefOption] = Field(min_length=2, max_length=4)
+
+
+class ForeshadowingEntry(BaseModel):
+    """Lighter foreshadowing layer than ForeshadowLink (CS-6 Phase 5).
+
+    Authored on individual acts via Act.foreshadowing_plants. The narration
+    prompt at the plant act is told to weave a small foreshadowing detail.
+    The narration prompt at the payoff act is told to reference it.
+    """
+    plant_act:       int = Field(ge=1)
+    payoff_act:      int = Field(ge=1)
+    plant_concept:   str = Field(min_length=10)
+    payoff_concept:  str = Field(min_length=10)
+
+
 # ── Top-level spine ───────────────────────────────────────────────────
 
 
@@ -888,6 +1000,14 @@ class CampaignSpine(BaseModel):
     # ── Bond-event runtime (Trails-of-Cold-Steel pattern) ──
     bond_events: list[BondEvent] = []
     bond_event_system: Optional[BondEventSystem] = None
+    # ── Phase 25 runtime experience fields ──
+    codex: list[CodexEntry] = []  # §2.1 lore pages surfaced in choice slot
+    achievements: list[Achievement] = []  # §2.7 earned/in-progress dashboard
+    glossary: list[GlossaryEntry] = []  # §3.6 hover-tooltip definitions
+    expected_relationship_count: int = Field(ge=0, default=5)  # §3.1 dashboard slots
+    set_pieces: list[SetPieceDeclaration] = []  # §2.8 designated peak moments
+    personality_lock_moments: list[PersonalityLockMoment] = []  # §2.5 belief commitments
+    opposed_pairs_definitions: list[dict[str, str]] = []  # §2.6 pair_id → label config
 
     @field_validator("acts")
     @classmethod

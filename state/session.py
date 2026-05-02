@@ -51,6 +51,8 @@ def log_turn(
     skill_tags_json:  str | None = None,
     choice_implications: str | None = None,
     force_result_json: str | None = None,
+    visible_costs_json: str | None = None,
+    codex_links_json:   str | None = None,
 ) -> None:
     """Write one completed turn to the database.
 
@@ -74,14 +76,15 @@ def log_turn(
             " check_skill, check_difficulty, dice_pool_json, roll_result_json, "
             " narration, choices_json, skill_tags_json, meaningful_note, "
             " context_json, scene_type, moral_weight, choice_implications, "
-            " force_result_json, compressed, created_at) "
-            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, ?)",
+            " force_result_json, visible_costs_json, codex_links_json, "
+            " compressed, created_at) "
+            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, ?)",
             (
                 session_id, turn_number, player_action, choice_index,
                 check_skill, check_difficulty, dice_pool_json, roll_result_json,
                 narration, json.dumps(choices), skill_tags_json, meaningful_note,
                 context_json, scene_type, moral_weight, choice_implications,
-                force_result_json, now,
+                force_result_json, visible_costs_json, codex_links_json, now,
             ),
         )
         conn.execute(

@@ -167,6 +167,80 @@ class NarrativeArc(BaseModel):
     movements:  list[dict] = Field(default_factory=list)
 
 
+class OpposedPair(BaseModel):
+    """Zero-sum personality axis (Phase 25 §2.6).
+
+    Each pair is a single 0-100 percentage. Gain in one pole reduces the
+    other. pole_b_value is implicitly (100 - pole_a_value).
+
+    Six standard axes for Star Wars campaigns:
+      light_dark, lone_wolf_crew_loyalist, reckless_cautious,
+      showy_quiet, direct_subtle, lawful_lawless
+
+    `last_cue` is the most recent narration cue surfaced for hover.
+    """
+    pair_id:      str
+    pole_a_label: str
+    pole_b_label: str
+    pole_a_value: int = Field(ge=0, le=100, default=50)
+    last_cue:     str = ""
+
+    @property
+    def pole_b_value(self) -> int:
+        return 100 - self.pole_a_value
+
+    def dominant_pole(self) -> str:
+        if self.pole_a_value > 60:
+            return self.pole_a_label
+        if self.pole_a_value < 40:
+            return self.pole_b_label
+        return "balanced"
+
+
+class BeliefCommitment(BaseModel):
+    """A locked-in personality belief (Phase 25 §2.5).
+
+    Saved when the player picks a BeliefOption at a PersonalityLockMoment.
+    Future narration prompts include these as voice_tags and may gate
+    belief-aligned/contradicting choices.
+    """
+    anchor_id:    str
+    belief_text:  str
+    voice_tag:    str = ""
+    locked_at_turn: int = 0
+
+
+DEFAULT_OPPOSED_PAIRS: list[tuple[str, str, str]] = [
+    # (pair_id, pole_a_label, pole_b_label)
+    # light_dark is *not* in this list because morality (0-100) on
+    # MotivationTrack already represents that axis. Keeping it separate
+    # avoids double-bookkeeping. The dashboard renders morality as the
+    # "Light / Dark" axis alongside these five new ones.
+    ("lone_wolf_crew_loyalist",  "Lone Wolf",  "Crew Loyalist"),
+    ("reckless_cautious",         "Reckless",   "Cautious"),
+    ("showy_quiet",               "Showy",      "Quiet"),
+    ("direct_subtle",             "Direct",     "Subtle"),
+    ("lawful_lawless",            "Lawful",     "Lawless"),
+]
+
+
+def default_personality_axes() -> list[OpposedPair]:
+    """Build a fresh set of opposed-pair axes initialized to neutral 50/50.
+
+    Phase 25 §2.6 — five Star Wars-flavored axes. Light/Dark lives on
+    MotivationTrack.morality and is shown as a sixth axis on the dashboard.
+    """
+    return [
+        OpposedPair(
+            pair_id=pair_id,
+            pole_a_label=pole_a,
+            pole_b_label=pole_b,
+            pole_a_value=50,
+        )
+        for (pair_id, pole_a, pole_b) in DEFAULT_OPPOSED_PAIRS
+    ]
+
+
 class Character(BaseModel):
     name:               str
     species:            Species
@@ -198,6 +272,13 @@ class Character(BaseModel):
     voice_notes:          str = ""
     active_injuries:      list[str] = Field(default_factory=list)  # narrative injury descriptions (Game Mechanics §3)
     narrative_arc:        Optional[NarrativeArc] = None  # Brooks/Weiland arc — opt-in
+    # ── Phase 25 runtime experience fields ──
+    personality_axes:     list[OpposedPair] = Field(default_factory=list)       # §2.6
+    personality_locks:    list[BeliefCommitment] = Field(default_factory=list)  # §2.5
+    codex_read:           list[str] = Field(default_factory=list)               # entry_ids
+    achievements_earned:  list[str] = Field(default_factory=list)               # achievement_ids
+    achievement_progress: dict[str, int] = Field(default_factory=dict)          # achievement_id → count
+    relationship_slot_assignments: dict[str, str] = Field(default_factory=dict)  # slot_idx → npc_name
 
     def get_characteristic(self, name: str) -> int:
         return getattr(self.characteristics, name)
@@ -212,6 +293,50 @@ class Character(BaseModel):
         """Total soak: base soak (Brawn) + armor soak bonus (§18)."""
         armor_bonus = self.loadout.armor.soak_bonus if self.loadout.armor else 0
         return self.soak + armor_bonus
+
+    def find_axis(self, pair_id: str) -> Optional["OpposedPair"]:
+        """Look up a personality axis by its pair_id."""
+        for axis in self.personality_axes:
+            if axis.pair_id == pair_id:
+                return axis
+        return None
+
+    def adjust_axis(self, pair_id: str, delta: int, cue: str = "") -> bool:
+        """Apply a clamped delta to pole_a_value of a personality axis.
+
+        Returns True if a delta was applied (axis exists and delta != 0).
+        Stores the cue string for hover display in the dashboard.
+        """
+        axis = self.find_axis(pair_id)
+        if axis is None or delta == 0:
+            return False
+        axis.pole_a_value = max(0, min(100, axis.pole_a_value + delta))
+        if cue:
+            axis.last_cue = cue
+        return True
+
+    def has_personality_lock_for(self, anchor_id: str) -> bool:
+        return any(lock.anchor_id == anchor_id for lock in self.personality_locks)
+
+    def add_personality_lock(
+        self, anchor_id: str, belief_text: str, voice_tag: str = "",
+        locked_at_turn: int = 0,
+    ) -> None:
+        """Persist a chosen BeliefOption.
+
+        Idempotent — re-locking the same anchor replaces the prior belief.
+        """
+        # remove any pre-existing lock for this anchor
+        self.personality_locks = [
+            lock for lock in self.personality_locks
+            if lock.anchor_id != anchor_id
+        ]
+        self.personality_locks.append(BeliefCommitment(
+            anchor_id=anchor_id,
+            belief_text=belief_text,
+            voice_tag=voice_tag,
+            locked_at_turn=locked_at_turn,
+        ))
 
     def narrative_status(self) -> str:
         lines = [

@@ -47,6 +47,8 @@ CREATE TABLE IF NOT EXISTS turns (
     moral_weight     INTEGER DEFAULT 0,
     choice_implications TEXT,
     force_result_json TEXT,
+    visible_costs_json TEXT,
+    codex_links_json   TEXT,
     compressed       INTEGER DEFAULT 0,
     created_at       TEXT NOT NULL
 );
@@ -193,4 +195,19 @@ def init_db():
             conn.commit()
         except Exception:
             pass  # table already exists
+        # Phase 25: migrate existing DBs — add visible_costs_json + codex_links_json
+        try:
+            conn.execute(
+                "ALTER TABLE turns ADD COLUMN visible_costs_json TEXT"
+            )
+            conn.commit()
+        except Exception:
+            pass
+        try:
+            conn.execute(
+                "ALTER TABLE turns ADD COLUMN codex_links_json TEXT"
+            )
+            conn.commit()
+        except Exception:
+            pass
         conn.commit()

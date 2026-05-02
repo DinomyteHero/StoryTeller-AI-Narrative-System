@@ -385,6 +385,423 @@ header {
   border-color: var(--accent-dim) !important;
   background: var(--border) !important;
 }
+
+/* ── Phase 25 §3.4 — Visual prose formatting ───────────────────── */
+.passage em { font-style: italic; color: var(--text-dim); }
+.passage strong { font-weight: bold; color: var(--accent); }
+.passage hr.scene-break {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 1.2em auto;
+  width: 30%;
+  text-align: center;
+}
+.passage hr.scene-break::after {
+  content: "* * *";
+  display: inline-block;
+  position: relative;
+  top: -0.7em;
+  background: var(--surface);
+  padding: 0 0.6em;
+  color: var(--text-dim);
+  font-size: 0.8rem;
+  letter-spacing: 0.4em;
+}
+
+/* Phase 25 §3.6 — Glossary tooltip terms in prose */
+.passage .glossary-term {
+  border-bottom: 1px dotted var(--accent-dim);
+  cursor: help;
+}
+
+/* ── Phase 25 §2.2 — Visible cost tags + codex link styling ────── */
+.choice-cost-tags {
+  display: inline-block;
+  margin-left: 0.4rem;
+  font-family: monospace;
+  font-size: 0.78rem;
+  color: var(--text-dim);
+  letter-spacing: 0.02em;
+}
+
+.choice-cost-tag {
+  display: inline-block;
+  padding: 0.1rem 0.4rem;
+  border-radius: 3px;
+  background: rgba(200, 168, 78, 0.08);
+  border: 1px solid var(--accent-dim);
+  color: var(--accent);
+  margin-right: 0.25rem;
+}
+
+.choice-cost-tag.morality-down {
+  background: rgba(160, 72, 72, 0.08);
+  border-color: #a04848;
+  color: #d88;
+}
+
+.choice-btn.codex-link {
+  font-style: italic;
+  color: var(--text-dim);
+  background: var(--surface);
+  border-style: dashed;
+  border-color: var(--border);
+}
+.choice-btn.codex-link::before {
+  content: "📖 ";
+  margin-right: 0.2rem;
+}
+.choice-btn.codex-link:hover:not(:disabled) {
+  border-color: var(--accent-dim);
+  color: var(--text);
+}
+
+/* ── Phase 25 §2.1 — Codex overlay ────────────────────────────── */
+.codex-overlay {
+  display: none;
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.72);
+  z-index: 1000;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+}
+.codex-overlay.visible { display: flex; }
+
+.codex-panel {
+  background: var(--surface);
+  border: 1px solid var(--accent-dim);
+  border-radius: 8px;
+  padding: 1.5rem 1.75rem;
+  max-width: 640px;
+  width: 100%;
+  max-height: 86vh;
+  overflow-y: auto;
+  font-family: Georgia, 'Times New Roman', serif;
+  line-height: 1.7;
+  font-size: 1rem;
+}
+
+.codex-panel .codex-tag {
+  font-family: monospace;
+  font-size: 0.8rem;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 0.3rem;
+}
+
+.codex-panel h2 {
+  color: var(--text);
+  font-size: 1.4rem;
+  margin-bottom: 1rem;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 0.5rem;
+}
+
+.codex-panel .codex-body p { margin-bottom: 1rem; }
+
+.codex-back-btn {
+  display: inline-block;
+  margin-top: 1.2rem;
+  padding: 0.5rem 1rem;
+  background: var(--surface-alt);
+  border: 1px solid var(--accent-dim);
+  color: var(--accent);
+  border-radius: 4px;
+  font-family: sans-serif;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+.codex-back-btn:hover { background: var(--surface); }
+
+/* ── Phase 25 §3.5 — Dashboard ─────────────────────────────────── */
+.dashboard-toggle-btn {
+  background: var(--surface-alt);
+  border: 1px solid var(--border);
+  color: var(--accent);
+  padding: 0.4rem 0.8rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-family: sans-serif;
+  font-size: 0.85rem;
+}
+.dashboard-toggle-btn:hover { background: var(--surface); }
+
+.dashboard-overlay {
+  display: none;
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.85);
+  z-index: 999;
+  padding: 1.5rem;
+  overflow-y: auto;
+}
+.dashboard-overlay.visible { display: block; }
+
+.dashboard-panel {
+  max-width: 760px;
+  margin: 0 auto;
+  background: var(--surface);
+  border: 1px solid var(--accent-dim);
+  border-radius: 8px;
+  padding: 1.25rem 1.5rem;
+  font-family: Georgia, 'Times New Roman', serif;
+}
+
+.dashboard-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-bottom: 1rem;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 0.6rem;
+}
+
+.dashboard-tab-btn {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+  padding: 0.35rem 0.7rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-family: sans-serif;
+  font-size: 0.82rem;
+}
+.dashboard-tab-btn.active {
+  background: var(--surface-alt);
+  color: var(--accent);
+  border-color: var(--accent-dim);
+}
+.dashboard-tab-btn:hover:not(.active) {
+  border-color: var(--accent-dim);
+  color: var(--text);
+}
+
+.dashboard-section {
+  display: none;
+  font-size: 0.92rem;
+  line-height: 1.55;
+}
+.dashboard-section.active { display: block; }
+
+.dashboard-section h3 {
+  color: var(--accent);
+  font-size: 1rem;
+  margin-bottom: 0.6rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-family: sans-serif;
+}
+
+.axis-bar {
+  position: relative;
+  height: 18px;
+  background: var(--surface-alt);
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  overflow: hidden;
+  margin: 0.2rem 0 0.6rem 0;
+}
+.axis-bar-fill {
+  position: absolute;
+  top: 0; left: 0; bottom: 0;
+  background: linear-gradient(to right, var(--accent-dim), var(--accent));
+  transition: width 0.3s ease;
+}
+
+.axis-row {
+  display: grid;
+  grid-template-columns: 1fr 60px 1fr;
+  align-items: center;
+  font-size: 0.83rem;
+  margin-bottom: 0.7rem;
+  gap: 0.5rem;
+}
+.axis-row .pole-label-left { text-align: right; color: var(--text-dim); }
+.axis-row .pole-label-right { text-align: left; color: var(--text-dim); }
+.axis-row .pole-label-active { color: var(--accent); font-weight: bold; }
+.axis-row .axis-value { text-align: center; font-family: monospace; color: var(--text-dim); font-size: 0.78rem; }
+
+.dashboard-section .axis-cue {
+  font-style: italic;
+  color: var(--text-dim);
+  font-size: 0.78rem;
+  padding-left: 0.5rem;
+  border-left: 2px solid var(--border);
+  margin-bottom: 0.7rem;
+}
+
+.relationship-slot {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.5rem 0.6rem;
+  border-bottom: 1px solid var(--border);
+  align-items: center;
+  font-size: 0.88rem;
+}
+.relationship-slot.unknown { color: var(--text-dim); font-style: italic; }
+.relationship-slot .disposition-bar {
+  width: 80px;
+  height: 6px;
+  background: var(--surface-alt);
+  border-radius: 3px;
+  overflow: hidden;
+}
+.relationship-slot .disposition-bar > div {
+  height: 100%;
+  background: var(--accent);
+  transition: width 0.3s;
+}
+
+.codex-list-tag-group {
+  margin-bottom: 0.8rem;
+}
+.codex-list-tag-group .codex-tag-label {
+  color: var(--accent);
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-family: sans-serif;
+  margin-bottom: 0.3rem;
+}
+.codex-list-entry {
+  display: block;
+  width: 100%;
+  text-align: left;
+  background: var(--surface-alt);
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 0.4rem 0.7rem;
+  border-radius: 3px;
+  margin-bottom: 0.25rem;
+  cursor: pointer;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 0.85rem;
+}
+.codex-list-entry.read { color: var(--text-dim); }
+.codex-list-entry.unread::after {
+  content: " · NEW";
+  color: var(--accent);
+  font-size: 0.7rem;
+}
+
+.achievement-row {
+  padding: 0.5rem 0.6rem;
+  border-bottom: 1px solid var(--border);
+  font-size: 0.86rem;
+}
+.achievement-row .ach-title {
+  font-weight: bold;
+  color: var(--accent);
+}
+.achievement-row.in-progress .ach-title { color: var(--text-dim); }
+.achievement-row .ach-desc { font-size: 0.8rem; color: var(--text-dim); margin-top: 0.2rem; }
+
+/* ── Phase 25 §2.8 — Set-piece scene treatments ────────────────── */
+.scene-title-card {
+  background: linear-gradient(to right, transparent, rgba(200, 168, 78, 0.15), transparent);
+  border-top: 2px solid var(--accent);
+  border-bottom: 2px solid var(--accent);
+  padding: 1.5rem 1rem;
+  margin: 1.2rem 0;
+  text-align: center;
+  font-family: Georgia, 'Times New Roman', serif;
+}
+.scene-title-card .scene-title-label {
+  color: var(--accent);
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  margin-bottom: 0.4rem;
+}
+.scene-title-card .scene-title-text {
+  color: var(--text);
+  font-size: 1.5rem;
+  font-weight: bold;
+  letter-spacing: 0.04em;
+}
+
+.scene-break-marker {
+  border-bottom: 1px solid var(--accent-dim);
+  padding-bottom: 0.3rem;
+  margin: 0.6rem 0 0.8rem 0;
+}
+.scene-break-marker .scene-title-text {
+  color: var(--accent);
+  font-weight: bold;
+  font-size: 1.1rem;
+  letter-spacing: 0.03em;
+}
+
+.scene-epigraph {
+  font-style: italic;
+  color: var(--text-dim);
+  border-left: 2px solid var(--accent-dim);
+  padding-left: 0.8rem;
+  margin: 0.8rem 0 1rem 0;
+  font-size: 0.9rem;
+}
+
+/* Phase 25 §2.10 — Stakes badge */
+.stakes-badge {
+  display: inline-block;
+  padding: 0.15rem 0.5rem;
+  border-radius: 3px;
+  font-size: 0.7rem;
+  font-family: sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  font-weight: bold;
+  margin-left: 0.5rem;
+  vertical-align: middle;
+}
+.stakes-badge.high {
+  background: rgba(200, 168, 78, 0.15);
+  border: 1px solid var(--accent-dim);
+  color: var(--accent);
+}
+.stakes-badge.critical {
+  background: rgba(196, 64, 64, 0.18);
+  border: 1px solid var(--danger);
+  color: #f88;
+}
+
+/* Phase 25 §3.3 — Chapter / act title display */
+.chapter-title {
+  font-family: Georgia, 'Times New Roman', serif;
+  color: var(--text-dim);
+  font-size: 0.82rem;
+  letter-spacing: 0.04em;
+  text-align: center;
+  margin: 0.5rem 0 1rem 0;
+  padding: 0.4rem 0;
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+}
+.chapter-title strong { color: var(--accent); font-weight: bold; }
+
+/* Phase 25 §3.7 — Recap card for returning players */
+.recap-card {
+  background: rgba(200, 168, 78, 0.05);
+  border: 1px solid var(--accent-dim);
+  border-radius: 6px;
+  padding: 1rem 1.2rem;
+  margin-bottom: 1.2rem;
+  font-size: 0.88rem;
+  line-height: 1.5;
+}
+.recap-card .recap-label {
+  color: var(--accent);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 0.4rem;
+  font-family: sans-serif;
+}
+.recap-card details { margin-top: 0.4rem; }
+.recap-card details summary { cursor: pointer; color: var(--text-dim); font-size: 0.85rem; }
 </style>
 </head>
 <body>
@@ -408,7 +825,10 @@ header {
   <div id="game-screen" style="display:none">
     <header>
       <span class="campaign-name" id="campaign-name"></span>
-      <span class="session-info" id="session-info"></span>
+      <span style="display:flex; gap:0.4rem; align-items:center;">
+        <button class="dashboard-toggle-btn" id="dashboard-btn" onclick="openDashboard()">Dashboard</button>
+        <span class="session-info" id="session-info"></span>
+      </span>
     </header>
 
     <div class="local-warning" id="local-warning">
@@ -416,6 +836,15 @@ header {
     </div>
 
     <div class="error-msg" id="error-msg"></div>
+
+    <!-- Phase 25 §3.3 — chapter / scene title shown above prose -->
+    <div class="chapter-title" id="chapter-title" style="display:none"></div>
+
+    <!-- Phase 25 §3.7 — recap card for sessions resumed after a break -->
+    <div id="recap-mount"></div>
+
+    <!-- Phase 25 §2.8 — set-piece title card (only shown for declared scenes) -->
+    <div id="scene-treatment-mount"></div>
 
     <div class="passage" id="passage"></div>
 
@@ -437,6 +866,30 @@ header {
       <span id="status-turn">Turn 0</span>
       <span id="status-wounds"></span>
       <span id="status-strain"></span>
+    </div>
+  </div>
+
+  <!-- Phase 25 §2.1 — codex overlay (sideways navigation) -->
+  <div class="codex-overlay" id="codex-overlay" onclick="closeCodexIfBackdrop(event)">
+    <div class="codex-panel" id="codex-panel">
+      <div class="codex-tag" id="codex-entry-tag"></div>
+      <h2 id="codex-entry-title"></h2>
+      <div class="codex-body" id="codex-entry-body"></div>
+      <button class="codex-back-btn" onclick="closeCodex()">Back to the story</button>
+    </div>
+  </div>
+
+  <!-- Phase 25 §3.5 — dashboard overlay -->
+  <div class="dashboard-overlay" id="dashboard-overlay">
+    <div class="dashboard-panel">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem;">
+        <h2 style="color:var(--accent); font-size:1.2rem; letter-spacing:0.04em;">CHARACTER DASHBOARD</h2>
+        <button class="codex-back-btn" onclick="closeDashboard()">Close</button>
+      </div>
+      <div class="dashboard-tabs" id="dashboard-tabs"></div>
+      <div id="dashboard-body">
+        <p style="text-align:center; color:var(--text-dim);">Loading...</p>
+      </div>
     </div>
   </div>
 
@@ -584,7 +1037,7 @@ async function startSession() {
     // opening narration begins; it carries forward into the prose contract.
     renderSessionIntro(data.session_intro);
     renderPassage(data.opening_narration);
-    renderChoices(data.choices);
+    renderChoices(data.choices, data.choices_meta);
     showStatus(0, 0, 0);
   } catch (e) {
     btn.disabled = false;
@@ -625,7 +1078,11 @@ async function takeTurn(choiceIndex, freeFormText) {
     const data = await res.json();
 
     renderPassage(data.narration);
-    renderChoices(data.choices);
+    renderChoices(data.choices, data.choices_meta);
+
+    // Phase 25 §2.8 / §3.3 — set-piece visual treatment + chapter title
+    renderSceneTreatment(data.scene_treatment);
+    renderChapterTitle(data.chapter_title);
 
     // Dice panel
     if (data.dice_result) {
@@ -723,7 +1180,9 @@ async function takeTurnStream(choiceIndex, freeFormText) {
         if (eventType === 'done') {
           turnComplete = true;
           renderPassage(data.narration);
-          renderChoices(data.choices);
+          renderChoices(data.choices, data.choices_meta);
+          renderSceneTreatment(data.scene_treatment);
+          renderChapterTitle(data.chapter_title);
 
           if (data.dice_result) {
             renderDicePanel(data.dice_result, data.roll_summary, data.destiny);
@@ -759,17 +1218,430 @@ async function takeTurnStream(choiceIndex, freeFormText) {
     }
   } catch (e) {
     showError(e.message);
-    renderChoices(currentChoices);
+    renderChoices(currentChoices, currentChoiceMeta);
     enableChoices();
     showLoading(false);
   }
 }
 
+/* ── Phase 25 §3.3 — chapter title rendering ─────────────────── */
+function renderChapterTitle(chapter) {
+  const el = document.getElementById('chapter-title');
+  if (!el) return;
+  if (!chapter || (!chapter.title && !chapter.act_number)) {
+    el.style.display = 'none';
+    return;
+  }
+  const title = chapter.title || '';
+  const act = chapter.act_number ? `Part ${chapter.act_number}` : '';
+  el.innerHTML = `${_esc(act)}${title ? ` · <strong>${_esc(title)}</strong>` : ''}`;
+  el.style.display = 'block';
+}
+
+/* ── Phase 25 §2.8 — set-piece scene treatment ─────────────── */
+function renderSceneTreatment(treatment) {
+  const mount = document.getElementById('scene-treatment-mount');
+  if (!mount) return;
+  mount.innerHTML = '';
+  if (!treatment) return;
+  const variant = treatment.visual_treatment || 'scene_break';
+  const sceneTitle = treatment.scene_title || '';
+  const stakes = treatment.stakes_level || 'normal';
+  let stakesBadge = '';
+  if (stakes === 'high') stakesBadge = '<span class="stakes-badge high">CRITICAL MOMENT</span>';
+  else if (stakes === 'critical') stakesBadge = '<span class="stakes-badge critical">CLIMAX</span>';
+
+  if (variant === 'title_card') {
+    mount.innerHTML = `<div class="scene-title-card">
+      <div class="scene-title-label">SCENE</div>
+      <div class="scene-title-text">${_esc(sceneTitle)} ${stakesBadge}</div>
+    </div>`;
+  } else if (variant === 'epigraph' && treatment.epigraph) {
+    mount.innerHTML = `<div class="scene-epigraph">${_esc(treatment.epigraph)}</div>
+      <div class="scene-break-marker"><span class="scene-title-text">${_esc(sceneTitle)} ${stakesBadge}</span></div>`;
+  } else if (variant === 'scene_break') {
+    mount.innerHTML = `<div class="scene-break-marker"><span class="scene-title-text">${_esc(sceneTitle)} ${stakesBadge}</span></div>`;
+  } else if (stakes === 'high' || stakes === 'critical') {
+    mount.innerHTML = `<div style="text-align:right; margin-bottom:0.4rem;">${stakesBadge}</div>`;
+  }
+}
+
+/* ── Phase 25 §2.1 — codex overlay ────────────────────────────── */
+async function openCodex(entryId) {
+  if (!entryId || !sessionId) return;
+  const overlay = document.getElementById('codex-overlay');
+  const tagEl = document.getElementById('codex-entry-tag');
+  const titleEl = document.getElementById('codex-entry-title');
+  const bodyEl = document.getElementById('codex-entry-body');
+  tagEl.textContent = '';
+  titleEl.textContent = 'Loading...';
+  bodyEl.innerHTML = '';
+  overlay.classList.add('visible');
+  try {
+    const res = await fetch(API + '/session/' + sessionId + '/codex/' + encodeURIComponent(entryId));
+    if (!res.ok) throw new Error('Codex entry unavailable');
+    const data = await res.json();
+    tagEl.textContent = data.tag || '';
+    titleEl.textContent = data.title || '';
+    bodyEl.innerHTML = renderProseMarkdown(data.body || '');
+  } catch (e) {
+    titleEl.textContent = 'Error';
+    bodyEl.textContent = e.message;
+  }
+}
+
+function closeCodex() {
+  const overlay = document.getElementById('codex-overlay');
+  overlay.classList.remove('visible');
+}
+
+function closeCodexIfBackdrop(event) {
+  if (event.target.id === 'codex-overlay') closeCodex();
+}
+
+/* ── Phase 25 §3.5 — dashboard rendering ───────────────────── */
+const DASHBOARD_TABS = [
+  { key: 'hero',           label: 'Hero' },
+  { key: 'personality',    label: 'Personality' },
+  { key: 'relationships',  label: 'Bonds' },
+  { key: 'skills',         label: 'Skills' },
+  { key: 'talents',        label: 'Talents & Force' },
+  { key: 'locks',          label: 'Beliefs' },
+  { key: 'codex',          label: 'Codex' },
+  { key: 'achievements',   label: 'Achievements' },
+  { key: 'glossary',       label: 'Glossary' },
+  { key: 'history',        label: 'Recent' },
+];
+
+let _dashboardState = { activeTab: 'hero', data: null };
+
+async function openDashboard() {
+  const overlay = document.getElementById('dashboard-overlay');
+  overlay.classList.add('visible');
+  try {
+    const res = await fetch(API + '/session/' + sessionId + '/dashboard');
+    if (!res.ok) throw new Error('Dashboard unavailable');
+    const data = await res.json();
+    _dashboardState.data = data;
+    if (data.glossary) setGlossary(data.glossary);
+    renderDashboardTabs();
+    renderDashboardSection(_dashboardState.activeTab);
+  } catch (e) {
+    document.getElementById('dashboard-body').innerHTML =
+      '<p style="color:var(--danger);">' + _esc(e.message) + '</p>';
+  }
+}
+
+function closeDashboard() {
+  document.getElementById('dashboard-overlay').classList.remove('visible');
+}
+
+function renderDashboardTabs() {
+  const tabsEl = document.getElementById('dashboard-tabs');
+  tabsEl.innerHTML = DASHBOARD_TABS.map(t =>
+    '<button class="dashboard-tab-btn' +
+    (_dashboardState.activeTab === t.key ? ' active' : '') +
+    '" data-tab="' + t.key + '">' + _esc(t.label) + '</button>'
+  ).join('');
+  tabsEl.querySelectorAll('button').forEach(b => {
+    b.onclick = () => {
+      _dashboardState.activeTab = b.dataset.tab;
+      renderDashboardTabs();
+      renderDashboardSection(b.dataset.tab);
+    };
+  });
+}
+
+function renderDashboardSection(tabKey) {
+  const body = document.getElementById('dashboard-body');
+  const data = _dashboardState.data || {};
+  let html = '<div class="dashboard-section active">';
+  if (tabKey === 'hero')        html += renderHeroSection(data);
+  else if (tabKey === 'personality')   html += renderPersonalitySection(data);
+  else if (tabKey === 'relationships') html += renderRelationshipsSection(data);
+  else if (tabKey === 'skills')        html += renderSkillsSection(data);
+  else if (tabKey === 'talents')       html += renderTalentsSection(data);
+  else if (tabKey === 'locks')         html += renderLocksSection(data);
+  else if (tabKey === 'codex')         html += renderCodexListSection(data);
+  else if (tabKey === 'achievements')  html += renderAchievementsSection(data);
+  else if (tabKey === 'glossary')      html += renderGlossarySection(data);
+  else if (tabKey === 'history')       html += renderHistorySection(data);
+  html += '</div>';
+  body.innerHTML = html;
+  // Attach codex-list click handlers
+  body.querySelectorAll('[data-codex-id]').forEach(el => {
+    el.onclick = () => { closeDashboard(); openCodex(el.dataset.codexId); };
+  });
+}
+
+function renderHeroSection(d) {
+  const h = d.hero || {};
+  const ch = d.chapter || {};
+  let html = '<h3>Your Hero</h3>';
+  html += '<div style="margin-bottom:0.8rem;">';
+  html += '<div style="font-size:1.15rem; color:var(--accent); font-weight:bold;">' + _esc(h.name || '') + '</div>';
+  html += '<div style="color:var(--text-dim); font-size:0.85rem;">' +
+    _esc((h.species || '').replace('_', ' ').replace(/\b\w/g, c => c.toUpperCase())) + ' · ' +
+    _esc((h.career || '').replace('_', ' ').replace(/\b\w/g, c => c.toUpperCase())) + '</div>';
+  if ((h.specializations || []).length) {
+    html += '<div style="color:var(--text-dim); font-size:0.8rem;">' +
+      h.specializations.map(_esc).join(', ') + '</div>';
+  }
+  html += '</div>';
+  if (h.background) {
+    html += '<div style="font-size:0.85rem; color:var(--text); margin-bottom:0.8rem;">' +
+      _esc(h.background) + '</div>';
+  }
+  if (h.voice_notes) {
+    html += '<div style="font-style:italic; color:var(--text-dim); font-size:0.83rem; margin-bottom:0.8rem;">' +
+      _esc(h.voice_notes) + '</div>';
+  }
+  // Health
+  html += '<h3 style="margin-top:0.8rem;">Status</h3>';
+  html += '<div style="font-family:monospace; font-size:0.85rem;">';
+  html += 'Wounds: ' + (h.wounds && h.wounds.current) + '/' + (h.wounds && h.wounds.threshold) + '<br>';
+  html += 'Strain: ' + (h.strain && h.strain.current) + '/' + (h.strain && h.strain.threshold) + '<br>';
+  html += 'Soak: ' + (h.soak || 0);
+  html += '</div>';
+  if (ch && ch.title) {
+    html += '<h3 style="margin-top:1rem;">Chapter</h3>';
+    html += '<div style="font-size:0.9rem;">Part ' + (ch.act_number || 1) + ' · <strong>' +
+      _esc(ch.title) + '</strong></div>';
+    if (ch.tension) {
+      html += '<div style="color:var(--text-dim); font-size:0.83rem; font-style:italic;">' +
+        _esc(ch.tension) + '</div>';
+    }
+  }
+  return html;
+}
+
+function renderPersonalitySection(d) {
+  const p = d.personality || { axes: [] };
+  let html = '<h3>Personality Axes</h3>';
+  html += '<div style="font-size:0.78rem; color:var(--text-dim); margin-bottom:0.8rem;">' +
+    'Each axis is zero-sum — committing to one pole reduces the other.</div>';
+  // Light/Dark from morality
+  if (p.morality) {
+    html += renderAxisRow({
+      pole_a_label: 'Light',
+      pole_b_label: 'Dark',
+      pole_a_value: p.morality.value,
+      pole_b_value: 100 - (p.morality.value || 50),
+      last_cue: '',
+    });
+  }
+  for (const axis of p.axes || []) {
+    html += renderAxisRow(axis);
+  }
+  if (typeof p.conflict === 'number') {
+    html += '<div style="margin-top:1rem; font-size:0.85rem; color:var(--text-dim);">' +
+      'Active Conflict: <strong style="color:var(--text);">' + p.conflict + '</strong></div>';
+  }
+  return html;
+}
+
+function renderAxisRow(axis) {
+  const v = axis.pole_a_value;
+  const labelClassA = v > 60 ? 'pole-label-active' : '';
+  const labelClassB = v < 40 ? 'pole-label-active' : '';
+  let html = '<div class="axis-row">';
+  html += '<span class="pole-label-left ' + labelClassA + '">' + _esc(axis.pole_a_label) + '</span>';
+  html += '<span class="axis-value">' + v + ' / ' + (100 - v) + '</span>';
+  html += '<span class="pole-label-right ' + labelClassB + '">' + _esc(axis.pole_b_label) + '</span>';
+  html += '</div>';
+  html += '<div class="axis-bar"><div class="axis-bar-fill" style="width:' + v + '%"></div></div>';
+  if (axis.last_cue) {
+    html += '<div class="axis-cue">Last: ' + _esc(axis.last_cue) + '</div>';
+  }
+  return html;
+}
+
+function renderRelationshipsSection(d) {
+  const r = d.relationships || { slots: [], expected_count: 0 };
+  let html = '<h3>Relationships</h3>';
+  html += '<div style="font-size:0.78rem; color:var(--text-dim); margin-bottom:0.8rem;">' +
+    'Pre-allocated slots fill in as you meet the people who matter.</div>';
+  for (const slot of r.slots || []) {
+    const cls = slot.discovered ? '' : 'unknown';
+    const dispPct = Math.round((slot.disposition || 0.5) * 100);
+    html += '<div class="relationship-slot ' + cls + '">';
+    html += '<span>' + _esc(slot.name || 'Unknown') + '</span>';
+    html += '<span class="disposition-bar"><div style="width:' + dispPct + '%"></div></span>';
+    html += '</div>';
+    if (slot.memory_summary) {
+      html += '<div style="font-size:0.78rem; color:var(--text-dim); padding:0.2rem 0.5rem 0.5rem 0.5rem; font-style:italic;">' +
+        _esc(slot.memory_summary) + '</div>';
+    }
+  }
+  return html;
+}
+
+function renderSkillsSection(d) {
+  const s = d.skills || {};
+  let html = '<h3>Skills</h3>';
+  const groups = [
+    ['General', ['astrogation','athletics','charm','coercion','computers','cool','coordination','deception','discipline','leadership','mechanics','medicine','negotiation','perception','piloting_planetary','piloting_space','resilience','skulduggery','stealth','streetwise','survival','vigilance']],
+    ['Combat',  ['brawl','gunnery','melee','ranged_light','ranged_heavy']],
+    ['Knowledge', ['core_worlds','education','lore','outer_rim','underworld','warfare','xenology']],
+    ['Force',   ['lightsaber']],
+  ];
+  for (const [groupName, names] of groups) {
+    const ranks = names.map(n => [n, s[n] || 0]).filter(([n, r]) => r > 0);
+    if (!ranks.length) continue;
+    html += '<div style="margin-bottom:0.7rem;"><div style="color:var(--accent); font-size:0.8rem; text-transform:uppercase; letter-spacing:0.06em; font-family:sans-serif;">' + groupName + '</div>';
+    for (const [n, r] of ranks) {
+      html += '<div style="display:flex; justify-content:space-between; font-size:0.85rem; padding:0.15rem 0;">' +
+        '<span>' + _esc(n.replace('_',' ').replace(/\b\w/g, c => c.toUpperCase())) + '</span>' +
+        '<span style="font-family:monospace; color:var(--accent);">' + ('●'.repeat(r)) + ('○'.repeat(5 - r)) + '</span></div>';
+    }
+    html += '</div>';
+  }
+  if (!html.includes('●')) html += '<div style="color:var(--text-dim);">No trained skills yet.</div>';
+  return html;
+}
+
+function renderTalentsSection(d) {
+  const t = d.talents_force || {};
+  let html = '<h3>Talents</h3>';
+  if ((t.acquired_talents || []).length === 0) {
+    html += '<div style="color:var(--text-dim); margin-bottom:0.8rem;">No talents acquired yet.</div>';
+  } else {
+    for (const tal of t.acquired_talents) {
+      html += '<div style="margin-bottom:0.5rem; padding:0.5rem 0.7rem; background:var(--surface-alt); border-radius:4px;">';
+      html += '<div style="color:var(--accent); font-weight:bold; font-size:0.9rem;">' + _esc(tal.name || tal.talent_id || '') + '</div>';
+      if (tal.description) html += '<div style="font-size:0.82rem; color:var(--text-dim);">' + _esc(tal.description) + '</div>';
+      html += '</div>';
+    }
+  }
+  if (t.force_rating > 0) {
+    html += '<h3 style="margin-top:1rem;">Force</h3>';
+    html += '<div style="font-size:0.85rem;">';
+    html += 'Force Rating: <strong style="color:var(--accent);">' + t.force_rating + '</strong>';
+    if (t.force_committed > 0) html += ' · Committed: ' + t.force_committed;
+    html += '</div>';
+    if ((t.force_powers || []).length) {
+      html += '<div style="margin-top:0.5rem;">';
+      for (const p of t.force_powers) {
+        html += '<div style="margin-bottom:0.3rem; font-size:0.85rem;">' + _esc(p.name || p.power_id || '') + '</div>';
+      }
+      html += '</div>';
+    }
+  }
+  return html;
+}
+
+function renderLocksSection(d) {
+  const locks = d.personality_locks || [];
+  let html = '<h3>Personality Locks</h3>';
+  if (!locks.length) {
+    html += '<div style="color:var(--text-dim);">No beliefs locked in yet. ' +
+      'These commit at major anchor scenes and shape how the story responds to you afterward.</div>';
+    return html;
+  }
+  for (const lk of locks) {
+    html += '<div style="margin-bottom:0.7rem; padding:0.6rem 0.8rem; background:var(--surface-alt); border-radius:4px; border-left:3px solid var(--accent-dim);">';
+    html += '<div style="color:var(--text); font-style:italic; font-size:0.88rem;">"' + _esc(lk.belief_text) + '"</div>';
+    html += '<div style="color:var(--text-dim); font-size:0.75rem; margin-top:0.3rem;">Locked at turn ' + lk.locked_at_turn + '</div>';
+    html += '</div>';
+  }
+  return html;
+}
+
+function renderCodexListSection(d) {
+  const c = d.codex || { by_tag: {}, read_count: 0, total_count: 0 };
+  let html = '<h3>Codex (' + c.read_count + ' / ' + c.total_count + ')</h3>';
+  if (!c.total_count) {
+    html += '<div style="color:var(--text-dim);">No codex entries in this campaign.</div>';
+    return html;
+  }
+  for (const tag of Object.keys(c.by_tag).sort()) {
+    html += '<div class="codex-list-tag-group">';
+    html += '<div class="codex-tag-label">' + _esc(tag) + '</div>';
+    for (const entry of c.by_tag[tag]) {
+      const cls = entry.read ? 'read' : 'unread';
+      html += '<button class="codex-list-entry ' + cls + '" data-codex-id="' + _esc(entry.entry_id) + '">' +
+        _esc(entry.title) + '</button>';
+    }
+    html += '</div>';
+  }
+  return html;
+}
+
+function renderAchievementsSection(d) {
+  const a = d.achievements || { earned: [], in_progress: [] };
+  let html = '<h3>Earned (' + (a.earned.length) + ')</h3>';
+  if (!a.earned.length) html += '<div style="color:var(--text-dim);">None yet.</div>';
+  for (const ach of a.earned) {
+    html += '<div class="achievement-row">';
+    html += '<div class="ach-title">' + _esc(ach.title) + '</div>';
+    html += '<div class="ach-desc">' + _esc(ach.description) + '</div>';
+    html += '</div>';
+  }
+  html += '<h3 style="margin-top:1rem;">In Progress</h3>';
+  if (!a.in_progress.length) html += '<div style="color:var(--text-dim);">None tracked.</div>';
+  for (const ach of a.in_progress) {
+    html += '<div class="achievement-row in-progress">';
+    html += '<div class="ach-title">' + _esc(ach.title) + '</div>';
+    if (ach.description) html += '<div class="ach-desc">' + _esc(ach.description) + '</div>';
+    html += '</div>';
+  }
+  return html;
+}
+
+function renderGlossarySection(d) {
+  const g = d.glossary || [];
+  let html = '<h3>Glossary</h3>';
+  if (!g.length) html += '<div style="color:var(--text-dim);">No terms.</div>';
+  for (const e of g) {
+    html += '<div class="achievement-row">';
+    html += '<div class="ach-title">' + _esc(e.term) + '</div>';
+    html += '<div class="ach-desc">' + _esc(e.long_definition || e.short_definition) + '</div>';
+    html += '</div>';
+  }
+  return html;
+}
+
+function renderHistorySection(d) {
+  const r = d.recent_history || [];
+  let html = '<h3>Recent Turns</h3>';
+  if (!r.length) html += '<div style="color:var(--text-dim);">No turns yet.</div>';
+  for (const t of r) {
+    html += '<div class="achievement-row">';
+    html += '<div style="color:var(--text-dim); font-size:0.78rem;">Turn ' + t.turn_number +
+      (t.check_made ? ' · ' + _esc(t.check_made) : '') +
+      (t.dice_result ? ' · ' + _esc(t.dice_result) : '') + '</div>';
+    html += '<div style="font-size:0.85rem; margin-top:0.2rem;">' + _esc(t.player_action) + '</div>';
+    if (t.narration_excerpt) {
+      html += '<div style="font-size:0.78rem; color:var(--text-dim); margin-top:0.2rem; font-style:italic;">' +
+        _esc(t.narration_excerpt) + '</div>';
+    }
+    html += '</div>';
+  }
+  return html;
+}
+
+/* ── Phase 25 §3.7 — recap card on resume ─────────────────── */
+function renderRecapCard(recap) {
+  const mount = document.getElementById('recap-mount');
+  if (!mount || !recap) return;
+  mount.innerHTML =
+    '<div class="recap-card">' +
+    '<div class="recap-label">WHAT JUST HAPPENED</div>' +
+    '<div>' + _esc(recap.summary || '') + '</div>' +
+    (recap.act_summary ?
+      '<details><summary>Act so far</summary>' +
+      '<div style="margin-top:0.4rem; color:var(--text-dim); font-size:0.83rem;">' +
+      _esc(recap.act_summary) + '</div></details>' : '') +
+    '</div>';
+}
+
 /* ── Render streamed prose (progressive) ───────────────────────── */
 function renderStreamedPassage(text) {
   const el = document.getElementById('passage');
-  const paragraphs = text.split(/\n\n+/).filter(p => p.trim());
-  el.innerHTML = paragraphs.map(p => '<p>' + escapeHtml(p.trim()) + '</p>').join('');
+  // Phase 25 §3.4 — Markdown rendering also applied to streamed prose.
+  let html = renderProseMarkdown(text);
+  html = applyGlossaryToHtml(html);
+  el.innerHTML = html;
 }
 
 /* ── Render the "you are about to play..." session intro ───────── */
@@ -801,6 +1673,78 @@ function renderSessionIntro(intro) {
   passageEl.innerHTML = html;
 }
 
+/* ── Phase 25 §3.4 — light Markdown rendering for prose ──────── */
+/* Supports:                                                       */
+/*   *italic*  → <em>                                              */
+/*   **bold**  → <strong>                                          */
+/*   --- or * * * on a line → <hr class="scene-break">              */
+function renderProseMarkdown(rawText) {
+  // Process by paragraph (split on blank lines).
+  const paragraphs = rawText.split(/\n\n+/).filter(p => p.trim());
+  return paragraphs.map(p => {
+    const trimmed = p.trim();
+    // Standalone scene break markers
+    if (/^(-{3,}|\*\s*\*\s*\*)$/.test(trimmed)) {
+      return '<hr class="scene-break">';
+    }
+    // Escape HTML first, then add inline emphasis
+    let html = escapeHtml(trimmed);
+    // Bold (process before italic to avoid greedy ** matching as ***)
+    html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+    // Italic
+    html = html.replace(/\*(.+?)\*/g, '<em>$1</em>');
+    // Glossary-term highlights are applied by a later pass that
+    // walks the rendered HTML and wraps known terms.
+    return '<p>' + html + '</p>';
+  }).join('');
+}
+
+/* Phase 25 §3.6 — apply glossary-term highlights to rendered prose */
+let GLOSSARY_TERMS = [];   // [{term, short_definition, long_definition}]
+let GLOSSARY_RE = null;
+
+function setGlossary(entries) {
+  GLOSSARY_TERMS = Array.isArray(entries) ? entries.slice() : [];
+  // Sort longest first to avoid sub-string mis-matches.
+  GLOSSARY_TERMS.sort((a, b) => (b.term || '').length - (a.term || '').length);
+  if (!GLOSSARY_TERMS.length) {
+    GLOSSARY_RE = null;
+    return;
+  }
+  const escaped = GLOSSARY_TERMS.map(g =>
+    (g.term || '').replace(/[-/\\^$*+?.()|[\]{}]/g, '\\$&')
+  ).filter(Boolean);
+  GLOSSARY_RE = new RegExp('\\b(' + escaped.join('|') + ')\\b', 'gi');
+}
+
+function applyGlossaryToHtml(html) {
+  if (!GLOSSARY_RE) return html;
+  // Don't decorate inside existing tags. Walk tag boundaries.
+  let out = '';
+  let inTag = false;
+  let buf = '';
+  for (const ch of html) {
+    if (ch === '<') { out += decorateText(buf); buf = ''; inTag = true; out += ch; continue; }
+    if (ch === '>') { inTag = false; out += ch; continue; }
+    if (inTag) { out += ch; continue; }
+    buf += ch;
+  }
+  out += decorateText(buf);
+  return out;
+}
+
+function decorateText(text) {
+  if (!GLOSSARY_RE || !text) return text;
+  return text.replace(GLOSSARY_RE, (match) => {
+    const entry = GLOSSARY_TERMS.find(g =>
+      (g.term || '').toLowerCase() === match.toLowerCase()
+    );
+    if (!entry) return match;
+    const tip = (entry.short_definition || '').replace(/"/g, '&quot;');
+    return '<span class="glossary-term" title="' + tip + '">' + match + '</span>';
+  });
+}
+
 /* ── Render prose ──────────────────────────────────────────────── */
 function renderPassage(text) {
   const el = document.getElementById('passage');
@@ -808,8 +1752,8 @@ function renderPassage(text) {
   // session-intro card already rendered so the intro stays visible
   // alongside the opening passage on turn 0.
   const existingHtml = el.innerHTML.trim();
-  const paragraphs = text.split(/\n\n+/).filter(p => p.trim());
-  const passageHtml = paragraphs.map(p => '<p>' + escapeHtml(p.trim()) + '</p>').join('');
+  let passageHtml = renderProseMarkdown(text);
+  passageHtml = applyGlossaryToHtml(passageHtml);
   if (existingHtml && existingHtml.includes('YOU ARE ABOUT TO PLAY')) {
     el.innerHTML = existingHtml + passageHtml;
   } else {
@@ -820,15 +1764,29 @@ function renderPassage(text) {
 }
 
 /* ── Render choices ────────────────────────────────────────────── */
-function renderChoices(choices) {
+let currentChoiceMeta = [];   // Phase 25 §2.1/§2.2 — per-choice metadata
+function renderChoices(choices, meta) {
   const el = document.getElementById('choices');
   currentChoices = choices;
+  currentChoiceMeta = Array.isArray(meta) ? meta : [];
   el.innerHTML = '';
 
   choices.forEach((text, i) => {
     const btn = document.createElement('button');
     btn.className = 'choice-btn';
-    btn.textContent = text;
+    const m = currentChoiceMeta[i] || {};
+    // Phase 25 §2.1 — codex links open the codex overlay, do not advance turn
+    if (m.kind === 'codex' || m.codex_link) {
+      btn.classList.add('codex-link');
+      btn.textContent = text;
+      btn.onclick = () => openCodex(m.codex_link);
+      el.appendChild(btn);
+      return;
+    }
+    // Phase 25 §2.2 — render visible cost tags inline. The tag text is
+    // already in the choice text (parser kept it), but we also stylize
+    // any remaining bracketed cost so the player can scan it quickly.
+    btn.innerHTML = renderChoiceText(text, m.visible_costs);
     btn.onclick = () => takeTurn(i);
     el.appendChild(btn);
   });
@@ -875,6 +1833,27 @@ function renderPendingChoices(message) {
   btn.disabled = true;
   btn.textContent = message;
   el.appendChild(btn);
+}
+
+/* Phase 25 §2.2 — render a choice line with cost tags styled.
+   The choice text already has cost tags inline like "[Strain: +2]";
+   we apply small color treatments so the player can scan them. */
+function renderChoiceText(text, costs) {
+  let html = escapeHtml(text);
+  html = html.replace(/\[([^\[\]]+?)\]/g, (full, inner) => {
+    const lower = inner.toLowerCase();
+    let cls = 'choice-cost-tag';
+    if (lower.startsWith('morality:') || lower.startsWith('conflict:') ||
+        lower.startsWith('obligation:')) {
+      // Negative shifts get a danger color
+      const m = inner.match(/:\s*([+\-]?-?\d+)/);
+      if (m && parseInt(m[1], 10) < 0 && lower.startsWith('morality:')) {
+        cls += ' morality-down';
+      }
+    }
+    return '<span class="' + cls + '">[' + escapeHtml(inner) + ']</span>';
+  });
+  return html;
 }
 
 function disableChoices() {
@@ -1008,7 +1987,9 @@ async function resumeSession(sid) {
 
     if (data.last_turn) {
       renderPassage(data.last_turn.narration);
-      renderChoices(data.last_turn.choices);
+      renderChoices(data.last_turn.choices, data.last_turn.choices_meta);
+      // Phase 25 §3.7 — recap card on resume
+      if (data.recap) renderRecapCard(data.recap);
 
       if (data.last_turn.roll_result) {
         // Minimal dice display from session restore

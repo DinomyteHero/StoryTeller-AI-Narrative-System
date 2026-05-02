@@ -710,6 +710,103 @@ Success criteria:
 7. A recurring discovery (rejected once before) uses the intensified
    Phase 2 instructions
 
+### Phase 25: Runtime Experience Redesign
+
+**Status: COMPLETE (May 2026).**
+
+Files added:
+- `gm/choice_tags.py` — visible-cost / codex-link / skill-tag classifier
+- `gm/runtime_experience.py` — codex surface, stakes, set pieces,
+  foreshadowing, achievement engine, personality-axis annotation
+- `scripts/add_phase25_content.py` — campaign content augmentation script
+- `tests/test_phase25_runtime_experience.py` — 60 test cases covering
+  the new runtime layer
+
+Files modified:
+- `studio/schema.py` — adds CodexEntry, Achievement, GlossaryEntry,
+  SetPieceDeclaration, PersonalityLockMoment, BeliefOption,
+  ForeshadowingEntry. Acts gain `title_visible` and
+  `foreshadowing_plants`. Spine gains 7 new optional fields.
+- `engine/character.py` — adds OpposedPair, BeliefCommitment,
+  default_personality_axes(), Character.adjust_axis(),
+  Character.add_personality_lock(), and runtime fields:
+  `personality_axes`, `personality_locks`, `codex_read`,
+  `achievements_earned`, `achievement_progress`,
+  `relationship_slot_assignments`.
+- `gm/cloud_gm.py` — choice tag parsing now classifies skill
+  (hidden), visible cost (kept), and codex-link (sideways nav)
+  tags. Markdown emphasis preserved. 1-choice pacing continuations
+  accepted. Choice count up to 5.
+- `gm/prompts/narration.txt` + `narration_literary.txt` — choice
+  count guidance, choice format guidance, visible cost tag
+  catalog, codex link instructions, Markdown formatting guidance,
+  9 new placeholder blocks.
+- `api/game_routes.py` — new `/session/{id}/dashboard` and
+  `/session/{id}/codex/{entry_id}` routes; `_apply_phase25_post_turn`
+  applies cost tags, axis movements, locks, foreshadow delivery,
+  and achievement awarding; turn responses gain `choices_meta`,
+  `scene_treatment`, and `chapter_title`; session GET returns
+  recap card and choices_meta.
+- `state/db.py` — adds `visible_costs_json` and `codex_links_json`
+  columns to the turns table (with migration path).
+- `state/session.py` — `log_turn` accepts and persists the new
+  per-choice metadata.
+- `web/index.html` — light Markdown renderer, codex overlay,
+  glossary tooltips, set-piece title cards, stakes badges,
+  10-tab dashboard overlay, recap card, chapter title display,
+  visible cost tag styling, codex-link choice styling.
+- `data/campaigns/shadows_of_the_custodian.json` — 12 codex
+  entries, 29 glossary terms, 5 set pieces, 3 personality lock
+  moments, 15 achievements, 4 foreshadowing plants, act
+  `title_visible` for all 5 acts.
+
+Design: `docs/specialist/runtime-experience-redesign.md`
+(originating spec).
+
+Goal: The hours of play between prologue and finale should feel
+fun, exciting, and easy to read. Variety in choice format, scene
+density, pacing, stakes, and reward keeps the next click
+compelling. Legibility in dashboard, dice costs, NPC slots, and
+chapter titles makes the experience usable.
+
+Dependencies: V1 phases 1-6 (the engine, GM, state layers).
+Independent of psychometric prologue (Phase 18) and post-V1
+saga phases.
+
+Phased delivery:
+- Phase 25a — visible mechanics + dashboard (cost tags, dashboard,
+  titles, formatting). DONE.
+- Phase 25b — codex layer + glossary. DONE.
+- Phase 25c — personality axes + locks + relationship slots. DONE.
+- Phase 25d — variable choice format + variety. DONE.
+- Phase 25e — set pieces + stakes + recap. DONE.
+- Phase 25f — achievements + foreshadowing. DONE.
+- Phase 25g — Shadows of the Custodian content pass. DONE.
+
+Success criteria:
+1. Choices with visible cost tags retain the bracket text in the
+   player-facing display; skill tags are stripped; codex links
+   render as sideways navigation.
+2. The dashboard surfaces hero, personality axes, relationships,
+   skills, talents, locks, codex, achievements, glossary, recent
+   history.
+3. Reading a codex entry marks it as read on the character and is
+   reflected in the dashboard's read count.
+4. Personality axis values shift in response to choice keywords;
+   the dashboard hover surfaces the most recent cue.
+5. Personality lock moments register the chosen belief on the
+   character with axis_effects applied.
+6. Set piece anchors render with their declared visual treatment
+   and the narration prompt receives the word-budget multiplier.
+7. Stakes computation correctly classifies set pieces, personality
+   locks, climax acts, and incapacitation as elevated stakes.
+8. Foreshadowing plants and payoffs surface to the narration
+   prompt at the correct acts.
+9. Achievements earn at spine anchors, codex completion thresholds,
+   relationship thresholds, and pattern counts.
+10. The session resume endpoint returns a recap card on subsequent
+    visits.
+
 ### Milestone 4 Success Criteria
 
 Chain two campaign spines with one character:
