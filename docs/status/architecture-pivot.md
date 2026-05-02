@@ -6,6 +6,9 @@ review feedback applied. 653 tests pass + 12 cleanly skip + 0 fail (the
 12 skips are campaign-specific fixtures for the deleted Nar Shaddaa /
 Echoes spines — see changelog 2026-04-25).
 
+**Stage 4 (2026-05-01):** Local backend fully removed. See "Stage 4" section
+at the bottom of this document.
+
 ---
 
 ## What Changed and Why
@@ -287,6 +290,71 @@ The two-tier approach captures most of the cost win without sacrificing
 narration quality. Studio generation costs jump from $0 (Ollama) to $0.10
 per spine (Pro), but spine generation is a one-time authoring action, not
 per-turn — negligible at the user level.
+
+---
+
+## Stage 4 — Local backend removed (May 2026)
+
+The April pivot kept Ollama as "an optional offline path for development
+and emergency fallback." That fallback was never used in practice and the
+parallel code path was a maintenance tax: every new fast-tier call site
+had to keep `is_local_backend()` checks, `is_qwen` `/no_think` shims, and
+`used_local` parameters in sync. The May 2026 pass deletes the local path
+entirely.
+
+### Code removed
+
+- **`gm/llm_client.py`** — deleted `_call_ollama_json()`, `is_local_backend()`,
+  `_is_qwen_local()`, `call_local_chat()`. Removed `NARRATIVE_BACKEND`,
+  `OLLAMA_URL`, `LOCAL_FAST_MODEL`, `LOCAL_QUALITY_MODEL`,
+  `LOCAL_MODEL`, `LOCAL_NARRATION_MODEL` constants and all
+  `if NARRATIVE_BACKEND == "local"` branches.
+- **`gm/cloud_gm.py`** — deleted `_narrate_with_local_fallback()`. Removed
+  `CLOUD_FALLBACK_TO_LOCAL`, `NARRATIVE_BACKEND`, all `is_local_backend()`
+  call sites, every `is_qwen` no-think prefix shim. `narrate_turn()` is
+  now a single-path cloud call.
+- **`gm/local_gm.py` → `gm/fast_gm.py`** — file renamed to match what it
+  actually does. The "local GM" name was historical; every function in
+  the file routes through the cloud fast tier (DeepSeek V4 Flash by
+  default). 8 import sites updated.
+- **`studio/generate.py`** — dropped `is_local_backend` import,
+  `OLLAMA_URL` / `LOCAL_MODEL` / `NARRATIVE_BACKEND` constants, and the
+  unused `_get_local_client()` shim.
+- **`api/game_routes.py`** — removed `NARRATIVE_BACKEND` import from
+  `gm.cloud_gm`; replaced `used_local=(NARRATIVE_BACKEND == "local")`
+  with `used_local=False` at the streaming parse site.
+- **`state/db.py`, `state/session.py`** — comments referencing
+  `NARRATIVE_BACKEND != local` rewritten.
+- **`.env.example`** — Ollama section removed. `NARRATIVE_BACKEND` and
+  `CLOUD_FALLBACK_TO_LOCAL` deleted.
+
+### Tests removed
+
+- `tests/test_e2e_game_loop.py::test_criterion_12_local_backend` (the V1
+  success criterion #12 test). The criterion itself is also retired.
+- `_mock_ollama_post` helper and the `httpx.post` patch in the e2e mock
+  fixture.
+- `NARRATIVE_BACKEND=local` environment setup at module import.
+
+### Tests still passing: 829 / 0 fail / 13 skipped
+
+The skips are pre-existing live-LLM and budget-gated tests; none relate
+to the removed local path.
+
+### What `used_local` still exists for
+
+The `NarrationResult.used_local` field is preserved (always `False`) and
+the API still surfaces `used_local_narration` for back-compat with the
+frontend banner logic. The dead UI branch can be cleaned up in a future
+sweep.
+
+### Migration for existing deployments
+
+`.env` files that still set `NARRATIVE_BACKEND=local`,
+`CLOUD_FALLBACK_TO_LOCAL=true`, `OLLAMA_URL`, `LOCAL_MODEL`, etc. now
+silently inert — the constants are no longer read. Recommend deleting
+those lines from local `.env` files for clarity but no action is required
+to keep the cloud path working.
 
 ---
 

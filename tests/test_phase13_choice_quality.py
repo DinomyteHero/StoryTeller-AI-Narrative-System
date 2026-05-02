@@ -37,7 +37,7 @@ from gm.context import (
     ThreadState,
     TurnMemory,
 )
-from gm.local_gm import (
+from gm.fast_gm import (
     annotate_choice,
     run_prose_diagnostic,
     _validate_annotation,
@@ -167,7 +167,7 @@ class TestProseDiagnostic:
         result = run_prose_diagnostic([], "No NPCs.")
         assert result is None
 
-    @patch("gm.local_gm.call_chat_json")
+    @patch("gm.fast_gm.call_chat_json")
     def test_returns_structured_json(self, mock_llm):
         mock_llm.return_value = {
             "sensory_channels_recent": ["visual", "visual", "auditory"],
@@ -191,7 +191,7 @@ class TestProseDiagnostic:
         assert "npc_coherence_flags" in result
         assert len(result["npc_coherence_flags"]) == 1
 
-    @patch("gm.local_gm.call_chat_json")
+    @patch("gm.fast_gm.call_chat_json")
     def test_graceful_failure(self, mock_llm):
         mock_llm.side_effect = RuntimeError("LLM down")
         result = run_prose_diagnostic(
@@ -302,7 +302,7 @@ class TestChoiceAnnotation:
         with pytest.raises(ValueError):
             _validate_annotation({"choice_target": "test"})  # missing priority + tags
 
-    @patch("gm.local_gm.call_chat_json")
+    @patch("gm.fast_gm.call_chat_json")
     def test_annotate_choice_success(self, mock_llm):
         mock_llm.return_value = {
             "choice_target": "protect_doss",
@@ -327,7 +327,7 @@ class TestChoiceAnnotation:
         assert result["priority_revealed"] == "relationship_over_safety"
         assert "protective" in result["behavioral_tags"]
 
-    @patch("gm.local_gm.call_chat_json")
+    @patch("gm.fast_gm.call_chat_json")
     def test_annotate_choice_graceful_failure(self, mock_llm):
         mock_llm.side_effect = RuntimeError("Connection error")
         result = annotate_choice(

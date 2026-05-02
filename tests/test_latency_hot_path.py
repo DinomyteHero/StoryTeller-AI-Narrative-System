@@ -188,7 +188,6 @@ def test_openrouter_provider_routing_env(monkeypatch):
     import importlib
     import gm.llm_client as llm_client
 
-    monkeypatch.setenv("NARRATIVE_BACKEND", "cloud")
     monkeypatch.setenv("CLOUD_PROVIDER", "openrouter")
     monkeypatch.setenv("OPENROUTER_PROVIDER_ORDER", "deepseek,siliconflow")
     monkeypatch.setenv("OPENROUTER_PROVIDER_IGNORE", "novita")

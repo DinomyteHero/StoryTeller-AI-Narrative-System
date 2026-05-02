@@ -12,15 +12,13 @@ import json
 import os
 from pathlib import Path
 import uuid
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 
 import pytest
 
 # Set test environment before importing app modules
 os.environ["DB_PATH"] = ""  # will be overridden per test
-os.environ["NARRATIVE_BACKEND"] = "local"
 os.environ["STREAMING_ENABLED"] = "false"
-os.environ["OLLAMA_URL"] = "http://localhost:11434"
 
 from fastapi.testclient import TestClient
 
@@ -146,32 +144,6 @@ MOCK_ANNOTATION = json.dumps({
 })
 
 
-def _mock_ollama_post(url, **kwargs):
-    """Mock httpx.post for the legacy NARRATIVE_BACKEND=local Ollama path.
-
-    Kept for tests that exercise the offline mode. Cloud-tier mocks should
-    patch gm.llm_client.call_chat_json instead.
-    """
-    body = kwargs.get("json", {})
-
-    # Determine which prompt is being called by the schema format
-    fmt = str(body.get("format", ""))
-    if "requires_check" in fmt:
-        response_text = MOCK_CHECK_DECISION_WITH_CHECK
-    elif "npc_updates" in fmt:
-        response_text = MOCK_RECONCILIATION
-    elif "choice_target" in fmt:
-        response_text = MOCK_ANNOTATION
-    else:
-        response_text = MOCK_RECONCILIATION
-
-    mock_resp = MagicMock()
-    mock_resp.status_code = 200
-    mock_resp.json.return_value = {"response": response_text}
-    mock_resp.raise_for_status = MagicMock()
-    return mock_resp
-
-
 def _mock_call_chat_json(*, tier, user, schema=None, purpose="", **_kwargs):
     """Mock gm.llm_client.call_chat_json — replaces the legacy httpx mock.
 
@@ -192,7 +164,7 @@ def _mock_call_chat_json(*, tier, user, schema=None, purpose="", **_kwargs):
 def _make_narration_result(narration_text):
     """Create a NarrationResult by parsing mock text."""
     from gm.cloud_gm import _parse_response
-    return _parse_response(narration_text, used_local=True)
+    return _parse_response(narration_text)
 
 
 # ── Fixtures ────────────────────────────────────────────────────────────────
@@ -250,16 +222,14 @@ def mock_llms():
         else:
             return _make_narration_result(MOCK_NARRATION_TURN)
 
-    with patch("httpx.post", side_effect=_mock_ollama_post) as mock_http, \
-         patch("gm.local_gm.call_chat_json", side_effect=_mock_call_chat_json) as mock_local, \
+    with patch("gm.fast_gm.call_chat_json", side_effect=_mock_call_chat_json) as mock_local, \
          patch("engine.reconciliation.call_chat_json", side_effect=_mock_call_chat_json) as mock_recon, \
          patch("api.game_routes.narrate_turn", side_effect=mock_narrate_turn) as mock_narrate, \
          patch("api.game_routes.narrate_turn_stream") as mock_stream, \
          patch("api.game_routes.run_prose_diagnostic", return_value=None) as mock_diag, \
          patch("api.game_routes.annotate_choice", return_value=None) as mock_annot:
         yield {
-            "http": mock_http,
-            "local_llm": mock_local,
+            "fast_llm": mock_local,
             "reconciliation_llm": mock_recon,
             "narrate": mock_narrate,
             "stream": mock_stream,
@@ -329,9 +299,9 @@ class TestV1SuccessCriteria:
             "free_form_action": "Bluff the temple supply clerk into overlooking a mismatched crate manifest.",
         })
         assert turn_res.status_code == 200
-        # Free-form actions route through the local check-decision model.
+        # Free-form actions route through the fast-tier check-decision model.
         # Tagged authored choices can be resolved deterministically.
-        assert mock_llms["local_llm"].called or mock_llms["http"].called
+        assert mock_llms["fast_llm"].called
 
     def test_criterion_5_and_6_dice_pool_and_roll(self, client, mock_llms):
         """V1.5-6: Dice pool built correctly and rolled with correct symbols."""
@@ -451,23 +421,6 @@ class TestV1SuccessCriteria:
         assert data["turn_count"] >= 1
         assert data["last_turn"] is not None
         assert len(data["last_turn"]["choices"]) >= 2
-
-    def test_criterion_12_local_backend(self, client, mock_llms):
-        """V1.12: NARRATIVE_BACKEND=local runs full loop without cloud credits."""
-        assert os.environ.get("NARRATIVE_BACKEND") == "local"
-
-        res = client.post("/session", json={
-            "campaign_name": "shadows_of_the_custodian",
-            "character_id": "clovis_beryl",
-        })
-        assert res.status_code == 200
-        session_id = res.json()["session_id"]
-
-        turn_res = client.post(f"/session/{session_id}/turn", json={
-            "choice_index": 0,
-        })
-        assert turn_res.status_code == 200
-
 
 class TestGameMechanics:
     """Tests verifying core game mechanics work correctly."""

@@ -182,7 +182,7 @@ class TestVehicleSkills:
 
     def test_space_combat_in_scene_type_enum(self):
         """The check_decision prompt and schema accept space_combat."""
-        from gm.local_gm import CHECK_DECISION_SCHEMA
+        from gm.fast_gm import CHECK_DECISION_SCHEMA
         scene_types = CHECK_DECISION_SCHEMA["properties"]["scene_type"]["enum"]
         assert "space_combat" in scene_types
 

@@ -58,15 +58,11 @@ from gm.llm_client import (
     make_client as _make_unified_client,
     resolve_model,
     TIER_QUALITY,
-    is_local_backend,
 )
 
 # Retained for back-compat with existing telemetry that records model_used.
 CLOUD_PROVIDER = os.getenv("CLOUD_PROVIDER", "openrouter")
 CLOUD_MODEL    = os.getenv("CLOUD_MODEL", "")
-OLLAMA_URL     = os.getenv("OLLAMA_URL", "http://localhost:11434")
-LOCAL_MODEL    = os.getenv("LOCAL_MODEL", "qwen3.5:9b")
-NARRATIVE_BACKEND = os.getenv("NARRATIVE_BACKEND", "cloud")
 
 PROVIDER_BASE_URLS = {
     "openai": None,
@@ -83,11 +79,6 @@ def studio_model() -> str:
 
 
 def _get_cloud_client() -> OpenAI:
-    """Back-compat shim — use gm.llm_client.make_client() in new code."""
-    return _make_unified_client()
-
-
-def _get_local_client() -> OpenAI:
     """Back-compat shim — use gm.llm_client.make_client() in new code."""
     return _make_unified_client()
 

@@ -45,7 +45,7 @@ Documentation: 16 active files in `docs/` plus 6 in `docs/reference/`.
 |------------|--------|----------|-----|-------------|
 | Prose narration (cloud GM) | §3, §7 | ✓ | ✓ Verified | Phase 3 |
 | FFG dice engine (all 7 die types) | §6 | ✓ | ✓ Verified | Phase 1 |
-| Check decision (local model) | §6 | ✓ | ✓ Verified | Phase 2 |
+| Check decision (fast tier) | §6 | ✓ | ✓ Verified | Phase 2 |
 | Scene type classification | §3 | ✓ | ✓ Verified | Phase 2 |
 | Context package assembly | §3 | ✓ | ✓ Verified | Phase 3 |
 | Cloud failure fallback (local narration) | — | ✓ | ✓ Verified | Phase 3 |
@@ -229,7 +229,7 @@ Documentation: 16 active files in `docs/` plus 6 in `docs/reference/`.
 |------------|--------|----------|-----|-------------|
 | Narration word count enforcement (250–800) | §3 | ✓ | ✓ Verified (retry loop) | Phase 3 |
 | Minimum 2 choices enforcement | §7 | ✓ | ✓ Verified (retry loop) | Phase 3 |
-| JSON schema enforcement (local model) | — | ✓ | ✓ Verified | Phase 2 |
+| JSON schema enforcement (fast tier) | — | ✓ | ✓ Verified | Phase 2 |
 | Context package pre-submission validation | — | ✓ | ✓ Verified | Phase 3 |
 | 5-category compliance test protocol | — | ✓ | Not in V1 (pre-deploy test) | Phase 1 deployment |
 | Behavioral envelope enforcement | §11 | ✓ | Not in V1 | Post-Milestone 1 |
@@ -250,7 +250,7 @@ Documentation: 16 active files in `docs/` plus 6 in `docs/reference/`.
 | OpenRouter `require_parameters` + `data_collection=deny` | — | ✓ | ✓ Built | Architecture pivot (Apr 2026) |
 | Strict `json_schema` response_format with json_object fallback | — | ✓ | ✓ Built | Architecture pivot (Apr 2026) |
 | `/health` endpoint surfacing routing config | — | ✓ | ✓ Built | Architecture pivot (Apr 2026) |
-| Ollama optional offline path | — | ✓ | ✓ Built | Phase 2 (still supported) |
+| Ollama optional offline path | — | ✗ | ✗ Removed (May 2026) | Phase 2 — see [architecture-pivot.md](architecture-pivot.md) §"Stage 4" |
 | Identity drift surfacing policy (turn-to-turn) | §8, §10 | ✓ | ✓ Built | Audit closure (Apr 2026) |
 | Introspection trigger conditions (explicit) | §7 | ✓ | ✓ Built | Audit closure (Apr 2026) |
 | Path differentiation validation (Gate 1/3 extensions) | §8 | ✓ | ✓ Built | Audit closure (Apr 2026) |

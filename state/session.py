@@ -55,10 +55,9 @@ def log_turn(
     """Write one completed turn to the database.
 
     context_json and scene_type are stored for future distillation training
-    data. When NARRATIVE_BACKEND != local, pass the serialized context
-    package as context_json so the distillation_pairs view can pair it
-    with the cloud-generated narration. This costs nothing at write time
-    and avoids expensive backfilling later.
+    data. Pass the serialized context package as context_json so the
+    distillation_pairs view can pair it with the cloud-generated narration.
+    This costs nothing at write time and avoids expensive backfilling later.
 
     choice_implications (Phase 13, §24): JSON string containing the choice
     annotation — behavioral meaning extracted from the player's choice.

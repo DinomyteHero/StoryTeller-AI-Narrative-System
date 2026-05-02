@@ -9,5 +9,18 @@ build/
 data/storyteller.db
 data/telemetry/*.jsonl
 eval_report.json
+
+# ── Scratch / audit / probe directories (do not commit) ────────────
+# Created by ad-hoc agent runs (Codex, pytest sandbox runs, smoke tests).
+# Keep all under these patterns ignored to avoid repo pollution.
 __test_dbs/
+__codex_*/
+__codex_*.db
+.codex-tmp*/
+.codex_pytest_*/
+.pytest-tmp*/
+.pytest-basetemp/
+.tmp_pytest/
 codex_smoke_tmp/
+codex_pytest_tmp_*/
+logs/

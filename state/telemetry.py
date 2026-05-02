@@ -140,6 +140,24 @@ def emit_choice_quality_eval(
     ))
 
 
+def emit_scene_validation(
+    session_id: str, turn_number: int, validation: dict,
+) -> None:
+    """CS-6 scene purpose validation result for the just-completed turn.
+
+    `validation` should contain the five 1-5 dimension scores
+    (mission_delivery, pressure_progression, antagonist_relevance,
+    character_choices, change), the composite, the validated mission
+    name, and any concern / corrective_instruction text. Quality
+    signal only — emitted for eval, never blocks delivery.
+    """
+    emit_event(NarrativeEvent(
+        session_id=session_id, turn_number=turn_number,
+        event_type="scene_validation",
+        event_data=validation,
+    ))
+
+
 def emit_act_transition(
     session_id: str, turn_number: int,
     from_act: int, to_act: int,

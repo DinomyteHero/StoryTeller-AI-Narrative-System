@@ -55,7 +55,7 @@ CREATE TABLE IF NOT EXISTS turns (
 -- Each row pairs the full context package sent to the cloud GM with the
 -- narration it produced. scene_type and dice metadata enable filtered
 -- dataset construction (e.g. "only combat scenes with failures").
--- Populated automatically by log_turn when NARRATIVE_BACKEND != local.
+-- Populated automatically by log_turn.
 CREATE VIEW IF NOT EXISTS distillation_pairs AS
 SELECT
     t.session_id,

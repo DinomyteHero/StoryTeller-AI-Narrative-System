@@ -24,7 +24,7 @@ from engine.character import Character
 from engine.dice import DicePool, RollResult
 from gm.cloud_gm import _parse_response
 from gm.context import ArcState, ContextPackage, NPCState, TurnMemory
-from gm.local_gm import CheckDecision
+from gm.fast_gm import CheckDecision
 
 
 def _act():

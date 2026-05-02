@@ -309,10 +309,10 @@ Success criteria:
 
 ### Phase 13: Semantic Memory, Aspiration Echoes, and Prose Diagnostics
 
-**Status: COMPLETE — March 2026.** Choice annotation via `gm/local_gm.py`, aspiration echoes via `gm/context.py`, prose diagnostic via `gm/local_gm.py`. Prompt: `choice_annotation.txt`.
+**Status: COMPLETE — March 2026.** Choice annotation via `gm/fast_gm.py`, aspiration echoes via `gm/context.py`, prose diagnostic via `gm/fast_gm.py`. Prompt: `choice_annotation.txt`.
 
 Files: `gm/context.py` (extend — aspiration echo block),
-`gm/prompts/narration.txt` (extend), `gm/local_gm.py` (extend —
+`gm/prompts/narration.txt` (extend), `gm/fast_gm.py` (extend —
 prose diagnostic call + choice annotation call),
 `gm/prompts/choice_annotation.txt` (new)
 
@@ -381,7 +381,7 @@ acquiring Force powers, and experiencing the Morality spiral.
 **Status: COMPLETE — March 2026.** `engine/force.py` with pip resolution, temptation mechanics, dark-dominant inversion.
 
 Files: `engine/force.py` (new), `engine/checks.py` (extend —
-Force-enhanced pool construction), `gm/local_gm.py` (extend —
+Force-enhanced pool construction), `gm/fast_gm.py` (extend —
 check decision Force fields)
 
 Design: Game Mechanics §16.1 (Force dice), §16.2 (dark side
@@ -490,7 +490,7 @@ and the ship feels like a persistent part of the story.
 **Status: COMPLETE — March 2026.** `engine/vehicle.py` with ShipState, damage tiers, handling, critical hit table. Ship persistence in `state/db.py`.
 
 Files: `engine/vehicle.py` (new), `state/db.py` (extend — ship_states
-table), `gm/local_gm.py` (extend — space_combat scene type),
+table), `gm/fast_gm.py` (extend — space_combat scene type),
 `gm/context.py` (extend — ship state injection)
 
 Design: Game Mechanics §17.

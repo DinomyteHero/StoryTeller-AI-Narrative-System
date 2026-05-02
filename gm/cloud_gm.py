@@ -23,9 +23,7 @@ from gm.llm_client import (
     make_client as _make_unified_client,
     resolve_model,
     _prepare_kwargs,
-    call_local_chat,
     TIER_QUALITY,
-    is_local_backend,
 )
 
 _PROMPTS_DIR = Path(__file__).parent / "prompts"
@@ -45,13 +43,9 @@ NARRATION_FALLBACK_MODELS = [
 CHOICE_QUALITY_INLINE = os.getenv("CHOICE_QUALITY_INLINE", "true").lower() == "true"
 LLM_TIMING_LOG = os.getenv("LLM_TIMING_LOG", "true").lower() == "true"
 
-# Provider config. The unified client (gm/llm_client.py)
-# is the authoritative source for model/provider routing.
-NARRATIVE_BACKEND = os.getenv("NARRATIVE_BACKEND", "cloud")
-PROSE_VOICE       = os.getenv("PROSE_VOICE", "clean")  # "clean" | "literary"
-CLOUD_FALLBACK_TO_LOCAL = os.getenv(
-    "CLOUD_FALLBACK_TO_LOCAL", "false"
-).lower() == "true"
+# Provider config. The unified client (gm/llm_client.py) is the authoritative
+# source for model/provider routing.
+PROSE_VOICE = os.getenv("PROSE_VOICE", "clean")  # "clean" | "literary"
 
 
 def _make_completion_kwargs(
@@ -903,43 +897,14 @@ def narrate_turn(
     max_retries: Optional[int] = None,
 ) -> NarrationResult:
     """
-    One call to the configured provider for narration + choices.
-    This is the ONE cloud call per turn (or local equivalent).
-    Retries with a correction note appended on validation failure.
-
-    Cloud failure fallback (v1.5): Disabled unless CLOUD_FALLBACK_TO_LOCAL=true.
-    If enabled and the cloud model is unavailable or
-    exceeds the timeout, fall back to the local model for this turn only.
-    The next turn reattempts the cloud model. The player never sees an
-    error — they get a less polished passage that still honors the dice
-    and advances the story. A counter tracks consecutive fallbacks; if 3+
-    consecutive turns fall back, the UI surfaces a subtle indicator.
+    One call to the configured provider for narration + choices. This is
+    the ONE cloud call per turn. Retries with a correction note appended
+    on validation failure.
     """
     if max_retries is None:
         max_retries = NARRATION_PARSE_RETRIES
 
-    # If already configured for local, skip fallback logic
-    if NARRATIVE_BACKEND == "local":
-        return _narrate_with_backend(ctx, max_retries, used_local=True)
-
-    # Attempt cloud first, optionally fall back to local on failure
-    try:
-        return _narrate_with_backend(ctx, max_retries, used_local=False)
-    except (CloudGMError, Exception) as cloud_err:
-        logging.warning(
-            f"Cloud GM failed ({cloud_err})"
-        )
-        if not CLOUD_FALLBACK_TO_LOCAL:
-            raise CloudGMError(
-                f"Cloud GM failed and local fallback is disabled: {cloud_err}"
-            )
-        try:
-            return _narrate_with_local_fallback(ctx)
-        except Exception as local_err:
-            raise CloudGMError(
-                f"Both cloud and local failed. "
-                f"Cloud: {cloud_err}. Local: {local_err}"
-            )
+    return _narrate_with_backend(ctx, max_retries, used_local=False)
 
 
 def _narrate_with_backend(
@@ -963,9 +928,7 @@ def _narrate_with_backend(
     best_result: NarrationResult | None = None  # best structurally valid result
 
     for attempt in range(max_retries + 1):
-        is_qwen = used_local and "qwen" in model.lower()
-        msg_content = f"/no_think\n{prompt}" if is_qwen else prompt
-        messages = [{"role": "user", "content": msg_content}]
+        messages = [{"role": "user", "content": prompt}]
         if attempt > 0 and last_error:
             messages.append({
                 "role": "user",
@@ -1038,8 +1001,8 @@ def _narrate_with_backend(
         # Track best structurally valid result for fallback
         best_result = result
 
-        # Choice quality validation (skip for local backend per spec §10)
-        if used_local or NARRATIVE_BACKEND == "local" or not CHOICE_QUALITY_INLINE:
+        # Choice quality validation
+        if not CHOICE_QUALITY_INLINE:
             return result
 
         quality = validate_choice_quality(
@@ -1074,32 +1037,6 @@ def _narrate_with_backend(
     raise CloudGMError("Unreachable")
 
 
-def _narrate_with_local_fallback(ctx: ContextPackage) -> NarrationResult:
-    """
-    Emergency fallback: narrate via local model when cloud is unavailable.
-    Uses a simplified prompt optimized for the local model's capability.
-    Output quality will be lower but the turn advances.
-    """
-    simplified_prompt = (
-        f"You are the narrator for a Star Wars RPG. Write in second person "
-        f"present tense, 250-400 words.\n\n"
-        f"SITUATION: {ctx.situation}\n"
-        f"LOCATION: {ctx.location}\n"
-        f"{ctx.build_dice_result_block()}\n\n"
-        f"Write the passage, then on a new line write ---CHOICES--- "
-        f"followed by 2-3 short choices.\n"
-    )
-    raw = call_local_chat(
-        tier=TIER_QUALITY,
-        user=simplified_prompt,
-        temperature=0.7,
-        max_tokens=NARRATION_MAX_TOKENS,
-        timeout=60.0,
-        retries=1,
-    )
-    return _parse_response(raw, used_local=True)
-
-
 def _normalize_choice_tag(raw_tag: str) -> str | None:
     """Normalize bracketed choice metadata into a mechanical tag.
 
@@ -1120,7 +1057,7 @@ def _normalize_choice_tag(raw_tag: str) -> str | None:
     tag = tag.strip().strip(":").lower().replace(" ", "_").replace("-", "_")
     tag = re.sub(r"[^a-z0-9_:]", "", tag)
     try:
-        from gm.local_gm import SKILL_ALIASES, VALID_SKILLS
+        from gm.fast_gm import SKILL_ALIASES, VALID_SKILLS
 
         if tag in VALID_SKILLS:
             return tag
@@ -1158,15 +1095,12 @@ def narrate_turn_stream(ctx: ContextPackage) -> Iterator[str]:
         result = _parse_response(full_text)
     """
     client, model = _make_client()
-    is_local = is_local_backend()
-    is_qwen = is_local and "qwen" in model.lower()
     prompt = _build_prompt(ctx)
-    msg_content = f"/no_think\n{prompt}" if is_qwen else prompt
 
     kwargs = _make_completion_kwargs(
         model,
-        [{"role": "user", "content": msg_content}],
-        is_local=is_local,
+        [{"role": "user", "content": prompt}],
+        is_local=False,
         timeout=NARRATION_TIMEOUT_SEC,
         max_tokens=NARRATION_MAX_TOKENS,
         stream=True,
@@ -1222,14 +1156,12 @@ def generate_milestone_reflection(
     )
 
     client, model = _make_client(purpose="milestone")
-    is_local = is_local_backend()
-    is_qwen = is_local and "qwen" in model.lower()
-    msg_content = f"/no_think\n{prompt}" if is_qwen else prompt
+    msg_content = prompt
 
     kwargs = _make_completion_kwargs(
         model,
         [{"role": "user", "content": msg_content}],
-        is_local=is_local,
+        is_local=False,
     )
     response = client.chat.completions.create(**kwargs)
     raw = response.choices[0].message.content or ""
@@ -1296,7 +1228,7 @@ def _parse_milestone_response(raw: str, expected_choices: list) -> NarrationResu
         passage=passage,
         choices=parsed_choices,
         skill_tags=milestone_tags,  # repurpose skill_tags for milestone refs
-        used_local=(NARRATIVE_BACKEND == "local"),
+        used_local=False,
     )
 
 
@@ -1345,14 +1277,12 @@ def generate_force_power_milestone_reflection(
     )
 
     client, model = _make_client(purpose="milestone")
-    is_local = is_local_backend()
-    is_qwen = is_local and "qwen" in model.lower()
-    msg_content = f"/no_think\n{prompt}" if is_qwen else prompt
+    msg_content = prompt
 
     kwargs = _make_completion_kwargs(
         model,
         [{"role": "user", "content": msg_content}],
-        is_local=is_local,
+        is_local=False,
     )
     response = client.chat.completions.create(**kwargs)
     raw = response.choices[0].message.content or ""
@@ -1420,7 +1350,7 @@ def _parse_force_power_milestone_response(
         passage=passage,
         choices=parsed_choices,
         skill_tags=force_tags,  # repurpose for "power_id:upgrade_id" compound keys
-        used_local=(NARRATIVE_BACKEND == "local"),
+        used_local=False,
     )
 
 
@@ -1453,14 +1383,12 @@ def generate_time_skip_opening(
     )
 
     client, model = _make_client(purpose="narration")
-    is_local = is_local_backend()
-    is_qwen = is_local and "qwen" in model.lower()
-    msg_content = f"/no_think\n{prompt}" if is_qwen else prompt
+    msg_content = prompt
 
     kwargs = _make_completion_kwargs(
         model,
         [{"role": "user", "content": msg_content}],
-        is_local=is_local,
+        is_local=False,
     )
     response = client.chat.completions.create(**kwargs)
     raw = response.choices[0].message.content or ""
@@ -1493,14 +1421,12 @@ def generate_time_skip_closing(
     )
 
     client, model = _make_client(purpose="narration")
-    is_local = is_local_backend()
-    is_qwen = is_local and "qwen" in model.lower()
-    msg_content = f"/no_think\n{prompt}" if is_qwen else prompt
+    msg_content = prompt
 
     kwargs = _make_completion_kwargs(
         model,
         [{"role": "user", "content": msg_content}],
-        is_local=is_local,
+        is_local=False,
     )
     response = client.chat.completions.create(**kwargs)
     raw = response.choices[0].message.content or ""

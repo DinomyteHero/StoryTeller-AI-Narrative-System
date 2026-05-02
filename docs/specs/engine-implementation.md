@@ -224,7 +224,7 @@ No LLM. No database. No API. Just Python.
 Goal: Roll a dice pool for Keth's Deception check and get a correct result.
 
 ### Phase 2: The Local GM
-Files: `gm/local_gm.py`, `gm/prompts/check_decision.txt`
+Files: `gm/fast_gm.py`, `gm/prompts/check_decision.txt`
 
 Goal: Given a scene description and player action, correctly decide whether a
 check is needed and return structured JSON.
@@ -1004,7 +1004,7 @@ If NO check is required:
 }
 ```
 
-### 6.2 `gm/local_gm.py`
+### 6.2 `gm/fast_gm.py`
 
 ```python
 import json

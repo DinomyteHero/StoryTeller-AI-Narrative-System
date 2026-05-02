@@ -1,19 +1,18 @@
 """
-Unified LLM client — two-tier routing, provider-agnostic.
+Unified LLM client — two-tier routing, cloud-only.
 
-This is the single entry point for every LLM call in the project. It replaces
-the ad-hoc Ollama-direct httpx calls in local_gm.py and reconciliation.py
-and the bespoke OpenAI client construction in cloud_gm.py and studio/generate.py.
+Single entry point for every LLM call in the project. Wraps the OpenAI
+SDK and routes through OpenRouter (default) or OpenAI direct.
 
 ═══ Tiers ═══════════════════════════════════════════════════════════════════
  FAST    — DeepSeek V4 Flash (default). Structured JSON, decisions, annotations,
-           reconciliation, prose diagnostics. Latency-sensitive. Quality is
-           bounded by JSON schema, so a smaller/faster model is fine.
+           reconciliation, prose diagnostics, scene validation. Latency-
+           sensitive. Quality is bounded by JSON schema, so a smaller/faster
+           model is fine.
  QUALITY — DeepSeek V4 Pro (default). Turn narration, milestone reflections,
            time-skip prose, studio generation. Quality-critical, latency-tolerant.
 
 ═══ Configuration ═══════════════════════════════════════════════════════════
-Primary (preferred):
   CLOUD_PROVIDER     = openrouter | openai     (default: openrouter)
   FAST_MODEL         = deepseek/deepseek-v4-flash
   QUALITY_MODEL      = deepseek/deepseek-v4-pro
@@ -24,16 +23,12 @@ Per-call-site overrides (optional, named by purpose):
   DIAGNOSTIC_MODEL, MILESTONE_MODEL, STUDIO_MODEL, MEMORY_MODEL,
   CHOICE_QUALITY_MODEL, DRIFT_MODEL
 
-Legacy (still honored for backwards compatibility):
-  CLOUD_MODEL          → if set, used as quality default
-  NARRATIVE_BACKEND    = cloud | local         (default: cloud)
-  LOCAL_MODEL          → fast tier when backend=local
-  LOCAL_NARRATION_MODEL → quality tier when backend=local
-  OLLAMA_URL           = http://localhost:11434
+Legacy back-compat:
+  CLOUD_MODEL → if set, used as quality default.
 
 ═══ Architectural invariants ════════════════════════════════════════════════
-- One cloud call per turn (narration). Fast-tier calls are not "cloud calls"
-  in this accounting — they're structured JSON decisions.
+- One quality-tier call per turn (narration). Fast-tier calls are accounted
+  separately — they're structured JSON decisions.
 - All hot-path calls have retry-with-fallback semantics.
 - The call site chooses the tier; the client never auto-downgrades.
 """
@@ -46,7 +41,6 @@ import os
 import time
 from typing import Iterator, Optional
 
-import httpx
 from openai import OpenAI
 
 
@@ -56,9 +50,8 @@ TIER_FAST    = "fast"
 TIER_QUALITY = "quality"
 
 
-# ── Backend & provider ───────────────────────────────────────────────
+# ── Provider ─────────────────────────────────────────────────────────
 
-NARRATIVE_BACKEND = os.getenv("NARRATIVE_BACKEND", "cloud")
 CLOUD_PROVIDER    = os.getenv("CLOUD_PROVIDER", "openrouter")
 
 PROVIDER_BASE_URLS = {
@@ -78,11 +71,6 @@ QUALITY_MODEL = os.getenv("QUALITY_MODEL", "deepseek/deepseek-v4-pro")
 _LEGACY_CLOUD_MODEL = os.getenv("CLOUD_MODEL", "")
 if _LEGACY_CLOUD_MODEL:
     QUALITY_MODEL = _LEGACY_CLOUD_MODEL
-
-# Local (Ollama) defaults — used only when NARRATIVE_BACKEND=local
-OLLAMA_URL          = os.getenv("OLLAMA_URL", "http://localhost:11434")
-LOCAL_FAST_MODEL    = os.getenv("LOCAL_FAST_MODEL",    os.getenv("LOCAL_MODEL",           "qwen3.5:9b"))
-LOCAL_QUALITY_MODEL = os.getenv("LOCAL_QUALITY_MODEL", os.getenv("LOCAL_NARRATION_MODEL", LOCAL_FAST_MODEL))
 
 # Per-call-site overrides — empty string means "fall through to tier default"
 PURPOSE_OVERRIDES = {
@@ -291,11 +279,6 @@ def _is_reasoning_model(model: str) -> bool:
     return _capabilities_for(model)["reasoning"] != "none"
 
 
-def _is_qwen_local(model: str) -> bool:
-    """Qwen models served via Ollama need /no_think prefix to skip reasoning."""
-    return "qwen" in model.lower() and NARRATIVE_BACKEND == "local"
-
-
 # ── Public API ───────────────────────────────────────────────────────
 
 
@@ -303,13 +286,9 @@ def resolve_model(*, tier: str, purpose: str = "") -> str:
     """Pick the actual model id for a tier+purpose.
 
     Resolution order:
-      1. NARRATIVE_BACKEND=local  → LOCAL_FAST_MODEL or LOCAL_QUALITY_MODEL
-      2. {PURPOSE}_MODEL env override (if set)
-      3. tier default (FAST_MODEL or QUALITY_MODEL)
+      1. {PURPOSE}_MODEL env override (if set)
+      2. tier default (FAST_MODEL or QUALITY_MODEL)
     """
-    if NARRATIVE_BACKEND == "local":
-        return LOCAL_FAST_MODEL if tier == TIER_FAST else LOCAL_QUALITY_MODEL
-
     override = PURPOSE_OVERRIDES.get(purpose, "")
     if override:
         return override
@@ -317,15 +296,8 @@ def resolve_model(*, tier: str, purpose: str = "") -> str:
     return FAST_MODEL if tier == TIER_FAST else QUALITY_MODEL
 
 
-def is_local_backend() -> bool:
-    return NARRATIVE_BACKEND == "local"
-
-
 def make_client() -> OpenAI:
-    """OpenAI-compatible client for the configured backend."""
-    if NARRATIVE_BACKEND == "local":
-        return OpenAI(base_url=f"{OLLAMA_URL}/v1", api_key="ollama")
-
+    """OpenAI-compatible client for the configured cloud provider."""
     if CLOUD_PROVIDER == "openrouter":
         api_key = os.getenv("OPENROUTER_API_KEY") or os.getenv("OPENAI_API_KEY", "")
         return OpenAI(
@@ -383,7 +355,7 @@ def _prepare_kwargs(
     # else: model doesn't support reasoning — ignore the hint
 
     # OpenRouter provider preferences (require_parameters, data_collection)
-    if NARRATIVE_BACKEND == "cloud" and CLOUD_PROVIDER == "openrouter":
+    if CLOUD_PROVIDER == "openrouter":
         provider_block: dict = {}
         if OPENROUTER_REQUIRE_PARAMS:
             provider_block["require_parameters"] = True
@@ -440,11 +412,10 @@ def call_chat(
     model  = resolve_model(tier=tier, purpose=purpose)
     client = make_client()
 
-    user_content = f"/no_think\n{user}" if _is_qwen_local(model) else user
     messages: list = []
     if system:
         messages.append({"role": "system", "content": system})
-    messages.append({"role": "user", "content": user_content})
+    messages.append({"role": "user", "content": user})
 
     kwargs = _prepare_kwargs(
         model=model, messages=messages,
@@ -499,55 +470,6 @@ def call_chat(
     ) from last_error
 
 
-def call_local_chat(
-    *,
-    tier: str,
-    user: str,
-    system: Optional[str] = None,
-    temperature: float = 0.4,
-    max_tokens: int = 1500,
-    timeout: float = 60.0,
-    retries: int = 1,
-) -> str:
-    """Explicit local-Ollama text call for emergency fallbacks."""
-    model = LOCAL_FAST_MODEL if tier == TIER_FAST else LOCAL_QUALITY_MODEL
-    client = OpenAI(base_url=f"{OLLAMA_URL}/v1", api_key="ollama")
-
-    user_content = f"/no_think\n{user}" if _is_qwen_local(model) else user
-    messages: list = []
-    if system:
-        messages.append({"role": "system", "content": system})
-    messages.append({"role": "user", "content": user_content})
-
-    kwargs = {
-        "model": model,
-        "messages": messages,
-        "temperature": temperature,
-        "max_tokens": max_tokens,
-        "timeout": timeout,
-    }
-
-    last_error: Optional[Exception] = None
-    for attempt in range(retries):
-        try:
-            response = client.chat.completions.create(**kwargs)
-            content = response.choices[0].message.content
-            if content is None or not content.strip():
-                raise RuntimeError(f"Empty content from {model}")
-            return content.strip()
-        except Exception as e:  # noqa: BLE001 - provider SDK exceptions vary
-            last_error = e
-            logging.warning(
-                "Local fallback LLM call failed (attempt=%d/%d model=%s): %s",
-                attempt + 1, retries, model, e,
-            )
-
-    raise RuntimeError(
-        f"Local fallback LLM call failed after {retries} attempts "
-        f"(tier={tier} model={model}): {last_error}"
-    )
-
-
 def call_chat_json(
     *,
     tier: str,
@@ -565,23 +487,14 @@ def call_chat_json(
 ) -> dict:
     """JSON-mode chat call. Parses and returns a dict.
 
-    Routing:
-      - NARRATIVE_BACKEND=local → Ollama's /api/generate with `format=<schema>`
-        for strict native enforcement.
-      - Otherwise → OpenAI-compatible json_schema response_format. With
-        OPENROUTER_REQUIRE_PARAMS=true (default), OpenRouter routes to a
-        provider that actually enforces the schema, eliminating the
-        json.loads-then-cross-fingers retry loop the project used to need.
+    Uses OpenAI-compatible json_schema response_format. With
+    OPENROUTER_REQUIRE_PARAMS=true (default), OpenRouter routes to a
+    provider that actually enforces the schema, eliminating the
+    json.loads-then-cross-fingers retry loop the project used to need.
 
     When strict_schema=False (or the API rejects json_schema), falls back
     to json_object mode with the schema injected into the prompt as guidance.
     """
-    if NARRATIVE_BACKEND == "local":
-        return _call_ollama_json(
-            tier=tier, user=user, schema=schema,
-            temperature=temperature, max_tokens=max_tokens, retries=retries,
-        )
-
     use_strict = bool(strict_schema and schema)
     if use_strict:
         response_format: dict = {
@@ -662,61 +575,6 @@ def call_chat_json(
     ) from last_error
 
 
-def _call_ollama_json(
-    *,
-    tier: str,
-    user: str,
-    schema: Optional[dict],
-    temperature: float,
-    max_tokens: int,
-    retries: int,
-) -> dict:
-    """Native Ollama /api/generate call with format=<schema> enforcement."""
-    model  = resolve_model(tier=tier)
-    is_qwen = "qwen" in model.lower()
-    prompt  = f"/no_think\n{user}" if is_qwen else user
-
-    last_error: Optional[Exception] = None
-    for attempt in range(retries):
-        try:
-            payload: dict = {
-                "model":   model,
-                "prompt":  prompt,
-                "stream":  False,
-                "options": {"temperature": temperature, "num_predict": max_tokens},
-            }
-            if schema:
-                payload["format"] = schema
-
-            response = httpx.post(
-                f"{OLLAMA_URL}/api/generate", json=payload, timeout=30.0,
-            )
-            response.raise_for_status()
-            resp_json = response.json()
-
-            text = (resp_json.get("response") or "").strip()
-            if not text and resp_json.get("thinking", "").strip():
-                text = resp_json["thinking"].strip()
-
-            if text.startswith("```"):
-                text = text.split("```")[1]
-                if text.startswith("json"):
-                    text = text[4:]
-                text = text.strip()
-
-            return json.loads(text)
-        except (json.JSONDecodeError, KeyError, ValueError, httpx.HTTPError) as e:
-            last_error = e
-            logging.warning(
-                "Ollama JSON call failed (attempt=%d/%d): %s",
-                attempt + 1, retries, e,
-            )
-
-    raise RuntimeError(
-        f"Ollama JSON call failed after {retries} attempts: {last_error}"
-    )
-
-
 def call_chat_stream(
     *,
     tier: str,
@@ -732,11 +590,10 @@ def call_chat_stream(
     model  = resolve_model(tier=tier, purpose=purpose)
     client = make_client()
 
-    user_content = f"/no_think\n{user}" if _is_qwen_local(model) else user
     messages: list = []
     if system:
         messages.append({"role": "system", "content": system})
-    messages.append({"role": "user", "content": user_content})
+    messages.append({"role": "user", "content": user})
 
     kwargs = _prepare_kwargs(
         model=model, messages=messages,
@@ -758,8 +615,7 @@ def call_chat_stream(
 def describe_routing() -> dict:
     """Return the active routing configuration. Useful for /health endpoints."""
     return {
-        "backend":       NARRATIVE_BACKEND,
-        "provider":      CLOUD_PROVIDER if NARRATIVE_BACKEND == "cloud" else "ollama",
+        "provider":      CLOUD_PROVIDER,
         "fast_model":    resolve_model(tier=TIER_FAST),
         "quality_model": resolve_model(tier=TIER_QUALITY),
         "narration_model": resolve_model(tier=TIER_QUALITY, purpose="narration"),

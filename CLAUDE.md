@@ -26,10 +26,14 @@ The campaign spine JSON is the interface contract between them.
 ## Tech Stack
 
 - Python 3.11+, FastAPI + Uvicorn
-- Local LLM: Ollama with Qwen3.5:9B (check decisions, structured JSON)
-- Cloud LLM: OpenAI-compatible SDK, provider-configurable via env vars
-  (OpenAI, OpenRouter, or any OpenAI-compatible endpoint). Code
-  defaults to `gpt-5.2`; configure via `CLOUD_MODEL` env var.
+- Cloud LLM only — no local model path. Two-tier routing through
+  `gm/llm_client.py`:
+  - **FAST** tier: DeepSeek V4 Flash via OpenRouter (default).
+    Structured JSON: check decisions, annotations, reconciliation,
+    prose diagnostic, scene validation.
+  - **QUALITY** tier: DeepSeek V4 Pro via OpenRouter (default). Turn
+    narration, milestone reflections, time-skip prose, studio gen.
+  - Provider configurable via `CLOUD_PROVIDER=openrouter|openai`.
 - SQLite with WAL mode
 - Pydantic v2 for all data models
 - Single-file HTML frontend
@@ -132,9 +136,12 @@ No LLM. No database. No API. Just Python.
 Goal: Roll a dice pool for Keth's Deception check and get correct FFG results.
 **Start here. This is the most important file in the project.**
 
-### Phase 2: The Local GM
-Files: `gm/local_gm.py`, `gm/prompts/check_decision.txt`
-Goal: Given a scene and player action, return structured JSON check decision.
+### Phase 2: The Fast GM
+Files: `gm/fast_gm.py`, `gm/prompts/check_decision.txt`
+Goal: Given a scene and player action, return structured JSON check decision
+via the fast tier (DeepSeek V4 Flash by default). Historically named
+"local GM" when an Ollama path existed; the local backend was removed
+in May 2026 in favor of cloud-only routing.
 
 ### Phase 3: The Cloud GM
 Files: `gm/cloud_gm.py`, `gm/context.py`, `gm/prompts/narration.txt`
@@ -160,24 +167,17 @@ And so on. The full code spec for each phase is in the Implementation doc.
 
 ## V1 Success Criteria
 
-V1 is complete when all 12 pass:
-1. Player starts as Keth Varso
-2. Opening passage of The Nar Shaddaa Job appears
-3. Player selects a choice
-4. Local model correctly decides check/no-check
-5. Dice pool built correctly per FFG rules
-6. Dice rolled with correct symbols
-7. Cloud GM narrates honoring the dice result
-8. Dice panel shows actual roll on demand
-9. New choices are scene-specific
-10. Loop repeats 5+ turns without errors
-11. Session persists across restart
-12. `NARRATIVE_BACKEND=local` runs full loop without cloud credits
+V1 was completed in Q1 2026 against the canonical campaign (Shadows of
+the Custodian) and an active protagonist roster. The original list
+(12 criteria, including a now-deleted local-backend offline mode) is
+preserved in [docs/reference/](docs/reference/) for historical context.
+Current invariants live under "Critical Rules" below and in the
+post-V1 milestone roadmap.
 
 ## Critical Rules
 
 **Rule 3:** `engine/` is pure Python. Zero LLM dependencies. Runnable
-with no API keys and no Ollama.
+with no API keys.
 
 **Rule 4:** The dice are the truth. Failure is narrated as failure.
 Triumph is narrated as triumph. No softening.
@@ -202,7 +202,7 @@ outcomes (dice, state transitions, NPC disposition changes) BEFORE the
 narrative model receives the context. The LLM describes outcomes code
 has already determined. It never decides them.
 
-## Post-V1 Milestones — Current Status (last synced: 2026-04-08)
+## Post-V1 Milestones — Current Status (last synced: 2026-05-02)
 
 Follow `docs/status/roadmap.md`. Four milestones:
 - Milestone 1: Full single-campaign experience (Phases 7-13) — **COMPLETE**
@@ -226,12 +226,12 @@ Campaign Studio (parallel track):
 
 **Next work:** Phase 18 (Psychometric Prologue) or CS-7 (Saga Depth).
 
-## Codebase Metrics (as of April 8, 2026)
+## Codebase Metrics (as of May 2, 2026)
 
-- ~18,600 lines of application code (Python + HTML)
-- ~10,300 lines of test code across 20 test files
-- 15 active documentation files in `docs/` + 6 archived in `docs/reference/`
-- 1 campaign spine (Shadows of the Custodian), 2 characters, 6 talent trees, 5 Force powers
+- ~26,100 lines of application code (Python + HTML)
+- ~13,600 lines of test code across 31 test files
+- 23 active documentation files in `docs/` + 6 archived in `docs/reference/`
+- 1 campaign spine (Shadows of the Custodian), 3 characters, 7 talent files (6 trees + library), 5 Force powers
 
 ## Repo Structure
 
@@ -241,7 +241,7 @@ storyteller-v3/
 ├── README.md              # Project overview and getting started
 ├── pyproject.toml
 ├── .env.example
-├── docs/                  # Project documentation (24 files across 6 subdirectories)
+├── docs/                  # Project documentation (29 files across 6 subdirectories)
 │   ├── index.md                               # Start here — orientation
 │   ├── specs/                                 # Tier 1: Core specifications
 │   │   ├── vision.md                          # Creative vision
@@ -253,14 +253,19 @@ storyteller-v3/
 │   │   ├── roadmap.md                         # Phase plan
 │   │   ├── backlog.md                         # Item tracker (source of truth)
 │   │   ├── state-matrix.md                    # Capability dashboard
+│   │   ├── architecture-pivot.md              # Architecture pivot notes
 │   │   └── changelog.md                       # Release history
 │   ├── research/                              # Tier 3: Research and evaluation
 │   │   ├── llm-evaluation.md                  # Model selection
-│   │   └── research-catalogue.md              # Research evidence
+│   │   ├── research-catalogue.md              # Research evidence
+│   │   ├── brooks-weiland-pass-2026-04.md     # Narrative pass review
+│   │   └── depth-pass-stress-test-2026-04.md  # Depth pass stress test
 │   ├── specialist/                            # Tier 4: Specialist specs
 │   │   ├── choice-quality-validation.md       # Choice quality (Phase 7)
 │   │   ├── prologue-system.md                 # Prologue system (Phase 18)
 │   │   ├── import-package-quality.md          # Import quality (Phase 19)
+│   │   ├── content-packs.md                   # Content pack system
+│   │   ├── era-packs.md                       # Era pack design
 │   │   └── story-architecture.md              # Story architecture (CS-5/CS-6)
 │   ├── api/                                   # API reference
 │   │   ├── game-engine-api.md                 # Game Engine endpoints
@@ -272,24 +277,26 @@ storyteller-v3/
 │       ├── consolidation-report.md
 │       ├── claude-code-initial-prompt.md
 │       └── prose-quality-review-1.md
-├── engine/                # Pure Python — dice, character, checks (~5,500 lines)
+├── engine/                # Pure Python — dice, character, checks (6,109 lines)
 │   ├── dice.py            # FFG dice system — 7 die types, symbol tables (270 lines)
-│   ├── character.py       # Character model — Pydantic, 33 skills (220 lines)
+│   ├── character.py       # Character model — Pydantic, 33 skills (242 lines)
 │   ├── checks.py          # 6-stage pool pipeline (197 lines)
-│   ├── equipment.py       # Loadout system — weapons, armor, tools (287 lines)
-│   ├── advancement.py     # XP and behavioral inference (462 lines)
+│   ├── equipment.py       # Loadout system — weapons, armor, tools (309 lines)
+│   ├── advancement.py     # XP and behavioral inference (527 lines)
 │   ├── talents.py         # Talent tree engine — 5-type taxonomy (797 lines)
-│   ├── destiny.py         # Destiny Point pool — light/dark spending (275 lines)
-│   ├── reconciliation.py  # Post-turn reconciliation + 16-step pipeline (~1,050 lines)
-│   ├── force.py           # Force dice, powers, temptation (732 lines)
+│   ├── destiny.py         # Destiny Point pool — light/dark spending (281 lines)
+│   ├── reconciliation.py  # Post-turn reconciliation + 16-step pipeline (1,451 lines)
+│   ├── force.py           # Force dice, powers, temptation (741 lines)
 │   ├── vehicle.py         # Vehicle/starship system (303 lines)
 │   ├── time_skip.py       # Time skip vignettes (611 lines)
-│   ├── dramatic_mission.py # CS-6: Dramatic mission classification + voice modes (~200 lines)
-│   └── scene_validator.py # CS-6: Scene purpose validation model (~110 lines)
-├── gm/                    # LLM orchestration — local + cloud GM (1,805 lines)
-│   ├── local_gm.py        # Check decisions, annotations, diagnostics (478 lines)
-│   ├── cloud_gm.py        # Narration, milestones, time skips (946 lines)
-│   ├── context.py         # Context package assembly (381 lines)
+│   ├── dramatic_mission.py # CS-6: Dramatic mission classification + voice modes (259 lines)
+│   └── scene_validator.py # CS-6: Scene purpose validation model (121 lines)
+├── gm/                    # LLM orchestration — fast + quality cloud tiers (4,853 lines)
+│   ├── llm_client.py      # Two-tier LLM routing, retry/backoff, provider abstraction (624 lines)
+│   ├── fast_gm.py         # Check decisions, annotations, diagnostics, scene validation (496 lines)
+│   ├── cloud_gm.py        # Narration, milestones, time skips (1,436 lines)
+│   ├── context.py         # Context package assembly (2,133 lines)
+│   ├── choice_validator.py # CS-6: Post-generation choice quality validator (164 lines)
 │   └── prompts/           # Prompt templates (8 files)
 │       ├── check_decision.txt
 │       ├── narration.txt
@@ -299,26 +306,26 @@ storyteller-v3/
 │       ├── force_power_milestone.txt
 │       ├── time_skip_opening.txt
 │       └── time_skip_closing.txt
-├── state/                 # SQLite persistence + telemetry (~710 lines)
-│   ├── db.py              # Database schema and connections (183 lines)
-│   ├── session.py         # Turn logging and state queries (244 lines)
-│   ├── memory.py          # Episodic compression (120 lines)
-│   └── telemetry.py       # Narrative event logging — JSON-lines per session (162 lines)
-├── api/                   # FastAPI routes (3,253 lines)
-│   ├── main.py            # App bootstrap and frontend serving (71 lines)
-│   ├── game_routes.py     # Game Engine routes (2,685 lines)
+├── state/                 # SQLite persistence + telemetry (1,013 lines)
+│   ├── db.py              # Database schema and connections (196 lines)
+│   ├── session.py         # Turn logging and state queries (540 lines)
+│   ├── memory.py          # Episodic compression (116 lines)
+│   └── telemetry.py       # Narrative event logging — JSON-lines per session (179 lines)
+├── api/                   # FastAPI routes (6,206 lines)
+│   ├── main.py            # App bootstrap and frontend serving (78 lines)
+│   ├── game_routes.py     # Game Engine routes (5,679 lines)
 │   └── studio_routes.py   # Campaign Studio routes (497 lines)
 ├── web/                   # Single-file frontend
-│   └── index.html         # Prose reader UI (788 lines)
-├── studio/                # Campaign Studio (~4,200 lines)
-│   ├── schema.py          # Spine schema — interface contract (~570 lines)
-│   ├── validate.py        # Four-gate validation suite (~500 lines)
-│   ├── generate.py        # Modes 1, 2, 3 generation (~750 lines)
-│   ├── architect.py       # Pre-generation story architecture (CS-5)
-│   ├── narrative_eval.py  # Gate 4 narrative evaluation (CS-5)
+│   └── index.html         # Prose reader UI (1,038 lines)
+├── studio/                # Campaign Studio (5,283 lines)
+│   ├── schema.py          # Spine schema — interface contract (900 lines)
+│   ├── validate.py        # Four-gate validation suite (765 lines)
+│   ├── generate.py        # Modes 1, 2, 3 generation (749 lines)
+│   ├── architect.py       # Pre-generation story architecture (CS-5) (154 lines)
+│   ├── narrative_eval.py  # Gate 4 narrative evaluation (CS-5) (703 lines)
 │   ├── seeding.py         # Deterministic seed derivation (111 lines)
 │   ├── difficulty.py      # Spine difficulty calibration (353 lines)
-│   ├── import_interface.py # Cross-era character import (404 lines)
+│   ├── import_interface.py # Cross-era character import (405 lines)
 │   ├── prompts/           # Studio prompt templates (7 files)
 │   │   ├── mode1_generate.txt
 │   │   ├── mode2_generate.txt
@@ -327,7 +334,7 @@ storyteller-v3/
 │   │   ├── architect.txt        # CS-5: architecture generation
 │   │   ├── narrative_eval.txt   # CS-5: Gate 4 evaluation
 │   │   └── narrative_score.txt  # CS-5: Stage 5 scoring
-│   └── saga/              # Saga layer pipeline — CS-4 (1,090 lines)
+│   └── saga/              # Saga layer pipeline — CS-4 (1,143 lines)
 │       ├── pipeline.py    # 5-stage orchestrator
 │       ├── personas.py    # Persona pool management
 │       ├── diverge.py     # Stage 2: direction generation
@@ -336,30 +343,38 @@ storyteller-v3/
 │       ├── select.py      # Stage 5: pairwise selection
 │       ├── ensemble.py    # Multi-model writer assignment
 │       └── evaluator.py   # Trained local evaluator
-├── eval/                  # Evaluation harness (~1,040 lines)
-│   ├── harness.py         # Scripted play sessions + quality measurement (294 lines)
-│   ├── metrics.py         # Tier 1 (no LLM) + Tier 2 quality metrics (407 lines)
-│   ├── divergence.py      # Cross-session replayability analysis (130 lines)
-│   ├── golden_scenarios.py # Fixed-seed reproducible test scenarios (42 lines)
-│   ├── policies.py        # Automated choice selection strategies (45 lines)
-│   └── reporter.py        # Console + JSON report generation (118 lines)
+├── eval/                  # Evaluation harness (1,640 lines)
+│   ├── harness.py         # Scripted play sessions + quality measurement
+│   ├── metrics.py         # Tier 1 (no LLM) + Tier 2 quality metrics
+│   ├── divergence.py      # Cross-session replayability analysis
+│   ├── golden_scenarios.py # Fixed-seed reproducible test scenarios
+│   ├── policies.py        # Automated choice selection strategies
+│   └── reporter.py        # Console + JSON report generation
 ├── data/
-│   ├── characters/        # praxeum_student.json, praxeum_mechanic.json
+│   ├── characters/        # praxeum_student.json, praxeum_mechanic.json, clovis_beryl.json
 │   ├── campaigns/         # shadows_of_the_custodian.json (canonical campaign)
 │   ├── talent_trees/      # 6 specialization trees + talent_library.json
 │   ├── force_powers/      # 5 powers (enhance, heal_harm, influence, move, sense)
 │   └── personas/          # writer_room_personas.json (55 personas)
-└── tests/                 # 20 test files (~10,300 lines)
+└── tests/                 # 31 test files (~13,650 lines)
     ├── __init__.py
     ├── dice_validation.py
     ├── studio_schema_test.py
+    ├── test_content_packs.py             # Content pack loader + validation
     ├── test_cs2_mode3.py
     ├── test_cs3_mode2_import.py
     ├── test_cs4_saga.py
-    ├── test_cs5_narrative_quality.py  # CS-5: 33 tests
-    ├── test_cs6_story_engineering.py  # CS-6: Campaign Studio tests
-    ├── test_story_engineering.py      # CS-6: Game Engine tests
+    ├── test_cs5_narrative_quality.py     # CS-5: 33 tests
+    ├── test_cs6_runtime_wiring.py        # CS-6: runtime integration into game loop
+    ├── test_cs6_story_engineering.py     # CS-6: Campaign Studio tests
     ├── test_e2e_game_loop.py
+    ├── test_era_packs.py                 # Era-specific pack composition
+    ├── test_faction_reactivity.py        # NPC faction stance and reaction logic
+    ├── test_identity_drift_introspection.py # Identity drift detection
+    ├── test_latency_hot_path.py          # Hot-path latency budget enforcement
+    ├── test_llm_client_backoff.py        # LLM retry/backoff (429 handling)
+    ├── test_llm_client_serialization.py  # LLM request-body shape + RUN_LIVE_LLM gate
+    ├── test_path_differentiation_audit.py # Choice path differentiation audit
     ├── test_phase10_advancement.py
     ├── test_phase115_destiny.py
     ├── test_phase11_talents.py
@@ -369,7 +384,11 @@ storyteller-v3/
     ├── test_phase155_fd_trees.py
     ├── test_phase15_force_powers.py
     ├── test_phase16_vehicles.py
-    └── test_phase17_time_skips.py
+    ├── test_phase17_time_skips.py
+    ├── test_reconciliation_escalation.py # Reconciliation escalation rules
+    ├── test_scene_validator_wiring.py     # CS-6: scene validator runtime integration
+    ├── test_story_coherence_state.py     # Cross-turn coherence checks
+    └── test_story_engineering.py         # CS-6: Game Engine story-engineering tests
 ```
 
 **Note:** `data/evaluation_pairs/` and `data/canon_profiles/` directories

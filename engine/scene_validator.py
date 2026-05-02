@@ -5,7 +5,7 @@ A lightweight local-model call that scores narration against its
 dramatic mission. Runs AFTER narration, in parallel with reconciliation.
 Quality signal only — does not block delivery.
 
-Pure Python data models. The LLM call is in gm/local_gm.py.
+Pure Python data models. The LLM call is in gm/fast_gm.py.
 """
 
 from dataclasses import dataclass

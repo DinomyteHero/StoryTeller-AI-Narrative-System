@@ -18,17 +18,18 @@ The campaign spine JSON is the interface contract between them.
 ### Core Loop
 
 1. Player reads a prose passage and selects a choice
-2. A local LLM decides whether the action requires a skill check
+2. A fast-tier LLM call decides whether the action requires a skill check
 3. If yes, the engine builds a dice pool and rolls FFG narrative dice
-4. A cloud LLM narrates the outcome, honoring the dice result exactly
+4. A quality-tier LLM call narrates the outcome, honoring the dice result exactly
 5. New scene-specific choices are presented
 6. State persists across sessions
 
 ## Tech Stack
 
 - **Python 3.11+** with **FastAPI + Uvicorn**
-- **Local LLM:** Ollama (check decisions, structured JSON)
-- **Cloud LLM:** OpenAI-compatible SDK, provider-configurable (OpenAI, OpenRouter, or any compatible endpoint)
+- **Cloud LLM only:** OpenAI-compatible SDK, two-tier routing
+  (fast: DeepSeek V4 Flash; quality: DeepSeek V4 Pro), default
+  provider OpenRouter. Switch to direct OpenAI via `CLOUD_PROVIDER`.
 - **SQLite** with WAL mode for persistence
 - **Pydantic v2** for all data models
 - **Single-file HTML frontend**
@@ -39,7 +40,6 @@ The campaign spine JSON is the interface contract between them.
 
 - Python 3.11+
 - An API key for your cloud LLM provider — OpenRouter (default) or OpenAI
-- [Ollama](https://ollama.ai/) is optional. Only needed if you set `NARRATIVE_BACKEND=local` for offline play, or enable `CLOUD_FALLBACK_TO_LOCAL=true` as an emergency fallback.
 
 ### Installation
 
@@ -70,15 +70,12 @@ Key settings in `.env`:
 
 | Variable | Description | Default |
 |---|---|---|
-| `NARRATIVE_BACKEND` | `cloud` or `local` | `cloud` |
 | `CLOUD_PROVIDER` | `openrouter` or `openai` | `openrouter` |
 | `OPENROUTER_API_KEY` | Your OpenRouter API key (default path) | — |
 | `OPENAI_API_KEY` | Your OpenAI API key (only if `CLOUD_PROVIDER=openai`) | — |
 | `FAST_MODEL` | High-volume tier — decisions, annotations, reconciliation | `deepseek/deepseek-v4-flash` |
 | `QUALITY_MODEL` | Quality-critical tier — milestones, time skips, studio | `deepseek/deepseek-v4-pro` |
 | `NARRATION_MODEL` | Per-call override for live narration | `deepseek/deepseek-v4-flash` |
-| `OLLAMA_URL` | Ollama endpoint (only used in local mode / fallback) | `http://localhost:11434` |
-| `LOCAL_FAST_MODEL` | Local model for check decisions (offline / fallback) | `qwen3.5:9b` |
 | `DB_PATH` | SQLite database path | `./data/storyteller.db` |
 | `PORT` | Server port | `8000` |
 
@@ -89,9 +86,6 @@ See `.env.example` for the full set of tunables (token budgets, hot-path quality
 ```bash
 # Start the server
 uvicorn api.main:app --port 8000
-
-# Or run fully local (no cloud API key needed — requires Ollama)
-NARRATIVE_BACKEND=local uvicorn api.main:app --port 8000
 ```
 
 Then open `http://localhost:8000` in your browser.
@@ -101,7 +95,7 @@ Then open `http://localhost:8000` in your browser.
 ```
 storyteller-v3/
 ├── engine/          # Pure Python — dice, characters, checks, talents, Force, vehicles
-├── gm/              # LLM orchestration — local + cloud GM, context assembly, prompts
+├── gm/              # LLM orchestration — fast + quality tiers, context assembly, prompts
 ├── state/           # SQLite persistence — sessions, turn history, memory compression
 ├── api/             # FastAPI routes for Game Engine and Campaign Studio
 ├── web/             # Single-file HTML frontend
@@ -119,7 +113,7 @@ storyteller-v3/
 
 ### Key Design Rules
 
-- **`engine/` is pure Python.** Zero LLM dependencies. Runnable with no API keys and no Ollama.
+- **`engine/` is pure Python.** Zero LLM dependencies. Runnable with no API keys.
 - **Physics before imagination.** Code resolves all mechanical outcomes (dice, state transitions) *before* the LLM receives context. The LLM describes outcomes; it never decides them.
 - **Fail loud.** Bad JSON after retries = exception. Missing markers = exception. Errors surface, never hide.
 

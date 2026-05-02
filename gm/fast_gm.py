@@ -8,12 +8,14 @@ from dataclasses import dataclass
 from typing import Optional
 
 from gm.llm_client import call_chat_json, TIER_FAST
+from engine.scene_validator import (
+    SceneValidationResult,
+    VALIDATOR_SCHEMA,
+    build_validator_prompt,
+)
 
 PROMPT_PATH = Path(__file__).parent / "prompts" / "check_decision.txt"
 ANNOTATION_PROMPT_PATH = Path(__file__).parent / "prompts" / "choice_annotation.txt"
-# Retained for back-compat with code that still references these.
-OLLAMA_URL  = os.getenv("OLLAMA_URL", "http://localhost:11434")
-LOCAL_MODEL = os.getenv("LOCAL_MODEL", "qwen3.5:9b")
 
 VALID_SKILLS = {
     "astrogation", "athletics", "charm", "coercion", "computers", "cool",
@@ -444,3 +446,51 @@ def run_prose_diagnostic(
     except Exception as e:
         logging.warning(f"Prose diagnostic failed (non-critical): {e}")
         return None
+
+
+def validate_scene_purpose(
+    *,
+    selected_mission: str,
+    mission_sentence: str,
+    narration_text: str,
+    choices: Optional[list] = None,
+) -> SceneValidationResult:
+    """CS-6 post-narration scene purpose validation.
+
+    Scores the just-completed turn's narration against its dramatic mission
+    on five dimensions (mission_delivery, pressure_progression,
+    antagonist_relevance, character_choices, change). Quality signal only —
+    callers should never use the result to gate or rewrite narration.
+
+    Returns a neutral SceneValidationResult (composite=3.0) when the mission
+    is missing or the LLM call fails, so callers can treat the result as
+    always-present and never block on validation problems.
+    """
+    if not selected_mission or not mission_sentence:
+        return SceneValidationResult()
+
+    choices_text = "\n".join(f"- {c}" for c in (choices or [])[:6])
+    prompt = build_validator_prompt(
+        selected_mission=selected_mission,
+        mission_sentence=mission_sentence,
+        narration_text=narration_text or "",
+        choices_text=choices_text,
+    )
+
+    try:
+        data = call_chat_json(
+            tier=TIER_FAST,
+            purpose="diagnostic",
+            user=prompt,
+            schema=VALIDATOR_SCHEMA,
+            schema_name="scene_validation",
+            temperature=0.2,
+            max_tokens=400,
+            timeout=20.0,
+            retries=2,
+        )
+    except Exception as e:
+        logging.warning(f"scene_validator failed (non-critical): {e}")
+        return SceneValidationResult()
+
+    return SceneValidationResult.from_dict(data)

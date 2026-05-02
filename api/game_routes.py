@@ -27,6 +27,7 @@ from engine.reconciliation import count_state_deltas
 from state.telemetry import (
     emit_choice_made, emit_dice_resolved, emit_state_delta,
     emit_consequence_gap, emit_npc_disposition_shift, emit_thread_event,
+    emit_scene_validation,
 )
 from engine.equipment import (
     COMBAT_SKILLS,
@@ -80,7 +81,6 @@ from gm.cloud_gm import (
     narrate_turn_stream,
     _parse_response,
     CloudGMError,
-    NARRATIVE_BACKEND,
 )
 from gm.context import (
     ArcState,
@@ -105,13 +105,14 @@ from engine.reconciliation import (
     roll_obligation_duty,
     morality_label,
 )
-from gm.local_gm import (
+from gm.fast_gm import (
     CheckDecision,
     SKILL_ALIASES,
     VALID_SKILLS,
     annotate_choice,
     decide_check,
     run_prose_diagnostic,
+    validate_scene_purpose,
 )
 from state.db import get_connection
 from state.memory import compress_if_needed, should_compress, compress_act_turns
@@ -142,6 +143,11 @@ CHOICE_ANNOTATION_ENABLED = os.getenv("CHOICE_ANNOTATION_ENABLED", "false").lowe
 ANNOTATION_JOIN_TIMEOUT_SEC = float(os.getenv("ANNOTATION_JOIN_TIMEOUT_SEC", "0.2"))
 RECONCILIATION_INLINE = os.getenv("RECONCILIATION_INLINE", "false").lower() == "true"
 TAGGED_CHOICE_DECISIONS = os.getenv("TAGGED_CHOICE_DECISIONS", "true").lower() == "true"
+# CS-6 scene purpose validation. One extra fast-tier local-model call
+# per turn after reconciliation. Quality signal only — never blocks
+# delivery. Off by default to keep the hot path lean; opt in for eval
+# runs or when you want the telemetry stream.
+SCENE_VALIDATOR_ENABLED = os.getenv("SCENE_VALIDATOR_ENABLED", "false").lower() == "true"
 
 
 SOCIAL_TAG_SKILLS = {"charm", "coercion", "deception", "leadership", "negotiation"}
@@ -1318,6 +1324,15 @@ def _post_reconciliation_cs6_hook(
     selected = dm.get("selected_mission") if isinstance(dm, dict) else ""
     if selected:
         arc_state["last_dramatic_mission"] = selected
+    # Persist the full dict (selected + sentence) so the next turn's
+    # scene_validator can score against the mission that drove its
+    # narration. Only the selected string is needed for voice-mode
+    # routing, but the validator wants the full sentence too.
+    if isinstance(dm, dict) and dm.get("selected_mission"):
+        arc_state["last_dramatic_mission_full"] = {
+            "selected_mission": dm.get("selected_mission", ""),
+            "mission_sentence": dm.get("mission_sentence", ""),
+        }
 
     # Contradiction arc accumulation (CS-6 Phase 6) + lie_grip update
     from gm.context import accumulate_contradiction_arc
@@ -3035,6 +3050,13 @@ async def handle_turn(
     ships = load_ship_states(session_id)
     primary_ship = ships[0] if ships else None
 
+    # CS-6: snapshot the dramatic mission that drove this turn's narration
+    # before reconciliation overwrites it. Used by the post-reconciliation
+    # scene validator to score this turn against its stated mission.
+    prior_dramatic_mission = dict(
+        arc_state.get("last_dramatic_mission_full") or {}
+    )
+
     # ── Step 1: Resolve the player's choice ───────────────────────────
     last_turn = get_most_recent_turn(session_id)
     previous_choices = json.loads(last_turn["choices_json"])
@@ -3614,6 +3636,31 @@ async def handle_turn(
         emit_thread_event(session_id, turn_number, "progressed", t)
     for t in recon_result.thread_updates.get("threads_resolved", []):
         emit_thread_event(session_id, turn_number, "resolved", t)
+
+    # CS-6: Scene purpose validation (quality signal only, never blocks).
+    # Scores this turn's narration against the mission that drove it.
+    # Off by default; opt in via SCENE_VALIDATOR_ENABLED for eval runs.
+    if SCENE_VALIDATOR_ENABLED and prior_dramatic_mission.get("selected_mission"):
+        validation = validate_scene_purpose(
+            selected_mission=prior_dramatic_mission.get("selected_mission", ""),
+            mission_sentence=prior_dramatic_mission.get("mission_sentence", ""),
+            narration_text=narration_result.passage,
+            choices=narration_result.choices,
+        )
+        emit_scene_validation(
+            session_id, turn_number,
+            {
+                "selected_mission": prior_dramatic_mission.get("selected_mission", ""),
+                "composite": validation.composite,
+                "mission_delivery": validation.mission_delivery,
+                "pressure_progression": validation.pressure_progression,
+                "antagonist_relevance": validation.antagonist_relevance,
+                "character_choices": validation.character_choices,
+                "change": validation.change,
+                "concern": validation.concern,
+                "corrective_instruction": validation.corrective_instruction,
+            },
+        )
 
     # ── Step 9: Check act boundary ───────────────────────────────────
     act_boundary_reached = detect_act_boundary(arc_state)
@@ -4319,7 +4366,7 @@ async def handle_turn_stream(
         try:
             narration_result = _parse_response(
                 full_text,
-                used_local=(NARRATIVE_BACKEND == "local"),
+                used_local=False,
             )
         except CloudGMError as e:
             logging.warning(

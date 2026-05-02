@@ -39,7 +39,7 @@ from engine.force import (
     resolve_force_pips,
 )
 from gm.context import ArcState, ContextPackage
-from gm.local_gm import CheckDecision, _validate_decision
+from gm.fast_gm import CheckDecision, _validate_decision
 
 
 # ── Test fixtures ──────────────────────────────────────────────────────
