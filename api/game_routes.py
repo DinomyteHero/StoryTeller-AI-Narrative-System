@@ -144,6 +144,44 @@ RECONCILIATION_INLINE = os.getenv("RECONCILIATION_INLINE", "false").lower() == "
 TAGGED_CHOICE_DECISIONS = os.getenv("TAGGED_CHOICE_DECISIONS", "true").lower() == "true"
 
 
+# ── Phase 24: pattern-of-use tracking for talent unlocks (Mechanism 3) ──
+# Maps (scene_type, skill) → pattern_id. Each occurrence bumps the counter
+# on character.use_pattern_counts. When the threshold defined in
+# engine.character_creation.PATTERN_THRESHOLDS is hit, the next milestone
+# fires the corresponding talent unlock.
+PATTERN_USE_RULES: dict[tuple[str, str], str] = {
+    ("social", "negotiation"):     "consular_influence_uses",
+    ("social", "charm"):           "consular_influence_uses",
+    ("social", "leadership"):      "consular_influence_uses",
+    ("combat", "lightsaber"):      "guardian_protection_uses",
+    ("combat", "melee"):           "guardian_protection_uses",
+    ("combat", "discipline"):      "guardian_protection_uses",
+    ("infiltration", "perception"): "sentinel_investigation_uses",
+    ("infiltration", "stealth"):    "sentinel_investigation_uses",
+    ("infiltration", "skulduggery"): "sentinel_investigation_uses",
+    ("introspection", "discipline"): "sentinel_investigation_uses",
+}
+
+
+def _track_pattern_use(character, scene_type: str | None, skill: str | None) -> None:
+    """Bump a use-pattern counter when the (scene_type, skill) pair maps
+    to a tracked pattern. No-op when the pair is not on the rule list."""
+    if not scene_type or not skill:
+        return
+    key = (str(scene_type).strip().lower(), str(skill).strip().lower())
+    pattern_id = PATTERN_USE_RULES.get(key)
+    if not pattern_id:
+        return
+    from engine.character_creation import increment_use_pattern, check_pattern_unlocks, grant_pattern_unlock
+    increment_use_pattern(character, pattern_id, 1)
+    # Pattern unlocks are recorded immediately when the threshold is reached
+    # (post-crystallization gate is enforced inside check_pattern_unlocks).
+    for unlock in check_pattern_unlocks(character):
+        grant_pattern_unlock(
+            character, unlock["talent_id"], unlock["description"]
+        )
+
+
 SOCIAL_TAG_SKILLS = {"charm", "coercion", "deception", "leadership", "negotiation"}
 INTRINSIC_VEHICLE_SKILLS = {
     "piloting_space", "piloting_planetary", "gunnery", "astrogation",
@@ -2127,7 +2165,9 @@ def load_campaign_spine(name: str) -> dict:
         filename = filename[4:]
     path = f"data/campaigns/{filename}.json"
     try:
-        with open(path) as f:
+        # Phase 24: explicit utf-8 — campaign JSON contains non-ASCII
+        # (em-dashes, etc.) and the platform default on Windows is cp1252.
+        with open(path, encoding="utf-8") as f:
             spine_data = json.load(f)
     except FileNotFoundError:
         raise HTTPException(404, f"Campaign not found: {name}")
@@ -2147,7 +2187,7 @@ def load_character(character_id: str) -> Character:
     """Read character JSON from data/characters/{id}.json."""
     path = f"data/characters/{character_id}.json"
     try:
-        with open(path) as f:
+        with open(path, encoding="utf-8") as f:
             return Character.model_validate_json(f.read())
     except FileNotFoundError:
         raise HTTPException(404, f"Character not found: {character_id}")
@@ -3650,6 +3690,13 @@ async def handle_turn(
     )
     _finish_active_social_scene(arc_state)
 
+    # Phase 24: track pattern-of-use for talent earned-through-use unlocks
+    _track_pattern_use(
+        character,
+        arc_state.get("scene_state", {}).get("scene_type", check_decision.scene_type),
+        check_decision.skill,
+    )
+
     # ── Step 11: Update session state ─────────────────────────────────
     update_session_state(session_id, character, arc_state)
 
@@ -4467,6 +4514,13 @@ async def handle_turn_stream(
             ),
         )
         _finish_active_social_scene(arc_state)
+
+        # Phase 24: track pattern-of-use for talent earned-through-use unlocks
+        _track_pattern_use(
+            character,
+            arc_state.get("scene_state", {}).get("scene_type", check_decision.scene_type),
+            check_decision.skill,
+        )
 
         # ── Step 11: Update session state ─────────────────────────────
         update_session_state(session_id, character, arc_state)

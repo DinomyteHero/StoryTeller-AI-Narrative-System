@@ -19,6 +19,7 @@ from fastapi.responses import FileResponse
 
 from api.game_routes import router as game_router
 from api.studio_routes import router as studio_router
+from api.character_creation_routes import router as character_creation_router
 from state.db import init_db
 
 WEB_DIR = Path(__file__).resolve().parent.parent / "web"
@@ -52,6 +53,9 @@ app.include_router(game_router)
 
 # Mount studio routes
 app.include_router(studio_router)
+
+# Mount character creation routes (Phase 24)
+app.include_router(character_creation_router)
 
 
 @app.get("/health")

@@ -70,6 +70,8 @@ CHARACTER VOICE:
 
 {background_block}
 
+{identity_state_block}
+
 LOADOUT:
 {equipment_block}
 

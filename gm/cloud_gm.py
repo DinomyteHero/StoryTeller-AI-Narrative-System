@@ -600,6 +600,7 @@ def _build_prompt(ctx: ContextPackage) -> str:
     from gm.context import (
         build_evolved_voice_block as _build_evolved_voice_block,
         build_background_block as _build_background_block,
+        build_identity_state_block as _build_identity_state_block,
     )
 
     prompt_path    = PROMPT_PATH_LITERARY if PROSE_VOICE == "literary" else PROMPT_PATH
@@ -623,11 +624,14 @@ def _build_prompt(ctx: ContextPackage) -> str:
     # Phase 15: Force power capabilities for narration (§16.3)
     force_caps = build_force_capabilities_block(ctx.character)
 
+    spine_data = getattr(ctx, "_spine_for_prompt", None)
+    bg_block = _build_background_block(ctx.character, spine_data)
     return template.format(
         character_summary=ctx.character.narrative_status(),
         character_voice=ctx.character.voice_notes,
         evolved_voice_block=_build_evolved_voice_block(ctx.character),
-        background_block=_build_background_block(ctx.character),
+        background_block=bg_block,
+        identity_state_block=_build_identity_state_block(ctx.character),
         lore_seeds_block=getattr(ctx, "lore_seeds_block", "") or "",
         growth_recognition_block=getattr(ctx, "growth_recognition_block", "") or "",
         tactical_state_block=getattr(ctx, "tactical_state_block", "") or "",
