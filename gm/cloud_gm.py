@@ -588,6 +588,10 @@ class NarrationResult:
     raw_response: str
     used_local:   bool = False
     state_patch:  dict = field(default_factory=dict)
+    # Phase 25 §2.2 — visible mechanical cost metadata, parallel to choices/skill_tags
+    visible_costs: list[list[dict]] = field(default_factory=list)
+    # Phase 25 §2.1 — per-choice codex link entry_id (None if not a codex link)
+    codex_links:  list[str | None] = field(default_factory=list)
 
 
 class CloudGMError(Exception):
@@ -626,6 +630,20 @@ def _build_prompt(ctx: ContextPackage) -> str:
 
     spine_data = getattr(ctx, "_spine_for_prompt", None)
     bg_block = _build_background_block(ctx.character, spine_data)
+
+    # Phase 25 runtime experience blocks — empty by default; populated
+    # in api.game_routes before context is dispatched.
+    available_codex_block        = getattr(ctx, "available_codex_block", "") or ""
+    personality_axes_block       = getattr(ctx, "personality_axes_block", "") or ""
+    personality_locks_block      = getattr(ctx, "personality_locks_block", "") or ""
+    set_piece_block              = getattr(ctx, "set_piece_block", "") or ""
+    stakes_block                 = getattr(ctx, "stakes_block", "") or ""
+    light_foreshadow_block       = getattr(ctx, "light_foreshadow_block", "") or ""
+    goal_priming_block           = getattr(ctx, "goal_priming_block", "") or ""
+    personality_lock_moment_block = getattr(ctx, "personality_lock_moment_block", "") or ""
+    glossary_terms_block         = getattr(ctx, "glossary_terms_block", "") or ""
+
+
     return template.format(
         character_summary=ctx.character.narrative_status(),
         character_voice=ctx.character.voice_notes,
@@ -678,6 +696,16 @@ def _build_prompt(ctx: ContextPackage) -> str:
         behavioral_availability_block=ctx.build_behavioral_availability_block(),
         voice_mode_instruction=ctx.voice_mode_instruction,
         tone_instruction=ctx.tone_instruction,
+        # Phase 25 runtime experience blocks
+        available_codex_block=available_codex_block,
+        personality_axes_block=personality_axes_block,
+        personality_locks_block=personality_locks_block,
+        set_piece_block=set_piece_block,
+        stakes_block=stakes_block,
+        light_foreshadow_block=light_foreshadow_block,
+        goal_priming_block=goal_priming_block,
+        personality_lock_moment_block=personality_lock_moment_block,
+        glossary_terms_block=glossary_terms_block,
     )
 
 
@@ -839,9 +867,11 @@ def _parse_response(raw: str, used_local: bool = False) -> NarrationResult:
             choices_raw = choices_raw.strip()
             break
 
-    # Strip markdown emphasis (*italic* and **bold**) — frontend is plain text
-    passage = re.sub(r"\*{1,2}(.+?)\*{1,2}", r"\1", passage)
-    # Strip stray --- separators from passage edges
+    # Phase 25 §3.4 — preserve light markdown (italic / bold / scene breaks)
+    # so the frontend can render typographic variety. The narration prompt
+    # restricts these to occasional use.
+    # Strip stray --- separators from passage edges only (kept inside the
+    # passage where they signal sub-scene breaks).
     passage = re.sub(r"^-{3,}\s*\n", "", passage)
     passage = re.sub(r"\n\s*-{3,}\s*$", "", passage)
     passage = _strip_wrapped_narration_quotes(passage)
@@ -869,28 +899,51 @@ def _parse_response(raw: str, used_local: bool = False) -> NarrationResult:
         if line:
             raw_choices.append(line)
 
-    if len(raw_choices) < 2:
+    # Phase 25 §2.3 — allow 1-choice "continue" pacing nodes when explicitly
+    # signalled. A 1-choice node is acceptable when the choice text reads as
+    # a pacing/continuation cue (e.g., "Continue", "Press onward", "Hours pass",
+    # "Five minutes later"). Otherwise still require ≥2 choices.
+    pacing_continuation_re = re.compile(
+        r"^(continue|press\s+onward|press\s+on|hours?\s+pass|"
+        r"days?\s+pass|years?\s+pass|five\s+minutes?\s+later|"
+        r"later|onward|the\s+\w+\s+rolls?\s+on)\b",
+        re.IGNORECASE,
+    )
+    if len(raw_choices) == 1:
+        if not pacing_continuation_re.match(raw_choices[0].strip()):
+            raise CloudGMError(
+                f"GM returned 1 choice that is not a pacing continuation. Retrying."
+            )
+    elif len(raw_choices) < 1:
         raise CloudGMError(
-            f"GM returned {len(raw_choices)} choice(s). Minimum 2 required. Retrying."
+            f"GM returned 0 choices. Retrying."
         )
 
-    # Extract and strip skill tags: "[Deception]", "[Force:Move]", or
-    # "[Force:Sense -- why this is risky]". The tag may be embedded inside
-    # a trailing explanatory parenthetical that is also stripped below.
-    skill_tag_pattern = re.compile(r"\[([^\]]+)\]")
-    choices = []
-    skill_tags = []
-    for choice_text in raw_choices[:4]:
-        matches = list(skill_tag_pattern.finditer(choice_text))
-        match = matches[-1] if matches else None
-        tag = None
-        if match:
-            tag = _normalize_choice_tag(match.group(1))
-            choice_text = (
-                choice_text[:match.start()] + choice_text[match.end():]
-            ).strip()
-        choices.append(_clean_choice_text(choice_text))
-        skill_tags.append(tag)
+    # Phase 25 §2.2 — tags now have two display rules:
+    #   * skill tags ([Deception], [Force:Move]) stripped before display
+    #   * visible cost tags ([Strain: 2], [Force commit: 1]) kept inline
+    #   * codex link tags ([codex:entry_id]) stripped + mark sideways navigation
+    # parse_choice_tags handles all three, returning (display, tag_info).
+    from gm.choice_tags import parse_choice_tags
+
+    # Phase 25 §2.3 — accept up to 5 choices instead of 4 to support
+    # variable choice count (1-5) per scene density.
+    choices: list[str] = []
+    skill_tags: list[str | None] = []
+    visible_costs: list[list[dict]] = []
+    codex_links: list[str | None] = []
+    for choice_text in raw_choices[:5]:
+        display, info = parse_choice_tags(choice_text)
+        # Skill tag goes through normalizer for engine matching.
+        normalized_skill = (
+            _normalize_choice_tag(info.skill_tag) if info.skill_tag else None
+        )
+        choices.append(_clean_choice_text(display))
+        skill_tags.append(normalized_skill)
+        visible_costs.append([
+            {"label": c.label, "value": c.value} for c in info.visible_costs
+        ])
+        codex_links.append(info.codex_link)
 
     return NarrationResult(
         passage=passage,
@@ -899,6 +952,8 @@ def _parse_response(raw: str, used_local: bool = False) -> NarrationResult:
         raw_response=raw,
         used_local=used_local,
         state_patch=state_patch,
+        visible_costs=visible_costs,
+        codex_links=codex_links,
     )
 
 
@@ -1142,7 +1197,12 @@ def _normalize_choice_tag(raw_tag: str) -> str | None:
 
 
 def _clean_choice_text(text: str) -> str:
-    """Remove model-side choice annotations that should not face players."""
+    """Remove model-side choice annotations that should not face players.
+
+    Visible cost tags ([Strain: 2], [Force commit: 1]) and any other tag
+    not stripped by parse_choice_tags() are preserved — that function has
+    already classified and re-emitted the keepers.
+    """
     cleaned = re.sub(r"\*{1,2}", "", text).strip()
     cleaned = re.sub(r"\s+\([^)]{18,}\)\s*$", "", cleaned).strip()
     cleaned = re.sub(r"\s+--\s+[^.?!\"]{18,}$", "", cleaned).strip()

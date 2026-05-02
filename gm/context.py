@@ -1710,6 +1710,16 @@ class ContextPackage:
     # Brooks beat-role + protagonist-stance cue derived from the active act's
     # dramatic_function and protagonist_mode. Empty when act has no role data.
     beat_role_block: str = ""
+    # ── Phase 25 runtime experience blocks ─────────────────────────────
+    available_codex_block:    str = ""    # §2.1 codex pages eligible to surface
+    personality_axes_block:   str = ""    # §2.6 dominant axes for voice
+    personality_locks_block:  str = ""    # §2.5 active belief commitments
+    set_piece_block:          str = ""    # §2.8 designated peak moment
+    stakes_block:             str = ""    # §2.10 stakes communication
+    light_foreshadow_block:   str = ""    # §2.9 lightweight plant/payoff
+    goal_priming_block:       str = ""    # §3.2 goal-priming closing line
+    personality_lock_moment_block: str = ""  # §2.5 lock-decision turn
+    glossary_terms_block:     str = ""    # §3.6 terms used in this scene
 
     def build_dice_result_block(self) -> str:
         if self.roll_result is None:

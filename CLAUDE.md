@@ -224,6 +224,20 @@ Campaign Studio (parallel track):
   - Enhanced generation prompts with architectural vocabulary
   - Stage 5 LLM-based narrative quality scoring
 
+Phase 25 (Runtime Experience Redesign) — May 2026: **COMPLETE**
+- Codex layer (12 entries for canonical campaign), glossary (29 terms),
+  10-tab character dashboard, set-piece scene treatments, stakes badges
+- Visible cost tags ([Strain: 2], [Morality: -3], [Force commit: 1])
+  appear inline in choices; skill tags ([Deception]) stay hidden
+- Codex link choices ([codex:entry_id]) render as sideways navigation
+- 5 personality axes (Lone Wolf↔Crew Loyalist, Reckless↔Cautious,
+  Showy↔Quiet, Direct↔Subtle, Lawful↔Lawless) + Light↔Dark from morality
+- 3 personality-lock moments at long_watch / two_brothers / custodians_hand
+- 15 achievements (anchor / relationship / pattern / codex / Force-power)
+- Lightweight foreshadowing plants/payoffs across acts
+- Markdown rendering (italic, bold, scene breaks), chapter/act titles,
+  recap card on session resume, goal-priming at act boundaries
+
 **Next work:** Phase 18 (Psychometric Prologue) or CS-7 (Saga Depth).
 
 ## Codebase Metrics (as of April 8, 2026)

@@ -237,6 +237,178 @@ def _normalise_choice_skill_tag(tag: str) -> str | None:
     return SKILL_ALIASES.get(raw)
 
 
+def _apply_phase25_post_turn(
+    *,
+    character,
+    arc_state: dict,
+    spine: dict,
+    previous_choices: list[str],
+    previous_visible_costs: list,
+    chosen_index: int,
+    player_action: str,
+    turn_number: int,
+) -> None:
+    """Apply Phase 25 runtime experience side effects to character + arc_state.
+
+    Called after reconciliation and before log_turn so the engine state
+    reflects the new turn's actions when persisted.
+    """
+    from gm.runtime_experience import (
+        annotate_axis_movement,
+        evaluate_achievements,
+        mark_light_foreshadow_delivered,
+    )
+
+    # 1) Apply visible cost tags from the previous turn's chosen choice
+    if 0 <= chosen_index < len(previous_visible_costs):
+        for cost in (previous_visible_costs[chosen_index] or []):
+            try:
+                _apply_visible_cost(character, arc_state, cost)
+            except Exception:
+                logging.exception("Failed to apply visible cost tag")
+
+    # 2) Personality axis movements from chosen text
+    if player_action and "[session_start]" not in (player_action or ""):
+        movements = annotate_axis_movement(player_action)
+        for (pair_id, delta, cue) in movements:
+            character.adjust_axis(pair_id, delta, cue)
+
+    # 3) Persist personality lock if this turn was a lock decision
+    lock_moment = arc_state.get("_phase25_lock_moment")
+    anchor_id = arc_state.get("_phase25_anchor_id", "")
+    if lock_moment and 0 <= chosen_index < len(previous_choices):
+        chosen_text = previous_choices[chosen_index].strip()
+        # Match against the BeliefOption.belief_text (may be normalized
+        # by the LLM — match by prefix). Apply the option's axis_effects.
+        for option in (lock_moment.get("belief_options") or []):
+            belief = (option.get("belief_text") or "").strip()
+            if not belief:
+                continue
+            if chosen_text.startswith(belief[:60]) or belief[:60] in chosen_text:
+                character.add_personality_lock(
+                    anchor_id=anchor_id,
+                    belief_text=belief,
+                    voice_tag=option.get("voice_tag", ""),
+                    locked_at_turn=turn_number,
+                )
+                # Apply axis effects defined on the option
+                for (pair_id, delta) in (option.get("axis_effects") or {}).items():
+                    try:
+                        delta_int = int(delta)
+                    except (TypeError, ValueError):
+                        continue
+                    cue = f"locked: {belief[:60]}"
+                    character.adjust_axis(pair_id, delta_int, cue)
+                break
+
+    # 4) Mark light foreshadowing as delivered
+    fs_entry = arc_state.get("_phase25_foreshadow_entry")
+    fs_kind  = arc_state.get("_phase25_foreshadow_kind", "")
+    if fs_entry and fs_kind:
+        mark_light_foreshadow_delivered(arc_state, fs_entry, fs_kind)
+
+    # 5) Award achievements
+    arc_state["_spine_for_eval"] = spine
+    try:
+        newly_earned = evaluate_achievements(spine, character, arc_state)
+        if newly_earned:
+            logging.info(
+                "Phase 25: achievements earned this turn: %s", newly_earned,
+            )
+    finally:
+        arc_state.pop("_spine_for_eval", None)
+
+    # Clear side-channel data that was only relevant to this turn's prompt.
+    # _phase25_stakes_level + _phase25_set_piece are kept until the API
+    # response is built; they're cleared in update_session_state via
+    # _scrub_phase25_side_channel before persistence.
+    for key in (
+        "_phase25_foreshadow_kind",
+        "_phase25_foreshadow_entry",
+        "_phase25_lock_moment",
+        "_phase25_anchor_id",
+    ):
+        arc_state.pop(key, None)
+
+
+def _scrub_phase25_side_channel(arc_state: dict) -> None:
+    """Strip transient phase-25 keys before persisting arc_state."""
+    for key in (
+        "_phase25_set_piece",
+        "_phase25_stakes_level",
+        "_phase25_foreshadow_kind",
+        "_phase25_foreshadow_entry",
+        "_phase25_lock_moment",
+        "_phase25_anchor_id",
+    ):
+        arc_state.pop(key, None)
+
+
+def _apply_visible_cost(character, arc_state: dict, cost: dict) -> None:
+    """Apply one visible cost tag (e.g., {'label':'Strain','value':2}) to state."""
+    label = (cost.get("label") or "").strip().lower().replace(" ", "_")
+    try:
+        value = int(cost.get("value", 0))
+    except (TypeError, ValueError):
+        return
+    if value == 0:
+        return
+    if label in ("strain",):
+        character.current_strain = max(
+            0, min(character.strain_threshold, character.current_strain + value)
+        )
+    elif label in ("wounds",):
+        character.current_wounds = max(
+            0, min(character.wound_threshold, character.current_wounds + value)
+        )
+    elif label in ("morality",):
+        character.motivation.morality = max(
+            0, min(100, int(character.motivation.morality) + value)
+        )
+    elif label in ("conflict",):
+        character.motivation.conflict = max(
+            0, int(character.motivation.conflict) + value
+        )
+    elif label in ("obligation",):
+        character.motivation.obligation_value = max(
+            0, int(character.motivation.obligation_value) + value
+        )
+    elif label in ("duty",):
+        character.motivation.duty_value = max(
+            0, int(character.motivation.duty_value) + value
+        )
+    elif label in ("force_commit",):
+        character.force_committed = max(
+            0,
+            min(character.force_rating, character.force_committed + value),
+        )
+    # Destiny is stored on session, not character — skip here.
+
+
+def _build_choice_meta(narration_result) -> list[dict]:
+    """Build per-choice metadata array (Phase 25 §2.1, §2.2).
+
+    Each entry: {visible_costs: [...], codex_link: str|None, kind: str}.
+    `kind` is "codex" when the choice is a sideways codex link, else "action".
+    """
+    choices = list(getattr(narration_result, "choices", []) or [])
+    visible_costs = list(getattr(narration_result, "visible_costs", []) or [])
+    codex_links = list(getattr(narration_result, "codex_links", []) or [])
+    while len(visible_costs) < len(choices):
+        visible_costs.append([])
+    while len(codex_links) < len(choices):
+        codex_links.append(None)
+    out = []
+    for i in range(len(choices)):
+        link = codex_links[i] if i < len(codex_links) else None
+        out.append({
+            "visible_costs": visible_costs[i] if i < len(visible_costs) else [],
+            "codex_link": link,
+            "kind": "codex" if link else "action",
+        })
+    return out
+
+
 def _scene_type_for_tag(skill: str, ship_state: ShipState | None) -> str:
     if skill in COMBAT_SKILLS:
         return "combat"
@@ -1255,6 +1427,113 @@ def _compute_dynamic_context_fields(
         scene_npc_names=scene_npc_names,
     )
 
+    # ── Phase 25 runtime experience blocks ─────────────────────────────
+    from gm.runtime_experience import (
+        select_available_codex_entries,
+        build_codex_block,
+        build_personality_axis_block,
+        build_personality_locks_block,
+        lookup_set_piece,
+        build_set_piece_block,
+        compute_stakes_level,
+        build_stakes_block,
+        select_foreshadowing,
+        build_light_foreshadow_block,
+        find_personality_lock_for_anchor,
+        build_personality_lock_block,
+        should_emit_goal_priming,
+        build_goal_priming_block,
+    )
+
+    current_act_progress = float(arc_state.get("act_progress", 0.0) or 0.0)
+    act_number = int(arc_state.get("current_act", 1) or 1)
+    present_npc_names = [getattr(n, "name", "") for n in npc_states]
+    location = (scene_state.get("current_location") or "")
+    flags = list(arc_state.get("spine_flags", []) or [])
+    current_anchor_id = (
+        current_act.get("anchor", "") or current_act.get("next_anchor", "")
+    )
+
+    available_codex = select_available_codex_entries(
+        spine,
+        current_act=act_number,
+        present_npcs=present_npc_names,
+        location=location,
+        flags=flags,
+    )
+
+    set_piece = lookup_set_piece(spine, current_anchor_id)
+
+    # Personality lock moment — only fires once per anchor for the protagonist.
+    lock_moment = find_personality_lock_for_anchor(spine, current_anchor_id)
+    if lock_moment and character.has_personality_lock_for(current_anchor_id):
+        lock_moment = None  # already chosen
+
+    # Stakes
+    relationship_at_threshold = False
+    for state in npc_states:
+        disp = float(getattr(state, "disposition", 0.5) or 0.5)
+        if disp <= 0.15 or disp >= 0.85:
+            relationship_at_threshold = True
+            break
+
+    stakes_level = compute_stakes_level(
+        is_set_piece=set_piece is not None,
+        is_personality_lock=lock_moment is not None,
+        relationship_at_threshold=relationship_at_threshold,
+        achievement_imminent=False,  # populated by achievement engine if needed
+        death_or_irreversible_risk=(
+            character.is_incapacitated()
+            or current_act_progress >= 0.95
+        ),
+        is_climax=(act_number == int(spine.get("total_acts", 1)) and current_act_progress >= 0.85),
+    )
+
+    # Lightweight foreshadowing
+    fs_entry, fs_kind = select_foreshadowing(
+        spine, arc_state, current_act=act_number,
+    )
+
+    # Goal priming
+    is_act_close = current_act_progress >= 0.85
+    is_lock_close = lock_moment is not None
+    goal_priming = should_emit_goal_priming(
+        is_act_close=is_act_close,
+        is_personality_lock_close=is_lock_close,
+        is_prologue_close=(act_number == 1 and current_act_progress >= 0.95),
+    )
+    goal_reason = (
+        "act close" if is_act_close
+        else "lock decision" if is_lock_close
+        else "prologue close"
+    )
+
+    # Glossary terms relevant to the scene — surface terms whose definitions
+    # match present NPCs or locations (lightweight heuristic).
+    glossary_relevant = []
+    for term_def in spine.get("glossary") or []:
+        term = (term_def.get("term") or "").lower()
+        if term and (
+            term in (location.lower() if location else "")
+            or any(term in npc.lower() for npc in present_npc_names)
+        ):
+            glossary_relevant.append(term_def)
+
+    glossary_terms_block = ""
+    if glossary_relevant:
+        lines = ["GLOSSARY TERMS USED IN SCENE (Phase 25 §3.6):"]
+        for term_def in glossary_relevant:
+            lines.append(f"  - {term_def.get('term', '')}: {term_def.get('short_definition', '')}")
+        glossary_terms_block = "\n".join(lines)
+
+    # Stash phase-25 side data on arc_state for post-narration hooks
+    arc_state["_phase25_set_piece"] = set_piece
+    arc_state["_phase25_stakes_level"] = stakes_level
+    arc_state["_phase25_foreshadow_kind"] = fs_kind
+    arc_state["_phase25_foreshadow_entry"] = fs_entry
+    arc_state["_phase25_lock_moment"] = lock_moment
+    arc_state["_phase25_anchor_id"] = current_anchor_id
+
     return {
         "reputation_entries": select_reputation_echoes(
             session_id=session_id,
@@ -1286,6 +1565,18 @@ def _compute_dynamic_context_fields(
         "faction_reactivity_block":      _build_faction_reactivity_block(arc_state, spine),
         "side_content_block":            _build_side_content_block(spine, current_act, arc_state),
         "pivot_warning_block":           _build_pivot_warning_block(spine, current_act, arc_state),
+        # ── Phase 25 runtime experience blocks ──
+        "available_codex_block":   build_codex_block(available_codex),
+        "personality_axes_block":  build_personality_axis_block(character),
+        "personality_locks_block": build_personality_locks_block(character),
+        "set_piece_block":         build_set_piece_block(set_piece),
+        "stakes_block":            build_stakes_block(stakes_level),
+        "light_foreshadow_block":  build_light_foreshadow_block(fs_entry, fs_kind),
+        "goal_priming_block":      (
+            build_goal_priming_block(goal_reason) if goal_priming else ""
+        ),
+        "personality_lock_moment_block": build_personality_lock_block(lock_moment),
+        "glossary_terms_block":    glossary_terms_block,
     }
 
 
@@ -2183,12 +2474,38 @@ def load_campaign_spine(name: str) -> dict:
     return spine_data
 
 
+def _hydrate_runtime_experience_fields(character: Character) -> Character:
+    """Phase 25 — ensure new experience fields are populated.
+
+    Older character JSON files predate the personality_axes / personality_locks
+    fields. When loading, we initialize the default opposed-pair set if absent
+    so the dashboard has data to render.
+    """
+    if not character.personality_axes:
+        from engine.character import default_personality_axes
+        character.personality_axes = default_personality_axes()
+    return character
+
+
+def load_character_from_session(character_json: str) -> Character:
+    """Phase 25 — load a Character from session JSON and hydrate runtime fields.
+
+    All session-load paths should use this helper so older sessions
+    automatically pick up personality axes / locks / codex fields.
+    """
+    return _hydrate_runtime_experience_fields(
+        Character.model_validate_json(character_json)
+    )
+
+
 def load_character(character_id: str) -> Character:
     """Read character JSON from data/characters/{id}.json."""
     path = f"data/characters/{character_id}.json"
     try:
         with open(path, encoding="utf-8") as f:
-            return Character.model_validate_json(f.read())
+            return _hydrate_runtime_experience_fields(
+                Character.model_validate_json(f.read())
+            )
     except FileNotFoundError:
         raise HTTPException(404, f"Character not found: {character_id}")
 
@@ -2208,7 +2525,7 @@ def load_character_from_variant(spine_data: dict, variant_id: str) -> Character:
     spine = CampaignSpine(**spine_data)
     char_dict = build_default_character(spine, variant_id)
     char_dict["name"] = variant_id.replace("_", " ").title()
-    return Character.model_validate(char_dict)
+    return _hydrate_runtime_experience_fields(Character.model_validate(char_dict))
 
 
 def get_most_recent_turn(session_id: str) -> dict:
@@ -2349,11 +2666,15 @@ def update_session_state(
 ) -> None:
     """Write updated character JSON and arc state back to sessions table."""
     now = datetime.now(timezone.utc).isoformat()
+    # Phase 25 — strip transient side-channel keys before persistence so
+    # they don't pollute the saved arc_state.
+    persist_state = dict(arc_state)
+    _scrub_phase25_side_channel(persist_state)
     with get_connection() as conn:
         conn.execute(
             "UPDATE sessions SET character_json = ?, arc_state_json = ?, "
             "updated_at = ? WHERE id = ?",
-            (character.model_dump_json(), json.dumps(arc_state), now, session_id),
+            (character.model_dump_json(), json.dumps(persist_state), now, session_id),
         )
         conn.commit()
 
@@ -2704,6 +3025,19 @@ def _append_social_offers_to_narration(
 
     while len(skill_tags) < len(choices):
         skill_tags.append(None)
+    # Phase 25 §2.2 — keep visible_costs and codex_links aligned with choices
+    visible_costs = getattr(narration_result, "visible_costs", None)
+    if not isinstance(visible_costs, list):
+        visible_costs = []
+        narration_result.visible_costs = visible_costs
+    while len(visible_costs) < len(choices):
+        visible_costs.append([])
+    codex_links = getattr(narration_result, "codex_links", None)
+    if not isinstance(codex_links, list):
+        codex_links = []
+        narration_result.codex_links = codex_links
+    while len(codex_links) < len(choices):
+        codex_links.append(None)
 
     offers = _select_social_offers(
         spine, arc_state, existing_choice_count=len(choices)
@@ -2721,6 +3055,8 @@ def _append_social_offers_to_narration(
         offer["act"] = act_number
         choices.append(offer["choice_text"])
         skill_tags.append(None)
+        visible_costs.append([])
+        codex_links.append(None)
         pending.append(dict(offer))
         _mark_social_offer_displayed(runtime, offer, act_number)
 
@@ -2996,6 +3332,8 @@ async def create_session_route(
         choices=narration_result.choices,
         scene_type=arc_state.get("scene_state", {}).get("scene_type", "exploration"),
         skill_tags_json=json.dumps(narration_result.skill_tags),
+        visible_costs_json=json.dumps(getattr(narration_result, "visible_costs", []) or []),
+        codex_links_json=json.dumps(getattr(narration_result, "codex_links", []) or []),
         context_json=_context_audit_json(ctx),
     )
 
@@ -3037,6 +3375,7 @@ async def create_session_route(
         "session_intro": session_intro,
         "opening_narration": narration_result.passage,
         "choices": narration_result.choices,
+        "choices_meta": _build_choice_meta(narration_result),
         "streaming_enabled": STREAMING_ENABLED,
     }
 
@@ -3667,6 +4006,25 @@ async def handle_turn(
     else:
         _append_social_offers_to_narration(narration_result, spine, arc_state)
 
+    # ── Phase 25 post-narration hook ─────────────────────────────────
+    # 1) Apply visible cost tags from the chosen choice
+    # 2) Annotate personality axes from the chosen text
+    # 3) Persist personality lock if this turn was a lock decision
+    # 4) Mark light foreshadowing as delivered
+    # 5) Award achievements if any condition is met
+    _apply_phase25_post_turn(
+        character=character,
+        arc_state=arc_state,
+        spine=spine,
+        previous_choices=previous_choices,
+        previous_visible_costs=json.loads(
+            last_turn.get("visible_costs_json") or "[]"
+        ) if last_turn.get("visible_costs_json") else [],
+        chosen_index=req.choice_index,
+        player_action=player_action,
+        turn_number=turn_number,
+    )
+
     # ── Step 10: Persist ─────────────────────────────────────────────
     log_turn(
         session_id=session_id,
@@ -3683,6 +4041,8 @@ async def handle_turn(
         scene_type=arc_state.get("scene_state", {}).get("scene_type", check_decision.scene_type),
         moral_weight=check_decision.moral_weight,
         skill_tags_json=json.dumps(narration_result.skill_tags),
+        visible_costs_json=json.dumps(getattr(narration_result, "visible_costs", []) or []),
+        codex_links_json=json.dumps(getattr(narration_result, "codex_links", []) or []),
         choice_implications=choice_implications_json,
         force_result_json=(
             json.dumps(asdict(force_result)) if force_result else None
@@ -3750,9 +4110,11 @@ async def handle_turn(
             update_session_state(session_id, character, arc_state)
 
     # ── Return ────────────────────────────────────────────────────────
+    from gm.runtime_experience import get_scene_treatment
     response = {
         "narration": narration_result.passage,
         "choices": narration_result.choices,
+        "choices_meta": _build_choice_meta(narration_result),
         "dice_result": describe_pool_for_display(dice_pool) if dice_pool else None,
         "roll_summary": roll_result.narrative_label() if roll_result else None,
         "session_state": {
@@ -3765,6 +4127,18 @@ async def handle_turn(
         },
         "used_local_narration": narration_result.used_local,
         "act_boundary": act_boundary_reached,
+        "scene_treatment": get_scene_treatment(
+            spine,
+            current_act.get("anchor", "") or current_act.get("next_anchor", ""),
+            arc_state.get("_phase25_stakes_level") or "normal",
+        ),
+        "chapter_title": {
+            "act_number": arc_state.get("current_act", 1),
+            "title": (
+                current_act.get("title_visible", "")
+                or current_act.get("name", "")
+            ),
+        },
         "destiny": {
             "light_spent": bool(destiny_result and destiny_result.light_spent),
             "dark_spent":  bool(destiny_result and destiny_result.dark_spent),
@@ -3799,7 +4173,7 @@ async def get_session_route(session_id: str):
         raise HTTPException(404, "Session not found")
 
     arc_state = json.loads(session["arc_state_json"])
-    character = Character.model_validate_json(session["character_json"])
+    character = load_character_from_session(session["character_json"])
     recent_turns = get_recent_turns(session_id, limit=5)
     turn_count = get_turn_count(session_id)
 
@@ -3808,20 +4182,50 @@ async def get_session_route(session_id: str):
     if turn_count > 0:
         with get_connection() as conn:
             row = conn.execute(
-                "SELECT narration, choices_json, check_skill, roll_result_json "
+                "SELECT narration, choices_json, check_skill, roll_result_json, "
+                "skill_tags_json, visible_costs_json, codex_links_json "
                 "FROM turns WHERE session_id = ? ORDER BY turn_number DESC LIMIT 1",
                 (session_id,),
             ).fetchone()
             if row:
+                # Reconstruct choice meta from persisted columns
+                choices_meta = []
+                visible_costs_list = (
+                    json.loads(row["visible_costs_json"])
+                    if row["visible_costs_json"] else []
+                )
+                codex_links_list = (
+                    json.loads(row["codex_links_json"])
+                    if row["codex_links_json"] else []
+                )
+                choices_list = json.loads(row["choices_json"])
+                for i in range(len(choices_list)):
+                    link = (
+                        codex_links_list[i]
+                        if i < len(codex_links_list) else None
+                    )
+                    choices_meta.append({
+                        "visible_costs": (
+                            visible_costs_list[i]
+                            if i < len(visible_costs_list) else []
+                        ),
+                        "codex_link": link,
+                        "kind": "codex" if link else "action",
+                    })
                 last_turn = {
                     "narration": row["narration"],
-                    "choices": json.loads(row["choices_json"]),
+                    "choices": choices_list,
+                    "choices_meta": choices_meta,
                     "check_skill": row["check_skill"],
                     "roll_result": (
                         json.loads(row["roll_result_json"])
                         if row["roll_result_json"] else None
                     ),
                 }
+
+    # Phase 25 §3.7 — recap card if turns_count > 0
+    from gm.runtime_experience import build_recap
+    recap = build_recap(arc_state, recent_turns, last_turn) if last_turn else None
 
     return {
         "session_id": session_id,
@@ -3850,6 +4254,262 @@ async def get_session_route(session_id: str):
             for t in recent_turns
         ],
         "last_turn": last_turn,
+        "recap": recap,
+    }
+
+
+@router.get("/session/{session_id}/dashboard")
+async def get_dashboard_route(session_id: str):
+    """Phase 25 §3.5 dashboard — character portrait + state visibility.
+
+    Returns 10 sections covering: hero identity, personality axes,
+    skills, talents/Force powers, personality locks, equipment,
+    relationships (with pre-allocated slots), codex (read entries by
+    tag), achievements (earned + in-progress), and recent history.
+    """
+    session = get_session(session_id)
+    if session is None:
+        raise HTTPException(404, "Session not found")
+    arc_state = json.loads(session["arc_state_json"])
+    character = load_character_from_session(session["character_json"])
+    spine = load_campaign_spine(session["campaign_name"])
+
+    # ── Hero ─────────────────────────────────────────────────────────
+    hero = {
+        "name": character.name,
+        "species": character.species.value,
+        "career": character.career.value,
+        "specializations": list(character.specializations),
+        "wounds": {
+            "current": character.current_wounds,
+            "threshold": character.wound_threshold,
+        },
+        "strain": {
+            "current": character.current_strain,
+            "threshold": character.strain_threshold,
+        },
+        "soak": character.effective_soak(),
+        "voice_notes": character.voice_notes,
+        "background": character.background,
+    }
+
+    # ── Personality (opposed pair axes + morality) ───────────────────
+    personality_axes = []
+    for axis in character.personality_axes:
+        personality_axes.append({
+            "pair_id": axis.pair_id,
+            "pole_a_label": axis.pole_a_label,
+            "pole_b_label": axis.pole_b_label,
+            "pole_a_value": axis.pole_a_value,
+            "pole_b_value": 100 - axis.pole_a_value,
+            "dominant": axis.dominant_pole(),
+            "last_cue": axis.last_cue,
+        })
+    personality = {
+        "axes": personality_axes,
+        "morality": {
+            "value": character.motivation.morality,
+            "label": (
+                "Light" if character.motivation.morality >= 70
+                else "Dark" if character.motivation.morality <= 30
+                else "Balanced"
+            ),
+        },
+        "conflict": character.motivation.conflict,
+    }
+
+    # ── Skills (all ranks) ────────────────────────────────────────────
+    skills = {
+        name: getattr(character.skills, name)
+        for name in character.skills.model_fields
+    }
+
+    # ── Talents & Force powers ────────────────────────────────────────
+    talents_force = {
+        "acquired_talents": list(character.acquired_talents),
+        "force_rating": character.force_rating,
+        "force_committed": character.force_committed,
+        "force_powers": list(character.force_powers),
+        "active_commitments": list(character.active_commitments),
+    }
+
+    # ── Personality locks (active beliefs) ────────────────────────────
+    personality_locks = [
+        {
+            "anchor_id": lock.anchor_id,
+            "belief_text": lock.belief_text,
+            "voice_tag": lock.voice_tag,
+            "locked_at_turn": lock.locked_at_turn,
+        }
+        for lock in character.personality_locks
+    ]
+
+    # ── Equipment ─────────────────────────────────────────────────────
+    equipment = json.loads(character.loadout.model_dump_json())
+
+    # ── Relationships (pre-allocated slots) ───────────────────────────
+    expected_count = int(spine.get("expected_relationship_count", 5) or 5)
+    relationship_slots = []
+    npc_states = arc_state.get("npc_states") or []
+    by_name = {s.get("name", ""): s for s in npc_states if isinstance(s, dict)}
+    revealed_npcs = sorted(
+        by_name.values(),
+        key=lambda s: int(s.get("first_seen_turn", 9999)),
+    )
+    for i in range(expected_count):
+        if i < len(revealed_npcs):
+            npc = revealed_npcs[i]
+            relationship_slots.append({
+                "slot_index": i,
+                "name": npc.get("name", ""),
+                "disposition": npc.get("disposition", 0.5),
+                "discovered": True,
+                "memory_summary": npc.get("sharpest_memory", ""),
+            })
+        else:
+            relationship_slots.append({
+                "slot_index": i,
+                "name": "Unknown",
+                "disposition": 0.5,
+                "discovered": False,
+                "memory_summary": "",
+            })
+
+    # ── Codex (read entries grouped by tag) ───────────────────────────
+    codex_entries = spine.get("codex") or []
+    codex_by_tag: dict[str, list[dict]] = {}
+    for entry in codex_entries:
+        tag = entry.get("tag", "(General)")
+        codex_by_tag.setdefault(tag, []).append({
+            "entry_id": entry.get("entry_id", ""),
+            "title": entry.get("title", ""),
+            "tag": tag,
+            "read": entry.get("entry_id", "") in character.codex_read,
+        })
+
+    # ── Achievements (earned + in-progress) ───────────────────────────
+    achievements_data = spine.get("achievements") or []
+    earned: list[dict] = []
+    in_progress: list[dict] = []
+    for ach in achievements_data:
+        ach_id = ach.get("achievement_id", "")
+        visibility = ach.get("visibility", "progress_visible")
+        if ach_id in character.achievements_earned:
+            earned.append({
+                "achievement_id": ach_id,
+                "title": ach.get("title", ""),
+                "description": ach.get("description", ""),
+            })
+        else:
+            if visibility == "hidden_until_earned":
+                # only show a placeholder
+                in_progress.append({
+                    "achievement_id": ach_id,
+                    "title": "???",
+                    "description": "",
+                    "hidden": True,
+                    "progress": 0,
+                })
+            else:
+                in_progress.append({
+                    "achievement_id": ach_id,
+                    "title": ach.get("title", ""),
+                    "description": (
+                        ach.get("description", "")
+                        if visibility == "always_visible"
+                        else ""
+                    ),
+                    "hidden": False,
+                    "progress": int(
+                        character.achievement_progress.get(ach_id, 0)
+                    ),
+                })
+
+    # ── Recent history (compressed act summaries + last 3 turns) ─────
+    recent_turns = get_recent_turns(session_id, limit=3)
+    recent_history = []
+    for t in recent_turns:
+        recent_history.append({
+            "turn_number": t.turn_number,
+            "player_action": t.player_action,
+            "narration_excerpt": t.narration_excerpt[:280],
+            "check_made": t.check_made,
+            "dice_result": t.dice_result,
+        })
+
+    # ── Glossary ──────────────────────────────────────────────────────
+    glossary = spine.get("glossary") or []
+
+    # ── Chapter / scene title ─────────────────────────────────────────
+    current_act_data = (
+        spine["acts"][arc_state.get("current_act", 1) - 1]
+        if spine.get("acts") else {}
+    )
+    chapter = {
+        "act_number": arc_state.get("current_act", 1),
+        "title": (
+            current_act_data.get("title_visible", "")
+            or current_act_data.get("name", "")
+        ),
+        "tension": current_act_data.get("tension", ""),
+    }
+
+    return {
+        "session_id": session_id,
+        "campaign_name": session["campaign_name"],
+        "hero": hero,
+        "personality": personality,
+        "skills": skills,
+        "talents_force": talents_force,
+        "personality_locks": personality_locks,
+        "equipment": equipment,
+        "relationships": {
+            "expected_count": expected_count,
+            "slots": relationship_slots,
+        },
+        "codex": {
+            "by_tag": codex_by_tag,
+            "read_count": len(character.codex_read),
+            "total_count": len(codex_entries),
+        },
+        "achievements": {
+            "earned": earned,
+            "in_progress": in_progress,
+        },
+        "recent_history": recent_history,
+        "glossary": glossary,
+        "chapter": chapter,
+    }
+
+
+@router.get("/session/{session_id}/codex/{entry_id}")
+async def get_codex_entry_route(session_id: str, entry_id: str):
+    """Phase 25 §2.1 — fetch a codex entry's full body.
+
+    Marks the entry as read in the character.codex_read list (idempotent).
+    """
+    session = get_session(session_id)
+    if session is None:
+        raise HTTPException(404, "Session not found")
+    spine = load_campaign_spine(session["campaign_name"])
+    entry = next(
+        (e for e in (spine.get("codex") or []) if e.get("entry_id") == entry_id),
+        None,
+    )
+    if entry is None:
+        raise HTTPException(404, f"Codex entry '{entry_id}' not found")
+
+    character = load_character_from_session(session["character_json"])
+    if entry_id not in character.codex_read:
+        character.codex_read.append(entry_id)
+        arc_state = json.loads(session["arc_state_json"])
+        update_session_state(session_id, character, arc_state)
+
+    return {
+        "entry_id": entry.get("entry_id", ""),
+        "title": entry.get("title", ""),
+        "tag": entry.get("tag", ""),
+        "body": entry.get("body", ""),
     }
 
 
@@ -4488,6 +5148,20 @@ async def handle_turn_stream(
         else:
             _append_social_offers_to_narration(narration_result, spine, arc_state)
 
+        # ── Phase 25 post-narration hook ─────────────────────────────
+        _apply_phase25_post_turn(
+            character=character,
+            arc_state=arc_state,
+            spine=spine,
+            previous_choices=previous_choices,
+            previous_visible_costs=json.loads(
+                last_turn.get("visible_costs_json") or "[]"
+            ) if last_turn.get("visible_costs_json") else [],
+            chosen_index=req.choice_index,
+            player_action=player_action,
+            turn_number=turn_number,
+        )
+
         # ── Step 10: Persist ──────────────────────────────────────────
         log_turn(
             session_id=session_id,
@@ -4508,6 +5182,8 @@ async def handle_turn_stream(
             scene_type=arc_state.get("scene_state", {}).get("scene_type", check_decision.scene_type),
             moral_weight=check_decision.moral_weight,
             skill_tags_json=json.dumps(narration_result.skill_tags),
+            visible_costs_json=json.dumps(getattr(narration_result, "visible_costs", []) or []),
+            codex_links_json=json.dumps(getattr(narration_result, "codex_links", []) or []),
             choice_implications=choice_implications_json_s,
             force_result_json=(
                 json.dumps(asdict(force_result)) if force_result else None
@@ -4579,9 +5255,11 @@ async def handle_turn_stream(
                 logging.error(f"Between-act pipeline failed: {e}")
 
         # ── Final event with turn data ────────────────────────────────
+        from gm.runtime_experience import get_scene_treatment as _get_st
         payload = {
             "narration": narration_result.passage,
             "choices": narration_result.choices,
+            "choices_meta": _build_choice_meta(narration_result),
             "dice_result": (describe_pool_for_display(dice_pool)
                             if dice_pool else None),
             "roll_summary": (roll_result.narrative_label()
@@ -4593,6 +5271,18 @@ async def handle_turn_stream(
                 "act_progress": arc_state.get("act_progress", 0.0),
                 "anchor_proximity": arc_state.get("anchor_proximity", "distant"),
                 "scene_state": arc_state.get("scene_state", {}),
+            },
+            "scene_treatment": _get_st(
+                spine,
+                current_act.get("anchor", "") or current_act.get("next_anchor", ""),
+                arc_state.get("_phase25_stakes_level") or "normal",
+            ),
+            "chapter_title": {
+                "act_number": arc_state.get("current_act", 1),
+                "title": (
+                    current_act.get("title_visible", "")
+                    or current_act.get("name", "")
+                ),
             },
             "used_local_narration": narration_result.used_local,
             "act_boundary": act_boundary_reached,
@@ -4919,6 +5609,8 @@ async def handle_temptation(
         scene_type=arc_state.get("scene_state", {}).get("scene_type", scene_type_t),
         moral_weight=pending.get("moral_weight", 0),
         skill_tags_json=json.dumps(narration_result.skill_tags),
+        visible_costs_json=json.dumps(getattr(narration_result, "visible_costs", []) or []),
+        codex_links_json=json.dumps(getattr(narration_result, "codex_links", []) or []),
         force_result_json=json.dumps(asdict(force_result)),
     )
 
@@ -4968,6 +5660,7 @@ async def handle_temptation(
     response = {
         "narration": narration_result.passage,
         "choices": narration_result.choices,
+        "choices_meta": _build_choice_meta(narration_result),
         "dice_result": describe_pool_for_display(dice_pool),
         "roll_summary": roll_result.narrative_label() if not is_pure_force else None,
         "temptation_accepted": req.accept,
@@ -5274,6 +5967,8 @@ async def handle_intervention(
         scene_type=arc_state.get("scene_state", {}).get("scene_type", scene_type_iv),
         moral_weight=pending["moral_weight"],
         skill_tags_json=json.dumps(narration_result.skill_tags),
+        visible_costs_json=json.dumps(getattr(narration_result, "visible_costs", []) or []),
+        codex_links_json=json.dumps(getattr(narration_result, "codex_links", []) or []),
     )
 
     update_session_state(session_id, character, arc_state)
@@ -5321,6 +6016,7 @@ async def handle_intervention(
     response = {
         "narration": narration_result.passage,
         "choices": narration_result.choices,
+        "choices_meta": _build_choice_meta(narration_result),
         "dice_result": describe_pool_for_display(dice_pool),
         "roll_summary": roll_result.narrative_label(),
         "intervention_used": req.accept,
