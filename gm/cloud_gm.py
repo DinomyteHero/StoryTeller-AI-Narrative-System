@@ -52,7 +52,6 @@ def _make_completion_kwargs(
     model: str,
     messages: list,
     *,
-    is_local: bool,
     timeout: Optional[float] = None,
     max_tokens: Optional[int] = None,
     stream: bool = False,
@@ -63,7 +62,7 @@ def _make_completion_kwargs(
     naming, and OpenRouter provider preferences live in exactly one place.
     """
     if timeout is None:
-        timeout = 180.0 if is_local else 60.0
+        timeout = 60.0
     kwargs = _prepare_kwargs(
         model=model,
         messages=messages,
@@ -579,8 +578,7 @@ class NarrationResult:
     passage:      str
     choices:      list[str]          # player-facing text (skill tags stripped)
     skill_tags:   list[str | None]   # per-choice skill tag or None if no check
-    raw_response: str
-    used_local:   bool = False
+    raw_response: str = ""
     state_patch:  dict = field(default_factory=dict)
 
 
@@ -769,7 +767,7 @@ def _strip_wrapped_narration_quotes(passage: str) -> str:
     return "\n\n".join(cleaned)
 
 
-def _parse_response(raw: str, used_local: bool = False) -> NarrationResult:
+def _parse_response(raw: str) -> NarrationResult:
     """
     Split GM response into passage and choices.
     Enforces: delimiter present, configured word count bounds, 2-4 choices.
@@ -887,7 +885,6 @@ def _parse_response(raw: str, used_local: bool = False) -> NarrationResult:
         choices=choices,
         skill_tags=skill_tags,
         raw_response=raw,
-        used_local=used_local,
         state_patch=state_patch,
     )
 
@@ -904,21 +901,20 @@ def narrate_turn(
     if max_retries is None:
         max_retries = NARRATION_PARSE_RETRIES
 
-    return _narrate_with_backend(ctx, max_retries, used_local=False)
+    return _narrate_with_backend(ctx, max_retries)
 
 
 def _narrate_with_backend(
-    ctx: ContextPackage, max_retries: int, used_local: bool,
+    ctx: ContextPackage, max_retries: int,
 ) -> NarrationResult:
-    """Core narration logic — extracted for fallback reuse.
+    """Core narration logic.
 
     Includes post-parse choice quality validation (spec §5.2).
-    Quality validation is skipped for local backend (spec §10).
     """
     from gm.choice_validator import validate_choice_quality, build_quality_correction
 
     client, model = _make_client()
-    fallback_models = [] if used_local else [
+    fallback_models = [
         candidate
         for candidate in _narration_model_candidates(model)
         if candidate != model
@@ -946,7 +942,6 @@ def _narrate_with_backend(
             kwargs = _make_completion_kwargs(
                 candidate_model,
                 messages,
-                is_local=used_local,
                 timeout=NARRATION_TIMEOUT_SEC,
                 max_tokens=NARRATION_MAX_TOKENS,
             )
@@ -982,7 +977,7 @@ def _narrate_with_backend(
         )
 
         try:
-            result = _parse_response(raw, used_local=used_local)
+            result = _parse_response(raw)
         except CloudGMError as e:
             last_error = str(e)
             logging.warning(
@@ -1100,7 +1095,6 @@ def narrate_turn_stream(ctx: ContextPackage) -> Iterator[str]:
     kwargs = _make_completion_kwargs(
         model,
         [{"role": "user", "content": prompt}],
-        is_local=False,
         timeout=NARRATION_TIMEOUT_SEC,
         max_tokens=NARRATION_MAX_TOKENS,
         stream=True,
@@ -1161,7 +1155,6 @@ def generate_milestone_reflection(
     kwargs = _make_completion_kwargs(
         model,
         [{"role": "user", "content": msg_content}],
-        is_local=False,
     )
     response = client.chat.completions.create(**kwargs)
     raw = response.choices[0].message.content or ""
@@ -1228,7 +1221,6 @@ def _parse_milestone_response(raw: str, expected_choices: list) -> NarrationResu
         passage=passage,
         choices=parsed_choices,
         skill_tags=milestone_tags,  # repurpose skill_tags for milestone refs
-        used_local=False,
     )
 
 
@@ -1282,7 +1274,6 @@ def generate_force_power_milestone_reflection(
     kwargs = _make_completion_kwargs(
         model,
         [{"role": "user", "content": msg_content}],
-        is_local=False,
     )
     response = client.chat.completions.create(**kwargs)
     raw = response.choices[0].message.content or ""
@@ -1350,7 +1341,6 @@ def _parse_force_power_milestone_response(
         passage=passage,
         choices=parsed_choices,
         skill_tags=force_tags,  # repurpose for "power_id:upgrade_id" compound keys
-        used_local=False,
     )
 
 
@@ -1388,7 +1378,6 @@ def generate_time_skip_opening(
     kwargs = _make_completion_kwargs(
         model,
         [{"role": "user", "content": msg_content}],
-        is_local=False,
     )
     response = client.chat.completions.create(**kwargs)
     raw = response.choices[0].message.content or ""
@@ -1426,7 +1415,6 @@ def generate_time_skip_closing(
     kwargs = _make_completion_kwargs(
         model,
         [{"role": "user", "content": msg_content}],
-        is_local=False,
     )
     response = client.chat.completions.create(**kwargs)
     raw = response.choices[0].message.content or ""

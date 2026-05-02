@@ -68,21 +68,6 @@ header {
   font-family: monospace;
 }
 
-/* ── Local narration warning ───────────────────────────────────── */
-.local-warning {
-  display: none;
-  background: #2a2010;
-  border: 1px solid var(--accent-dim);
-  color: var(--accent);
-  padding: 0.5rem 0.75rem;
-  border-radius: 4px;
-  font-size: 0.85rem;
-  margin-bottom: 1rem;
-  font-family: sans-serif;
-}
-
-.local-warning.visible { display: block; }
-
 /* ── Prose passage ─────────────────────────────────────────────── */
 .passage {
   background: var(--surface);
@@ -411,10 +396,6 @@ header {
       <span class="session-info" id="session-info"></span>
     </header>
 
-    <div class="local-warning" id="local-warning">
-      Local narration — loop test only
-    </div>
-
     <div class="error-msg" id="error-msg"></div>
 
     <div class="passage" id="passage"></div>
@@ -632,14 +613,6 @@ async function takeTurn(choiceIndex, freeFormText) {
       renderDicePanel(data.dice_result, data.roll_summary, data.destiny);
     }
 
-    // Local narration warning
-    const warn = document.getElementById('local-warning');
-    if (data.used_local_narration) {
-      warn.classList.add('visible');
-    } else {
-      warn.classList.remove('visible');
-    }
-
     // Status bar
     if (data.session_state) {
       showStatus(
@@ -728,10 +701,6 @@ async function takeTurnStream(choiceIndex, freeFormText) {
           if (data.dice_result) {
             renderDicePanel(data.dice_result, data.roll_summary, data.destiny);
           }
-
-          const warn = document.getElementById('local-warning');
-          if (data.used_local_narration) warn.classList.add('visible');
-          else warn.classList.remove('visible');
 
           if (data.session_state) {
             showStatus(

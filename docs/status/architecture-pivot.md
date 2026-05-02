@@ -341,12 +341,13 @@ entirely.
 The skips are pre-existing live-LLM and budget-gated tests; none relate
 to the removed local path.
 
-### What `used_local` still exists for
+### Frontend `used_local_narration` banner removed
 
-The `NarrationResult.used_local` field is preserved (always `False`) and
-the API still surfaces `used_local_narration` for back-compat with the
-frontend banner logic. The dead UI branch can be cleaned up in a future
-sweep.
+The dead UI branch (`#local-warning` div + visibility toggles) and its
+backing API field (`used_local_narration`) have been removed in the same
+pass. `NarrationResult.used_local` is gone too; `_parse_response` no
+longer takes a `used_local` parameter. The turn-response payload shrinks
+by one boolean.
 
 ### Migration for existing deployments
 

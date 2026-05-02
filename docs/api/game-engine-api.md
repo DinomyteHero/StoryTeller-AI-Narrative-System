@@ -128,7 +128,6 @@ roll dice, generate narration, reconcile state.
     "wounds": 0, "strain": 3, "turn_number": 6,
     "act_progress": 0.5
   },
-  "used_local_narration": false,
   "act_boundary": false,
   "milestone": null,
   "force_power_milestone": null,

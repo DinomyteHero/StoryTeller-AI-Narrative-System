@@ -3763,7 +3763,6 @@ async def handle_turn(
             "anchor_proximity": arc_state.get("anchor_proximity", "distant"),
             "scene_state": arc_state.get("scene_state", {}),
         },
-        "used_local_narration": narration_result.used_local,
         "act_boundary": act_boundary_reached,
         "destiny": {
             "light_spent": bool(destiny_result and destiny_result.light_spent),
@@ -4364,10 +4363,7 @@ async def handle_turn_stream(
 
         # ── Parse response ────────────────────────────────────────────
         try:
-            narration_result = _parse_response(
-                full_text,
-                used_local=False,
-            )
+            narration_result = _parse_response(full_text)
         except CloudGMError as e:
             logging.warning(
                 "Streaming narration parse failed; falling back to robust "
@@ -4587,8 +4583,7 @@ async def handle_turn_stream(
                 "anchor_proximity": arc_state.get("anchor_proximity", "distant"),
                 "scene_state": arc_state.get("scene_state", {}),
             },
-            "used_local_narration": narration_result.used_local,
-            "act_boundary": act_boundary_reached,
+                "act_boundary": act_boundary_reached,
         }
         if milestone_data:
             payload["milestone"] = milestone_data
@@ -4977,7 +4972,6 @@ async def handle_temptation(
             "anchor_proximity": arc_state.get("anchor_proximity", "distant"),
             "scene_state": arc_state.get("scene_state", {}),
         },
-        "used_local_narration": narration_result.used_local,
         "act_boundary": act_boundary_reached,
     }
     if milestone_data:
