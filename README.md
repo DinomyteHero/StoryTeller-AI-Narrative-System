@@ -1,10 +1,30 @@
 # Storyteller V3
 
-An AI-powered Star Wars narrative RPG engine built on the Fantasy Flight Games (FFG) Edge of the Empire / Age of Rebellion / Force and Destiny dice system.
+An experimental AI-powered Star Wars narrative RPG engine built on the Fantasy Flight Games (FFG) *Edge of the Empire* / *Age of Rebellion* / *Force and Destiny* dice system.
 
 The player reads prose passages, makes choices, and the story responds — mechanically real (dice determine outcomes) and narratively generative (an LLM writes the prose). Think **Choice of Games meets tabletop RPG meets AI Game Master**.
 
-The prose reads like a Star Wars novel. The dice are real and consequential — failure is narrated as failure, triumph as triumph. The LLM never decides mechanical outcomes; it describes what the dice already determined.
+The dice are real and consequential — failure is narrated as failure, triumph as triumph. The LLM never decides mechanical outcomes; it describes what the dice already determined.
+
+> ## ⚠️ Experimental Project
+>
+> This is a personal research project, not a finished game. The engine is functional end-to-end and the core systems work, but the project is best understood as an **active experiment** in marrying tabletop RPG mechanics to LLM-generated prose. Expect rough edges, missing content, and the occasional dragon. See [Project Status](#project-status) below for an honest breakdown of what works and what does not.
+
+## Project Status
+
+| Area | State |
+|---|---|
+| **Game mechanics** (dice pools, checks, character sheets, talents, Force, vehicles, XP) | Working |
+| **Storytelling mechanics** (turn loop, context assembly, prose generation, choice annotation, reconciliation, scene validation) | Working |
+| **Persistence and session continuity** | Working |
+| **Campaign Studio authoring pipeline** (CS-1 through CS-6) | Working |
+| **Story content depth** | Thin — only one canonical campaign exists, and even that needs substantially more detail, NPC interiority, and act-level texture before it reads like a finished narrative experience |
+| **Multi-campaign saga features** (psychometric prologue, cross-campaign import quality, etc.) | Not started |
+| **Polish, balancing, content moderation, accessibility** | Minimal |
+
+In short: the **plumbing works**, the **scaffolding for stories works**, but the **stories themselves need a lot more meat on the bone**. If you load a session and play through it, the loop will hold together — but you'll see the cracks where authored detail is meant to be.
+
+This repo is published in the spirit of "show your work." Use it as a reference, fork it, break it, build on it. It is not a product.
 
 ## How It Works
 
@@ -24,12 +44,19 @@ The campaign spine JSON is the interface contract between them.
 5. New scene-specific choices are presented
 6. State persists across sessions
 
+### Key Design Rules
+
+- **`engine/` is pure Python.** Zero LLM dependencies. Runnable with no API keys.
+- **Physics before imagination.** Code resolves all mechanical outcomes (dice, state transitions, NPC disposition changes) *before* the LLM receives context. The LLM describes outcomes; it never decides them.
+- **Fail loud.** Bad JSON after retries = exception. Missing markers = exception. Errors surface, never hide.
+
 ## Tech Stack
 
 - **Python 3.11+** with **FastAPI + Uvicorn**
-- **Cloud LLM only:** OpenAI-compatible SDK, two-tier routing
-  (fast: DeepSeek V4 Flash; quality: DeepSeek V4 Pro), default
-  provider OpenRouter. Switch to direct OpenAI via `CLOUD_PROVIDER`.
+- **Cloud LLM only** — OpenAI-compatible SDK with two-tier routing
+  - **FAST tier:** structured JSON for decisions, annotations, reconciliation, scene validation (default: DeepSeek V4 Flash via OpenRouter)
+  - **QUALITY tier:** turn narration, milestone reflections, time-skip prose, studio generation (default: DeepSeek V4 Pro via OpenRouter)
+  - Provider configurable via `CLOUD_PROVIDER=openrouter|openai`
 - **SQLite** with WAL mode for persistence
 - **Pydantic v2** for all data models
 - **Single-file HTML frontend**
@@ -41,6 +68,8 @@ The campaign spine JSON is the interface contract between them.
 - Python 3.11+
 - An API key for your cloud LLM provider — OpenRouter (default) or OpenAI
 
+> **Note:** This project incurs cloud LLM costs per turn. Test with the cheapest model tier first. There is no local-model fallback.
+
 ### Installation
 
 ```bash
@@ -48,13 +77,13 @@ The campaign spine JSON is the interface contract between them.
 git clone https://github.com/DinomyteHero/StoryTeller-AI-Narrative-System.git
 cd StoryTeller-AI-Narrative-System
 
-# Install dependencies
+# Install runtime
 pip install -e .
 
 # For development (pytest, ruff)
 pip install -e ".[dev]"
 
-# For Campaign Studio features
+# For Campaign Studio features (NetworkX for graph validation)
 pip install -e ".[studio]"
 ```
 
@@ -84,7 +113,6 @@ See `.env.example` for the full set of tunables (token budgets, hot-path quality
 ### Running
 
 ```bash
-# Start the server
 uvicorn api.main:app --port 8000
 ```
 
@@ -107,23 +135,19 @@ storyteller-v3/
 │   ├── force_powers/ # 5 Force power definitions
 │   └── personas/    # Writer's Room personas (55)
 ├── eval/            # Evaluation harness (quality metrics, golden scenarios)
-├── tests/           # Test suite (20 test files)
-└── docs/            # All project documentation (21 files)
+├── tests/           # Test suite (31 test files)
+└── docs/            # Project documentation (23 active files across 6 subdirectories)
 ```
-
-### Key Design Rules
-
-- **`engine/` is pure Python.** Zero LLM dependencies. Runnable with no API keys.
-- **Physics before imagination.** Code resolves all mechanical outcomes (dice, state transitions) *before* the LLM receives context. The LLM describes outcomes; it never decides them.
-- **Fail loud.** Bad JSON after retries = exception. Missing markers = exception. Errors surface, never hide.
 
 ## Included Content
 
 - **Shadows of the Custodian** — the canonical campaign. A Jedi Praxeum mystery set in 16 ABY starring Clovis Beryl, a smuggler-raised Force-sensitive newly arrived at Luke Skywalker's academy. 5 acts, 26 NPCs, 53 bond events, 8 group scenes, 17 foreshadow threads, 5 distinct endings.
 
+This campaign's *structural skeleton* is complete and playable, but the **prose-level detail, scene texture, and NPC interiority all need substantially more authoring depth** before the experience reads like a finished novel-quality story. It is a working demonstration of the engine, not a polished narrative.
+
 Earlier campaigns (*The Nar Shaddaa Job*, *Echoes of the Force*) live in `data/campaigns/_archive/` for reference. They are not playable from the current build.
 
-## Milestone Status (last synced: 2026-05-01)
+## Milestone Status (last synced: 2026-05-03)
 
 | Milestone | Scope | Status |
 |---|---|---|
@@ -133,6 +157,14 @@ Earlier campaigns (*The Nar Shaddaa Job*, *Echoes of the Force*) live in `data/c
 | Milestone 3 | Vehicles and space combat | Complete |
 | Milestone 4 | Multi-campaign saga (time skips done; prologue & later phases pending) | Partial |
 | Campaign Studio | Spine authoring, validation, collaborative generation, saga pipeline, narrative quality, story engineering | Complete (CS-1 through CS-6) |
+
+## Known Limitations
+
+- **Story content is thin.** The engine and authoring tools are far ahead of the actual narrative material. Expect to author or generate your own spines to see the system stretch.
+- **Cloud LLM only.** No local model fallback. Costs scale with play time.
+- **Single canonical campaign.** *Shadows of the Custodian* is the only fully wired campaign in the current build.
+- **No content moderation layer.** The system relies on the upstream model provider's safety. Star Wars themes can include violence; tune your provider settings accordingly.
+- **No accessibility audit.** The frontend is a single HTML file optimized for readability, not screen readers or assistive tech.
 
 ## Documentation
 
@@ -155,10 +187,24 @@ Key documents:
 # Run tests
 pytest
 
+# Run a single test file
+pytest tests/test_phase14_force.py -v
+
 # Lint
 ruff check .
+
+# Auto-fix
+ruff check --fix .
 ```
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for branch naming, commit conventions, and the project's "do not build the second thing until the first thing works" rule.
+
+## Disclaimer
+
+This is an unofficial, non-commercial fan project. *Star Wars* and the FFG dice mechanics are the intellectual property of their respective owners (Lucasfilm Ltd. / Disney, and the original *Edge of the Empire* publisher). This project is not affiliated with, endorsed by, or sponsored by any of them. No copyrighted text, art, or audio from those properties is included in this repository.
 
 ## License
 
-See repository for license details.
+Licensed under the [Apache License, Version 2.0](LICENSE). You are free to use, modify, and distribute the code subject to the terms of that license. The Apache 2.0 license includes an explicit patent grant and requires preservation of attribution and the NOTICE if one is added later.
+
+This license applies to the **code in this repository only**. It does not grant rights to *Star Wars* or FFG intellectual property — see the Disclaimer above.
