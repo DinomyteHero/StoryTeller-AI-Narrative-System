@@ -16,8 +16,11 @@ cp .env.example .env
 ### Prerequisites
 
 - Python 3.11+
-- [Ollama](https://ollama.ai/) running locally with `qwen3.5:9b` pulled
-- An API key for a cloud LLM provider (OpenAI, OpenRouter, etc.)
+- An API key for a cloud LLM provider — OpenRouter (default) or OpenAI
+
+> The project is **cloud-LLM only**. The earlier local-model path
+> (Ollama + `qwen3.5:9b`) was removed in May 2026 in favor of two-tier
+> cloud routing through `gm/llm_client.py`. There is no offline mode.
 
 ## Project Structure
 
@@ -37,7 +40,7 @@ Read `docs/index.md` for full orientation.
 - **Linter:** [Ruff](https://docs.astral.sh/ruff/)
 - **Type hints:** Use Pydantic v2 models for data structures
 - **`engine/` is pure Python.** Zero LLM dependencies. No API keys, no
-  Ollama imports. Must be runnable standalone.
+  network calls. Must be runnable standalone.
 - Keep functions focused and testable
 
 ```bash
