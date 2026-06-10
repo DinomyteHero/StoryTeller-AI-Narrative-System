@@ -1,0 +1,205 @@
+{
+    "specialization": "pilot",
+    "career": "ace",
+    "game_line": "age_of_rebellion",
+    "talents": [
+        {
+            "id": "acep_t1_0",
+            "talent_ref": "skilled_jockey",
+            "tier": 1,
+            "position": 0,
+            "xp_cost": 5,
+            "prerequisites": []
+        },
+        {
+            "id": "acep_t1_1",
+            "talent_ref": "uncanny_senses",
+            "tier": 1,
+            "position": 1,
+            "xp_cost": 5,
+            "prerequisites": []
+        },
+        {
+            "id": "acep_t1_2",
+            "talent_ref": "grit",
+            "tier": 1,
+            "position": 2,
+            "xp_cost": 5,
+            "prerequisites": []
+        },
+        {
+            "id": "acep_t1_3",
+            "talent_ref": "quick_draw",
+            "tier": 1,
+            "position": 3,
+            "xp_cost": 5,
+            "prerequisites": []
+        },
+        {
+            "id": "acep_t2_0",
+            "talent_ref": "full_throttle",
+            "tier": 2,
+            "position": 0,
+            "xp_cost": 10,
+            "prerequisites": [
+                "acep_t1_0"
+            ]
+        },
+        {
+            "id": "acep_t2_1",
+            "talent_ref": "defensive_driving",
+            "tier": 2,
+            "position": 1,
+            "xp_cost": 10,
+            "prerequisites": [
+                "acep_t1_1"
+            ]
+        },
+        {
+            "id": "acep_t2_2",
+            "talent_ref": "lets_ride",
+            "tier": 2,
+            "position": 2,
+            "xp_cost": 10,
+            "prerequisites": [
+                "acep_t1_2"
+            ]
+        },
+        {
+            "id": "acep_t2_3",
+            "talent_ref": "side_step",
+            "tier": 2,
+            "position": 3,
+            "xp_cost": 10,
+            "prerequisites": [
+                "acep_t1_3"
+            ]
+        },
+        {
+            "id": "acep_t3_0",
+            "talent_ref": "skilled_jockey",
+            "tier": 3,
+            "position": 0,
+            "xp_cost": 15,
+            "prerequisites": [
+                "acep_t2_0"
+            ]
+        },
+        {
+            "id": "acep_t3_1",
+            "talent_ref": "tricky_target",
+            "tier": 3,
+            "position": 1,
+            "xp_cost": 15,
+            "prerequisites": [
+                "acep_t2_1"
+            ]
+        },
+        {
+            "id": "acep_t3_2",
+            "talent_ref": "toughened",
+            "tier": 3,
+            "position": 2,
+            "xp_cost": 15,
+            "prerequisites": [
+                "acep_t2_2"
+            ]
+        },
+        {
+            "id": "acep_t3_3",
+            "talent_ref": "quick_strike",
+            "tier": 3,
+            "position": 3,
+            "xp_cost": 15,
+            "prerequisites": [
+                "acep_t2_3"
+            ]
+        },
+        {
+            "id": "acep_t4_0",
+            "talent_ref": "natural_pilot",
+            "tier": 4,
+            "position": 0,
+            "xp_cost": 20,
+            "prerequisites": [
+                "acep_t3_0"
+            ]
+        },
+        {
+            "id": "acep_t4_1",
+            "talent_ref": "dead_to_rights",
+            "tier": 4,
+            "position": 1,
+            "xp_cost": 20,
+            "prerequisites": [
+                "acep_t3_1"
+            ]
+        },
+        {
+            "id": "acep_t4_2",
+            "talent_ref": "grit",
+            "tier": 4,
+            "position": 2,
+            "xp_cost": 20,
+            "prerequisites": [
+                "acep_t3_2"
+            ]
+        },
+        {
+            "id": "acep_t4_3",
+            "talent_ref": "second_chances",
+            "tier": 4,
+            "position": 3,
+            "xp_cost": 20,
+            "prerequisites": [
+                "acep_t3_3"
+            ]
+        },
+        {
+            "id": "acep_t5_1",
+            "talent_ref": "dedication",
+            "tier": 5,
+            "position": 1,
+            "xp_cost": 25,
+            "prerequisites": [
+                "acep_t4_1"
+            ]
+        }
+    ],
+    "tree_paths": {
+        "stick_and_rudder": {
+            "theme": "stick_and_rudder",
+            "description": "The path of pure flying. The ship as a second body, speed as a native language.",
+            "talent_ids": [
+                "acep_t1_0",
+                "acep_t2_0",
+                "acep_t3_0",
+                "acep_t4_0"
+            ]
+        },
+        "combat_instinct": {
+            "theme": "combat_instinct",
+            "description": "The path of the dogfight. Seeing the intercept geometry before it exists and refusing to be where the guns expect.",
+            "talent_ids": [
+                "acep_t1_1",
+                "acep_t2_1",
+                "acep_t3_1",
+                "acep_t4_1"
+            ]
+        },
+        "squadron_nerve": {
+            "theme": "squadron_nerve",
+            "description": "The path of the veteran. Cool under fire, lucky when it counts, first off the deck and last to leave.",
+            "talent_ids": [
+                "acep_t1_2",
+                "acep_t2_2",
+                "acep_t3_2",
+                "acep_t4_2",
+                "acep_t1_3",
+                "acep_t2_3",
+                "acep_t3_3",
+                "acep_t4_3"
+            ]
+        }
+    }
+}

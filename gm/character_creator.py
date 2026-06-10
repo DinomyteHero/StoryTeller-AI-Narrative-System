@@ -51,6 +51,7 @@ CHARACTER_DRAFT_SCHEMA: dict = {
         "name": {"type": "string"},
         "species": {"type": "string"},
         "career": {"type": "string"},
+        "specializations": {"type": "array", "items": {"type": "string"}},
         "archetype_concept": {"type": "string"},
         "background": {"type": "string"},
         "force_sensitive": {"type": "boolean"},
@@ -137,6 +138,17 @@ def assemble_character(draft: dict) -> Character:
     career = str(draft.get("career") or "wanderer").strip().lower()
     archetype = str(draft.get("archetype_concept") or "").strip()
 
+    # Specializations: lowercase slugs, capped at 2. When {career}_{spec}
+    # matches a curated tree file, milestones offer that tree's branches;
+    # freeform spec strings are legal and fall back to freeform choices.
+    specializations: list[str] = []
+    for spec in draft.get("specializations") or []:
+        slug = _slugify(spec)
+        if slug and slug not in specializations:
+            specializations.append(slug)
+        if len(specializations) >= 2:
+            break
+
     # Characteristics: clamp 1..5 (starting hero ceiling).
     cdata = draft.get("characteristics") or {}
     characteristics = Characteristics(
@@ -216,6 +228,7 @@ def assemble_character(draft: dict) -> Character:
         name=name,
         species=species,
         career=career,
+        specializations=specializations,
         archetype_concept=archetype,
         primary_game_line=game_line,
         background=str(draft.get("background", "")),

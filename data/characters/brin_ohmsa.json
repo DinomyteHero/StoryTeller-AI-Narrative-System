@@ -1,0 +1,143 @@
+{
+  "name": "Brin Ohmsa",
+  "species": "mirialan",
+  "career": "mystic",
+  "archetype_concept": "Village oracle whose one wrong timing cost nine lives, now drowning every room in warnings",
+  "specializations": [
+    "seer"
+  ],
+  "primary_game_line": "force_and_destiny",
+  "background": "Brin Ohmsa grew up at Vashka homestead, a terraced settlement on a moon nobody charts twice, where her teacher — an exiled Mirialan elder named Sajat Ohm — taught a handful of students that the Force speaks in weather, not verdicts. Brin heard it more clearly than anyone Sajat had ever trained. At nineteen she woke from a vision of fire on the eastern terraces: raiders, lift-skiffs, the granary burning, the well fouled. She told everyone. She was believed — that is the part outsiders never understand. Vashka kept armed watch the first night, and nothing came. They kept a thinner watch the second night, and nothing came, and the relief had a flavor she still tastes when anyone tells her to relax. The raiders came on the third night, on lift-skiffs, from the east, exactly as shown. Nine died, Sajat among them — at the well, fouling-party blaster in his hand, defending the detail Brin had begged them all to remember. The survivors split cleanly down the middle: half could not look at her because her gift had failed, half could not stop looking at her because it hadn't. Both halves asked her, gently and separately, to go. She walks the fringe settlements now, reading weather of every kind, and has made herself a rule she mistakes for a conscience: say everything, always, to everyone. She is aware that her warnings have become wallpaper — that she is spending her credibility like a woman trying to empty a purse — and she does not know how to stop, because the one time it mattered, the unsaid thing was the timing, and the timing was the only thing she got wrong.",
+  "characteristics": {
+    "brawn": 2,
+    "agility": 2,
+    "intellect": 2,
+    "cunning": 2,
+    "willpower": 4,
+    "presence": 3
+  },
+  "skills": {
+    "astrogation": 0,
+    "athletics": 0,
+    "charm": 1,
+    "coercion": 0,
+    "computers": 0,
+    "cool": 1,
+    "coordination": 0,
+    "deception": 0,
+    "discipline": 2,
+    "leadership": 0,
+    "mechanics": 0,
+    "medicine": 1,
+    "negotiation": 1,
+    "perception": 2,
+    "piloting_planetary": 0,
+    "piloting_space": 0,
+    "resilience": 1,
+    "skulduggery": 0,
+    "stealth": 0,
+    "streetwise": 0,
+    "survival": 1,
+    "vigilance": 2,
+    "brawl": 0,
+    "gunnery": 0,
+    "melee": 0,
+    "ranged_light": 0,
+    "ranged_heavy": 0,
+    "core_worlds": 0,
+    "education": 0,
+    "lore": 2,
+    "outer_rim": 0,
+    "underworld": 0,
+    "warfare": 0,
+    "xenology": 0,
+    "lightsaber": 0
+  },
+  "wound_threshold": 12,
+  "strain_threshold": 15,
+  "current_wounds": 0,
+  "current_strain": 0,
+  "soak": 2,
+  "total_xp": 100,
+  "available_xp": 0,
+  "motivation": {
+    "obligation_type": null,
+    "obligation_value": 0,
+    "duty_type": null,
+    "duty_value": 0,
+    "morality": 50,
+    "conflict": 0
+  },
+  "force_rating": 1,
+  "force_committed": 0,
+  "loadout": {
+    "weapons": [
+      {
+        "name": "Iron-shod walking staff",
+        "skill": "melee",
+        "damage_bonus": 2,
+        "critical_rating": 5,
+        "qualities": [],
+        "narrative_note": "Cut from a Vashka windbreak tree. She is not a fighter and the staff knows it; mostly it argues with terrain, doors, and the occasional dog."
+      }
+    ],
+    "armor": {
+      "name": "Layered pilgrim weathercloth",
+      "soak_bonus": 1,
+      "defense": 0,
+      "narrative_note": "Dust-colored layers that have slept outdoors on eleven worlds. The innermost wrap is Vashka loomwork, the pattern worn to a ghost of itself."
+    },
+    "tools": [
+      {
+        "category": "medical",
+        "name": "Herbalist's satchel",
+        "mechanical_effect": "Adds 1 boost die to Medicine checks made with natural remedies, field treatment, or long-recovery care.",
+        "narrative_note": "Sorted by smell, labeled in Mirialan script. Settlements that distrust her sight still send for her satchel, which she has decided not to find insulting."
+      },
+      {
+        "category": "ritual",
+        "name": "Sajat's meditation bowl",
+        "mechanical_effect": "Adds 1 boost die to Discipline checks made to center herself, resist fear, or recover strain during rest scenes.",
+        "narrative_note": "Hammered tin, struck once at dawn. Its note is half a tone flat. She has been told this is fixable and has declined to fix it."
+      }
+    ],
+    "special_items": [
+      {
+        "name": "The nine beads",
+        "mechanical_effect": "Nine glass beads on a knotted cord, one per Vashka dead. Once per session, when someone acts on a warning Brin has spoken aloud, the cord adds 1 boost die to that check — hers or theirs. Once per campaign, Brin can deliberately open herself to a full seeing: the GM provides a true, specific vision of a coming danger, including its timing; the experience costs her 3 strain and the vision cannot be unseen.",
+        "narrative_note": "She tells people they are a counting aid for meditation. She has never added a tenth bead, and refuses to begin a second cord — the count is not a tally of her failures, it is the exact size of the lesson."
+      }
+    ]
+  },
+  "career_skills": [],
+  "reserved_xp": 0,
+  "advancement_log": [],
+  "acquired_talents": [],
+  "talent_uses": {},
+  "force_powers": [
+    {
+      "power_id": "sense",
+      "name": "Sense",
+      "category": "perception_knowledge",
+      "base_pips_required": 1,
+      "active_upgrades": [],
+      "narrative_capability": "Can sense emotions, intentions, and the pressure of coming events — danger as a change in weather, grief as a cold current, a lie as a wrong note. For Brin the difficulty has never been hearing; it is knowing which hour the storm lands.",
+      "gm_choice_guidance": "Offer sensing choices when Brin could read a room's hidden temperature, feel danger gathering before evidence exists, or distinguish what someone feels from what they perform. Her dramatic territory is timing and credibility: visions that are true but imprecise, warnings that cost trust to give. Let her be right in ways that are hard to use.",
+      "dark_side_flavor": "Dark side Sense stops forecasting and starts auditing — prying open the one grief a person has buried, finding the fear that steers them, holding the knowledge like a tool. It is precise in exactly the way her visions are not, and that precision is the temptation."
+    }
+  ],
+  "active_commitments": [],
+  "throughline_question": "When your gift is true but your timing is human, is a warning a duty or a debt — and how many unheeded prophecies can a person give away before she has spent the credibility that makes prophecy worth anything?",
+  "voice_notes": "Speaks about future things in the present tense without noticing — 'the bridge is out' for a bridge that fails next week — which unnerves strangers and exhausts friends. Apologizes before delivering bad news, never after. Long silences mid-conversation that she doesn't register. Gives warnings in threes, then a fourth, then a fifth, watching belief drain with each one.",
+  "active_injuries": [],
+  "narrative_arc": {
+    "lie": "Every vision unshared is a death she chose. If she says everything she sees, to everyone, always, then nothing that happens afterward can be hers — silence was the sin at Vashka, and the cure for silence is volume.",
+    "ghost": "The Vashka raid. She saw it whole — the skiffs, the east terraces, the well — and called the night wrong. The settlement believed her, watched hard for one night, watched thin for a second, and bled on the third. Nine beads. Sajat died at the well defending the detail she'd begged them to remember, and the survivors asked her, kindly, in two different ways, to leave.",
+    "truth": "The sin at Vashka was not silence and not the wrong night — it was that nobody, including her, knew how to hold a true thing loosely. A vision is a weather report, not a verdict: it asks for preparation, not prophecy-perfect obedience. Discernment — saying the right thing, to the right person, at the weight it can carry — saves more lives than volume ever will. Her credibility is not hers to spend; it is the instrument the warnings travel on.",
+    "want": "To be believed again, completely, one more time — to find the place and the moment where her sight saves a Vashka instead of burying one, and to stand among people who treat her gift as a skill rather than an omen.",
+    "need": "To forgive the nineteen-year-old who got the night wrong and the village that relaxed on schedule. To learn to say less and land more. To let the beads be grief instead of arithmetic — and to risk warning someone she loves, at full weight, exactly once, when it matters.",
+    "arc_type": "positive",
+    "lie_grip": 0.85,
+    "movements": []
+  }
+}

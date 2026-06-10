@@ -1,0 +1,156 @@
+{
+  "name": "Kessa Rhane",
+  "species": "human",
+  "career": "guardian",
+  "archetype_concept": "Defected Imperial Force-hound learning to be a shield",
+  "specializations": [
+    "protector"
+  ],
+  "primary_game_line": "force_and_destiny",
+  "background": "Kessa Rhane was eight years old when an Imperial screening office on Corsin flagged her for 'aptitude consistent with sensitivity' and thanked her parents for their cooperation in a letter they never saw. The Empire that took her died two years later at Endor. The office did not. It survived the way filing systems survive — quietly, in copies — and re-formed in the Outer Rim as a retrieval cell its staff called the Catalogue, run by a patient ex-ISB acquisitions officer named Senn Varko and bankrolled, at a careful distance, by interests that answered to Brakiss. The Catalogue did not train Jedi. It maintained assets. Kessa was raised on station time and drill rotations, taught to read a room's fear before she could properly write, and used for the one thing she was unambiguously better at than anyone Varko owned: finding people who did not want to be found, and holding them still. She was twenty-one when the Catalogue sent her to Ossel Minor after a hidden family. She found them — nobody else could have. When the retrieval went loud, Varko ordered her to hold the mother's mind while the team took the youngest, a boy named Ilo, eight years old, the same age she had been. She held. The mother's grief tore through the Force like a hull breach, and Kessa let go of something that has not come back since. Three weeks later she walked off a transfer dock with a stolen long-haul shuttle and one heading she knew Varko genuinely feared. She arrived at Luke Skywalker's Praxeum with the Catalogue's faces in her memory, a recall beacon she refuses to throw away, and a sanctuary that is provisional on every side except one: Skywalker himself, who has been wrong about exactly one apprentice before, and knows it.",
+  "characteristics": {
+    "brawn": 2,
+    "agility": 3,
+    "intellect": 2,
+    "cunning": 2,
+    "willpower": 4,
+    "presence": 2
+  },
+  "skills": {
+    "astrogation": 0,
+    "athletics": 1,
+    "charm": 0,
+    "coercion": 1,
+    "computers": 0,
+    "cool": 2,
+    "coordination": 0,
+    "deception": 0,
+    "discipline": 2,
+    "leadership": 0,
+    "mechanics": 0,
+    "medicine": 0,
+    "negotiation": 0,
+    "perception": 0,
+    "piloting_planetary": 0,
+    "piloting_space": 0,
+    "resilience": 1,
+    "skulduggery": 0,
+    "stealth": 0,
+    "streetwise": 0,
+    "survival": 0,
+    "vigilance": 2,
+    "brawl": 0,
+    "gunnery": 0,
+    "melee": 0,
+    "ranged_light": 1,
+    "ranged_heavy": 0,
+    "core_worlds": 0,
+    "education": 1,
+    "lore": 0,
+    "outer_rim": 0,
+    "underworld": 0,
+    "warfare": 1,
+    "xenology": 0,
+    "lightsaber": 2
+  },
+  "wound_threshold": 12,
+  "strain_threshold": 14,
+  "current_wounds": 0,
+  "current_strain": 0,
+  "soak": 2,
+  "total_xp": 110,
+  "available_xp": 0,
+  "motivation": {
+    "obligation_type": null,
+    "obligation_value": 0,
+    "duty_type": null,
+    "duty_value": 0,
+    "morality": 50,
+    "conflict": 0
+  },
+  "force_rating": 1,
+  "force_committed": 0,
+  "loadout": {
+    "weapons": [
+      {
+        "name": "Praxeum training lightsaber (loaner)",
+        "skill": "lightsaber",
+        "damage_bonus": 6,
+        "critical_rating": 2,
+        "qualities": [
+          "breach_1",
+          "sunder"
+        ],
+        "narrative_note": "Issued from the rack, not built. She checks it back in after every drill like ordnance, and has not asked when she gets her own. The asking is the part she cannot do yet."
+      },
+      {
+        "name": "Remnant officer's blaster, serial intact",
+        "skill": "ranged_light",
+        "damage_bonus": 5,
+        "critical_rating": 4,
+        "qualities": [
+          "stun_setting"
+        ],
+        "narrative_note": "She never filed the serial. It sits on her shelf in plain view, because hiding what she was feels like lying, and she is done lying. It has not left stun since Ossel Minor."
+      }
+    ],
+    "armor": {
+      "name": "Praxeum robes over a Remnant flight underlayer",
+      "soak_bonus": 1,
+      "defense": 0,
+      "narrative_note": "Academy robes worn over the thermal underlayer of a uniform whose insignia she removed with a vibroblade. The stitching is military-neat. She checks the seams nightly, out of a habit she no longer explains."
+    },
+    "tools": [
+      {
+        "category": "security",
+        "name": "Catalogue field reader",
+        "mechanical_effect": "Adds 1 boost die to Perception or Vigilance checks to read physiological stress — elevated pulse, fear-sweat, the tells of a lie or a hidden intention.",
+        "narrative_note": "Interrogation-grade kit built to confirm what her Force sense reported. She mostly points it at herself now, to check whether the calm is real."
+      },
+      {
+        "category": "medical",
+        "name": "Two stimpacks",
+        "mechanical_effect": "Can heal 5 wounds per stimpack. Two uses before resupply needed.",
+        "narrative_note": "Catalogue field doctrine: stabilize the asset first. She is still deciding who the asset is."
+      }
+    ],
+    "special_items": [
+      {
+        "name": "Varko's recall beacon",
+        "mechanical_effect": "An encrypted single-burst recall beacon keyed to the Catalogue's retrieval net. Once per campaign, Kessa can trigger it deliberately: the Catalogue will come, on her timing and her chosen ground — a controlled lure instead of an ambush. Activation guarantees attention, not control of what arrives. While dormant, it adds 1 boost die once per session to checks involving Remnant protocol, Imperial-pattern systems, or Catalogue tradecraft.",
+        "narrative_note": "The beacon Varko issued the day she made asset grade: 'If you are ever lost, press it once and we will bring you home.' She keeps it where she can see it. A leash you hold is different from a leash you wear."
+      }
+    ]
+  },
+  "career_skills": [],
+  "reserved_xp": 0,
+  "advancement_log": [],
+  "acquired_talents": [],
+  "talent_uses": {},
+  "force_powers": [
+    {
+      "power_id": "influence",
+      "name": "Influence",
+      "category": "mental_influence",
+      "base_pips_required": 1,
+      "active_upgrades": [],
+      "narrative_capability": "Can subtly influence the emotions of nearby beings — calming hostility, heightening fear, pressing a single suggestion into a weak-willed mind. For Kessa this was a job skill before anyone told her it could be a violation, and she flinches from it accordingly.",
+      "gm_choice_guidance": "Offer Influence choices when Kessa could calm panic, defuse hostility, or steady someone's fear — and occasionally when the easy road is to push a mind instead of persuading it. The interesting choice is almost always whether she uses it at all. Around suspicious students, wary staff, or frightened civilians, offering the option and letting her refuse it is itself good drama.",
+      "dark_side_flavor": "Dark side Influence doesn't suggest — it overrides. Kessa knows the exact texture of a mind held still, the way the eyes go unfocused and the agreement comes too quickly. It is the most practiced thing she owns. That is why she is afraid of it."
+    }
+  ],
+  "active_commitments": [],
+  "throughline_question": "If you were built to be aimed, who are you when no one is holding the trigger — and what do you owe the people your obedience cost?",
+  "voice_notes": "Clipped and exact. Reports instead of converses when stressed: exits, counts, threat order. Rank-words surface under pressure — 'sir,' 'instructor' — and she hates each one a half-second too late. A genuinely terrible liar: goes silent instead of inventing, which reads as guilt to anyone looking for it. Asks permission for small things (sitting down, borrowing a tool) and forgiveness for large ones. Deadpan logistics humor once she finally trusts a room. Goes quiet and very precise around children.",
+  "active_injuries": [],
+  "narrative_arc": {
+    "lie": "I am an instrument. Someone has to aim me, because if I choose for myself, the things I was trained to do will do the choosing — and people end up on their knees with my hand in their mind. Obedience is the only safe shape for someone like me.",
+    "ghost": "Ossel Minor. She found the hidden family nobody else could find, and on her handler's order she held a mother's mind still while the Catalogue took her eight-year-old son, Ilo. The mother's grief through the Force is the last thing her old life ever said to her. She deserted three weeks later and has not been aimed since.",
+    "truth": "Being built for a thing is not the same as being that thing. A conscience is not a malfunction, and refusal was always one of her capabilities — running proved it. Choice is what makes loyalty worth anything, and protection only counts when it is chosen, not assigned.",
+    "want": "To be allowed to stay. To be useful enough, transparent enough, controllable enough that the Praxeum decides she is worth the risk — sanctuary as a ledger she can keep paying into.",
+    "need": "To stop offering obedience as rent. To say Ilo's name out loud to people who cannot use it. To accept a forgiveness she has not finished earning, and to pick up the shield because she chooses it — not because it was the assigned penance.",
+    "arc_type": "positive",
+    "lie_grip": 0.85,
+    "movements": []
+  }
+}

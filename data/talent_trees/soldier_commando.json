@@ -1,0 +1,205 @@
+{
+    "specialization": "commando",
+    "career": "soldier",
+    "game_line": "age_of_rebellion",
+    "talents": [
+        {
+            "id": "cmdo_t1_0",
+            "talent_ref": "quick_strike",
+            "tier": 1,
+            "position": 0,
+            "xp_cost": 5,
+            "prerequisites": []
+        },
+        {
+            "id": "cmdo_t1_1",
+            "talent_ref": "toughened",
+            "tier": 1,
+            "position": 1,
+            "xp_cost": 5,
+            "prerequisites": []
+        },
+        {
+            "id": "cmdo_t1_2",
+            "talent_ref": "side_step",
+            "tier": 1,
+            "position": 2,
+            "xp_cost": 5,
+            "prerequisites": []
+        },
+        {
+            "id": "cmdo_t1_3",
+            "talent_ref": "street_smarts",
+            "tier": 1,
+            "position": 3,
+            "xp_cost": 5,
+            "prerequisites": []
+        },
+        {
+            "id": "cmdo_t2_0",
+            "talent_ref": "parry",
+            "tier": 2,
+            "position": 0,
+            "xp_cost": 10,
+            "prerequisites": [
+                "cmdo_t1_0"
+            ]
+        },
+        {
+            "id": "cmdo_t2_1",
+            "talent_ref": "grit",
+            "tier": 2,
+            "position": 1,
+            "xp_cost": 10,
+            "prerequisites": [
+                "cmdo_t1_1"
+            ]
+        },
+        {
+            "id": "cmdo_t2_2",
+            "talent_ref": "dodge",
+            "tier": 2,
+            "position": 2,
+            "xp_cost": 10,
+            "prerequisites": [
+                "cmdo_t1_2"
+            ]
+        },
+        {
+            "id": "cmdo_t2_3",
+            "talent_ref": "stim_application",
+            "tier": 2,
+            "position": 3,
+            "xp_cost": 10,
+            "prerequisites": [
+                "cmdo_t1_3"
+            ]
+        },
+        {
+            "id": "cmdo_t3_0",
+            "talent_ref": "parry",
+            "tier": 3,
+            "position": 0,
+            "xp_cost": 15,
+            "prerequisites": [
+                "cmdo_t2_0"
+            ]
+        },
+        {
+            "id": "cmdo_t3_1",
+            "talent_ref": "toughened",
+            "tier": 3,
+            "position": 1,
+            "xp_cost": 15,
+            "prerequisites": [
+                "cmdo_t2_1"
+            ]
+        },
+        {
+            "id": "cmdo_t3_2",
+            "talent_ref": "dodge",
+            "tier": 3,
+            "position": 2,
+            "xp_cost": 15,
+            "prerequisites": [
+                "cmdo_t2_2"
+            ]
+        },
+        {
+            "id": "cmdo_t3_3",
+            "talent_ref": "field_commander",
+            "tier": 3,
+            "position": 3,
+            "xp_cost": 15,
+            "prerequisites": [
+                "cmdo_t2_3"
+            ]
+        },
+        {
+            "id": "cmdo_t4_0",
+            "talent_ref": "dead_to_rights",
+            "tier": 4,
+            "position": 0,
+            "xp_cost": 20,
+            "prerequisites": [
+                "cmdo_t3_0"
+            ]
+        },
+        {
+            "id": "cmdo_t4_1",
+            "talent_ref": "grit",
+            "tier": 4,
+            "position": 1,
+            "xp_cost": 20,
+            "prerequisites": [
+                "cmdo_t3_1"
+            ]
+        },
+        {
+            "id": "cmdo_t4_2",
+            "talent_ref": "tricky_target",
+            "tier": 4,
+            "position": 2,
+            "xp_cost": 20,
+            "prerequisites": [
+                "cmdo_t3_2"
+            ]
+        },
+        {
+            "id": "cmdo_t4_3",
+            "talent_ref": "intimidating_presence",
+            "tier": 4,
+            "position": 3,
+            "xp_cost": 20,
+            "prerequisites": [
+                "cmdo_t3_3"
+            ]
+        },
+        {
+            "id": "cmdo_t5_1",
+            "talent_ref": "dedication",
+            "tier": 5,
+            "position": 1,
+            "xp_cost": 25,
+            "prerequisites": [
+                "cmdo_t4_1"
+            ]
+        }
+    ],
+    "tree_paths": {
+        "first_through_the_door": {
+            "theme": "first_through_the_door",
+            "description": "The path of assault. Violence as a precision tool: fast, close, and finished before the alarm.",
+            "talent_ids": [
+                "cmdo_t1_0",
+                "cmdo_t2_0",
+                "cmdo_t3_0",
+                "cmdo_t4_0"
+            ]
+        },
+        "built_to_last": {
+            "theme": "built_to_last",
+            "description": "The path of endurance. The body as armor, the will as a second wind, the refusal to stay down.",
+            "talent_ids": [
+                "cmdo_t1_1",
+                "cmdo_t2_1",
+                "cmdo_t3_1",
+                "cmdo_t4_1",
+                "cmdo_t1_2",
+                "cmdo_t2_2",
+                "cmdo_t3_2",
+                "cmdo_t4_2"
+            ]
+        },
+        "squad_doctrine": {
+            "theme": "squad_doctrine",
+            "description": "The path of the unit. Field medicine, fire discipline, and the voice everyone steadies on.",
+            "talent_ids": [
+                "cmdo_t1_3",
+                "cmdo_t2_3",
+                "cmdo_t3_3",
+                "cmdo_t4_3"
+            ]
+        }
+    }
+}

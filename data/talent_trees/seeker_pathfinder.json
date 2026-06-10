@@ -1,0 +1,205 @@
+{
+    "specialization": "pathfinder",
+    "career": "seeker",
+    "game_line": "force_and_destiny",
+    "talents": [
+        {
+            "id": "path_t1_0",
+            "talent_ref": "stalker",
+            "tier": 1,
+            "position": 0,
+            "xp_cost": 5,
+            "prerequisites": []
+        },
+        {
+            "id": "path_t1_1",
+            "talent_ref": "uncanny_senses",
+            "tier": 1,
+            "position": 1,
+            "xp_cost": 5,
+            "prerequisites": []
+        },
+        {
+            "id": "path_t1_2",
+            "talent_ref": "grit",
+            "tier": 1,
+            "position": 2,
+            "xp_cost": 5,
+            "prerequisites": []
+        },
+        {
+            "id": "path_t1_3",
+            "talent_ref": "galaxy_mapper",
+            "tier": 1,
+            "position": 3,
+            "xp_cost": 5,
+            "prerequisites": []
+        },
+        {
+            "id": "path_t2_0",
+            "talent_ref": "shortcut",
+            "tier": 2,
+            "position": 0,
+            "xp_cost": 10,
+            "prerequisites": [
+                "path_t1_0"
+            ]
+        },
+        {
+            "id": "path_t2_1",
+            "talent_ref": "sense_danger",
+            "tier": 2,
+            "position": 1,
+            "xp_cost": 10,
+            "prerequisites": [
+                "path_t1_1"
+            ]
+        },
+        {
+            "id": "path_t2_2",
+            "talent_ref": "toughened",
+            "tier": 2,
+            "position": 2,
+            "xp_cost": 10,
+            "prerequisites": [
+                "path_t1_2"
+            ]
+        },
+        {
+            "id": "path_t2_3",
+            "talent_ref": "quick_draw",
+            "tier": 2,
+            "position": 3,
+            "xp_cost": 10,
+            "prerequisites": [
+                "path_t1_3"
+            ]
+        },
+        {
+            "id": "path_t3_0",
+            "talent_ref": "stalker",
+            "tier": 3,
+            "position": 0,
+            "xp_cost": 15,
+            "prerequisites": [
+                "path_t2_0"
+            ]
+        },
+        {
+            "id": "path_t3_1",
+            "talent_ref": "uncanny_senses",
+            "tier": 3,
+            "position": 1,
+            "xp_cost": 15,
+            "prerequisites": [
+                "path_t2_1"
+            ]
+        },
+        {
+            "id": "path_t3_2",
+            "talent_ref": "side_step",
+            "tier": 3,
+            "position": 2,
+            "xp_cost": 15,
+            "prerequisites": [
+                "path_t2_2"
+            ]
+        },
+        {
+            "id": "path_t3_3",
+            "talent_ref": "tricky_target",
+            "tier": 3,
+            "position": 3,
+            "xp_cost": 15,
+            "prerequisites": [
+                "path_t2_3"
+            ]
+        },
+        {
+            "id": "path_t4_0",
+            "talent_ref": "shortcut",
+            "tier": 4,
+            "position": 0,
+            "xp_cost": 20,
+            "prerequisites": [
+                "path_t3_0"
+            ]
+        },
+        {
+            "id": "path_t4_1",
+            "talent_ref": "force_rating",
+            "tier": 4,
+            "position": 1,
+            "xp_cost": 20,
+            "prerequisites": [
+                "path_t3_1"
+            ]
+        },
+        {
+            "id": "path_t4_2",
+            "talent_ref": "grit",
+            "tier": 4,
+            "position": 2,
+            "xp_cost": 20,
+            "prerequisites": [
+                "path_t3_2"
+            ]
+        },
+        {
+            "id": "path_t4_3",
+            "talent_ref": "rapid_recovery",
+            "tier": 4,
+            "position": 3,
+            "xp_cost": 20,
+            "prerequisites": [
+                "path_t3_3"
+            ]
+        },
+        {
+            "id": "path_t5_1",
+            "talent_ref": "dedication",
+            "tier": 5,
+            "position": 1,
+            "xp_cost": 25,
+            "prerequisites": [
+                "path_t4_1"
+            ]
+        }
+    ],
+    "tree_paths": {
+        "the_trail": {
+            "theme": "the_trail",
+            "description": "The path of pursuit. Tracks read in dust and in the Force alike; nothing stays hidden from patience.",
+            "talent_ids": [
+                "path_t1_0",
+                "path_t2_0",
+                "path_t3_0",
+                "path_t4_0"
+            ]
+        },
+        "listening_wild": {
+            "theme": "listening_wild",
+            "description": "The path of instinct. The Force as a hunting partner — danger smelled, intentions heard, ambushes felt.",
+            "talent_ids": [
+                "path_t1_1",
+                "path_t2_1",
+                "path_t3_1",
+                "path_t4_1"
+            ]
+        },
+        "far_from_home": {
+            "theme": "far_from_home",
+            "description": "The path of self-sufficiency. The wilds as teacher: endurance, recovery, and the long way back.",
+            "talent_ids": [
+                "path_t1_2",
+                "path_t2_2",
+                "path_t3_2",
+                "path_t4_2",
+                "path_t1_3",
+                "path_t2_3",
+                "path_t3_3",
+                "path_t4_3"
+            ]
+        }
+    }
+}

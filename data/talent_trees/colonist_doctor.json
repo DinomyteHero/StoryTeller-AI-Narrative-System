@@ -1,0 +1,205 @@
+{
+    "specialization": "doctor",
+    "career": "colonist",
+    "game_line": "edge_of_empire",
+    "talents": [
+        {
+            "id": "doc_t1_0",
+            "talent_ref": "surgeon",
+            "tier": 1,
+            "position": 0,
+            "xp_cost": 5,
+            "prerequisites": []
+        },
+        {
+            "id": "doc_t1_1",
+            "talent_ref": "researcher",
+            "tier": 1,
+            "position": 1,
+            "xp_cost": 5,
+            "prerequisites": []
+        },
+        {
+            "id": "doc_t1_2",
+            "talent_ref": "grit",
+            "tier": 1,
+            "position": 2,
+            "xp_cost": 5,
+            "prerequisites": []
+        },
+        {
+            "id": "doc_t1_3",
+            "talent_ref": "street_smarts",
+            "tier": 1,
+            "position": 3,
+            "xp_cost": 5,
+            "prerequisites": []
+        },
+        {
+            "id": "doc_t2_0",
+            "talent_ref": "stim_application",
+            "tier": 2,
+            "position": 0,
+            "xp_cost": 10,
+            "prerequisites": [
+                "doc_t1_0"
+            ]
+        },
+        {
+            "id": "doc_t2_1",
+            "talent_ref": "knowledge_is_power",
+            "tier": 2,
+            "position": 1,
+            "xp_cost": 10,
+            "prerequisites": [
+                "doc_t1_1"
+            ]
+        },
+        {
+            "id": "doc_t2_2",
+            "talent_ref": "calming_aura",
+            "tier": 2,
+            "position": 2,
+            "xp_cost": 10,
+            "prerequisites": [
+                "doc_t1_2"
+            ]
+        },
+        {
+            "id": "doc_t2_3",
+            "talent_ref": "convincing_demeanor",
+            "tier": 2,
+            "position": 3,
+            "xp_cost": 10,
+            "prerequisites": [
+                "doc_t1_3"
+            ]
+        },
+        {
+            "id": "doc_t3_0",
+            "talent_ref": "surgeon",
+            "tier": 3,
+            "position": 0,
+            "xp_cost": 15,
+            "prerequisites": [
+                "doc_t2_0"
+            ]
+        },
+        {
+            "id": "doc_t3_1",
+            "talent_ref": "researcher",
+            "tier": 3,
+            "position": 1,
+            "xp_cost": 15,
+            "prerequisites": [
+                "doc_t2_1"
+            ]
+        },
+        {
+            "id": "doc_t3_2",
+            "talent_ref": "toughened",
+            "tier": 3,
+            "position": 2,
+            "xp_cost": 15,
+            "prerequisites": [
+                "doc_t2_2"
+            ]
+        },
+        {
+            "id": "doc_t3_3",
+            "talent_ref": "second_chances",
+            "tier": 3,
+            "position": 3,
+            "xp_cost": 15,
+            "prerequisites": [
+                "doc_t2_3"
+            ]
+        },
+        {
+            "id": "doc_t4_0",
+            "talent_ref": "rapid_recovery",
+            "tier": 4,
+            "position": 0,
+            "xp_cost": 20,
+            "prerequisites": [
+                "doc_t3_0"
+            ]
+        },
+        {
+            "id": "doc_t4_1",
+            "talent_ref": "nobody_s_fool",
+            "tier": 4,
+            "position": 1,
+            "xp_cost": 20,
+            "prerequisites": [
+                "doc_t3_1"
+            ]
+        },
+        {
+            "id": "doc_t4_2",
+            "talent_ref": "grit",
+            "tier": 4,
+            "position": 2,
+            "xp_cost": 20,
+            "prerequisites": [
+                "doc_t3_2"
+            ]
+        },
+        {
+            "id": "doc_t4_3",
+            "talent_ref": "rapid_recovery",
+            "tier": 4,
+            "position": 3,
+            "xp_cost": 20,
+            "prerequisites": [
+                "doc_t3_3"
+            ]
+        },
+        {
+            "id": "doc_t5_1",
+            "talent_ref": "dedication",
+            "tier": 5,
+            "position": 1,
+            "xp_cost": 25,
+            "prerequisites": [
+                "doc_t4_1"
+            ]
+        }
+    ],
+    "tree_paths": {
+        "the_practice": {
+            "theme": "the_practice",
+            "description": "The path of medicine. Steady hands, field triage, and the refusal to lose anyone on the table.",
+            "talent_ids": [
+                "doc_t1_0",
+                "doc_t2_0",
+                "doc_t3_0",
+                "doc_t4_0"
+            ]
+        },
+        "clinical_eye": {
+            "theme": "clinical_eye",
+            "description": "The path of knowledge. Research, diagnosis, and reading what people will not say about what hurts.",
+            "talent_ids": [
+                "doc_t1_1",
+                "doc_t2_1",
+                "doc_t3_1",
+                "doc_t4_1"
+            ]
+        },
+        "frontier_calm": {
+            "theme": "frontier_calm",
+            "description": "The path of composure. The bedside voice that works on mobs, magistrates, and the dying alike.",
+            "talent_ids": [
+                "doc_t1_2",
+                "doc_t2_2",
+                "doc_t3_2",
+                "doc_t4_2",
+                "doc_t1_3",
+                "doc_t2_3",
+                "doc_t3_3",
+                "doc_t4_3"
+            ]
+        }
+    }
+}

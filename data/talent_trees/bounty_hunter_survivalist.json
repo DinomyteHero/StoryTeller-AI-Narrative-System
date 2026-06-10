@@ -1,0 +1,205 @@
+{
+    "specialization": "survivalist",
+    "career": "bounty_hunter",
+    "game_line": "edge_of_empire",
+    "talents": [
+        {
+            "id": "surv_t1_0",
+            "talent_ref": "stalker",
+            "tier": 1,
+            "position": 0,
+            "xp_cost": 5,
+            "prerequisites": []
+        },
+        {
+            "id": "surv_t1_1",
+            "talent_ref": "toughened",
+            "tier": 1,
+            "position": 1,
+            "xp_cost": 5,
+            "prerequisites": []
+        },
+        {
+            "id": "surv_t1_2",
+            "talent_ref": "quick_draw",
+            "tier": 1,
+            "position": 2,
+            "xp_cost": 5,
+            "prerequisites": []
+        },
+        {
+            "id": "surv_t1_3",
+            "talent_ref": "street_smarts",
+            "tier": 1,
+            "position": 3,
+            "xp_cost": 5,
+            "prerequisites": []
+        },
+        {
+            "id": "surv_t2_0",
+            "talent_ref": "stalker",
+            "tier": 2,
+            "position": 0,
+            "xp_cost": 10,
+            "prerequisites": [
+                "surv_t1_0"
+            ]
+        },
+        {
+            "id": "surv_t2_1",
+            "talent_ref": "grit",
+            "tier": 2,
+            "position": 1,
+            "xp_cost": 10,
+            "prerequisites": [
+                "surv_t1_1"
+            ]
+        },
+        {
+            "id": "surv_t2_2",
+            "talent_ref": "side_step",
+            "tier": 2,
+            "position": 2,
+            "xp_cost": 10,
+            "prerequisites": [
+                "surv_t1_2"
+            ]
+        },
+        {
+            "id": "surv_t2_3",
+            "talent_ref": "shortcut",
+            "tier": 2,
+            "position": 3,
+            "xp_cost": 10,
+            "prerequisites": [
+                "surv_t1_3"
+            ]
+        },
+        {
+            "id": "surv_t3_0",
+            "talent_ref": "uncanny_senses",
+            "tier": 3,
+            "position": 0,
+            "xp_cost": 15,
+            "prerequisites": [
+                "surv_t2_0"
+            ]
+        },
+        {
+            "id": "surv_t3_1",
+            "talent_ref": "toughened",
+            "tier": 3,
+            "position": 1,
+            "xp_cost": 15,
+            "prerequisites": [
+                "surv_t2_1"
+            ]
+        },
+        {
+            "id": "surv_t3_2",
+            "talent_ref": "dodge",
+            "tier": 3,
+            "position": 2,
+            "xp_cost": 15,
+            "prerequisites": [
+                "surv_t2_2"
+            ]
+        },
+        {
+            "id": "surv_t3_3",
+            "talent_ref": "nobody_s_fool",
+            "tier": 3,
+            "position": 3,
+            "xp_cost": 15,
+            "prerequisites": [
+                "surv_t2_3"
+            ]
+        },
+        {
+            "id": "surv_t4_0",
+            "talent_ref": "dead_to_rights",
+            "tier": 4,
+            "position": 0,
+            "xp_cost": 20,
+            "prerequisites": [
+                "surv_t3_0"
+            ]
+        },
+        {
+            "id": "surv_t4_1",
+            "talent_ref": "grit",
+            "tier": 4,
+            "position": 1,
+            "xp_cost": 20,
+            "prerequisites": [
+                "surv_t3_1"
+            ]
+        },
+        {
+            "id": "surv_t4_2",
+            "talent_ref": "tricky_target",
+            "tier": 4,
+            "position": 2,
+            "xp_cost": 20,
+            "prerequisites": [
+                "surv_t3_2"
+            ]
+        },
+        {
+            "id": "surv_t4_3",
+            "talent_ref": "quick_strike",
+            "tier": 4,
+            "position": 3,
+            "xp_cost": 20,
+            "prerequisites": [
+                "surv_t3_3"
+            ]
+        },
+        {
+            "id": "surv_t5_1",
+            "talent_ref": "dedication",
+            "tier": 5,
+            "position": 1,
+            "xp_cost": 25,
+            "prerequisites": [
+                "surv_t4_1"
+            ]
+        }
+    ],
+    "tree_paths": {
+        "the_long_hunt": {
+            "theme": "the_long_hunt",
+            "description": "The path of pursuit. Tracking, patience, and the moment the quarry finally stops running.",
+            "talent_ids": [
+                "surv_t1_0",
+                "surv_t2_0",
+                "surv_t3_0",
+                "surv_t4_0"
+            ]
+        },
+        "iron_constitution": {
+            "theme": "iron_constitution",
+            "description": "The path of endurance. Outlasting the wilderness, the wound, and the contract that went wrong.",
+            "talent_ids": [
+                "surv_t1_1",
+                "surv_t2_1",
+                "surv_t3_1",
+                "surv_t4_1"
+            ]
+        },
+        "first_to_move": {
+            "theme": "first_to_move",
+            "description": "The path of reaction. Fast hands, faster feet, and the instinct for which way trouble breaks.",
+            "talent_ids": [
+                "surv_t1_2",
+                "surv_t2_2",
+                "surv_t3_2",
+                "surv_t4_2",
+                "surv_t1_3",
+                "surv_t2_3",
+                "surv_t3_3",
+                "surv_t4_3"
+            ]
+        }
+    }
+}

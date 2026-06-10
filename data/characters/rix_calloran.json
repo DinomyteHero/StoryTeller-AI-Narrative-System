@@ -1,0 +1,140 @@
+{
+  "name": "Rix Calloran",
+  "species": "human",
+  "career": "ace",
+  "archetype_concept": "Decorated pilot who froze once, resigned before the inquiry could rule, and now flies the runs nobody survives",
+  "specializations": [
+    "pilot"
+  ],
+  "primary_game_line": "age_of_rebellion",
+  "background": "Rix Calloran was the pilot instructors pointed at: a farm kid from Taanab with reflexes the simulators flagged as sensor error, commissioned young, decorated younger. He led Banshee Flight — five interceptors flying convoy escort on the kind of unglamorous runs that win wars without making holos. On his ninety-first escort, a routine corridor turned out to be a layered ambush: jamming, mines, two squadrons where intelligence had promised none. Rix saw the geometry of it a full two seconds before anyone else — and for four more seconds, did nothing. Not panic, exactly. A perfect, crystalline lock: every option visible, every option ending in names. By the time his voice came back he flew like the legend they said he was, and it almost mattered. Banshee Two, Three, and Five didn't come back. The board of inquiry would likely have cleared him — the jamming alone justified it — but Rix resigned his commission the morning before the ruling, because a verdict in either direction would have made it official, and he needed it to stay his. Now he flies freight in the cheap seats of the galaxy, taking the contracts pinned at the bottom of the board: the blockaded medical runs, the storm-moon approaches, the strips with more wreck than runway. He tells himself it's because the pay scales with the risk. His logbook, which lists every passenger and crew member brought home alive in a neat column with no heading, suggests otherwise.",
+  "characteristics": {
+    "brawn": 2,
+    "agility": 4,
+    "intellect": 2,
+    "cunning": 2,
+    "willpower": 2,
+    "presence": 3
+  },
+  "skills": {
+    "astrogation": 2,
+    "athletics": 0,
+    "charm": 1,
+    "coercion": 0,
+    "computers": 0,
+    "cool": 2,
+    "coordination": 0,
+    "deception": 0,
+    "discipline": 0,
+    "leadership": 0,
+    "mechanics": 1,
+    "medicine": 0,
+    "negotiation": 0,
+    "perception": 0,
+    "piloting_planetary": 1,
+    "piloting_space": 3,
+    "resilience": 0,
+    "skulduggery": 0,
+    "stealth": 0,
+    "streetwise": 0,
+    "survival": 0,
+    "vigilance": 1,
+    "brawl": 0,
+    "gunnery": 2,
+    "melee": 0,
+    "ranged_light": 1,
+    "ranged_heavy": 0,
+    "core_worlds": 0,
+    "education": 0,
+    "lore": 0,
+    "outer_rim": 0,
+    "underworld": 0,
+    "warfare": 0,
+    "xenology": 0,
+    "lightsaber": 0
+  },
+  "wound_threshold": 12,
+  "strain_threshold": 12,
+  "current_wounds": 0,
+  "current_strain": 0,
+  "soak": 2,
+  "total_xp": 110,
+  "available_xp": 0,
+  "motivation": {
+    "obligation_type": null,
+    "obligation_value": 0,
+    "duty_type": "bring_them_home",
+    "duty_value": 10,
+    "morality": 50,
+    "conflict": 0
+  },
+  "force_rating": 0,
+  "force_committed": 0,
+  "loadout": {
+    "weapons": [
+      {
+        "name": "Service blaster pistol, holster-worn",
+        "skill": "ranged_light",
+        "damage_bonus": 5,
+        "critical_rating": 4,
+        "qualities": [
+          "stun_setting"
+        ],
+        "narrative_note": "Cleaned weekly, fired rarely. Pilots carry sidearms the way sailors carry knives: for the day the real weapon stops being available."
+      }
+    ],
+    "armor": {
+      "name": "Patched flight suit and survival vest",
+      "soak_bonus": 1,
+      "defense": 0,
+      "narrative_note": "Squadron-issue with the insignia carefully unstitched — the outline still visible if the light is wrong. The vest's beacon works. He checks it before every run, twice."
+    },
+    "tools": [
+      {
+        "category": "navigation",
+        "name": "Hand-annotated astrogation slate",
+        "mechanical_effect": "Adds 1 boost die to Astrogation checks involving hazardous, blockaded, or poorly-charted routes.",
+        "narrative_note": "Officially these corridors don't exist. Unofficially, someone has flown all of them and written down what the charts wouldn't say."
+      },
+      {
+        "category": "mechanics",
+        "name": "Cockpit rig kit",
+        "mechanical_effect": "Adds 1 boost die to Mechanics checks made on a ship Rix is currently flying or has flown for at least a week.",
+        "narrative_note": "Every ship he flies gets re-rigged within days: thrust bias, alarm tones, a kill-switch under the left armrest. Crews complain until the first emergency."
+      },
+      {
+        "category": "medical",
+        "name": "Two stimpacks",
+        "mechanical_effect": "Can heal 5 wounds per stimpack. Two uses before resupply needed.",
+        "narrative_note": "Strapped inside the survival vest, exactly where flight school said. Some habits are load-bearing."
+      }
+    ],
+    "special_items": [
+      {
+        "name": "Banshee Flight patch",
+        "mechanical_effect": "The squadron patch of Banshee Flight, kept folded in a chest pocket. Once per session, when Rix is acting to protect a wingmate, crew member, or passenger during a vehicle scene, it adds 1 boost die to the check. Once per campaign, invoking the Banshee name can call in a favor from the survivors' network — two pilots, one controller, one quartermaster — people who will move cargo, clear a berth, or scramble unofficially, once, no questions.",
+        "narrative_note": "Three names are stitched under the lining in thread the same color as the fabric, invisible unless you know to look. He has never shown anyone. He has also never flown without it."
+      }
+    ]
+  },
+  "career_skills": [],
+  "reserved_xp": 0,
+  "advancement_log": [],
+  "acquired_talents": [],
+  "talent_uses": {},
+  "force_powers": [],
+  "active_commitments": [],
+  "throughline_question": "If four seconds of being human cost three lives, is the rest of a life spent daring the galaxy to finish the sentence a penance, a death wish, or the long way back to being someone's wingman?",
+  "voice_notes": "Easy cockpit patter — callsigns, weather, mock-complaints about the caf — that goes flat and clinical the moment stakes appear, all clipped vectors and altitudes. Never says 'lost' or 'died'; says 'didn't come back.' Compulsively counts souls aboard out loud at hatch-close and pretends it's procedure. Deflects gratitude by criticizing his own landings.",
+  "active_injuries": [],
+  "narrative_arc": {
+    "lie": "The freeze is the truth about him and the talent was the costume. Anyone can fly when flying is enough; he is the man who watched for four seconds while his flight died, and the only honest thing left is to keep flying until the universe corrects its bookkeeping.",
+    "ghost": "Escort run ninety-one. A layered ambush his instincts caught two seconds early and his body refused for four seconds more. Banshee Two, Three, and Five didn't come back. He resigned the morning before the inquiry could rule, because either verdict would have taken the story out of his hands — and punishing himself required keeping custody of it.",
+    "truth": "Four seconds of overload in an impossible corridor is not a verdict; it is the cost of being a person instead of a targeting computer. The column of names in his logbook — every soul brought home since — is not interest on a debt. It is evidence. The freeze was one data point. The decade of coming back for people is the trend line.",
+    "want": "To fly the runs nobody else will take, stack the saved against the lost, and feel the ledger close — to be so demonstrably the pilot who comes back for people that run ninety-one becomes statistically deniable.",
+    "need": "To let someone fly on his wing again — to trust himself with people who trust him, accept that the inquiry he fled would have been right to clear him, and say the three names out loud to another living pilot instead of to the patch.",
+    "arc_type": "positive",
+    "lie_grip": 0.8,
+    "movements": []
+  }
+}

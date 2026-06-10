@@ -1,0 +1,140 @@
+{
+  "name": "Yara Senn",
+  "species": "human",
+  "career": "colonist",
+  "archetype_concept": "Blacklisted medical researcher undoing, patient by patient, what her employer built from her best work",
+  "specializations": [
+    "doctor"
+  ],
+  "primary_game_line": "edge_of_empire",
+  "background": "Dr. Yara Senn was the youngest project lead in Threnody Biomedical's pain division, and Calm-9 was going to be her proof that the galaxy could be gentler: a non-dependency analgesic suite for burn wards and field hospitals, the kind of molecule that makes triage humane. She built it in four years of eighteen-hour days and believed every word of the mission statements. Threnody's defense-contracts division took eleven months to invert it. The variant — internally, Compound K-9R; in the labor camps where it was deployed, 'the quiet ration' — kept workers compliant, pain-free, and chemically incapable of organizing, and it metabolized into dependency by design. Yara found out the way doctors find things out: a patient. A freighter medic from the Verannis works was wheeled into the corporate clinic with a withdrawal profile that matched nothing in the literature and everything in her own unpublished failure logs. She spent two weeks confirming it, one night copying what she could, and the next morning asking questions in the wrong meeting. Threnody's response was bloodless: research credentials voided, publications retracted on procedural grounds, a non-disclosure enforcement bounty filed under trade-secret law — the polite, legal way to make a scientist stop existing. She practices now on the fringe, unlicensed and over-qualified, in a clinic that fits in two crates. She keeps a list of every Verannis-pattern dependency she has weaned — forty-one names so far — and a sealed vial of original-formula Calm-9, because the molecule was never the crime, and some days she needs the evidence.",
+  "characteristics": {
+    "brawn": 2,
+    "agility": 2,
+    "intellect": 4,
+    "cunning": 2,
+    "willpower": 3,
+    "presence": 2
+  },
+  "skills": {
+    "astrogation": 0,
+    "athletics": 0,
+    "charm": 1,
+    "coercion": 0,
+    "computers": 0,
+    "cool": 2,
+    "coordination": 0,
+    "deception": 0,
+    "discipline": 1,
+    "leadership": 0,
+    "mechanics": 1,
+    "medicine": 3,
+    "negotiation": 1,
+    "perception": 1,
+    "piloting_planetary": 0,
+    "piloting_space": 0,
+    "resilience": 1,
+    "skulduggery": 0,
+    "stealth": 0,
+    "streetwise": 0,
+    "survival": 0,
+    "vigilance": 0,
+    "brawl": 0,
+    "gunnery": 0,
+    "melee": 0,
+    "ranged_light": 0,
+    "ranged_heavy": 0,
+    "core_worlds": 0,
+    "education": 2,
+    "lore": 0,
+    "outer_rim": 0,
+    "underworld": 0,
+    "warfare": 0,
+    "xenology": 1,
+    "lightsaber": 0
+  },
+  "wound_threshold": 12,
+  "strain_threshold": 13,
+  "current_wounds": 0,
+  "current_strain": 0,
+  "soak": 2,
+  "total_xp": 110,
+  "available_xp": 0,
+  "motivation": {
+    "obligation_type": "corporate_blacklist",
+    "obligation_value": 10,
+    "duty_type": null,
+    "duty_value": 0,
+    "morality": 50,
+    "conflict": 0
+  },
+  "force_rating": 0,
+  "force_committed": 0,
+  "loadout": {
+    "weapons": [
+      {
+        "name": "Compact stun pistol, clinic drawer",
+        "skill": "ranged_light",
+        "damage_bonus": 4,
+        "critical_rating": 5,
+        "qualities": [
+          "stun_setting"
+        ],
+        "narrative_note": "Bought after the second time someone came for her supplies instead of her care. She thinks of it as anesthesia for situations, and is not entirely joking."
+      }
+    ],
+    "armor": {
+      "name": "Reinforced field vest under a clinic coat",
+      "soak_bonus": 1,
+      "defense": 0,
+      "narrative_note": "The coat is white because patients calm down for white. The vest underneath is because the fringe does not always calm down."
+    },
+    "tools": [
+      {
+        "category": "medical",
+        "name": "Two-crate field surgery",
+        "mechanical_effect": "A full portable clinic. Adds 1 boost die to Medicine checks made with time to set up — surgery, dependency weaning, long care. Counts as proper facilities for stabilizing the critically injured.",
+        "narrative_note": "Crate one is instruments and sterile field. Crate two is the pharmacy, alphabetized, with the controlled drawer keyed to her thumb and a decoy drawer keyed to anyone who forces it."
+      },
+      {
+        "category": "diagnostic",
+        "name": "Portable assay scanner",
+        "mechanical_effect": "Adds 1 boost die to Perception or Education checks made to diagnose, identify a substance, or read a body's chemical story.",
+        "narrative_note": "Threnody property, technically. She considers it evidence in ongoing litigation she has no legal standing to bring."
+      },
+      {
+        "category": "medical",
+        "name": "Two stimpacks",
+        "mechanical_effect": "Can heal 5 wounds per stimpack. Two uses before resupply needed.",
+        "narrative_note": "Dispensed reluctantly and replaced religiously. Stims are a loan against a recovery the body still has to make; she says this every single time."
+      }
+    ],
+    "special_items": [
+      {
+        "name": "The sealed Calm-9 vial",
+        "mechanical_effect": "The last dose of original-formula Calm-9, sealed and assay-tagged. Once per campaign, administering it lets a critically injured or incapacitated character act normally through one full scene before crashing into collapse afterward. While sealed, it adds 1 boost die once per session to Medicine or Education checks involving dependency, toxicology, or Threnody-pattern compounds — she knows this molecule's family like her own handwriting.",
+        "narrative_note": "Forty-one names are weaned; the vial stays sealed. It is the control sample for a question she keeps re-running: whether the work was good before someone made it useful. Breaking the seal means deciding the answer doesn't matter — or that, for one patient, it does."
+      }
+    ]
+  },
+  "career_skills": [],
+  "reserved_xp": 0,
+  "advancement_log": [],
+  "acquired_talents": [],
+  "talent_uses": {},
+  "force_powers": [],
+  "active_commitments": [],
+  "throughline_question": "When your best work becomes someone else's weapon, how much of the harm belongs to your hands — and can a healer ever trust another set of hands enough to make her knowledge survivable?",
+  "voice_notes": "Triage cadence: questions arrive in threes — where, when, how bad — before hello. Swears in chemical nomenclature ('son of a benzene ring'). Tenderness disguised as instruction; the closest she comes to 'I care about you' is a written med schedule with underlining. Goes very still and very polite when corporate people are in the room.",
+  "active_injuries": [],
+  "narrative_arc": {
+    "lie": "If she controls every variable — every formula, every dose, every supply line, every set of hands — nobody is hurt by her work again. Control is care, delegation is exposure, and teaching anyone anything is handing the next Threnody its next molecule.",
+    "ghost": "The Verannis medic on the clinic table, withdrawal profile matching her own unpublished failure logs: the moment she understood the quiet ration was Calm-9 wearing a contract. Four years of her best self, eleven months to invert it, two hundred dependents in the first season — and a blacklist for the crime of asking in the wrong meeting.",
+    "truth": "The inversion was not her hands' work — it was a deliberate act by people who needed her ignorance more than her consent. Knowledge hoarded dies with the hoarder and saves exactly one clinic's worth of people; knowledge taught is the only formula a corporation can't retract. Care that cannot be delegated is not care — it is custody, and patients deserve better than a single point of failure.",
+    "want": "To wean every Verannis-pattern dependency she can find — the list has forty-one names and she wants hundreds — and to build a clinic far enough out that Threnody's enforcement bounty becomes a line item nobody bothers to collect.",
+    "need": "To forgive the researcher who believed the mission statements. To take an apprentice and hand over the dangerous knowledge with both hands. To stop running the control experiment on her own goodness — and let the sealed vial be a dose, a donation, or a museum piece, but no longer a verdict in escrow.",
+    "arc_type": "positive",
+    "lie_grip": 0.8,
+    "movements": []
+  }
+}

@@ -1,0 +1,205 @@
+{
+    "specialization": "shii_cho_knight",
+    "career": "warrior",
+    "game_line": "force_and_destiny",
+    "talents": [
+        {
+            "id": "shii_t1_0",
+            "talent_ref": "parry",
+            "tier": 1,
+            "position": 0,
+            "xp_cost": 5,
+            "prerequisites": []
+        },
+        {
+            "id": "shii_t1_1",
+            "talent_ref": "toughened",
+            "tier": 1,
+            "position": 1,
+            "xp_cost": 5,
+            "prerequisites": []
+        },
+        {
+            "id": "shii_t1_2",
+            "talent_ref": "grit",
+            "tier": 1,
+            "position": 2,
+            "xp_cost": 5,
+            "prerequisites": []
+        },
+        {
+            "id": "shii_t1_3",
+            "talent_ref": "intimidating_presence",
+            "tier": 1,
+            "position": 3,
+            "xp_cost": 5,
+            "prerequisites": []
+        },
+        {
+            "id": "shii_t2_0",
+            "talent_ref": "quick_strike",
+            "tier": 2,
+            "position": 0,
+            "xp_cost": 10,
+            "prerequisites": [
+                "shii_t1_0"
+            ]
+        },
+        {
+            "id": "shii_t2_1",
+            "talent_ref": "reflect",
+            "tier": 2,
+            "position": 1,
+            "xp_cost": 10,
+            "prerequisites": [
+                "shii_t1_1"
+            ]
+        },
+        {
+            "id": "shii_t2_2",
+            "talent_ref": "side_step",
+            "tier": 2,
+            "position": 2,
+            "xp_cost": 10,
+            "prerequisites": [
+                "shii_t1_2"
+            ]
+        },
+        {
+            "id": "shii_t2_3",
+            "talent_ref": "center_of_being",
+            "tier": 2,
+            "position": 3,
+            "xp_cost": 10,
+            "prerequisites": [
+                "shii_t1_3"
+            ]
+        },
+        {
+            "id": "shii_t3_0",
+            "talent_ref": "parry",
+            "tier": 3,
+            "position": 0,
+            "xp_cost": 15,
+            "prerequisites": [
+                "shii_t2_0"
+            ]
+        },
+        {
+            "id": "shii_t3_1",
+            "talent_ref": "toughened",
+            "tier": 3,
+            "position": 1,
+            "xp_cost": 15,
+            "prerequisites": [
+                "shii_t2_1"
+            ]
+        },
+        {
+            "id": "shii_t3_2",
+            "talent_ref": "dodge",
+            "tier": 3,
+            "position": 2,
+            "xp_cost": 15,
+            "prerequisites": [
+                "shii_t2_2"
+            ]
+        },
+        {
+            "id": "shii_t3_3",
+            "talent_ref": "saber_throw",
+            "tier": 3,
+            "position": 3,
+            "xp_cost": 15,
+            "prerequisites": [
+                "shii_t2_3"
+            ]
+        },
+        {
+            "id": "shii_t4_0",
+            "talent_ref": "natural_blademaster",
+            "tier": 4,
+            "position": 0,
+            "xp_cost": 20,
+            "prerequisites": [
+                "shii_t3_0"
+            ]
+        },
+        {
+            "id": "shii_t4_1",
+            "talent_ref": "reflect",
+            "tier": 4,
+            "position": 1,
+            "xp_cost": 20,
+            "prerequisites": [
+                "shii_t3_1"
+            ]
+        },
+        {
+            "id": "shii_t4_2",
+            "talent_ref": "grit",
+            "tier": 4,
+            "position": 2,
+            "xp_cost": 20,
+            "prerequisites": [
+                "shii_t3_2"
+            ]
+        },
+        {
+            "id": "shii_t4_3",
+            "talent_ref": "force_rating",
+            "tier": 4,
+            "position": 3,
+            "xp_cost": 20,
+            "prerequisites": [
+                "shii_t3_3"
+            ]
+        },
+        {
+            "id": "shii_t5_1",
+            "talent_ref": "dedication",
+            "tier": 5,
+            "position": 1,
+            "xp_cost": 25,
+            "prerequisites": [
+                "shii_t4_1"
+            ]
+        }
+    ],
+    "tree_paths": {
+        "the_first_form": {
+            "theme": "the_first_form",
+            "description": "The path of the blade. Shii-Cho: the oldest lessons, drilled until the sword stops being separate.",
+            "talent_ids": [
+                "shii_t1_0",
+                "shii_t2_0",
+                "shii_t3_0",
+                "shii_t4_0"
+            ]
+        },
+        "the_unbroken_guard": {
+            "theme": "the_unbroken_guard",
+            "description": "The path of defense. Bolts turned, blows absorbed, the body conditioned to stand in the storm.",
+            "talent_ids": [
+                "shii_t1_1",
+                "shii_t2_1",
+                "shii_t3_1",
+                "shii_t4_1",
+                "shii_t1_2",
+                "shii_t2_2",
+                "shii_t3_2",
+                "shii_t4_2"
+            ]
+        },
+        "the_warrior_spirit": {
+            "theme": "the_warrior_spirit",
+            "description": "The path of presence. The Force as fire under control — felt by every enemy who considers the odds.",
+            "talent_ids": [
+                "shii_t1_3",
+                "shii_t2_3",
+                "shii_t3_3",
+                "shii_t4_3"
+            ]
+        }
+    }
+}

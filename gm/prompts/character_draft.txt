@@ -15,9 +15,28 @@ OUTPUT — a single JSON object with EXACTLY these fields:
 - "species": a short lowercase string. Canonical FFG species are human, bothan,
   twi_lek, rodian, wookiee, zabrak, togruta, nautolan, mirialan, droid — but
   any Star Wars species string is allowed (e.g. "kel_dor", "chiss").
-- "career": a short lowercase free-form role/archetype slug, e.g.
-  "smuggler", "ex-imperial slicer", "frontier medic". This is flavor, not a
-  fixed class.
+- "career": a short lowercase role slug. PREFER one of the 18 canonical FFG
+  careers when the concept fits — they unlock curated talent advancement:
+    Edge of the Empire: bounty_hunter, colonist, explorer, hired_gun,
+                        smuggler, technician
+    Age of Rebellion:   ace, commander, diplomat, engineer, soldier, spy
+    Force and Destiny:  consular, guardian, mystic, seeker, sentinel, warrior
+  Free-form careers (e.g. "ex-imperial slicer", "frontier medic") are allowed
+  when no canonical career fits; they advance through bespoke talents instead.
+- "specializations": a list of 0-2 lowercase specialization slugs. When using
+  a canonical career, pick its covered specialization so the character gets a
+  curated talent tree:
+    bounty_hunter: survivalist      | ace: pilot
+    colonist: doctor                | commander: tactician
+    explorer: scout                 | diplomat: ambassador
+    hired_gun: bodyguard            | engineer: saboteur
+    smuggler: pilot/scoundrel/thief | soldier: commando
+    technician: mechanic            | spy: infiltrator
+    consular: niman_disciple        | mystic: seer
+    guardian: protector             | seeker: pathfinder
+    sentinel: shadow                | warrior: shii_cho_knight
+  For a free-form career, either omit specializations or invent one slug that
+  names the character's discipline.
 - "archetype_concept": one vivid sentence naming who this person is, e.g.
   "Jaded ex-Imperial loadmaster turned reluctant courier".
 - "background": 2-4 sentences of backstory grounded in the pitch.
@@ -88,8 +107,14 @@ OUTPUT — a single JSON object with EXACTLY these fields:
                          "qualities": [<strings>] },
     "armor": optional { "name", "soak_bonus" },
     "tools": list of { "name", "description" },
-    "special_items": list of strings.
-  Keep it to starting-tier gear that fits the concept.
+    "special_items": list — each either a string, or an object
+      { "name", "mechanical_effect", "narrative_note" }.
+  Keep it to starting-tier gear that fits the concept. Give ONE special item
+  real story weight: an object from the character's past with a small,
+  bounded mechanical hook (e.g. "once per session, adds 1 boost die to checks
+  involving X" or "once per campaign, calls in Y — attention guaranteed,
+  outcome not"). It should embody the character's unresolved history, not
+  just be useful.
 
 DO NOT output wound_threshold, strain_threshold, soak, or any XP fields — the
 engine computes those. Output ONLY the JSON object, no commentary.

@@ -8,7 +8,8 @@
     "overall": "4-24 ABY",
     "primary_play_window": "11-14 ABY",
     "praxeum_window": "11-17 ABY",
-    "notes": "The pack covers the New Republic's post-Endor consolidation through the pre-New Jedi Order peace, with special support for Luke Skywalker's early Jedi Praxeum on Yavin 4."
+    "notes": "The pack covers the New Republic's post-Endor consolidation through the pre-New Jedi Order peace, with special support for Luke Skywalker's early Jedi Praxeum on Yavin 4. The maturation window (14-17 ABY) supports campaigns set after the founding crises, when the Praxeum is institutional and its threats turn bureaucratic and political rather than purely martial.",
+    "maturation_window": "14-17 ABY"
   },
   "authoring_intent": "A reusable Legends era pack for campaigns where the Empire has fallen as a central regime, the New Republic is legitimate but overstretched, and Luke Skywalker's Jedi Order is being rebuilt from fragments. It should support academy mysteries, Imperial Remnant pressure, Force discovery, archaeological danger, New Republic politics, and small-group heroics without drifting into Clone Wars, Imperial Dark Times, or later New Jedi Order war textures.",
   "core_premise": "The Rebellion won, but the victory did not settle the galaxy. The New Republic must govern a wounded civilization while Luke's Jedi Praxeum, Imperial holdouts, warlords, old secrets, and half-understood Force legacies test whether restoration can become something wiser than repetition.",
@@ -102,6 +103,18 @@
         "pre-NJO mystery hooks",
         "cross-era character import into wartime campaigns"
       ]
+    },
+    {
+      "id": "praxeum_maturation",
+      "range": "15-17 ABY",
+      "summary": "Luke Skywalker's Praxeum is five-plus years old and institutional: thirty students, a tiered curriculum, regular intake cohorts, a published address, and a Senate oversight coalition auditing what a Jedi school owes the Republic that hosts it. Pellaeon's consolidated Remnant remains disciplined and pre-treaty hostile; the Disciples of Ragnos are dispersed but not extinct; Brakiss builds quietly in the Outer Rim; and the era's distinct dread is bureaucratic — collection programs that survived the Empire as filing systems and kept working.",
+      "campaign_uses": [
+        "academy politics under Senate oversight",
+        "defector and sanctuary arcs",
+        "surviving Imperial collection programs",
+        "pre-treaty Remnant brinkmanship",
+        "second-generation students inheriting first-generation compromises"
+      ]
     }
   ],
   "terminology": {
@@ -155,6 +168,21 @@
         "term": "Recovered Jedi lore",
         "definition": "Holocrons, records, artifacts, oral fragments, and Force traditions used to rebuild Jedi practice.",
         "usage": "Use as useful but incomplete guidance. Recovered knowledge should raise questions, not close them all."
+      },
+      {
+        "term": "Praxeum Maturation Period",
+        "definition": "The 14-17 ABY stretch when the academy stops being fragile and starts being institutional: cohorts, curriculum, oversight, and the discovery of its own compromises.",
+        "usage": "Use for campaigns where the threat is subtler than a siege — politics, infiltration, and the inheritance of first-generation mistakes."
+      },
+      {
+        "term": "Collection program",
+        "definition": "An Imperial-era acquisition apparatus for Force-sensitive children, artifacts, or intelligence that survived Endor in fragments and kept operating under new management.",
+        "usage": "Use as bureaucratic dread: polite, legal-seeming, patient. Its officers file paperwork about stolen children."
+      },
+      {
+        "term": "Senate oversight coalition",
+        "definition": "New Republic senators who audit the Praxeum's autonomy, funding, and accountability — neither villains nor allies by default.",
+        "usage": "Use to make the academy politically mortal; oversight pressure should constrain choices without cartoonish hostility."
       }
     ],
     "avoid_or_contextualize": [
@@ -336,6 +364,29 @@
         "Imperial holdout victims",
         "smuggler allies",
         "Force-sensitive discovery outside the academy"
+      ]
+    },
+    {
+      "faction_id": "shadow_collection_cells",
+      "display_name": "Shadow Collection Cells",
+      "description": "Surviving Imperial acquisition programs — child-screening offices, artifact retrieval branches, Force-sensitive cataloguing cells — that outlived the Empire the way filing systems outlive governments: quietly, in copies, under patient ex-ISB management and discreet patronage from dark-side actors like Brakiss.",
+      "disposition_start": 0.15,
+      "influence_start": 0.25,
+      "awareness_start": 0.2,
+      "per_act_drift": {},
+      "playable": false,
+      "pressure_vectors": [
+        "assets versus persons",
+        "bureaucratic patience versus Jedi visibility",
+        "a defector's knowledge as a liability with a deadline",
+        "purchase, leverage, and retrieval over open assault"
+      ],
+      "campaign_uses": [
+        "antagonists tied to a protagonist's past",
+        "defector pursuit arcs",
+        "missing Force-sensitive children",
+        "quiet infiltration of academy support layers",
+        "evidence chains that implicate respectable institutions"
       ]
     }
   ],
@@ -845,6 +896,26 @@
         "duty",
         "obligation",
         "morality"
+      ]
+    },
+    {
+      "id": "defector_at_the_gate",
+      "title": "The Defector at the Gate",
+      "pitch": "Someone trained by the old machine — an Imperial successor program, a dark-side school, an intelligence cell — arrives at the Praxeum asking for sanctuary, and the academy must decide what its mercy costs while the machine comes to collect.",
+      "best_allegiances": [
+        "jedi_order",
+        "imperial_survivor",
+        "academy_support"
+      ],
+      "core_threads": [
+        "Is a person what their training made them?",
+        "What does sanctuary owe the suspicious, and what do the suspicious owe sanctuary?",
+        "Who pays when an institution's compassion is gamed — and who pays when it isn't offered?"
+      ],
+      "recommended_tracks": [
+        "morality",
+        "obligation",
+        "duty"
       ]
     }
   ],

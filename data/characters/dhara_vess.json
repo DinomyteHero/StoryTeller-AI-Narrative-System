@@ -1,0 +1,148 @@
+{
+  "name": "Dhara Vess",
+  "species": "zabrak",
+  "career": "bounty_hunter",
+  "archetype_concept": "Bounty hunter who only takes 'deserving' quarry, paying down a debt that isn't measured in credits",
+  "specializations": [
+    "survivalist"
+  ],
+  "primary_game_line": "edge_of_empire",
+  "background": "Dhara Vess learned tracking from her mother on Iridonia's flint plateaus and learned the trade from Joss Ferren, a greying human skip-tracer who worked the Mid Rim debt circuits and never once drew first. For six years they were the kind of partnership the guild holds up as proof the work can be done clean. Then came Veth Maro: a dock administrator who skipped on a Hutt consortium loan, a standard recovery, paper in order. Dhara ran him down in two days and delivered him on schedule. The consortium made an example of him on a public feed, and Dhara learned what the contract had always been for. Joss said nothing for a week, then quietly took a retrieval job to buy Maro's family passage out of the consortium's reach — a job Dhara refused on principle she did not yet have. He died on it, covering a family that wasn't his, holding a debt that should have been hers. Dhara paid for the funeral, took over his ship lease, and discovered that Joss had been quietly carrying his own family's debt to a Brentaal factor for years. She hunts again now — selective, expensive, scrupulous about who deserves it — and sends half of every fee to a family on Brentaal who have never met her and believe their father's partner simply honors an old arrangement. The ledger does not balance. She has stopped expecting it to and not stopped paying into it.",
+  "characteristics": {
+    "brawn": 3,
+    "agility": 3,
+    "intellect": 2,
+    "cunning": 3,
+    "willpower": 2,
+    "presence": 2
+  },
+  "skills": {
+    "astrogation": 0,
+    "athletics": 1,
+    "charm": 0,
+    "coercion": 0,
+    "computers": 0,
+    "cool": 1,
+    "coordination": 0,
+    "deception": 0,
+    "discipline": 0,
+    "leadership": 0,
+    "mechanics": 0,
+    "medicine": 0,
+    "negotiation": 0,
+    "perception": 1,
+    "piloting_planetary": 0,
+    "piloting_space": 0,
+    "resilience": 1,
+    "skulduggery": 0,
+    "stealth": 1,
+    "streetwise": 1,
+    "survival": 2,
+    "vigilance": 2,
+    "brawl": 1,
+    "gunnery": 0,
+    "melee": 0,
+    "ranged_light": 0,
+    "ranged_heavy": 2,
+    "core_worlds": 0,
+    "education": 0,
+    "lore": 0,
+    "outer_rim": 0,
+    "underworld": 1,
+    "warfare": 0,
+    "xenology": 0,
+    "lightsaber": 0
+  },
+  "wound_threshold": 13,
+  "strain_threshold": 12,
+  "current_wounds": 0,
+  "current_strain": 0,
+  "soak": 3,
+  "total_xp": 100,
+  "available_xp": 0,
+  "motivation": {
+    "obligation_type": "debt",
+    "obligation_value": 10,
+    "duty_type": null,
+    "duty_value": 0,
+    "morality": 50,
+    "conflict": 0
+  },
+  "force_rating": 0,
+  "force_committed": 0,
+  "loadout": {
+    "weapons": [
+      {
+        "name": "Worn blaster carbine 'Settlement'",
+        "skill": "ranged_heavy",
+        "damage_bonus": 6,
+        "critical_rating": 3,
+        "qualities": [
+          "stun_setting"
+        ],
+        "narrative_note": "Joss's carbine, renamed after his death. She fires stun first in every engagement that allows it, which her competitors consider a weakness and her clients consider a brand."
+      },
+      {
+        "name": "Plateau knife",
+        "skill": "melee",
+        "damage_bonus": 2,
+        "critical_rating": 4,
+        "qualities": [],
+        "narrative_note": "Iridonian flint-steel, her mother's. Used for game, rope, and exactly one fight she does not discuss."
+      }
+    ],
+    "armor": {
+      "name": "Armored long-coat over trail leathers",
+      "soak_bonus": 1,
+      "defense": 0,
+      "narrative_note": "Patched at the left shoulder where the armorweave stopped what should have ended her. She keeps the patch a different color on purpose."
+    },
+    "tools": [
+      {
+        "category": "tracking",
+        "name": "Spoor kit and pulse-tagger",
+        "mechanical_effect": "Adds 1 boost die to Survival or Vigilance checks made to track, trail, or anticipate the movement of a specific quarry.",
+        "narrative_note": "Half the kit is technology. The other half is sample jars, casting resin, and a notebook of handwriting that is not hers."
+      },
+      {
+        "category": "restraint",
+        "name": "Guild-grade binders",
+        "mechanical_effect": "Enables clean, non-injurious restraint of a subdued target; adds 1 boost die to checks to secure a prisoner against escape.",
+        "narrative_note": "Maintained meticulously. How a hunter treats a bound prisoner is, in her experience, the entire moral content of the trade."
+      },
+      {
+        "category": "medical",
+        "name": "One stimpack",
+        "mechanical_effect": "Can heal 5 wounds. One use before resupply needed.",
+        "narrative_note": "She carries one, not two. The second slot in the pouch holds the beads of her guild license, paid up through next year."
+      }
+    ],
+    "special_items": [
+      {
+        "name": "Joss's stopped chrono",
+        "mechanical_effect": "A mechanical wrist chrono, stopped at the hour Joss Ferren died. Once per session, when Dhara is hunting or protecting a quarry rather than merely collecting one, it adds 1 boost die to a Survival, Vigilance, or Streetwise check. Once per campaign, she can call on Joss's old network — retired trackers, dock clerks, one forger of unimpeachable honesty — for a favor that cannot be bought twice.",
+        "narrative_note": "It would cost twelve credits to repair. She has had twelve credits. The hands stay where they stopped, because some accounts should stay visibly open."
+      }
+    ]
+  },
+  "career_skills": [],
+  "reserved_xp": 0,
+  "advancement_log": [],
+  "acquired_talents": [],
+  "talent_uses": {},
+  "force_powers": [],
+  "active_commitments": [],
+  "throughline_question": "When the law is a price list and the paper says you're clean, who do you owe for the things the contract let you do — and can a debt like that ever be paid in the same currency it was made in?",
+  "voice_notes": "Speaks in contract language — 'terms,' 'breach,' 'settlement' — even about feelings, especially about feelings. Bone-dry humor delivered deadpan. Negotiates everything except her two rules: stun first, prisoners eat what she eats. Goes quiet and gentle with animals and children, then pretends she didn't.",
+  "active_injuries": [],
+  "narrative_arc": {
+    "lie": "A contract is a conscience. If the paper is legal and the quarry is guilty, the consequences belong to the client — a hunter who starts weighing souls stops being able to work, and the work is all she has left of him.",
+    "ghost": "Veth Maro, delivered on schedule and made an example of on a public feed. Then Joss, dead on a job she refused — buying back her mistake with his life because she told him it wasn't theirs to fix. She has hunted 'deserving' quarry ever since, and sends half of every fee to a family on Brentaal who don't know her name.",
+    "truth": "The paper was never the conscience; she was, the whole time — refusal was always on the rate card. Joss didn't die balancing her ledger, he died showing her how the work is done by someone who has decided what it's for. The debt isn't payable in credits, and it was never meant to be: it's payable in who she is on the next job, and the one after.",
+    "want": "To clear Joss's family debt with the Brentaal factor — fully, anonymously — and to keep her docket clean enough that she never has to learn what a second Veth Maro would make her.",
+    "need": "To stop pricing forgiveness in credits and percentages. To meet the Ferrens. To say what happened out loud to the people the money has been speaking to on her behalf, and to let the ledger be a relationship instead of a penance.",
+    "arc_type": "positive",
+    "lie_grip": 0.8,
+    "movements": []
+  }
+}

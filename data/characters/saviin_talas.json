@@ -1,0 +1,140 @@
+{
+  "name": "Saviin Talas",
+  "species": "twi_lek",
+  "career": "spy",
+  "archetype_concept": "Deep-cover identity artist who spent six years as someone else and came back unsure which habits are hers",
+  "specializations": [
+    "infiltrator"
+  ],
+  "primary_game_line": "age_of_rebellion",
+  "background": "Saviin Talas was recruited out of a Ryloth refugee registry by an intelligence service that valued exactly the thing her childhood had taught her: that a self is a set of choices, and choices can be made deliberately. She was twenty-two when they built Lessa Vessic around her — a freight expediter with a limp, a widow's pension, and a backstory deep enough to survive a professional audit — and inserted her into the Karthon Combine, a shipping syndicate that moved weapons under agricultural manifests. The operation was meant to last eight months. It lasted six years. Lessa rented a room above a laundry from a family called Vessic — the cover name had been borrowed from a real lineage, and the family assumed kinship — and somewhere in year two the assumption became fact: Vianne, the sister-in-law who taught her to cook properly; Tem, the nephew who called her aunt and showed her every school mark. The intelligence Saviin moved out of Karthon's books saved, by the service's own arithmetic, several thousand lives. On extraction day the service burned the Lessa identity completely: a dock accident, a closed-casket notice, a pension redirect. The Vessics grieved a woman who never existed. Saviin read the condolence thread from a safehouse and discovered she could not stop being someone she had never been. She freelances now — clean infiltration work, nothing that builds families — and maintains, against every rule of tradecraft she has ever taught, the dead-drop box Lessa kept. Tem still writes to it. She has never answered. She has also never closed it.",
+  "characteristics": {
+    "brawn": 2,
+    "agility": 3,
+    "intellect": 2,
+    "cunning": 4,
+    "willpower": 2,
+    "presence": 2
+  },
+  "skills": {
+    "astrogation": 0,
+    "athletics": 0,
+    "charm": 1,
+    "coercion": 0,
+    "computers": 1,
+    "cool": 1,
+    "coordination": 0,
+    "deception": 2,
+    "discipline": 0,
+    "leadership": 0,
+    "mechanics": 0,
+    "medicine": 0,
+    "negotiation": 0,
+    "perception": 2,
+    "piloting_planetary": 0,
+    "piloting_space": 0,
+    "resilience": 0,
+    "skulduggery": 1,
+    "stealth": 2,
+    "streetwise": 2,
+    "survival": 0,
+    "vigilance": 0,
+    "brawl": 0,
+    "gunnery": 0,
+    "melee": 0,
+    "ranged_light": 1,
+    "ranged_heavy": 0,
+    "core_worlds": 0,
+    "education": 0,
+    "lore": 0,
+    "outer_rim": 0,
+    "underworld": 1,
+    "warfare": 0,
+    "xenology": 0,
+    "lightsaber": 0
+  },
+  "wound_threshold": 12,
+  "strain_threshold": 13,
+  "current_wounds": 0,
+  "current_strain": 0,
+  "soak": 2,
+  "total_xp": 100,
+  "available_xp": 0,
+  "motivation": {
+    "obligation_type": "buried_identity",
+    "obligation_value": 10,
+    "duty_type": null,
+    "duty_value": 0,
+    "morality": 50,
+    "conflict": 0
+  },
+  "force_rating": 0,
+  "force_committed": 0,
+  "loadout": {
+    "weapons": [
+      {
+        "name": "Holdout blaster 'Plain Sight'",
+        "skill": "ranged_light",
+        "damage_bonus": 4,
+        "critical_rating": 4,
+        "qualities": [
+          "stun_setting"
+        ],
+        "narrative_note": "Small enough to live inside a hollowed datapad. In six years undercover she drew it twice and fired it never, which she considers the entire point of good cover."
+      }
+    ],
+    "armor": {
+      "name": "Unremarkable traveler's jacket",
+      "soak_bonus": 1,
+      "defense": 0,
+      "narrative_note": "Armorweave lining in a cut nobody looks at twice, in a color with no name. Forgettability is a feature she pays for."
+    },
+    "tools": [
+      {
+        "category": "tradecraft",
+        "name": "Documentation kit",
+        "mechanical_effect": "Adds 1 boost die to Deception or Skulduggery checks involving forged credentials, manifests, or identity documents.",
+        "narrative_note": "Blank flimsi, three stamp-cutters, and a list of which sector offices still use which seals. The craft is in knowing what a tired clerk expects to see."
+      },
+      {
+        "category": "surveillance",
+        "name": "Ear-stud comm and contact lens recorder",
+        "mechanical_effect": "Adds 1 boost die to Perception checks made while covertly observing or recording a conversation or location.",
+        "narrative_note": "Civilian-grade hardware, professionally modified. Anything better sets off the scanners that matter."
+      },
+      {
+        "category": "medical",
+        "name": "One stimpack",
+        "mechanical_effect": "Can heal 5 wounds. One use before resupply needed.",
+        "narrative_note": "Tucked beside a sewing kit that sees more use."
+      }
+    ],
+    "special_items": [
+      {
+        "name": "Lessa's locket",
+        "mechanical_effect": "A cheap pressed-tin locket holding a holo of the Vessic family at Tem's naming day, with Lessa in the second row. Once per session, when Saviin deliberately borrows one of her former covers' mannerisms, it adds 1 boost die to a Deception, Charm, or Streetwise check. Once per campaign, she can fully re-inhabit Lessa Vessic — a complete, audit-proof identity with real history and real references — knowing every use risks the Vessics learning their grief was engineered.",
+        "narrative_note": "Tradecraft says a cover keeps no souvenirs, and she taught that rule to others. The locket stays. Some evidence is of the crime; this is evidence of the alibi — that for six years, somebody real was loved under that name."
+      }
+    ]
+  },
+  "career_skills": [],
+  "reserved_xp": 0,
+  "advancement_log": [],
+  "acquired_talents": [],
+  "talent_uses": {},
+  "force_powers": [],
+  "active_commitments": [],
+  "throughline_question": "If the person you played for six years was braver, kinder, and more loved than the person who played her — which one of you came home, and what do you owe the family who buried the other one?",
+  "voice_notes": "Unconsciously mirrors the cadence and vocabulary of whoever she's talking to, a half-beat delayed — interrogators call it rapport, she calls it leakage. When genuinely off-script she goes flat and economical, Ryl understatement with the lekku held still. Answers personal questions with accurate, irrelevant facts. Cooks when stressed, in another woman's style.",
+  "active_injuries": [],
+  "narrative_arc": {
+    "lie": "There is no original underneath — a self is a costume all the way down, and whoever she decides to be is who she is. This is freedom, and anyone who calls it loneliness is reading the file wrong.",
+    "ghost": "Extraction day. The service burned Lessa Vessic with a dock accident and a closed casket, and Saviin read the family's condolence thread from a safehouse — Tem's message misspelled 'always' — and understood that the operation's only fully successful deception had been run on her. Six years of synthetic identity had produced two true things: the intelligence, and the love. The service kept the intelligence.",
+    "truth": "The covers worked because someone real was wearing them. What the Vessics loved was not the backstory — it was the woman who showed up, remembered the school marks, learned the recipes: choices no handler scripted. The original was never missing. She was load-bearing the whole time, and grieving Lessa is allowed, because Lessa's choices were hers.",
+    "want": "One more identity big enough to disappear into — a clean, consuming professional cover with no families in the blast radius — and enough distance from the Karthon cleanup crews that the drop-box stays safe to keep.",
+    "need": "To grieve the person she played as a real loss instead of a procedural one. To answer Tem's letters as somebody — even truthfully. To let one person meet her unscripted and stay in the room as whoever shows up.",
+    "arc_type": "positive",
+    "lie_grip": 0.85,
+    "movements": []
+  }
+}

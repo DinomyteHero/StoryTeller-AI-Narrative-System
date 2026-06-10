@@ -1,0 +1,205 @@
+{
+    "specialization": "scout",
+    "career": "explorer",
+    "game_line": "edge_of_empire",
+    "talents": [
+        {
+            "id": "scout_t1_0",
+            "talent_ref": "stalker",
+            "tier": 1,
+            "position": 0,
+            "xp_cost": 5,
+            "prerequisites": []
+        },
+        {
+            "id": "scout_t1_1",
+            "talent_ref": "uncanny_senses",
+            "tier": 1,
+            "position": 1,
+            "xp_cost": 5,
+            "prerequisites": []
+        },
+        {
+            "id": "scout_t1_2",
+            "talent_ref": "grit",
+            "tier": 1,
+            "position": 2,
+            "xp_cost": 5,
+            "prerequisites": []
+        },
+        {
+            "id": "scout_t1_3",
+            "talent_ref": "galaxy_mapper",
+            "tier": 1,
+            "position": 3,
+            "xp_cost": 5,
+            "prerequisites": []
+        },
+        {
+            "id": "scout_t2_0",
+            "talent_ref": "shortcut",
+            "tier": 2,
+            "position": 0,
+            "xp_cost": 10,
+            "prerequisites": [
+                "scout_t1_0"
+            ]
+        },
+        {
+            "id": "scout_t2_1",
+            "talent_ref": "sense_danger",
+            "tier": 2,
+            "position": 1,
+            "xp_cost": 10,
+            "prerequisites": [
+                "scout_t1_1"
+            ]
+        },
+        {
+            "id": "scout_t2_2",
+            "talent_ref": "toughened",
+            "tier": 2,
+            "position": 2,
+            "xp_cost": 10,
+            "prerequisites": [
+                "scout_t1_2"
+            ]
+        },
+        {
+            "id": "scout_t2_3",
+            "talent_ref": "street_smarts",
+            "tier": 2,
+            "position": 3,
+            "xp_cost": 10,
+            "prerequisites": [
+                "scout_t1_3"
+            ]
+        },
+        {
+            "id": "scout_t3_0",
+            "talent_ref": "stalker",
+            "tier": 3,
+            "position": 0,
+            "xp_cost": 15,
+            "prerequisites": [
+                "scout_t2_0"
+            ]
+        },
+        {
+            "id": "scout_t3_1",
+            "talent_ref": "uncanny_senses",
+            "tier": 3,
+            "position": 1,
+            "xp_cost": 15,
+            "prerequisites": [
+                "scout_t2_1"
+            ]
+        },
+        {
+            "id": "scout_t3_2",
+            "talent_ref": "side_step",
+            "tier": 3,
+            "position": 2,
+            "xp_cost": 15,
+            "prerequisites": [
+                "scout_t2_2"
+            ]
+        },
+        {
+            "id": "scout_t3_3",
+            "talent_ref": "knowledge_is_power",
+            "tier": 3,
+            "position": 3,
+            "xp_cost": 15,
+            "prerequisites": [
+                "scout_t2_3"
+            ]
+        },
+        {
+            "id": "scout_t4_0",
+            "talent_ref": "shortcut",
+            "tier": 4,
+            "position": 0,
+            "xp_cost": 20,
+            "prerequisites": [
+                "scout_t3_0"
+            ]
+        },
+        {
+            "id": "scout_t4_1",
+            "talent_ref": "tricky_target",
+            "tier": 4,
+            "position": 1,
+            "xp_cost": 20,
+            "prerequisites": [
+                "scout_t3_1"
+            ]
+        },
+        {
+            "id": "scout_t4_2",
+            "talent_ref": "grit",
+            "tier": 4,
+            "position": 2,
+            "xp_cost": 20,
+            "prerequisites": [
+                "scout_t3_2"
+            ]
+        },
+        {
+            "id": "scout_t4_3",
+            "talent_ref": "quick_strike",
+            "tier": 4,
+            "position": 3,
+            "xp_cost": 20,
+            "prerequisites": [
+                "scout_t3_3"
+            ]
+        },
+        {
+            "id": "scout_t5_1",
+            "talent_ref": "dedication",
+            "tier": 5,
+            "position": 1,
+            "xp_cost": 25,
+            "prerequisites": [
+                "scout_t4_1"
+            ]
+        }
+    ],
+    "tree_paths": {
+        "pathfinder": {
+            "theme": "pathfinder",
+            "description": "The path of motion. Always a route, always a shortcut, always somewhere the pursuit has not thought of.",
+            "talent_ids": [
+                "scout_t1_0",
+                "scout_t2_0",
+                "scout_t3_0",
+                "scout_t4_0"
+            ]
+        },
+        "weather_sense": {
+            "theme": "weather_sense",
+            "description": "The path of awareness. Reading terrain, rooms, and silences for the thing that is about to go wrong.",
+            "talent_ids": [
+                "scout_t1_1",
+                "scout_t2_1",
+                "scout_t3_1",
+                "scout_t4_1"
+            ]
+        },
+        "far_horizons": {
+            "theme": "far_horizons",
+            "description": "The path of the journey itself. Maps, endurance, and the accumulated knowledge of a thousand landings.",
+            "talent_ids": [
+                "scout_t1_2",
+                "scout_t2_2",
+                "scout_t3_2",
+                "scout_t4_2",
+                "scout_t1_3",
+                "scout_t2_3",
+                "scout_t3_3",
+                "scout_t4_3"
+            ]
+        }
+    }
+}

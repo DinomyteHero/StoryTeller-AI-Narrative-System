@@ -1,0 +1,205 @@
+{
+    "specialization": "bodyguard",
+    "career": "hired_gun",
+    "game_line": "edge_of_empire",
+    "talents": [
+        {
+            "id": "bgrd_t1_0",
+            "talent_ref": "toughened",
+            "tier": 1,
+            "position": 0,
+            "xp_cost": 5,
+            "prerequisites": []
+        },
+        {
+            "id": "bgrd_t1_1",
+            "talent_ref": "grit",
+            "tier": 1,
+            "position": 1,
+            "xp_cost": 5,
+            "prerequisites": []
+        },
+        {
+            "id": "bgrd_t1_2",
+            "talent_ref": "quick_draw",
+            "tier": 1,
+            "position": 2,
+            "xp_cost": 5,
+            "prerequisites": []
+        },
+        {
+            "id": "bgrd_t1_3",
+            "talent_ref": "street_smarts",
+            "tier": 1,
+            "position": 3,
+            "xp_cost": 5,
+            "prerequisites": []
+        },
+        {
+            "id": "bgrd_t2_0",
+            "talent_ref": "side_step",
+            "tier": 2,
+            "position": 0,
+            "xp_cost": 10,
+            "prerequisites": [
+                "bgrd_t1_0"
+            ]
+        },
+        {
+            "id": "bgrd_t2_1",
+            "talent_ref": "dodge",
+            "tier": 2,
+            "position": 1,
+            "xp_cost": 10,
+            "prerequisites": [
+                "bgrd_t1_1"
+            ]
+        },
+        {
+            "id": "bgrd_t2_2",
+            "talent_ref": "defensive_driving",
+            "tier": 2,
+            "position": 2,
+            "xp_cost": 10,
+            "prerequisites": [
+                "bgrd_t1_2"
+            ]
+        },
+        {
+            "id": "bgrd_t2_3",
+            "talent_ref": "intimidating_presence",
+            "tier": 2,
+            "position": 3,
+            "xp_cost": 10,
+            "prerequisites": [
+                "bgrd_t1_3"
+            ]
+        },
+        {
+            "id": "bgrd_t3_0",
+            "talent_ref": "toughened",
+            "tier": 3,
+            "position": 0,
+            "xp_cost": 15,
+            "prerequisites": [
+                "bgrd_t2_0"
+            ]
+        },
+        {
+            "id": "bgrd_t3_1",
+            "talent_ref": "grit",
+            "tier": 3,
+            "position": 1,
+            "xp_cost": 15,
+            "prerequisites": [
+                "bgrd_t2_1"
+            ]
+        },
+        {
+            "id": "bgrd_t3_2",
+            "talent_ref": "side_step",
+            "tier": 3,
+            "position": 2,
+            "xp_cost": 15,
+            "prerequisites": [
+                "bgrd_t2_2"
+            ]
+        },
+        {
+            "id": "bgrd_t3_3",
+            "talent_ref": "nobody_s_fool",
+            "tier": 3,
+            "position": 3,
+            "xp_cost": 15,
+            "prerequisites": [
+                "bgrd_t2_3"
+            ]
+        },
+        {
+            "id": "bgrd_t4_0",
+            "talent_ref": "dead_to_rights",
+            "tier": 4,
+            "position": 0,
+            "xp_cost": 20,
+            "prerequisites": [
+                "bgrd_t3_0"
+            ]
+        },
+        {
+            "id": "bgrd_t4_1",
+            "talent_ref": "dodge",
+            "tier": 4,
+            "position": 1,
+            "xp_cost": 20,
+            "prerequisites": [
+                "bgrd_t3_1"
+            ]
+        },
+        {
+            "id": "bgrd_t4_2",
+            "talent_ref": "tricky_target",
+            "tier": 4,
+            "position": 2,
+            "xp_cost": 20,
+            "prerequisites": [
+                "bgrd_t3_2"
+            ]
+        },
+        {
+            "id": "bgrd_t4_3",
+            "talent_ref": "quick_strike",
+            "tier": 4,
+            "position": 3,
+            "xp_cost": 20,
+            "prerequisites": [
+                "bgrd_t3_3"
+            ]
+        },
+        {
+            "id": "bgrd_t5_1",
+            "talent_ref": "dedication",
+            "tier": 5,
+            "position": 1,
+            "xp_cost": 25,
+            "prerequisites": [
+                "bgrd_t4_1"
+            ]
+        }
+    ],
+    "tree_paths": {
+        "living_wall": {
+            "theme": "living_wall",
+            "description": "The path of the shield. Standing between the principal and the blaster bolt, and being built to survive it.",
+            "talent_ids": [
+                "bgrd_t1_0",
+                "bgrd_t2_0",
+                "bgrd_t3_0",
+                "bgrd_t4_0"
+            ]
+        },
+        "close_protection": {
+            "theme": "close_protection",
+            "description": "The path of reaction. The drilled economy of motion that puts the body where the danger is going to be.",
+            "talent_ids": [
+                "bgrd_t1_1",
+                "bgrd_t2_1",
+                "bgrd_t3_1",
+                "bgrd_t4_1",
+                "bgrd_t1_2",
+                "bgrd_t2_2",
+                "bgrd_t3_2",
+                "bgrd_t4_2"
+            ]
+        },
+        "deterrence": {
+            "theme": "deterrence",
+            "description": "The path of presence. Most fights are won by the ones that visibly are not worth starting.",
+            "talent_ids": [
+                "bgrd_t1_3",
+                "bgrd_t2_3",
+                "bgrd_t3_3",
+                "bgrd_t4_3"
+            ]
+        }
+    }
+}

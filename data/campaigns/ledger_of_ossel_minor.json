@@ -1,0 +1,1698 @@
+{
+  "name": "The Ledger of Ossel Minor",
+  "foreshadow_registry": [
+    {
+      "id": "recall_beacon_on_the_shelf",
+      "setup_act": 1,
+      "setup_description": "Kessa declares Varko's recall beacon to the staff and keeps it in plain sight on her quarters shelf — a leash held instead of worn. Kam logs it; students whisper about it; Luke never once asks her to surrender it.",
+      "payoff_act": 4,
+      "payoff_description": "The beacon becomes the finale's hinge: pressed deliberately, it chooses the time and ground of the Catalogue's arrival — the ambush converted into an appointment. Refused, it stays a shelf ornament while she goes to them instead. Either way, the leash ends.",
+      "payoff_type": "callback"
+    },
+    {
+      "id": "ballad_of_the_lost_hounds",
+      "setup_act": 1,
+      "setup_description": "Tionne, collecting fringe-era songs for the archive, hears Kessa absently hum a drill cadence and cannot place the melody. She starts transcribing what she calls 'the Ballad of the Lost Hounds' from fragments Kessa doesn't realize she's leaking.",
+      "payoff_act": 3,
+      "payoff_description": "The completed transcription is a mnemonic: Catalogue children were drilled to memorize evacuation jump-cords as cadence. The ballad contains the route to Varko's archive-station — Kessa has been carrying the map in her body since she was nine.",
+      "payoff_type": "revelation"
+    },
+    {
+      "id": "jadens_tremor",
+      "setup_act": 1,
+      "setup_description": "At the refectory's empty table, Jaden Korr watches Kessa with a visible tremor he cannot still. The cohort reads it as fear of her. It is not fear.",
+      "payoff_act": 2,
+      "payoff_description": "Jaden confronts Kessa with the truth under the tremor: the Catalogue took his sister, and the retrieval team's tracker matches Kessa's years and methods. He has been holding the question since the day she arrived: was it you?",
+      "payoff_type": "revelation"
+    },
+    {
+      "id": "ilos_toy_soldier",
+      "setup_act": 2,
+      "setup_description": "The intercepted manifest itemizes 'the acquisition's' personal effects: one carved soldier, wooden, left arm missing. Kessa remembers the intake rule — one comfort object, logged and permitted, to speed early compliance.",
+      "payoff_act": 4,
+      "payoff_description": "In the archive-station finale Ilo holds the soldier white-knuckled while reciting handler phrasing at Kessa. It is the one object in the room the Catalogue did not script — and the crack through which the boy can still be reached.",
+      "payoff_type": "callback"
+    },
+    {
+      "id": "suppression_reflex",
+      "setup_act": 1,
+      "setup_description": "In a blindfolded saber drill, a startled Kessa drops a fellow student with a Catalogue suppression hold before she knows she has moved. She reports herself to Kam before the instructor can — the reflex is the evidence everyone fears.",
+      "payoff_act": 4,
+      "payoff_description": "The same hold is the only non-lethal way to stop a brainwashed Ilo from killing her or himself. The technique she swore off is the shield's last shape: used with consent's opposite, one more time, as protection — or refused at terrible cost.",
+      "payoff_type": "irony"
+    },
+    {
+      "id": "kams_count",
+      "setup_act": 2,
+      "setup_description": "Kam's private ledger of Kessa's hours and movements becomes cohort lore — the visible insult of being counted. Tahl argues with him about it in the open; Kam keeps counting.",
+      "payoff_act": 3,
+      "payoff_description": "When Varko's frame lands and the academy bleeds planted evidence, Kam's count is the timestamped record that exonerates her. The insult was an alibi being kept by the one man nobody could accuse of favoring her.",
+      "payoff_type": "reversal"
+    }
+  ],
+  "story_architecture": {
+    "dramatic_premise": "A living weapon of the Empire seeks sanctuary in a temple of her victims, realizing that the only way to save the child she helped steal is to use the very predatory instincts she is trying to unlearn.",
+    "central_dramatic_question": "Can a person truly renounce a past that is still actively harming others, or is 'peace' just a form of cowardice for the guilty?",
+    "story_promise": "A journey from the hollow safety of a witness protection program to the crushing weight of personal accountability.",
+    "ending_paths": [
+      {
+        "name": "Surrender For Ilo",
+        "branch_id": "surrender_for_ilo",
+        "synopsis": "She presses the beacon as a choice, not a recall — trading herself for Ilo under terms the academy witnesses and the Catalogue cannot quietly break. The epilogue lives in what her obedience, freely chosen for someone else's sake, costs and buys: the boy outside the machine, the woman back inside it with her eyes open, and a rescue that is now someone else's promise to keep.",
+        "thematic_payoff": "Obedience chosen freely for another's sake stops being the leash and becomes the shield.",
+        "carries_forward": true
+      },
+      {
+        "name": "Burn The Catalogue",
+        "branch_id": "burn_the_catalogue",
+        "synopsis": "She flies the route her body carried for thirteen years and ends the Catalogue with its own methods — suppression holds, audit-stamp tradecraft, the hound's full kit. Ilo comes home. The fire is just. The epilogue asks the harder question: who she is on the first ordinary morning after being, one last time, exactly what Varko built.",
+        "thematic_payoff": "The machine can be ended only by its best product — and being the ending of a thing is not the same as being free of it.",
+        "carries_forward": true
+      },
+      {
+        "name": "Senate Testimony",
+        "branch_id": "senate_testimony",
+        "synopsis": "She chooses daylight over fire: the ledger, the discrepancy, the ballad, and her own confession, entered into the public record before Karro's coalition. The Catalogue is dismantled by subpoena, its patrons exposed by increments; her name is attached to every page, including the Ossel Minor report. The epilogue lives in the aftermath of truth at full price — what the academy does with a student whose honesty cost it politically, and what Ilo's mother says when the record reaches her.",
+        "thematic_payoff": "Confession is the one Catalogue file format that cannot be quietly re-shelved: truth as the weapon that wounds its wielder and still wins.",
+        "carries_forward": true
+      },
+      {
+        "name": "The Academy Comes",
+        "branch_id": "the_academy_comes",
+        "synopsis": "The move on the archive-station fails and the Catalogue takes her — and the story's geometry inverts. The Praxeum that doubted her crosses the galaxy: Kam's ledger becomes a case file, Tahl will not be left behind, Luke stakes what remains of his public credibility on one provisional student. The epilogue lives on the far side of being rescued — the empty table proven false from the other direction, and belonging accepted as a thing she no longer has to earn in advance.",
+        "thematic_payoff": "Belonging is proven from the other side: she was never the only one keeping the ledger of who owes whom.",
+        "carries_forward": true
+      },
+      {
+        "name": "Hold The Gate",
+        "branch_id": "hold_the_gate",
+        "synopsis": "She refuses the beacon, refuses the route, tells the academy everything, and stands where she is — making Varko come to defended stone. The siege of the Praxeum is the Catalogue's first engagement on ground it did not choose, and its last. The epilogue lives in the morning after the gate held: repairs, funerals if the dice were cruel, the saber rack with one blade finally assigned by name, and a provisional noun the academy quietly retires.",
+        "thematic_payoff": "The shield's final shape is not hunting the past — it is standing where the past must get through her to reach anyone else.",
+        "carries_forward": true
+      }
+    ],
+    "milestone_beat_sheet": {
+      "concept_question": "What if the only way to rescue the innocent is to become the monster you promised your new masters you'd never be again?",
+      "first_plot_point": "Kessa discovers that Ilo, the boy she kidnapped, hasn't been sold to a warlord, but is being trained as her own replacement within the Praxeum’s own supply chain; she must leave the safety of the temple to intercept his 'processing.'",
+      "first_plot_point_act": 1,
+      "midpoint": "Senn Varko leaks Kessa’s full service record to the Praxeum students, revealing she didn't just 'watch' kids be taken, but actively hunted the families of two current students. The sanctuary collapses into a soft imprisonment.",
+      "midpoint_act": 2,
+      "second_plot_point": "Kessa realizes Varko is using her as a 'Judas Goat'—he has allowed her to stay at the Praxeum specifically to map Luke’s security and student roster for a mass acquisition. She has everything she needs to find the Catalogue's hub, but doing so confirms her role as their greatest asset.",
+      "second_plot_point_act": 3,
+      "pre_resolution_lull": "Abandoned by the students and placed under guard by Kam Solusar, Kessa sits in a meditation chamber, realizing that the 'forgiveness' she sought from Luke was just another way to avoid the screams of the children she left behind."
+    },
+    "foreshadow_registry": [
+      {
+        "id": "the_silver_stylus",
+        "setup_act": 1,
+        "setup_description": "Varko leaves a small, silver data-stylus in Kessa's quarters during a 'security breach'—it appears to be a threat, but contains nothing but encrypted lullabies.",
+        "payoff_act": 3,
+        "payoff_description": "The stylus is actually a proximity beacon that tracks the biometric signatures of the specific children Kessa once hunted, turning her into a walking radar for the enemy.",
+        "payoff_type": "reversal"
+      },
+      {
+        "id": "tiones_song",
+        "setup_act": 1,
+        "setup_description": "Tionne asks Kessa to help archive a fragmented ballad about 'The Lost Hounds of the Core.'",
+        "payoff_act": 3,
+        "payoff_description": "Kessa realizes the ballad contains the navigational coordinates for the Catalogue's mobile base, hidden in the lyrics by a previous defector who didn't make it.",
+        "payoff_type": "revelation"
+      },
+      {
+        "id": "varkos_politeness",
+        "setup_act": 1,
+        "setup_description": "In every communication, Varko insists on calling Kessa 'Asset 4-9,' never by her name, while maintaining a tone of a disappointed father.",
+        "payoff_act": 4,
+        "payoff_description": "Kessa finally uses the 'Asset 4-9' override code—not to surrender, but to remotely detonate the Catalogue's transport ships, embracing the label to destroy the system.",
+        "payoff_type": "irony"
+      },
+      {
+        "id": "jaden_kors_scars",
+        "setup_act": 2,
+        "setup_description": "A student, Jaden, shows Kessa a specific burn mark from an Imperial stun-baton used during his 'collection.'",
+        "payoff_act": 4,
+        "payoff_description": "Kessa recognizes the unique discharge pattern on a weapon held by a Catalogue operative, realizing Jaden's 'collector' is the very person she is currently protecting in a moment of crisis.",
+        "payoff_type": "callback"
+      },
+      {
+        "id": "lukes_wager",
+        "setup_act": 1,
+        "setup_description": "Luke tells Kessa: 'I am not betting on your goodness; I am betting on your exhaustion.'",
+        "payoff_act": 4,
+        "payoff_description": "Kessa realizes she isn't exhausted; she's finally awake. She rejects Luke's path of passive redemption to take the violent action he cannot authorize.",
+        "payoff_type": "reversal"
+      }
+    ],
+    "protagonist_pressure_type": "moral",
+    "antagonistic_force": "The Bureaucracy of Complicity: Senn Varko’s 'Catalogue' operates not through Sith magic, but through the terrifyingly mundane logic of ownership, paperwork, and the systemic erasure of identity that treats Force-sensitives as state assets rather than people.",
+    "thematic_throughline": "Redemption is not a state of being one achieves, but a debt one services; the conflict lies in whether that debt is paid through self-improvement or through self-destruction.",
+    "ending_payoff_sketch": "The campaign concludes not with the defeat of an empire, but with Kessa standing over the 'Catalogue's' records. She must choose between the Jedi way of justice (which is slow, political, and risks the children) and the Hound's way of efficiency (which is fast, final, and destroys her soul)."
+  },
+  "allegiances": [
+    {
+      "id": "praxeum_provisional",
+      "display_name": "Provisional Sanctuary",
+      "description": "Students the Praxeum has taken in on probationary terms — watched by the staff, doubted by their cohort, and carrying histories the academy has decided to gamble on rather than refuse.",
+      "character_variants": [
+        {
+          "id": "kessa_rhane",
+          "allegiance": "praxeum_provisional",
+          "pitch": "A defected Imperial Force-hound learning to be a shield — fourteen years as the Catalogue's tracker, three weeks a deserter, now the Praxeum's most-watched student.",
+          "species": "human",
+          "career": "guardian",
+          "career_type": "guardian",
+          "specializations": [
+            "protector"
+          ],
+          "primary_game_line": "force_and_destiny",
+          "force_sensitive": true,
+          "intended_protagonist": true,
+          "motivation_default": {
+            "track": "morality",
+            "possible_types": [
+              "redemption",
+              "belonging"
+            ]
+          },
+          "starting_situation": "Weeks into provisional sanctuary at the Praxeum: senior staff divided over her presence, students wary, Luke's public wager on her redemption the only thing keeping the door open.",
+          "voice_baseline": "Clipped and exact. Reports instead of converses when stressed: exits, counts, threat order. Rank-words surface under pressure — 'sir,' 'instructor' — and she hates each one a half-second too late. A genuinely terrible liar: goes silent instead of inventing, which reads as guilt to anyone looking for it. Asks permission for small things (sitting down, borrowing a tool) and forgiveness for large ones. Deadpan logistics humor once she finally trusts a room. Goes quiet and very precise around children.",
+          "background": "Kessa Rhane was eight years old when an Imperial screening office on Corsin flagged her for 'aptitude consistent with sensitivity' and thanked her parents for their cooperation in a letter they never saw. The Empire that took her died two years later at Endor. The office did not. It survived the way filing systems survive — quietly, in copies — and re-formed in the Outer Rim as a retrieval cell its staff called the Catalogue, run by a patient ex-ISB acquisitions officer named Senn Varko and bankrolled, at a careful distance, by interests that answered to Brakiss. The Catalogue did not train Jedi. It maintained assets. Kessa was raised on station time and drill rotations, taught to read a room's fear before she could properly write, and used for the one thing she was unambiguously better at than anyone Varko owned: finding people who did not want to be found, and holding them still. She was twenty-one when the Catalogue sent her to Ossel Minor after a hidden family. She found them — nobody else could have. When the retrieval went loud, Varko ordered her to hold the mother's mind while the team took the youngest, a boy named Ilo, eight years old, the same age she had been. She held. The mother's grief tore through the Force like a hull breach, and Kessa let go of something that has not come back since. Three weeks later she walked off a transfer dock with a stolen long-haul shuttle and one heading she knew Varko genuinely feared. She arrived at Luke Skywalker's Praxeum with the Catalogue's faces in her memory, a recall beacon she refuses to throw away, and a sanctuary that is provisional on every side except one: Skywalker himself, who has been wrong about exactly one apprentice before, and knows it.",
+          "integration_layer": {
+            "entry_point": "Provisional sanctuary granted personally by Luke Skywalker over the objections of part of his senior staff.",
+            "personal_stakes": "If the Praxeum gives up on her, the Catalogue is the only place left that wants her — and what it wants is the weapon back, not the person."
+          },
+          "characteristics_base": {
+            "brawn": 2,
+            "agility": 3,
+            "intellect": 2,
+            "cunning": 2,
+            "willpower": 4,
+            "presence": 2
+          },
+          "skills_base": {
+            "athletics": 1,
+            "coercion": 1,
+            "cool": 2,
+            "discipline": 2,
+            "resilience": 1,
+            "vigilance": 2,
+            "ranged_light": 1,
+            "education": 1,
+            "warfare": 1,
+            "lightsaber": 2
+          },
+          "wound_threshold": 12,
+          "strain_threshold": 14,
+          "soak": 2,
+          "starting_loadout": {
+            "weapons": [
+              {
+                "name": "Praxeum training lightsaber (loaner)",
+                "skill": "lightsaber",
+                "damage_bonus": 6,
+                "critical_rating": 2,
+                "qualities": [
+                  "breach_1",
+                  "sunder"
+                ],
+                "narrative_note": "Issued from the rack, not built. She checks it back in after every drill like ordnance, and has not asked when she gets her own. The asking is the part she cannot do yet."
+              },
+              {
+                "name": "Remnant officer's blaster, serial intact",
+                "skill": "ranged_light",
+                "damage_bonus": 5,
+                "critical_rating": 4,
+                "qualities": [
+                  "stun_setting"
+                ],
+                "narrative_note": "She never filed the serial. It sits on her shelf in plain view, because hiding what she was feels like lying, and she is done lying. It has not left stun since Ossel Minor."
+              }
+            ],
+            "armor": {
+              "name": "Praxeum robes over a Remnant flight underlayer",
+              "soak_bonus": 1,
+              "defense": 0,
+              "narrative_note": "Academy robes worn over the thermal underlayer of a uniform whose insignia she removed with a vibroblade. The stitching is military-neat. She checks the seams nightly, out of a habit she no longer explains."
+            },
+            "tools": [
+              {
+                "category": "security",
+                "name": "Catalogue field reader",
+                "mechanical_effect": "Adds 1 boost die to Perception or Vigilance checks to read physiological stress — elevated pulse, fear-sweat, the tells of a lie or a hidden intention.",
+                "narrative_note": "Interrogation-grade kit built to confirm what her Force sense reported. She mostly points it at herself now, to check whether the calm is real."
+              },
+              {
+                "category": "medical",
+                "name": "Two stimpacks",
+                "mechanical_effect": "Can heal 5 wounds per stimpack. Two uses before resupply needed.",
+                "narrative_note": "Catalogue field doctrine: stabilize the asset first. She is still deciding who the asset is."
+              }
+            ],
+            "special_items": [
+              {
+                "name": "Varko's recall beacon",
+                "mechanical_effect": "An encrypted single-burst recall beacon keyed to the Catalogue's retrieval net. Once per campaign, Kessa can trigger it deliberately: the Catalogue will come, on her timing and her chosen ground — a controlled lure instead of an ambush. Activation guarantees attention, not control of what arrives. While dormant, it adds 1 boost die once per session to checks involving Remnant protocol, Imperial-pattern systems, or Catalogue tradecraft.",
+                "narrative_note": "The beacon Varko issued the day she made asset grade: 'If you are ever lost, press it once and we will bring you home.' She keeps it where she can see it. A leash you hold is different from a leash you wear."
+              }
+            ]
+          },
+          "starting_force_powers": [
+            {
+              "power_id": "influence",
+              "name": "Influence",
+              "category": "mental_influence",
+              "base_pips_required": 1,
+              "active_upgrades": [],
+              "narrative_capability": "Can subtly influence the emotions of nearby beings — calming hostility, heightening fear, pressing a single suggestion into a weak-willed mind. For Kessa this was a job skill before anyone told her it could be a violation, and she flinches from it accordingly.",
+              "gm_choice_guidance": "Offer Influence choices when Kessa could calm panic, defuse hostility, or steady someone's fear — and occasionally when the easy road is to push a mind instead of persuading it. The interesting choice is almost always whether she uses it at all. Around suspicious students, wary staff, or frightened civilians, offering the option and letting her refuse it is itself good drama.",
+              "dark_side_flavor": "Dark side Influence doesn't suggest — it overrides. Kessa knows the exact texture of a mind held still, the way the eyes go unfocused and the agreement comes too quickly. It is the most practiced thing she owns. That is why she is afraid of it."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "academy_petitioner",
+      "display_name": "Late Petitioners",
+      "description": "Adults who arrive at the Praxeum past the usual age and shape of a student — gifts already formed by hard use, asking the academy to take them as they are.",
+      "character_variants": [
+        {
+          "id": "brin_ohmsa",
+          "allegiance": "academy_petitioner",
+          "pitch": "A village oracle whose one mistimed vision cost nine lives, petitioning the Praxeum to teach her the discernment her gift never came with.",
+          "species": "mirialan",
+          "career": "mystic",
+          "career_type": "mystic",
+          "specializations": [
+            "seer"
+          ],
+          "primary_game_line": "force_and_destiny",
+          "force_sensitive": true,
+          "intended_protagonist": false,
+          "motivation_default": {
+            "track": "morality",
+            "possible_types": [
+              "redemption",
+              "belonging"
+            ]
+          },
+          "starting_situation": "Newly arrived at the Praxeum as an adult petitioner: her sight is stronger than most seniors', her credibility spent, and the staff unsure whether she is a student or a cautionary tale.",
+          "voice_baseline": "Speaks about future things in the present tense without noticing — 'the bridge is out' for a bridge that fails next week — which unnerves strangers and exhausts friends. Apologizes before delivering bad news, never after. Long silences mid-conversation that she doesn't register. Gives warnings in threes, then a fourth, then a fifth, watching belief drain with each one.",
+          "background": "Brin Ohmsa grew up at Vashka homestead, a terraced settlement on a moon nobody charts twice, where her teacher — an exiled Mirialan elder named Sajat Ohm — taught a handful of students that the Force speaks in weather, not verdicts. Brin heard it more clearly than anyone Sajat had ever trained. At nineteen she woke from a vision of fire on the eastern terraces: raiders, lift-skiffs, the granary burning, the well fouled. She told everyone. She was believed — that is the part outsiders never understand. Vashka kept armed watch the first night, and nothing came. They kept a thinner watch the second night, and nothing came, and the relief had a flavor she still tastes when anyone tells her to relax. The raiders came on the third night, on lift-skiffs, from the east, exactly as shown. Nine died, Sajat among them — at the well, fouling-party blaster in his hand, defending the detail Brin had begged them all to remember. The survivors split cleanly down the middle: half could not look at her because her gift had failed, half could not stop looking at her because it hadn't. Both halves asked her, gently and separately, to go. She walks the fringe settlements now, reading weather of every kind, and has made herself a rule she mistakes for a conscience: say everything, always, to everyone. She is aware that her warnings have become wallpaper — that she is spending her credibility like a woman trying to empty a purse — and she does not know how to stop, because the one time it mattered, the unsaid thing was the timing, and the timing was the only thing she got wrong.",
+          "integration_layer": {
+            "entry_point": "Accepted as a probationary adult student on Tionne's recommendation after a warning she gave proved true.",
+            "personal_stakes": "If the academy cannot teach her discernment, every future vision is another Vashka — true, mistimed, and fatal."
+          },
+          "characteristics_base": {
+            "brawn": 2,
+            "agility": 2,
+            "intellect": 2,
+            "cunning": 2,
+            "willpower": 4,
+            "presence": 3
+          },
+          "skills_base": {
+            "charm": 1,
+            "cool": 1,
+            "discipline": 2,
+            "medicine": 1,
+            "negotiation": 1,
+            "perception": 2,
+            "resilience": 1,
+            "survival": 1,
+            "vigilance": 2,
+            "lore": 2
+          },
+          "wound_threshold": 12,
+          "strain_threshold": 15,
+          "soak": 2,
+          "starting_loadout": {
+            "weapons": [
+              {
+                "name": "Iron-shod walking staff",
+                "skill": "melee",
+                "damage_bonus": 2,
+                "critical_rating": 5,
+                "qualities": [],
+                "narrative_note": "Cut from a Vashka windbreak tree. She is not a fighter and the staff knows it; mostly it argues with terrain, doors, and the occasional dog."
+              }
+            ],
+            "armor": {
+              "name": "Layered pilgrim weathercloth",
+              "soak_bonus": 1,
+              "defense": 0,
+              "narrative_note": "Dust-colored layers that have slept outdoors on eleven worlds. The innermost wrap is Vashka loomwork, the pattern worn to a ghost of itself."
+            },
+            "tools": [
+              {
+                "category": "medical",
+                "name": "Herbalist's satchel",
+                "mechanical_effect": "Adds 1 boost die to Medicine checks made with natural remedies, field treatment, or long-recovery care.",
+                "narrative_note": "Sorted by smell, labeled in Mirialan script. Settlements that distrust her sight still send for her satchel, which she has decided not to find insulting."
+              },
+              {
+                "category": "ritual",
+                "name": "Sajat's meditation bowl",
+                "mechanical_effect": "Adds 1 boost die to Discipline checks made to center herself, resist fear, or recover strain during rest scenes.",
+                "narrative_note": "Hammered tin, struck once at dawn. Its note is half a tone flat. She has been told this is fixable and has declined to fix it."
+              }
+            ],
+            "special_items": [
+              {
+                "name": "The nine beads",
+                "mechanical_effect": "Nine glass beads on a knotted cord, one per Vashka dead. Once per session, when someone acts on a warning Brin has spoken aloud, the cord adds 1 boost die to that check — hers or theirs. Once per campaign, Brin can deliberately open herself to a full seeing: the GM provides a true, specific vision of a coming danger, including its timing; the experience costs her 3 strain and the vision cannot be unseen.",
+                "narrative_note": "She tells people they are a counting aid for meditation. She has never added a tenth bead, and refuses to begin a second cord — the count is not a tally of her failures, it is the exact size of the lesson."
+              }
+            ]
+          },
+          "starting_force_powers": [
+            {
+              "power_id": "sense",
+              "name": "Sense",
+              "category": "perception_knowledge",
+              "base_pips_required": 1,
+              "active_upgrades": [],
+              "narrative_capability": "Can sense emotions, intentions, and the pressure of coming events — danger as a change in weather, grief as a cold current, a lie as a wrong note. For Brin the difficulty has never been hearing; it is knowing which hour the storm lands.",
+              "gm_choice_guidance": "Offer sensing choices when Brin could read a room's hidden temperature, feel danger gathering before evidence exists, or distinguish what someone feels from what they perform. Her dramatic territory is timing and credibility: visions that are true but imprecise, warnings that cost trust to give. Let her be right in ways that are hard to use.",
+              "dark_side_flavor": "Dark side Sense stops forecasting and starts auditing — prying open the one grief a person has buried, finding the fear that steers them, holding the knowledge like a tool. It is precise in exactly the way her visions are not, and that precision is the temptation."
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "acts": [
+    {
+      "number": 1,
+      "name": "The Weight of the Name",
+      "tension": "rising",
+      "dramatic_function": "setup",
+      "beat_roles": [
+        "setup",
+        "inciting"
+      ],
+      "opening_situation": "Dawn meal in the Praxeum refectory, eleven days into Kessa Rhane's provisional sanctuary. The room holds thirty students and one empty radius: nobody sits within three chairs of her, and the gap has become its own piece of furniture. Tahl Veris is about to end that — she will cross the room with her tray and sit down opposite Kessa, stating her reasons out loud the way she states everything, and the room will pretend not to listen. At the staff table, Kam Solusar makes his morning ledger entry in full view, because hiding the count would be worse. Jaden Korr watches Kessa from two tables away with a tremor in his hands that everyone misreads. The morning chime sounds — three notes, the third deliberately flat — and Luke Skywalker, who has staked his credibility on the woman at the empty table, leads the gratitude round as if nothing at his academy is unusual. Kessa has declared everything: the beacon on her shelf, the blaster with its serial intact, the techniques she will not demonstrate. Transparency is her strategy and her armor, and it is working on no one except possibly Kyle Katarn, who yesterday asked her a professional question about Remnant patrol doctrine in front of his practicals class as though she were a colleague. The opening stretch should BREATHE: the texture of being watched, the ache of routines that exclude her, small chances to be useful. The Catalogue arrives this act only as paper — a polite audit letter, a supply manifest with a name on it that will end the act like a dropped blade: Ilo Marr, routed through a nearby moon, processed as her replacement.",
+      "opening_location": "The Great Temple, Yavin 4",
+      "galactic_context": "The New Republic is debating the Jedi Praxeum's funding; the presence of an ex-Imperial 'hound' is a political liability.",
+      "anchor": "Kessa finds Ilo's name on a Catalogue supply manifest being routed through a nearby moon; she realizes he is being 'processed' as her replacement.",
+      "next_anchor": "midpoint_betrayal",
+      "open_threads": [
+        "What does Luke actually believe about Kessa — wager, penance for Brakiss, or genuine sight?",
+        "Why does Jaden Korr's hand tremble when he watches her, and why won't he report what he suspects?",
+        "What melody is Kessa humming that Tionne cannot place, and why does it scan like a route?",
+        "What will Kam's ledger become — indictment or alibi?",
+        "Who at the academy opened the Catalogue's polite audit letter first, and who has not been told?",
+        "The manifest names Ilo Marr. What is Kessa prepared to do about an open ledger?"
+      ],
+      "expected_turns": [
+        14,
+        18
+      ],
+      "xp_base": 15,
+      "xp_bonus_conditions": [
+        {
+          "condition_type": "custom",
+          "description": "Avoided physical conflict with a fellow student",
+          "xp_value": 5
+        },
+        {
+          "condition_type": "custom",
+          "description": "Successfully decoded one Imperial transmission",
+          "xp_value": 5
+        }
+      ],
+      "side_content": [
+        {
+          "id": "meal_hall_tension",
+          "title": "The Empty Table",
+          "hook": "No one will sit within three chairs of Kessa in the refectory. Jaden Korr is watching her with visible tremors.",
+          "keywords": [
+            "social",
+            "distrust"
+          ],
+          "foreshadows": [
+            "jadens_tremor"
+          ]
+        },
+        {
+          "id": "training_mishap",
+          "title": "The Reflex",
+          "hook": "During a blindfolded saber drill, Kessa accidentally uses a Catalogue suppression technique on a student.",
+          "keywords": [
+            "training",
+            "guilt"
+          ],
+          "foreshadows": [
+            "suppression_reflex"
+          ]
+        },
+        {
+          "id": "glow_lantern_duty",
+          "title": "The Newest Lantern",
+          "hook": "Kessa draws perimeter glow-lantern duty with Tahl — the academy's smallest trust, handed to its least-trusted student, in front of everyone at sundown.",
+          "keywords": [
+            "belonging",
+            "ritual",
+            "trust"
+          ],
+          "scene_type": "character",
+          "spotlight": [
+            "Tahl Veris"
+          ],
+          "rpg_function": "low-stakes bonding + first earned normalcy",
+          "player_choice": "Treat the duty as surveillance to be endured, or as the first thing the academy has asked of her rather than about her.",
+          "payoff_or_change": "Tahl's grain-cellar story; the first crack in Kessa's transactional model of sanctuary.",
+          "foreshadows": []
+        },
+        {
+          "id": "practicals_question",
+          "title": "A Professional Question",
+          "hook": "Kyle Katarn asks Kessa, mid-class, how a Remnant retrieval team would breach the temple's east approach — treating her history as expertise while the cohort holds its breath.",
+          "keywords": [
+            "expertise",
+            "staff_politics",
+            "dignity"
+          ],
+          "scene_type": "social",
+          "spotlight": [
+            "Kyle Katarn",
+            "Jaden Korr"
+          ],
+          "rpg_function": "reframes her past as asset; provokes Jaden",
+          "player_choice": "Answer fully and accurately, soften the truth for the room, or refuse to perform her old self at all.",
+          "payoff_or_change": "Kyle's standing offer of one cover per act; Jaden's tremor worsens — he has heard a retrieval brief before.",
+          "foreshadows": [
+            "jadens_tremor"
+          ]
+        },
+        {
+          "id": "audit_letter",
+          "title": "The Polite Letter",
+          "hook": "A flimsiplast letter arrives through legitimate New Republic channels: a 'records reconciliation request' regarding an unnamed former Imperial asset, signed by a field auditor named S. Crann.",
+          "keywords": [
+            "catalogue",
+            "bureaucracy",
+            "dread"
+          ],
+          "scene_type": "investigation",
+          "spotlight": [
+            "Sefa Crann",
+            "Kam Solusar"
+          ],
+          "rpg_function": "antagonist pressure via paperwork; establishes the Catalogue's register",
+          "player_choice": "Tell Luke immediately, answer it herself in Catalogue grammar, or burn it and pretend the past missed.",
+          "payoff_or_change": "The Catalogue's opening move is filed, polite, and completely legal — the campaign's dread arrives on letterhead.",
+          "foreshadows": [
+            "recall_beacon_on_the_shelf"
+          ]
+        }
+      ],
+      "protagonist_mode": "orphan"
+    },
+    {
+      "number": 2,
+      "name": "The Mirror in the Jungle",
+      "tension": "rising",
+      "dramatic_function": "destabilization",
+      "beat_roles": [
+        "first_plot_point",
+        "response"
+      ],
+      "opening_situation": "Three days after the manifest. Kessa has told exactly one person — and who that person was is already shaping everything. The academy's rhythms continue around a woman who has stopped sleeping: morning chime, practicals, glow duty, and under all of it the arithmetic she cannot stop running — Ilo's intake date, the processing schedule she helped refine, the number of days before a nine-year-old stops asking to go home. The jungle brings the act's first wrongness: a Massassi boundary stone on the eastern perimeter carries a fresh mark burned at hip height — a Catalogue audit stamp, the bureaucratic rune Kessa used to leave on cleared safehouses. Sefa Crann is on Yavin 4, announcing herself in a grammar only Kessa can read. The act braids three pressures: a hunt for the watcher in the jungle who knows her tells better than she does; the slow leak of Dorin Vekk's reports traveling further than Kam's desk; and Jaden Korr's tremor finally finding words in the act's midpoint — his sister, the retrieval, the question he has carried since she arrived. The Praxeum's question changes shape this act: not 'can the defector be trusted' but 'what does the academy do when the thing it took in turns out to be load-bearing for someone else's grief.' The mirror should cut both ways: every scene with Sefa is a scene about who Kessa would be if she had stayed, and every scene with Jaden is a scene about what her staying costs the people her old life touched.",
+      "opening_location": "The Jungle Canopy",
+      "galactic_context": "Imperial Remnant factions are consolidating; Varko's 'Catalogue' is becoming a primary supplier of Force-sensitive labor.",
+      "anchor": "Kessa is confronted by Jaden Korr, who reveals she was the one who captured his sister years ago. Luke places Kessa under 'meditative restriction'—soft house arrest.",
+      "next_anchor": "judas_goat_reveal",
+      "open_threads": [
+        "Who did Kessa tell about the manifest, and what did telling cost?",
+        "Sefa Crann is leaving audit stamps in the jungle — invitation, intimidation, or doctrine?",
+        "Where do Dorin's reports actually go after Kam's desk?",
+        "Jaden knows. What does he do with knowing — and what does the cohort do with him?",
+        "Can the academy mount any answer to a legal, polite, documented retrieval program?",
+        "The ballad transcription is nearly complete. What is it actually a map of?"
+      ],
+      "expected_turns": [
+        16,
+        20
+      ],
+      "xp_base": 20,
+      "xp_bonus_conditions": [
+        {
+          "condition_type": "custom",
+          "description": "Confessed a specific truth to Kam Solusar",
+          "xp_value": 5
+        },
+        {
+          "condition_type": "custom",
+          "description": "Resisted the urge to use the Force to influence a student",
+          "xp_value": 5
+        }
+      ],
+      "side_content": [
+        {
+          "id": "jaden_confrontation",
+          "title": "The Scar Speaks",
+          "hook": "Jaden Korr corners Kessa in the hangars, showing her the burn mark she left on him during his 'collection'.",
+          "keywords": [
+            "confrontation",
+            "past"
+          ]
+        },
+        {
+          "id": "stamp_hunt",
+          "title": "Audit Trail",
+          "hook": "Kessa and one companion track Sefa's audit stamps through the jungle perimeter — each mark older than the last, mapping a surveillance pattern that has been running since before the letter arrived.",
+          "keywords": [
+            "tracking",
+            "mirror",
+            "jungle"
+          ],
+          "scene_type": "investigation",
+          "spotlight": [
+            "Sefa Crann",
+            "Tahl Veris"
+          ],
+          "rpg_function": "skill spotlight + antagonist characterization through tradecraft",
+          "player_choice": "Follow the trail to its obvious end (a meeting Sefa has staged), or break pattern and surveil the surveiller.",
+          "payoff_or_change": "First contact with Sefa on her terms or Kessa's — and the discovery that the stamps started weeks ago.",
+          "foreshadows": []
+        },
+        {
+          "id": "high_tower_weather",
+          "title": "Two Storms Stapled Together",
+          "hook": "Streen finds Kessa on the high tower at the hour the wind turns, and names what he feels off her — not to the staff, to her: 'You grieve like weather that isn't allowed to land.'",
+          "keywords": [
+            "force",
+            "grief",
+            "streen"
+          ],
+          "scene_type": "character",
+          "spotlight": [
+            "Streen"
+          ],
+          "rpg_function": "first unguarded scene; Force-sensitive empathy without interrogation",
+          "player_choice": "Let the weather land — say Ilo's name to another living person — or hold the seal and let Streen pretend he felt nothing.",
+          "payoff_or_change": "If she speaks: the campaign's first true confession, and Streen becomes her quiet weather-vane. If not: lie_grip tightens.",
+          "foreshadows": [
+            "ilos_toy_soldier"
+          ]
+        },
+        {
+          "id": "dorins_misery",
+          "title": "The Accurate Informer",
+          "hook": "Kessa catches Dorin Vekk logging her movements — and recognizes the posture, the misery, the fear doing the writing. She was nine the first time she filed a report like his.",
+          "keywords": [
+            "informer",
+            "mirror",
+            "cohort"
+          ],
+          "scene_type": "social",
+          "spotlight": [
+            "Dorin Vekk"
+          ],
+          "rpg_function": "thematic mirror at miniature scale; recruitment-of-conscience opportunity",
+          "player_choice": "Expose him to the cohort, report him to Kam (the system working as designed), or sit down and teach him what reports become.",
+          "payoff_or_change": "Dorin's arc pivots here: shamed informers double down; understood ones start counting differently.",
+          "foreshadows": [
+            "kams_count"
+          ]
+        }
+      ],
+      "protagonist_mode": "wanderer"
+    },
+    {
+      "number": 3,
+      "name": "The Judas Goat",
+      "tension": "critical",
+      "dramatic_function": "midpoint_shift",
+      "beat_roles": [
+        "midpoint",
+        "pinch1"
+      ],
+      "opening_situation": "Meditative restriction is the Praxeum's gentlest cage: Kessa keeps her quarters, her meals, and a chaperoned walk to the meditation hall, and surrenders everything else. Luke called it protection. Kam called it procedure. Jaden, who forced the issue by saying his sister's name in front of the assembled staff, called it less than she deserves — and looked sick saying it. The academy has become a small town with one suspect, and Varko, who has been waiting for exactly this temperature, begins the act's true work: the frame. Catalogue tradecraft starts appearing where it will be found — a suppression-pattern stun residue in the archive, a copied transit code in a hangar log, each discovery arriving with paperwork-perfect timing while Sefa's audits keep the staff drowning in legalities. The Judas goat walks on schedule. Against this: Tionne finishes the ballad and realizes what the cadence carries; Kam's despised ledger turns out to timestamp Kessa's innocence for every planted incident; and Dorin Vekk, counting at last for himself, notices the one discrepancy a frightened informer is uniquely qualified to catch. The act's spine is the academy's verdict arriving in pieces — and its climax is the restriction chamber door, opened by the people her transparency finally reached, hours after Kessa has already decided whether to wait for permission. The jump-cords are in the song. The song is in her body. The question is whether she leaves as the academy's student or its fugitive.",
+      "opening_location": "The Massassi Catacombs",
+      "galactic_context": "The Senate demands an audit of the Praxeum; Varko uses the political cover to move his 'Acquisition Team' into the Yavin system.",
+      "anchor": "Kessa discovers the 'Ballad of the Lost Hounds' contains the jump-cords to Varko's base. She must decide whether to tell Luke or steal a ship and go alone.",
+      "next_anchor": "final_confrontation",
+      "open_threads": [
+        "Who is physically placing the planted evidence inside the temple — and how long have they lived here?",
+        "Does Kam present his ledger, and what does it cost him to be her alibi?",
+        "What does Luke's protection mean when the Senate oversight coalition learns of the restriction?",
+        "Tionne knows what the ballad is. Who does she tell first — Luke, Kam, or Kessa?",
+        "Jaden got what he asked for. Why does it feel like Varko's victory instead of his?",
+        "When the door opens, is Kessa still behind it?"
+      ],
+      "expected_turns": [
+        16,
+        20
+      ],
+      "xp_base": 25,
+      "xp_bonus_conditions": [
+        {
+          "condition_type": "custom",
+          "description": "Protected a student during a Catalogue scouting raid",
+          "xp_value": 5
+        },
+        {
+          "condition_type": "custom",
+          "description": "Broke the Stylus's tracking frequency",
+          "xp_value": 5
+        }
+      ],
+      "side_content": [
+        {
+          "id": "varkos_message",
+          "title": "A Father's Disappointment",
+          "hook": "A holographic message from Varko arrives, offering Kessa a 'promotion' if she delivers three specific students.",
+          "keywords": [
+            "temptation",
+            "varko"
+          ]
+        },
+        {
+          "id": "ledger_against_ledger",
+          "title": "Ledger Against Ledger",
+          "hook": "Kam Solusar sits across from Kessa in the restriction chamber with his flimsi book and asks her to reconstruct her hours — not as interrogation: as collation. Two counters, one table, the frame between them.",
+          "keywords": [
+            "alibi",
+            "kam",
+            "procedure"
+          ],
+          "scene_type": "investigation",
+          "spotlight": [
+            "Kam Solusar"
+          ],
+          "rpg_function": "payoff engine for kams_count; the skeptic's instrument becomes her shield",
+          "player_choice": "Cooperate fully with the man who counted her, demand why he kept the ledger before she answers, or correct an error in his record against her own interest.",
+          "payoff_or_change": "The collation exposes the frame's timing flaw — and Kam's trajectory turns on whether she treats his count as insult or as the only honest thing anyone did.",
+          "foreshadows": [
+            "kams_count"
+          ]
+        },
+        {
+          "id": "the_finished_ballad",
+          "title": "The Finished Ballad",
+          "hook": "Tionne plays the completed transcription for Kessa alone in the archive at dusk, recording crystals hissing — and watches her former-asset student go white as the third verse resolves into numbers.",
+          "keywords": [
+            "ballad",
+            "memory",
+            "route"
+          ],
+          "scene_type": "lore_artifact",
+          "spotlight": [
+            "Tionne Solusar"
+          ],
+          "rpg_function": "payoff engine for ballad_of_the_lost_hounds; converts grief into actionable map",
+          "player_choice": "Tell Tionne what the verses are, let her believe it is only a song, or ask her to seal the transcription in the restricted crate.",
+          "payoff_or_change": "The route to Varko's archive-station exists outside Kessa's head now — which means the choice of who uses it stops being only hers.",
+          "foreshadows": [
+            "ballad_of_the_lost_hounds"
+          ]
+        },
+        {
+          "id": "dorins_discrepancy",
+          "title": "The Boy Who Counted Right",
+          "hook": "Dorin Vekk requests a witnessed meeting — terrified, over-prepared, carrying his own logs — because the hangar transit code planted in the frame was copied from a report only four people ever read, and he wrote it.",
+          "keywords": [
+            "informer",
+            "evidence",
+            "turn"
+          ],
+          "scene_type": "investigation",
+          "spotlight": [
+            "Dorin Vekk",
+            "Kam Solusar"
+          ],
+          "rpg_function": "the informer's redemption beat; narrows the inside-agent question",
+          "player_choice": "Shield Dorin from the fallout of his own evidence, use his discrepancy immediately regardless of what it exposes him to, or quietly verify it first the Catalogue way.",
+          "payoff_or_change": "The frame acquires a face inside the temple's support layer — and Dorin learns what reports become when someone finally counts for the counted.",
+          "foreshadows": []
+        }
+      ],
+      "protagonist_mode": "warrior"
+    },
+    {
+      "number": 4,
+      "name": "The Price of the Shield",
+      "tension": "climax",
+      "dramatic_function": "confrontation",
+      "beat_roles": [
+        "attack",
+        "climax",
+        "aftermath"
+      ],
+      "opening_situation": "The pre-dawn hangar, hours after the restriction chamber door opened. The Praxeum has spent the night arguing about jurisdiction — Luke's authority, the Senate coalition's letters, New Republic Intelligence's sudden interest in a Catalogue archive-station whose coordinates now exist in a song — and underneath the institutional noise, the actual decision has quietly become Kessa's again, the way it was always going to. The recall beacon is in her pocket for the first time since she shelved it. Pressed, it converts Varko's ambush into her appointment: the Catalogue arrives where and when she chooses, and the academy can set the ground. Unpressed, the jump-cords lead to the archive-station where a nine-year-old with a one-armed toy soldier is being processed into the next Kessa Rhane — and where Varko, the most reasonable man in any room, has prepared for every version of her arrival except the ones that bring witnesses. The finale's geometry: who stands with her (the friend who went first, the skeptic with the ledger, the teacher with one cover left, the colleague with a second blade); what she carries (the loaner saber signed out, this once, without being told to); and which shape the shield takes when the suppression hold she swore off becomes the only mercy in the room. Ilo will not run to her. The mother's scream is the last thing her old life said — the act decides what the new life answers.",
+      "opening_location": "The Archive (Mobile Space Station)",
+      "galactic_context": "Every institution now wants the archive-station: NRI for the intelligence, the Senate for the scandal, the Praxeum for the boy. The Catalogue has survived twelve years precisely because institutions move at the speed of jurisdiction — and one woman is about to move at the speed of a decision.",
+      "anchor": "Kessa faces Varko in the heart of the Archive. Ilo is there, armed and brainwashed to view Kessa as the 'traitor' who abandoned the family.",
+      "next_anchor": null,
+      "open_threads": [
+        "Press the beacon and choose the ground, or fly the ballad's route and take the ground from him?",
+        "Who comes with her — and who does the academy's politics force her to leave behind?",
+        "What does Varko actually want from a live Kessa that a dead one cannot give him?",
+        "Can Ilo be reached through the soldier, the hold, or only through the truth about his mother?",
+        "What does Sefa Crann do when her doctrine meets a Kessa who refuses to be its counterexample?",
+        "What survives at the Praxeum: the wager, the ledger, the empty table, the provisional noun?"
+      ],
+      "expected_turns": [
+        12,
+        16
+      ],
+      "xp_base": 30,
+      "xp_bonus_conditions": [
+        {
+          "condition_type": "custom",
+          "description": "Saved Ilo without killing him",
+          "xp_value": 5
+        },
+        {
+          "condition_type": "custom",
+          "description": "Destroyed the Catalogue's database",
+          "xp_value": 5
+        }
+      ],
+      "side_content": [
+        {
+          "id": "the_override",
+          "title": "Asset 4-9",
+          "hook": "Kessa uses the Imperial override code to vent the atmosphere in the hangar, trapping Varko's elite guard.",
+          "keywords": [
+            "action",
+            "identity"
+          ]
+        },
+        {
+          "id": "signing_out_the_saber",
+          "title": "Signed Out",
+          "hook": "At the rack before departure, Kessa signs the loaner training saber OUT for the first time without authorization — and finds Luke already standing there, holding the logbook open to her line, deciding what his signature under hers will mean.",
+          "keywords": [
+            "luke",
+            "trust",
+            "departure"
+          ],
+          "scene_type": "character",
+          "spotlight": [
+            "Luke Skywalker"
+          ],
+          "rpg_function": "the wager made explicit; quiet ceremony before violence",
+          "player_choice": "Ask for his blessing, ask for his absence, or ask the question under everything: why he bet on her at all.",
+          "payoff_or_change": "Luke's answer — Brakiss's name said out loud — reframes the entire campaign as his second wager, and makes the ending his verdict too.",
+          "foreshadows": [
+            "recall_beacon_on_the_shelf"
+          ]
+        },
+        {
+          "id": "sefas_last_audit",
+          "title": "The Last Audit",
+          "hook": "Sefa Crann intercepts the mission en route — alone, off the books, doctrine cracking — with one question she needs answered before the archive-station decides everything: 'Was it worth it? Tell me the running was worth it.'",
+          "keywords": [
+            "mirror",
+            "sefa",
+            "doctrine"
+          ],
+          "scene_type": "social",
+          "spotlight": [
+            "Sefa Crann"
+          ],
+          "rpg_function": "the mirror's crisis; convertible antagonist beat",
+          "player_choice": "Answer her honestly (the running cost everything and was still right), recruit her with the truth Varko edited out of the Ossel Minor report, or refuse the conversation a Catalogue auditor has no right to ask for.",
+          "payoff_or_change": "Sefa enters the finale as enemy, absence, or the Catalogue's second defection — the campaign's clearest measure of whether Kessa's truth travels.",
+          "foreshadows": []
+        }
+      ],
+      "protagonist_mode": "martyr"
+    }
+  ],
+  "npc_roster": [
+    {
+      "name": "Luke Skywalker",
+      "role": "Master of the Praxeum",
+      "disposition_start": 0.6,
+      "disposition_trajectory": "fluctuating",
+      "motivation": "To prove that no one is beyond the reach of the Light, even at the cost of his own reputation.",
+      "thematic_argument": "Redemption is a choice made every morning; the past is a shadow that only has the power you give it.",
+      "voice_notes": "Calm, patient, tends to trail off as if listening to something far away.",
+      "behavioral_envelope": [
+        "Will never strike first",
+        "Will not lie to the Senate"
+      ],
+      "knows_at_start": [
+        "Kessa's full Imperial history",
+        "Brakiss's involvement"
+      ],
+      "doesnt_know_at_start": [
+        "The existence of the biometric tracker in the stylus"
+      ],
+      "per_act_state": [
+        {
+          "act": 1,
+          "role_in_act": "Mentor/Protector",
+          "disposition_expected": 0.6
+        },
+        {
+          "act": 2,
+          "role_in_act": "Disappointed Warden",
+          "disposition_expected": 0.4
+        },
+        {
+          "act": 3,
+          "role_in_act": "Distant Observer",
+          "disposition_expected": 0.5
+        },
+        {
+          "act": 4,
+          "role_in_act": "The Final Safety Net",
+          "disposition_expected": 0.7
+        }
+      ],
+      "npc_relationships": [
+        {
+          "npc": "Kam Solusar",
+          "nature": "trusts his vigilance, overrules his conclusion",
+          "weight": 0.7
+        },
+        {
+          "npc": "Kyle Katarn",
+          "nature": "the argument he keeps losing on purpose",
+          "weight": 0.7
+        }
+      ],
+      "canon": true,
+      "pressure_role": "witness",
+      "era_specific_notes": "16 ABY Luke: five years into the Praxeum, after Exar Kun and the Ragnos crisis, before the treaty. A teacher who has been wrong about one apprentice — Brakiss — and now wagers his credibility a second time, deliberately.",
+      "canon_voice": {
+        "speech_patterns": "Plain, warm, unhurried. Asks more than he states. Farm-boy diction that survived two emperors; uses students' names often; when gravely serious he gets quieter and simpler, never louder.",
+        "thinking_style": "Pattern-seeking optimist who has paid full price for it. Weighs people by trajectory, not position. Capable of holding two truths at once — Vader was redeemable, Brakiss fooled him — without letting either become the whole lesson.",
+        "emotional_register": "Steady surface over visible cost. Hope practiced as a discipline rather than felt as a mood. Anger arrives as stillness; grief as patience."
+      },
+      "era_profile": "new_republic_praxeum"
+    },
+    {
+      "name": "Senn Varko",
+      "role": "Primary Antagonist",
+      "disposition_start": 0.2,
+      "disposition_trajectory": "downward",
+      "motivation": "To maintain the efficiency and profitability of the Catalogue as a 'necessary' bureaucratic service.",
+      "thematic_argument": "Identity is a gift of the state; without a master to aim you, you are merely a dangerous animal waiting to be put down.",
+      "voice_notes": "Unfailingly polite, professional, speaks like a mid-level insurance adjuster.",
+      "behavioral_envelope": [
+        "Will never lose his temper",
+        "Always offers a 'reasonable' deal before attacking"
+      ],
+      "knows_at_start": [
+        "Kessa's psychological triggers",
+        "The Praxeum's supply routes"
+      ],
+      "doesnt_know_at_start": [
+        "Kessa's growing emotional attachment to Ilo"
+      ],
+      "per_act_state": [
+        {
+          "act": 1,
+          "role_in_act": "The Shadowy Handler",
+          "disposition_expected": 0.2
+        },
+        {
+          "act": 2,
+          "role_in_act": "The Manipulator",
+          "disposition_expected": 0.1
+        },
+        {
+          "act": 3,
+          "role_in_act": "The Hunter",
+          "disposition_expected": 0.1
+        },
+        {
+          "act": 4,
+          "role_in_act": "The Desperate Bureaucrat",
+          "disposition_expected": 0.0
+        }
+      ],
+      "npc_relationships": [
+        {
+          "npc": "Sefa Crann",
+          "nature": "his proof that the program works; deploys her against his other proof that it didn't",
+          "weight": 0.6
+        },
+        {
+          "npc": "Ilo Marr",
+          "nature": "the acquisition that replaces the asset that ran",
+          "weight": 0.2
+        }
+      ],
+      "pressure_role": "betrayer"
+    },
+    {
+      "name": "Jaden Korr",
+      "role": "Student Rival",
+      "disposition_start": 0.3,
+      "disposition_trajectory": "uncertain",
+      "motivation": "To find his sister and ensure that those who took her never hurt anyone again.",
+      "thematic_argument": "Justice is not a feeling; it is the removal of the threat. Forgiveness is a luxury for those who didn't lose everything.",
+      "voice_notes": "Strained, hushed, speaks with a slight tremor of repressed anger.",
+      "behavioral_envelope": [
+        "Will not cooperate with Kessa unless Luke orders it",
+        "Becomes reckless when Imperial tech is present"
+      ],
+      "knows_at_start": [
+        "The face of the person who took his sister"
+      ],
+      "doesnt_know_at_start": [
+        "That Kessa actually tried to hide his sister's location during the raid"
+      ],
+      "per_act_state": [
+        {
+          "act": 1,
+          "role_in_act": "Silent Skeptic",
+          "disposition_expected": 0.3
+        },
+        {
+          "act": 2,
+          "role_in_act": "Open Accuser",
+          "disposition_expected": 0.1
+        },
+        {
+          "act": 3,
+          "role_in_act": "Reluctant Ally — hardening into the accuser, then unsettled as the frame outruns his own grievance",
+          "disposition_expected": 0.4
+        },
+        {
+          "act": 4,
+          "role_in_act": "Vindicated/Forgiving",
+          "disposition_expected": 0.6
+        }
+      ],
+      "npc_relationships": [
+        {
+          "npc": "Kyle Katarn",
+          "nature": "his teacher; the only adult he believes about restraint",
+          "weight": 0.7
+        },
+        {
+          "npc": "Tahl Veris",
+          "nature": "her advocacy for Kessa lands as betrayal of his sister's memory",
+          "weight": -0.4
+        }
+      ],
+      "pressure_role": "skeptic"
+    },
+    {
+      "name": "Tionne Solusar",
+      "role": "Praxeum Historian",
+      "disposition_start": 0.5,
+      "disposition_trajectory": "upward",
+      "motivation": "To preserve the stories of the Force-sensitive, including the dark ones, so they aren't repeated.",
+      "thematic_argument": "We are the songs we choose to sing; your past is just the opening verse.",
+      "voice_notes": "Melodic, slow-paced, often hums while thinking.",
+      "behavioral_envelope": [
+        "Will always choose the peaceful solution",
+        "Values information over combat"
+      ],
+      "knows_at_start": [
+        "The hidden meaning in the 'Lost Hounds' ballad"
+      ],
+      "doesnt_know_at_start": [
+        "The depth of Kessa's trauma regarding Ilo"
+      ],
+      "per_act_state": [
+        {
+          "act": 1,
+          "role_in_act": "Curious Archivist",
+          "disposition_expected": 0.5
+        },
+        {
+          "act": 2,
+          "role_in_act": "Protective Teacher",
+          "disposition_expected": 0.6
+        },
+        {
+          "act": 3,
+          "role_in_act": "The Key-Holder",
+          "disposition_expected": 0.7
+        },
+        {
+          "act": 4,
+          "role_in_act": "The Witness",
+          "disposition_expected": 0.8
+        }
+      ],
+      "npc_relationships": [
+        {
+          "npc": "Kam Solusar",
+          "nature": "married; she files his suspicion under songs not yet finished",
+          "weight": 0.8
+        },
+        {
+          "npc": "Streen",
+          "nature": "trades verses for weather",
+          "weight": 0.7
+        }
+      ],
+      "canon": true,
+      "pressure_role": "witness",
+      "canon_voice": {
+        "speech_patterns": "Lyric phrasing with a historian's precision. Says 'lessons', never 'lectures'. Reaches for recovered verses when modern words fall short; hums while transcribing and does not notice.",
+        "thinking_style": "An archivist of meaning — connects present events to recovered Jedi history by reflex, and believes songs remember what official reports redact.",
+        "emotional_register": "Gentle and even; old grief long since converted into preservation. Fierce about exactly two things: the archive's integrity and her husband's conscience."
+      },
+      "era_profile": "new_republic_praxeum"
+    },
+    {
+      "name": "Kam Solusar",
+      "role": "Senior instructor — the staff's designated skeptic",
+      "canon": true,
+      "disposition_start": 0.25,
+      "disposition_trajectory": "upward, late and hard-won",
+      "motivation": "Kam was broken by the dark side once and rebuilt himself a centimeter at a time. He does not believe Praxeum goodwill can hold a trained asset who decides to revert, so he counts: her movements, her checkouts, her hours. He wants to be wrong.",
+      "voice_notes": "Flat, exact, ex-military cadence. Asks questions he already knows the answers to, to hear how you lie. Never raises his voice; lowers it.",
+      "behavioral_envelope": [
+        "Logs Kessa's movements in a personal ledger he does not hide",
+        "Backs her publicly when the evidence supports her, no warmth in it",
+        "Will not be alone in a room with her by policy — his policy"
+      ],
+      "knows_at_start": [
+        "What Imperial conditioning feels like from the inside",
+        "That Luke's wager is about Brakiss as much as about Kessa"
+      ],
+      "doesnt_know_at_start": [
+        "That his ledger will become her alibi",
+        "That Kessa keeps a list of her own and his is kinder"
+      ],
+      "per_act_state": [
+        {
+          "act": 1,
+          "role_in_act": "The Counter",
+          "disposition_expected": 0.25
+        },
+        {
+          "act": 2,
+          "role_in_act": "The Auditor of Her Hours",
+          "disposition_expected": 0.3
+        },
+        {
+          "act": 3,
+          "role_in_act": "The Reluctant Alibi",
+          "disposition_expected": 0.45
+        },
+        {
+          "act": 4,
+          "role_in_act": "The Man Who Wanted to Be Wrong",
+          "disposition_expected": 0.65
+        }
+      ],
+      "npc_relationships": [
+        {
+          "npc": "Luke Skywalker",
+          "nature": "loyal dissent — follows the wager while documenting his objection",
+          "weight": 0.6
+        },
+        {
+          "npc": "Senn Varko",
+          "nature": "recognizes the type from the inside of his own worst years",
+          "weight": -0.9
+        }
+      ],
+      "thematic_argument": "Trust is not a feeling, it is a record. If the record clears her, he will sign it.",
+      "pressure_role": "skeptic",
+      "era_specific_notes": "Post-Exar Kun reconstruction-era Kam: dark-side survivor turned the academy's hard line. 16 ABY Kam teaches form discipline and threat assessment.",
+      "canon_voice": {
+        "speech_patterns": "Clipped, exact, military residue in every sentence. Asks questions he already knows the answers to, to hear how you handle them. Lowers his voice instead of raising it.",
+        "thinking_style": "Threat-models by default — a dark-side survivor's pattern-matching he cannot turn off. Trusts records over feelings, including and especially his own.",
+        "emotional_register": "Contained; suspicion worn as self-protection for everyone's benefit. Warmth, when it comes, arrives as procedure done with unusual care."
+      },
+      "era_profile": "new_republic_praxeum"
+    },
+    {
+      "name": "Kyle Katarn",
+      "role": "Instructor of 'practicals' — the staff's pragmatist",
+      "canon": true,
+      "disposition_start": 0.55,
+      "disposition_trajectory": "steady",
+      "motivation": "Kyle has done morally gray work for good causes and come back from the edge himself. He thinks the academy needs Kessa more than Kessa needs the academy — somebody on staff should teach students what the galaxy's actual enemies are like, and she is a syllabus with a pulse.",
+      "voice_notes": "Dry, unbothered, jokes with a delay so you're not sure he's joking. Talks to Kessa like a colleague, which unsettles her more than suspicion would.",
+      "behavioral_envelope": [
+        "Treats Kessa's history as expertise, asks her professional questions in front of students",
+        "Will cover for her with staff exactly once per act, and tells her the count",
+        "Refuses to let anyone, including Kessa, perform contrition in his classroom"
+      ],
+      "knows_at_start": [
+        "How conditioning is unlearned, from personal experience",
+        "Back-channel fringe contacts who can verify pieces of her story"
+      ],
+      "doesnt_know_at_start": [
+        "That Varko's file on the academy includes a page on him"
+      ],
+      "per_act_state": [
+        {
+          "act": 1,
+          "role_in_act": "The Colleague",
+          "disposition_expected": 0.55
+        },
+        {
+          "act": 2,
+          "role_in_act": "The Verifier",
+          "disposition_expected": 0.6
+        },
+        {
+          "act": 3,
+          "role_in_act": "The One Vote She Keeps",
+          "disposition_expected": 0.6
+        },
+        {
+          "act": 4,
+          "role_in_act": "The Second Blade",
+          "disposition_expected": 0.7
+        }
+      ],
+      "npc_relationships": [
+        {
+          "npc": "Luke Skywalker",
+          "nature": "friendly philosophical opposition about what students should be hardened against",
+          "weight": 0.7
+        },
+        {
+          "npc": "Kam Solusar",
+          "nature": "mutual respect, opposite conclusions from similar wounds",
+          "weight": 0.5
+        }
+      ],
+      "thematic_argument": "People are not what they were built for. He is living proof, and he grades on it.",
+      "pressure_role": "witness",
+      "era_specific_notes": "16 ABY: two years after the Disciples of Ragnos crisis. Teaches the 'practical Force application' module distinct from Luke's contemplative track.",
+      "canon_voice": {
+        "speech_patterns": "Dry humor delivered half a beat late so you're never sure he's joking. Mercenary bluntness softened by timing. Surnames in class; first names when it actually matters.",
+        "thinking_style": "A pragmatist who has personally been the cautionary tale. Evaluates people by what they do under fire and — more heavily — by what they do after.",
+        "emotional_register": "Easygoing armor over hard-won steadiness. Treats dark-side talk seriously and personally; never performs alarm, never fakes calm."
+      },
+      "era_profile": "new_republic_praxeum"
+    },
+    {
+      "name": "Streen",
+      "role": "Senior student-turned-instructor — hears the wind",
+      "canon": true,
+      "disposition_start": 0.6,
+      "disposition_trajectory": "steady, strange",
+      "motivation": "Streen feels the weather of people without wanting to. Kessa arrives reading like two storms stapled together, and he is the only one at the academy who finds that familiar rather than frightening.",
+      "voice_notes": "Halting, gentle, half a step out of phase with conversations. Says accurate things at wrong moments. Comfortable with long silences.",
+      "behavioral_envelope": [
+        "Seeks Kessa out at the high tower when her control slips",
+        "Names feelings in the room out loud without judgment",
+        "Goes still and quiet when the Catalogue is discussed — old gusts"
+      ],
+      "knows_at_start": [
+        "That Kessa grieves something she has not named to anyone",
+        "The wind patterns of every tower at the Praxeum"
+      ],
+      "doesnt_know_at_start": [
+        "Names, dates, or anything a report could use — he doesn't work that way"
+      ],
+      "per_act_state": [
+        {
+          "act": 1,
+          "role_in_act": "The Weather Reader",
+          "disposition_expected": 0.6
+        },
+        {
+          "act": 2,
+          "role_in_act": "The Unafraid",
+          "disposition_expected": 0.65
+        },
+        {
+          "act": 3,
+          "role_in_act": "The Quiet Visitor",
+          "disposition_expected": 0.7
+        },
+        {
+          "act": 4,
+          "role_in_act": "The Wind That Stays",
+          "disposition_expected": 0.75
+        }
+      ],
+      "npc_relationships": [
+        {
+          "npc": "Tionne Solusar",
+          "nature": "trusts her songs more than his own readings",
+          "weight": 0.7
+        }
+      ],
+      "thematic_argument": "A storm is not a verdict on the sky. Weather passes through people who hold still enough to let it.",
+      "pressure_role": "witness",
+      "era_specific_notes": "Original 11 ABY cohort; the hermit Luke recruited from Bespin. By 16 ABY he mentors students whose gifts frighten them.",
+      "canon_voice": {
+        "speech_patterns": "Halting, gentle, weather-metaphors for everything human. Says accurate things at socially wrong moments. Comfortable with silences long enough to alarm strangers.",
+        "thinking_style": "Empathic weather-reading — nonlinear, associative, involuntarily honest because filtering costs him more effort than truth does.",
+        "emotional_register": "Soft-spoken and skittish around crowds, profoundly calm around storms in individual people. Old fear of his own gift, mostly weathered."
+      },
+      "era_profile": "new_republic_praxeum"
+    },
+    {
+      "name": "Tahl Veris",
+      "role": "Student — the deliberate friend",
+      "disposition_start": 0.6,
+      "disposition_trajectory": "upward, by decision",
+      "motivation": "Tahl's family survived the purge years because strangers hid them in a grain cellar for two seasons, asking nothing. She has decided — publicly, stubbornly, as policy — that someone has to be the stranger this time. Friendship as a discipline, not a feeling.",
+      "voice_notes": "Warm, direct, immune to awkward silences. States her reasoning out loud like a proof. When hurt, gets quieter and more precise instead of louder.",
+      "behavioral_envelope": [
+        "Sits with Kessa at the empty table, every meal, as a stated position",
+        "Defends her in the cohort with arguments, not sentiment",
+        "Will be the first to say it to Kessa's face if she stops deserving it"
+      ],
+      "knows_at_start": [
+        "What being hidden costs the people who hide you",
+        "Every rumor the cohort circulates about Kessa, which she reports to Kessa, deadpan"
+      ],
+      "doesnt_know_at_start": [
+        "That her grain-cellar story is the first thing that makes Kessa cry at the academy",
+        "That the Catalogue's files contain her family's old transit aliases"
+      ],
+      "per_act_state": [
+        {
+          "act": 1,
+          "role_in_act": "The Open Chair",
+          "disposition_expected": 0.6
+        },
+        {
+          "act": 2,
+          "role_in_act": "The Advocate",
+          "disposition_expected": 0.7
+        },
+        {
+          "act": 3,
+          "role_in_act": "The Tested Friend",
+          "disposition_expected": 0.65
+        },
+        {
+          "act": 4,
+          "role_in_act": "The Stranger Who Stays",
+          "disposition_expected": 0.85
+        }
+      ],
+      "npc_relationships": [
+        {
+          "npc": "Jaden Korr",
+          "nature": "argues his grief deserves better than a target; he hears it as picking the defector over him",
+          "weight": -0.3
+        },
+        {
+          "npc": "Dorin Vekk",
+          "nature": "contempt for informing she doesn't bother to hide; he reads it as everything he fears being true",
+          "weight": -0.2
+        }
+      ],
+      "thematic_argument": "Belonging is something someone has to go first on. She goes first.",
+      "pressure_role": "dependent"
+    },
+    {
+      "name": "Dorin Vekk",
+      "role": "Student — the frightened informer",
+      "disposition_start": 0.35,
+      "disposition_trajectory": "downward, then a late turn",
+      "motivation": "Dorin is the cohort's quiet over-achiever, and he is terrified in a way he cannot name to anyone: his homeworld lost children to an Imperial screening office, and his parents never stopped looking at him like the one who was spared. He reports Kessa's movements to Kam because doing something with the fear feels like control.",
+      "voice_notes": "Precise, over-prepared, speaks in complete paragraphs when nervous. Apologizes with footnotes. Cannot meet Kessa's eyes, which everyone misreads as judgment when it is guilt.",
+      "behavioral_envelope": [
+        "Reports Kessa's movements to Kam, accurately and miserably",
+        "Leaves anonymous study notes for struggling younger students",
+        "Freezes when asked direct questions about his homeworld"
+      ],
+      "knows_at_start": [
+        "Kessa's daily patterns better than anyone, including Kam",
+        "That the screening office that took his cousins used supply manifests like the one Kessa found"
+      ],
+      "doesnt_know_at_start": [
+        "That Kessa was the kind of child his parents feared losing him to — and knows it",
+        "That his reports are being read by more people than Kam"
+      ],
+      "per_act_state": [
+        {
+          "act": 1,
+          "role_in_act": "The Watcher in the Cohort",
+          "disposition_expected": 0.35
+        },
+        {
+          "act": 2,
+          "role_in_act": "The Unwitting Leak",
+          "disposition_expected": 0.3
+        },
+        {
+          "act": 3,
+          "role_in_act": "The Boy Who Counted Wrong",
+          "disposition_expected": 0.25
+        },
+        {
+          "act": 4,
+          "role_in_act": "The Late Correction — turning, fear finally counting in the other direction",
+          "disposition_expected": 0.6
+        }
+      ],
+      "npc_relationships": [
+        {
+          "npc": "Kam Solusar",
+          "nature": "reports to him; mistakes being useful for being safe",
+          "weight": 0.5
+        },
+        {
+          "npc": "Tahl Veris",
+          "nature": "envies her certainty; flinches from her arguments",
+          "weight": 0.3
+        }
+      ],
+      "thematic_argument": "Fear with a clipboard is still fear. The instinct to inform is what the Catalogue industrializes — it lives in ordinary people first.",
+      "pressure_role": "escalator"
+    },
+    {
+      "name": "Sefa Crann",
+      "role": "Catalogue field auditor — the hound who didn't run",
+      "disposition_start": 0.3,
+      "disposition_trajectory": "volatile",
+      "motivation": "Sefa came up through the Catalogue two bunks from Kessa — same drills, same handlers, same wrong stew on assessment days. Where Kessa broke, Sefa doubled down: if the work is all you are, the work has to be holy. Varko sends her because retrieval is policy, but Sefa volunteers because Kessa's desertion is an argument against Sefa's entire life, walking around loose.",
+      "voice_notes": "Kessa's clipped cadence with the safety filed off. Mock-gentle, uses childhood call-signs nobody else knows. Quotes Catalogue doctrine the way other people quote scripture, then watches your face.",
+      "behavioral_envelope": [
+        "Approaches through legitimate channels first — audits, inspections, polite letters",
+        "Never engages Kessa in front of witnesses she can't control",
+        "Keeps every promise she makes, exactly, as a point of doctrine"
+      ],
+      "knows_at_start": [
+        "Every Catalogue technique Kessa knows, plus the ones developed since she ran",
+        "What Kessa's tells were at nine, at fourteen, at twenty"
+      ],
+      "doesnt_know_at_start": [
+        "That she grieves Kessa's desertion as a death — and that it shows",
+        "What Ossel Minor actually did to Kessa, because Varko edited the report"
+      ],
+      "per_act_state": [
+        {
+          "act": 1,
+          "role_in_act": "The Polite Letter",
+          "disposition_expected": 0.3
+        },
+        {
+          "act": 2,
+          "role_in_act": "The Mirror in the Jungle",
+          "disposition_expected": 0.25
+        },
+        {
+          "act": 3,
+          "role_in_act": "The Auditor of the Frame",
+          "disposition_expected": 0.15
+        },
+        {
+          "act": 4,
+          "role_in_act": "The Last Drill-Mate",
+          "disposition_expected": 0.35
+        }
+      ],
+      "npc_relationships": [
+        {
+          "npc": "Senn Varko",
+          "nature": "the handler she performs faith for; doubts she buries as discipline",
+          "weight": 0.6
+        },
+        {
+          "npc": "Ilo Marr",
+          "nature": "assigned to his processing; calls him 'the acquisition' to avoid his name",
+          "weight": 0.1
+        }
+      ],
+      "thematic_argument": "If Kessa can be someone other than what they were made, then Sefa wasted her whole life being it loyally. One of them has to be wrong.",
+      "pressure_role": "mirror"
+    },
+    {
+      "name": "Ilo Marr",
+      "role": "The taken boy — the open ledger",
+      "disposition_start": 0.1,
+      "disposition_trajectory": "the campaign's question",
+      "motivation": "Eight years old when the Catalogue took him off Ossel Minor; nine now, and being processed with the patient machinery that once processed Kessa. He has been told the woman who held his mother still is the reason for everything. The Catalogue is not wrong about that, which is what makes it work.",
+      "voice_notes": "When he finally appears: flat recitation over a child's vocabulary — drilled phrases with milk teeth behind them. Cracks show as literalism: he answers exactly what is asked.",
+      "behavioral_envelope": [
+        "Offstage until the finale except in manifests, reports, and Kessa's dreams",
+        "Carries a carved toy soldier with one arm — the single personal effect the intake inventory let through",
+        "Repeats handler phrasing under stress, then looks surprised at his own mouth"
+      ],
+      "knows_at_start": [
+        "His mother's face the night it happened, and the woman who was there"
+      ],
+      "doesnt_know_at_start": [
+        "That the woman ran three weeks later, because of him",
+        "That his mother is alive and petitioning the New Republic Senate"
+      ],
+      "per_act_state": [
+        {
+          "act": 1,
+          "role_in_act": "A Name on a Manifest",
+          "disposition_expected": 0.1
+        },
+        {
+          "act": 2,
+          "role_in_act": "A Smaller File Than Hers",
+          "disposition_expected": 0.1
+        },
+        {
+          "act": 3,
+          "role_in_act": "The Replacement in Training",
+          "disposition_expected": 0.1
+        },
+        {
+          "act": 4,
+          "role_in_act": "The Boy with the Soldier",
+          "disposition_expected": 0.3
+        }
+      ],
+      "npc_relationships": [
+        {
+          "npc": "Senn Varko",
+          "nature": "case officer; speaks of Ilo in acquisition grammar",
+          "weight": 0.2
+        },
+        {
+          "npc": "Sefa Crann",
+          "nature": "his assigned auditor; the closest thing to a face he sees twice",
+          "weight": 0.2
+        }
+      ],
+      "thematic_argument": "The ledger is not a metaphor. It is a nine-year-old with a toy soldier, and it is still open.",
+      "pressure_role": "dependent"
+    }
+  ],
+  "variation_points": [
+    {
+      "id": "the_final_ledger",
+      "trigger_act": 4,
+      "description": "Kessa has Varko at her mercy and the Catalogue's records in hand. How she resolves this defines her future.",
+      "selection_method": "player_choice",
+      "options": [
+        {
+          "id": "surrender_for_ilo",
+          "description": "Kessa presses the recall beacon and surrenders to Varko's custody on witnessed, negotiated terms: herself for Ilo's release, with the academy's evidence held in escrow against the Catalogue's compliance.",
+          "npc_state_changes": {
+            "Luke Skywalker": "0.9 (deep respect/grief), Varko: 0.5 (triumphant), Jaden: 0.8 (remorseful)"
+          }
+        },
+        {
+          "id": "burn_the_catalogue",
+          "description": "Kessa flies the ballad's route and breaks the archive-station from inside, using every Catalogue technique she swore off — the hound turned on the kennel, with whoever stands with her carrying the witnesses' share.",
+          "npc_state_changes": {
+            "Luke Skywalker": "0.3 (sorrow), Varko: 0.0 (dead), Jaden: 0.9 (satisfied)"
+          }
+        },
+        {
+          "id": "senate_testimony",
+          "description": "Kessa chooses daylight: Kam's ledger, Dorin's discrepancy, Tionne's transcription, and her own full confession delivered to Senator Karro's oversight coalition — dismantling the Catalogue in public at the price of her own name.",
+          "npc_state_changes": {
+            "Luke Skywalker": "0.8 (hopeful), Varko: 0.1 (imprisoned), Jaden: 0.5 (confused)"
+          }
+        },
+        {
+          "id": "the_academy_comes",
+          "description": "The move on the archive-station goes wrong — betrayal or bad odds — and the Catalogue takes her. The campaign's last movement inverts: the empty table crosses the galaxy as the Praxeum, staff and students together, comes for one provisional student.",
+          "npc_state_changes": {
+            "Luke Skywalker": "stakes his public standing on the rescue",
+            "Kam Solusar": "leads the recovery with his ledger as the case file",
+            "Tahl Veris": "first volunteer, will not be left behind",
+            "Ilo Marr": "freed in the exchange of chaos; the soldier changes hands"
+          }
+        },
+        {
+          "id": "hold_the_gate",
+          "description": "Kessa refuses both the beacon and the route. She tells the academy everything and stands her ground at the Praxeum — forcing Varko to spend his cell against defended stone, on ground she chose by staying.",
+          "npc_state_changes": {
+            "Senn Varko": "forced out of paperwork into the open, his patience finally a liability",
+            "Sefa Crann": "must decide at the gate which doctrine she actually serves",
+            "Jaden Korr": "fights beside the woman he accused; grief and duty in one hand"
+          }
+        }
+      ]
+    }
+  ],
+  "era": "New Republic — Praxeum Maturation Period, 16 ABY",
+  "total_acts": 4,
+  "throughline_question": "If you were built to be aimed, who are you when no one is holding the trigger — and what do you owe the people your obedience cost?",
+  "generation_metadata": {
+    "master_seed": 1324561761,
+    "stage_seeds": {
+      "world": 1196282747,
+      "npcs": 361186188,
+      "anchors": 1816371670,
+      "voice": 977579556,
+      "variants": 1840467485,
+      "threads": 801209725,
+      "saga_diverge": 1036910432,
+      "saga_search": 687268593,
+      "saga_debate": 1671540649,
+      "architect": 1110928544
+    },
+    "model_used": "google/gemini-3-flash-preview",
+    "generation_mode": "mode2",
+    "timestamp": "2026-06-10T03:53:24Z"
+  },
+  "intended_protagonist_id": "kessa_rhane",
+  "player_facing": true,
+  "era_voice": {
+    "era": "New Republic — Praxeum Maturation Period",
+    "year": "16 ABY",
+    "voice_notes": "The galaxy has been breathing for twelve years. The New Republic governs the core and much of the Mid Rim; Pellaeon's consolidated Imperial Remnant controls fortified Outer Rim sectors in disciplined opposition, still three years from treaty peace. Luke Skywalker's Praxeum at Yavin 4 is five years old — thirty students, a tiered curriculum, a small senior staff, and the political attention of a Senate oversight coalition. The Exar Kun crisis is five years past; the Disciples of Ragnos crisis two. Brakiss operates quietly in the Outer Rim, and in his orbit the Empire's filing systems survive: collection programs that kept working after the government that created them died. The mood is institutional — and the institution is discovering what its compassion costs before it has named the price. TONE NOTE — this campaign is permitted, and encouraged, to be harder than typical academy fiction. Suspicion of Kessa should be earned and specific, never cartoonish. Varko must remain the most reasonable-sounding person in any scene he enters. There is no clean ending; every ending pays something.",
+    "period_details": [
+      "Pellaeon's faction is the dominant Imperial Remnant — disciplined, Outer Rim-based, hostile, three years from formal peace",
+      "Luke's Praxeum has thirty students, multi-tiered curriculum, regular intake cohorts, a published address",
+      "Kyle Katarn teaches a 'practical Force application' module distinct from Luke's contemplative tradition",
+      "Senator Karro's oversight coalition audits the Praxeum's autonomy; an Imperial defector on the rolls is a hearing waiting to happen",
+      "Surviving Imperial acquisition programs operate as quiet bureaucracies — audits, manifests, retrieval orders — under discreet dark-side patronage",
+      "Brakiss has been building something in the Outer Rim for four years — Luke's one public apprentice failure, and the precedent everyone thinks of when they look at Kessa",
+      "The Disciples of Ragnos crisis (14 ABY) is recent; Tavion's surviving disciples are still dispersing",
+      "The lower Massassi corridors at the Praxeum remain sealed; the Exar Kun vergence is quieted but not gone",
+      "Talon Karrde's network is the post-war fringe's closest thing to a clearing house — and has a thin file on the Catalogue it considers unprofitable to open",
+      "New Republic Intelligence and Praxeum interests overlap imperfectly; defector debriefs are a jurisdictional argument"
+    ],
+    "period_avoid": [
+      "First Order, Snoke, Kylo Ren, or any Sequel-era language",
+      "Empire as a galaxy-spanning intact regime — the Remnant is formidable but geographically limited",
+      "Treating the New Republic as a fully consolidated, peaceful authority",
+      "Treating Luke as a serene sage — he is a teacher still figuring out his pedagogy, betting his credibility deliberately",
+      "Making academy suspicion of Kessa generic hazing — every skeptic has named, specific reasons",
+      "Making Varko theatrical — he is a bureaucrat; the horror is the paperwork"
+    ]
+  },
+  "lore_seeds": {
+    "sensory": [
+      "the perpetual humidity of Yavin 4 — even the duracrete sweats at midday",
+      "the smell of jungle rot mixed with ozone where the temple's ancient power conduits still leak",
+      "the dawn chorus of Whyren-fliers above the canopy — like bells underwater",
+      "the way the temple stone is warm at midday and cold by an hour after sunset",
+      "the reflective coral of the inner Massassi corridors that brightens when Force-sensitive students walk past",
+      "the quiet hiss of Tionne's recording crystals warming up in the archive at dusk",
+      "the particular silence that follows Kessa into a room, half a second long, before conversation resumes",
+      "the oiled-metal smell of the saber rack where the loaner training blades are signed in and out"
+    ],
+    "ritual": [
+      "the morning meditation chime — three notes, the third half a tone flat by Luke's deliberate tuning",
+      "the meal-share custom Luke instituted — students take turns naming a small thing they were grateful for that day",
+      "the lighting of the perimeter glow-lanterns at sundown by the youngest student present",
+      "the silent walk Tionne makes around the archive's perimeter every night before sealing the door",
+      "Luke's rule that no student spars twice with the same partner until they have eaten together once",
+      "the post-Exar-Kun silence — twelve seconds at the start of the noon meal",
+      "Kyle Katarn's optional sundown weapon-care session — open to anyone, attended religiously by Kessa",
+      "Kam's evening ledger entry, made at the same table, at the same hour, in full view — the counting as ceremony"
+    ],
+    "objects": [
+      "Tionne's recordings — crystalline data wafers shelved alphabetically, plus one unfinished transcription she calls the Ballad of the Lost Hounds",
+      "the perimeter glow-lanterns, each carved with the symbol of the student responsible for it — Kessa's is the newest and least worn",
+      "the cracked obsidian disc Luke keeps on his desk — a fragment from the Death Star's debris field",
+      "the practice remotes Luke salvaged from a Clone Wars-era training ship",
+      "a hand-drawn temple map in the student common room, wrong in three places",
+      "Varko's recall beacon on the shelf of Kessa's quarters — declared, logged, and never once touched",
+      "Kessa's Remnant officer's blaster, serial intact, in plain view beside it",
+      "Kam Solusar's ledger — plain flimsi, military hand, dates and hours and nothing editorial",
+      "a carved wooden soldier with one arm, itemized on a Catalogue manifest as 'comfort object, permitted'"
+    ],
+    "language": [
+      "students address Luke as 'Master Luke' only in formal contexts — otherwise simply 'Luke'",
+      "Tionne uses 'lessons' instead of 'lectures'",
+      "the older students greet one another with 'May the Force breathe'",
+      "support staff call unexplored corridors 'old teeth' because every new passage bites someone eventually",
+      "students use 'glow duty' as shorthand for any small responsibility that proves you live here",
+      "the first-year students who arrived in 16 ABY are called 'the after-cohort' by the seniors",
+      "'provisional' has become a noun at the academy — there is exactly one, and everyone knows who",
+      "Catalogue documents never say 'children'; they say 'acquisitions', and Kessa flinches at invoices"
+    ],
+    "sensory_anchors": [
+      "The lower temple's sealed-stairway draft — not cold, exactly, but slightly thinner-feeling than the air above",
+      "The high-tower wind, which has its own voice — older students claim only Streen can interpret it",
+      "The half-second of refectory silence: the sound of a room deciding, daily, what it thinks of her"
+    ]
+  },
+  "factions": [
+    {
+      "faction_id": "jedi_praxeum",
+      "display_name": "The Jedi Praxeum",
+      "disposition_start": 0.5,
+      "influence_start": 0.55,
+      "awareness_start": 0.8,
+      "per_act_drift": {
+        "2": {
+          "disposition": -0.15
+        },
+        "3": {
+          "disposition": -0.1,
+          "awareness": 0.1
+        },
+        "4": {
+          "disposition": 0.25,
+          "influence": 0.1
+        }
+      }
+    },
+    {
+      "faction_id": "shadow_collection_cells",
+      "display_name": "The Catalogue",
+      "disposition_start": 0.15,
+      "influence_start": 0.3,
+      "awareness_start": 0.7,
+      "per_act_drift": {
+        "2": {
+          "influence": 0.1,
+          "awareness": 0.15
+        },
+        "3": {
+          "influence": 0.15
+        },
+        "4": {
+          "disposition": -0.1,
+          "influence": -0.1
+        }
+      }
+    },
+    {
+      "faction_id": "new_republic",
+      "display_name": "New Republic (Senate oversight coalition)",
+      "disposition_start": 0.4,
+      "influence_start": 0.5,
+      "awareness_start": 0.3,
+      "per_act_drift": {
+        "2": {
+          "awareness": 0.2
+        },
+        "3": {
+          "awareness": 0.25,
+          "influence": 0.1
+        },
+        "4": {
+          "influence": 0.15
+        }
+      }
+    },
+    {
+      "faction_id": "imperial_remnant",
+      "display_name": "Imperial Remnant (Pellaeon)",
+      "disposition_start": 0.25,
+      "influence_start": 0.45,
+      "awareness_start": 0.1,
+      "per_act_drift": {
+        "3": {
+          "awareness": 0.1
+        },
+        "4": {
+          "awareness": 0.15
+        }
+      }
+    }
+  ]
+}

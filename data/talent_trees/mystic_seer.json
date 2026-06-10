@@ -1,0 +1,205 @@
+{
+    "specialization": "seer",
+    "career": "mystic",
+    "game_line": "force_and_destiny",
+    "talents": [
+        {
+            "id": "seer_t1_0",
+            "talent_ref": "sense_danger",
+            "tier": 1,
+            "position": 0,
+            "xp_cost": 5,
+            "prerequisites": []
+        },
+        {
+            "id": "seer_t1_1",
+            "talent_ref": "calming_aura",
+            "tier": 1,
+            "position": 1,
+            "xp_cost": 5,
+            "prerequisites": []
+        },
+        {
+            "id": "seer_t1_2",
+            "talent_ref": "grit",
+            "tier": 1,
+            "position": 2,
+            "xp_cost": 5,
+            "prerequisites": []
+        },
+        {
+            "id": "seer_t1_3",
+            "talent_ref": "researcher",
+            "tier": 1,
+            "position": 3,
+            "xp_cost": 5,
+            "prerequisites": []
+        },
+        {
+            "id": "seer_t2_0",
+            "talent_ref": "uncanny_senses",
+            "tier": 2,
+            "position": 0,
+            "xp_cost": 10,
+            "prerequisites": [
+                "seer_t1_0"
+            ]
+        },
+        {
+            "id": "seer_t2_1",
+            "talent_ref": "healing_trance",
+            "tier": 2,
+            "position": 1,
+            "xp_cost": 10,
+            "prerequisites": [
+                "seer_t1_1"
+            ]
+        },
+        {
+            "id": "seer_t2_2",
+            "talent_ref": "center_of_being",
+            "tier": 2,
+            "position": 2,
+            "xp_cost": 10,
+            "prerequisites": [
+                "seer_t1_2"
+            ]
+        },
+        {
+            "id": "seer_t2_3",
+            "talent_ref": "sleight_of_mind",
+            "tier": 2,
+            "position": 3,
+            "xp_cost": 10,
+            "prerequisites": [
+                "seer_t1_3"
+            ]
+        },
+        {
+            "id": "seer_t3_0",
+            "talent_ref": "natural_mystic",
+            "tier": 3,
+            "position": 0,
+            "xp_cost": 15,
+            "prerequisites": [
+                "seer_t2_0"
+            ]
+        },
+        {
+            "id": "seer_t3_1",
+            "talent_ref": "nobody_s_fool",
+            "tier": 3,
+            "position": 1,
+            "xp_cost": 15,
+            "prerequisites": [
+                "seer_t2_1"
+            ]
+        },
+        {
+            "id": "seer_t3_2",
+            "talent_ref": "grit",
+            "tier": 3,
+            "position": 2,
+            "xp_cost": 15,
+            "prerequisites": [
+                "seer_t2_2"
+            ]
+        },
+        {
+            "id": "seer_t3_3",
+            "talent_ref": "uncanny_senses",
+            "tier": 3,
+            "position": 3,
+            "xp_cost": 15,
+            "prerequisites": [
+                "seer_t2_3"
+            ]
+        },
+        {
+            "id": "seer_t4_0",
+            "talent_ref": "force_rating",
+            "tier": 4,
+            "position": 0,
+            "xp_cost": 20,
+            "prerequisites": [
+                "seer_t3_0"
+            ]
+        },
+        {
+            "id": "seer_t4_1",
+            "talent_ref": "knowledge_is_power",
+            "tier": 4,
+            "position": 1,
+            "xp_cost": 20,
+            "prerequisites": [
+                "seer_t3_1"
+            ]
+        },
+        {
+            "id": "seer_t4_2",
+            "talent_ref": "center_of_being",
+            "tier": 4,
+            "position": 2,
+            "xp_cost": 20,
+            "prerequisites": [
+                "seer_t3_2"
+            ]
+        },
+        {
+            "id": "seer_t4_3",
+            "talent_ref": "second_chances",
+            "tier": 4,
+            "position": 3,
+            "xp_cost": 20,
+            "prerequisites": [
+                "seer_t3_3"
+            ]
+        },
+        {
+            "id": "seer_t5_1",
+            "talent_ref": "dedication",
+            "tier": 5,
+            "position": 1,
+            "xp_cost": 25,
+            "prerequisites": [
+                "seer_t4_1"
+            ]
+        }
+    ],
+    "tree_paths": {
+        "the_open_eye": {
+            "theme": "the_open_eye",
+            "description": "The path of sight. Danger felt before it arrives, currents read before they surface, the Force as weather.",
+            "talent_ids": [
+                "seer_t1_0",
+                "seer_t2_0",
+                "seer_t3_0",
+                "seer_t4_0"
+            ]
+        },
+        "the_quiet_hand": {
+            "theme": "the_quiet_hand",
+            "description": "The path of healing. Stillness offered to others — calmed rooms, mended bodies, listened-to grief.",
+            "talent_ids": [
+                "seer_t1_1",
+                "seer_t2_1",
+                "seer_t3_1",
+                "seer_t4_1"
+            ]
+        },
+        "the_deep_well": {
+            "theme": "the_deep_well",
+            "description": "The path of interiority. Discipline, study, and a center of being that holds when the vision is terrible.",
+            "talent_ids": [
+                "seer_t1_2",
+                "seer_t2_2",
+                "seer_t3_2",
+                "seer_t4_2",
+                "seer_t1_3",
+                "seer_t2_3",
+                "seer_t3_3",
+                "seer_t4_3"
+            ]
+        }
+    }
+}

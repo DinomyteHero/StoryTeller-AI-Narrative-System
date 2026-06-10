@@ -1,0 +1,274 @@
+{
+  "schema_version": "campaign_content_pack.v0.1",
+  "id": "ledger_of_ossel_minor",
+  "display_name": "The Ledger of Ossel Minor",
+  "status": "active_canonical",
+  "continuity": "legends",
+  "source_spine": "data/campaigns/ledger_of_ossel_minor.json",
+  "era_pack_id": "new_republic_praxeum",
+  "era_pack_status": "available",
+  "campaign_identity": {
+    "dramatic_premise": "A defector from a surviving Imperial child-acquisitions cell arrives at Luke Skywalker's five-year-old Praxeum under provisional sanctuary — the academy's most-watched student, hunted from outside by the bureaucracy that built her and doubted from inside by people her old life cost something. The boy she helped take is still in the machine, and every day of belonging she banks is a day not spent finding him.",
+    "central_dramatic_question": "If you were built to be aimed, who are you when no one is holding the trigger — and what do you owe the people your obedience cost?",
+    "thematic_throughline": "A person is not what their training made them; choice is the only thing that makes loyalty mean anything.",
+    "story_promise": "Sanctuary under suspicion, dread arriving on letterhead, a mirror with her own face, and a finale where the techniques she renounced are the last shape of the shield.",
+    "protagonist": "kessa_rhane",
+    "antagonist": "Senn Varko and the Catalogue — a patient bureaucracy of stolen children that survived the Empire the way filing systems survive."
+  },
+  "design_contract": {
+    "must_feel_like": [
+      "Suspicion that is earned and specific — every skeptic has named, personal reasons",
+      "Bureaucratic dread: the antagonist files motions, sends polite letters, keeps every promise exactly",
+      "An institution discovering what its compassion costs while a person discovers what her choices are worth",
+      "Transparency as armor: Kessa declares everything and is believed by almost no one, slowly, then suddenly",
+      "Found-belonging paid for at full price — the empty table, the deliberate friend, the skeptic's ledger turned alibi"
+    ],
+    "must_not_feel_like": [
+      "Generic academy hazing or mean-girl cafeteria drama",
+      "A theatrical dark-sider antagonist — Varko never raises his voice and never lies",
+      "A redemption arc the academy hands her — every inch is earned against reasonable doubt",
+      "Luke as serene sage — he is a teacher making his second deliberate wager after losing the first (Brakiss)",
+      "The boy as a plot token — Ilo is the open ledger, and the finale's moral weight rests on reaching him as a person"
+    ]
+  },
+  "terminology": {
+    "campaign_terms": [
+      {
+        "term": "the Catalogue",
+        "definition": "A surviving Imperial child-acquisitions cell run by ex-ISB officer Senn Varko, quietly bankrolled in Brakiss's orbit.",
+        "usage": "Always bureaucratic in register: audits, manifests, retrievals, acquisitions. The horror is the paperwork; never play it as a cult."
+      },
+      {
+        "term": "acquisition",
+        "definition": "Catalogue grammar for a taken Force-sensitive child.",
+        "usage": "Catalogue personnel never say 'children'. Kessa flinches at invoices. Use the word to mark who has and hasn't left the machine."
+      },
+      {
+        "term": "provisional",
+        "definition": "Academy slang, now a noun: a student on probationary sanctuary. There is exactly one.",
+        "usage": "Cohort shorthand for Kessa — sometimes neutral, sometimes a wall, occasionally reclaimed by Tahl as a badge."
+      },
+      {
+        "term": "the Ballad of the Lost Hounds",
+        "definition": "Tionne's transcription of drill cadences Kessa leaks while humming — actually a mnemonic carrying Catalogue evacuation jump-cords.",
+        "usage": "Setup act 1, revelation act 3. The route to Varko's archive-station has been in Kessa's body since she was nine."
+      },
+      {
+        "term": "recall beacon",
+        "definition": "Varko's single-burst retrieval beacon, declared to staff and kept in plain sight on Kessa's shelf.",
+        "usage": "The leash held instead of worn. Finale hinge: pressed, it converts ambush into appointment; refused, she takes the ground instead."
+      },
+      {
+        "term": "the empty table",
+        "definition": "The three-chair radius around Kessa in the refectory, until Tahl Veris ends it as a stated position.",
+        "usage": "The campaign's social barometer — describe who sits where as acts progress."
+      },
+      {
+        "term": "Kam's ledger",
+        "definition": "Kam Solusar's open, undisguised log of Kessa's hours and movements.",
+        "usage": "Insult in act 1, lore by act 2, alibi by act 3. The skeptic's instrument becomes her shield."
+      },
+      {
+        "term": "audit stamp",
+        "definition": "The bureaucratic rune Catalogue operatives burn into cleared sites; Sefa Crann leaves them on Massassi boundary stones.",
+        "usage": "Sefa's calling card and a grammar only Kessa reads. Dread without a single blaster shot."
+      }
+    ],
+    "avoid_or_contextualize": [
+      {
+        "term": "Imperial Remnant",
+        "guidance": "Pellaeon's Outer Rim-based Remnant is disciplined, hostile, and three years from treaty — but the Catalogue is NOT theirs. The Remnant disowns it twice; its patrons are in Brakiss's orbit. Keep the distinction sharp; no settled peace."
+      },
+      {
+        "term": "Shadow Academy",
+        "guidance": "At 16 ABY Brakiss is building quietly — preparation, not yet a school. Reference his orbit and patronage, never an operational academy."
+      },
+      {
+        "term": "Inquisitorius",
+        "guidance": "Dead with the Empire. The Catalogue is its filing-cabinet descendant — collection and maintenance, not lightsaber inquisitors. Resist the urge to give Varko a red blade."
+      }
+    ]
+  },
+  "runtime_assets_snapshot": {
+    "acts": 4,
+    "allegiances": 2,
+    "npc_count": 11,
+    "faction_count": 4,
+    "vehicle_count": 0,
+    "variation_point_count": 1,
+    "foreshadow_link_count": 6,
+    "prologue_scene_sets": 0
+  },
+  "funnel_state": {
+    "intended_protagonist": "kessa_rhane",
+    "alternate_variants": ["brin_ohmsa"],
+    "expansion_variant_seeds": [
+      {
+        "id": "jaden_pov",
+        "seed": "Jaden Korr as protagonist: the cohort's griever discovers the defector is the tracker from his sister's file — and the campaign becomes about what justice is allowed to cost."
+      },
+      {
+        "id": "tahl_pov",
+        "seed": "Tahl Veris as protagonist: friendship as discipline — playing the one who goes first when the institution won't, and paying the cohort price for it."
+      },
+      {
+        "id": "sefa_defection",
+        "seed": "Sefa Crann as protagonist in a sequel frame: the hound who didn't run, after the archive-station — defection as aftermath rather than inciting incident."
+      },
+      {
+        "id": "staff_side",
+        "seed": "Kam Solusar as protagonist: the skeptic's campaign — counting a possible enemy into the alibi that saves her, against his own verdict."
+      }
+    ]
+  },
+  "npc_content_cards": [
+    {
+      "npc": "Senn Varko",
+      "card": "The most reasonable man in any room. Mid-level-insurance-adjuster voice; never lies, never raises his voice, always offers the deal first. His pressure escalates by act: letter, field presence, frame, retrieval posture. He believes the program is a public service."
+    },
+    {
+      "npc": "Sefa Crann",
+      "card": "The mirror. Kessa's drill-mate who doubled down where Kessa broke. Mock-gentle, doctrine-quoting, keeps every promise exactly. Her arc question: if Kessa can be someone else, Sefa's loyalty was a wasted life — one of them must be wrong. Convertible in act 4 via the truth Varko edited from the Ossel Minor report."
+    },
+    {
+      "npc": "Jaden Korr",
+      "card": "The earned skeptic. His sister was taken by a retrieval team whose tracker matches Kessa's years and methods. His tremor is grief, not fear. Never play him as a bully; he is what her old life costs, standing in the refectory."
+    },
+    {
+      "npc": "Kam Solusar",
+      "card": "The counter. Dark-side survivor; threat-models by reflex; logs her hours in the open because hiding it would be worse. His ledger is the act-3 alibi. Backs her exactly as far as the record supports, no further, no warmth — until act 4."
+    },
+    {
+      "npc": "Tahl Veris",
+      "card": "The deliberate friend. Sits at the empty table as a stated position, argues belonging like a proof. Her grain-cellar family history is the first thing that cracks Kessa open. If Kessa stops deserving it, Tahl says so first, to her face."
+    },
+    {
+      "npc": "Dorin Vekk",
+      "card": "The frightened informer — the Catalogue's instinct at miniature, civilian scale. Reports Kessa to Kam out of unnamed fear, accurately and miserably. His act-4 turn (the discrepancy only he can catch) lands only if his fear was treated as human earlier."
+    },
+    {
+      "npc": "Ilo Marr",
+      "card": "The open ledger. Offstage until the finale except as manifests and dreams. Nine years old, drilled phrases over milk teeth, one-armed toy soldier the single unscripted object in his file. Reachable through the soldier, the hold, or the truth about his mother — the finale's moral weight."
+    },
+    {
+      "npc": "Luke Skywalker",
+      "card": "The second wager. Plain, warm, unhurried; quieter when serious. He has been wrong about exactly one apprentice and says Brakiss's name out loud only once, in act 4, at the saber rack. His credibility is staked on her in front of the Senate's auditors."
+    }
+  ],
+  "faction_guidance": [
+    {
+      "faction_id": "jedi_praxeum",
+      "guidance": "The institution as character: hospitality, strain, fracture, commitment. Its verdict arrives in pieces — table seating, duty rosters, who walks her to restriction. The academy must feel like it could genuinely tip either way until act 4."
+    },
+    {
+      "faction_id": "shadow_collection_cells",
+      "guidance": "The Catalogue acts through paperwork and patience. Every escalation is procedurally defensible; the frame is its masterpiece. It loses influence only when institutions move faster than jurisdiction — which is to say, when individuals do."
+    },
+    {
+      "faction_id": "new_republic",
+      "guidance": "The oversight coalition is neither villain nor ally: it is leverage looking for a hearing. Use letters, staffers, and subpoena timing as act-3 pressure that constrains Luke without cartoonish hostility."
+    },
+    {
+      "faction_id": "imperial_remnant",
+      "guidance": "Background pressure only. Pellaeon's people disown the Catalogue truthfully — its patrons are darker and quieter. The Remnant watches the smoke; it does not start the fire."
+    }
+  ],
+  "act_content_guidance": [
+    {
+      "act": 1,
+      "guidance": "BREATHE. The texture of being watched: the empty table, glow duty, Kam's visible counting, Kyle's professional questions. The Catalogue arrives only as paper. End on the manifest — Ilo's name like a dropped blade."
+    },
+    {
+      "act": 2,
+      "guidance": "The mirror cuts both ways: Sefa scenes are who-Kessa-would-have-been; Jaden's midpoint revelation is what-her-staying-costs. The jungle stamps make dread physical. Dorin's leak widens quietly."
+    },
+    {
+      "act": 3,
+      "guidance": "The Judas Goat: meditative restriction, planted tradecraft, the academy as a small town with one suspect. Run the three counter-currents — Kam's ledger, Tionne's finished ballad, Dorin's discrepancy — so exoneration assembles from the people her transparency reached."
+    },
+    {
+      "act": 4,
+      "guidance": "The Price of the Shield: beacon pressed or route flown; who stands with her; the suppression hold as last mercy. Varko prepared for every version of her arrival except the ones with witnesses. Ilo is reached as a person or not at all. Every ending pays something."
+    }
+  ],
+  "ffg_scene_guidance": [
+    {
+      "scene_type": "social_suspicion",
+      "threat": "strain-heavy; failed social checks harden cohort positions and feed the rumor economy",
+      "guidance": "Discipline and Cool defend; Coercion poisons exactly the trust she needs. Triumphs shift a named NPC's posture visibly at the next meal."
+    },
+    {
+      "scene_type": "training_drill",
+      "threat": "strain and reputation; the suppression reflex is one bad roll away",
+      "guidance": "Lightsaber/Discipline checks with the cohort watching. Despair surfaces Catalogue technique in front of witnesses — feed the suppression_reflex thread, never waste it as mere embarrassment."
+    },
+    {
+      "scene_type": "investigation_paper_trail",
+      "threat": "time and exposure rather than wounds",
+      "guidance": "Education, Perception, and Knowledge checks against Catalogue paperwork. The trail is always legally clean; successes find the seam between procedure and intent."
+    },
+    {
+      "scene_type": "lore_artifact",
+      "threat": "strain; memory has edges",
+      "guidance": "The ballad sessions and archive scenes. Failed checks cost composure, not progress — the route is in her body either way; the question is what surfacing it costs."
+    },
+    {
+      "scene_type": "confrontation_mirror",
+      "threat": "real combat stakes plus conversion stakes",
+      "guidance": "Sefa fights in Kessa's own grammar. Every exchange should offer a non-violent line that costs more courage than the violent one."
+    },
+    {
+      "scene_type": "retrieval_finale",
+      "threat": "wounds, incapacitation, and the campaign's verdict",
+      "guidance": "The archive-station honors the variation point: surrender, burn, or testimony. Ilo's toy soldier is the one unscripted object in the room — keep it findable in every branch."
+    }
+  ],
+  "prologue_scene_seeds": [
+    {
+      "id": "corsin_screening",
+      "seed": "Age eight, the Corsin screening office: a kind-voiced examiner, a letter her parents never saw, and the first time being good at something was the worst thing that could happen."
+    },
+    {
+      "id": "first_drill",
+      "seed": "The Catalogue intake floor: learning to read a room's fear before learning to write properly. Sefa two bunks over. The wrong stew on assessment days."
+    },
+    {
+      "id": "ossel_minor",
+      "seed": "The retrieval: finding the family nobody else could find, the order, the hold, the mother's grief tearing through the Force like a hull breach. Played for weight, never for spectacle."
+    },
+    {
+      "id": "the_stolen_shuttle",
+      "seed": "Three weeks later: a transfer dock, a long-haul shuttle, one heading Varko genuinely fears. The decision rendered as logistics — because that is how she could bear to make it."
+    },
+    {
+      "id": "yavin_dock",
+      "seed": "Arrival: one bag, a declared beacon, a blaster with its serial intact, and Luke Skywalker reading her file without flinching. Sanctuary offered as a wager she can hear being placed."
+    }
+  ],
+  "content_gaps": [
+    {
+      "gap": "bond_events_library",
+      "note": "No optional one-on-one bond event library yet (Custodian accreted 53 over two iterations). Cohort relationships currently advance through side_content and act texture only."
+    },
+    {
+      "gap": "group_scenes",
+      "note": "No authored multi-NPC group scenes; refectory and staff-table dynamics are carried by opening situations and side content."
+    },
+    {
+      "gap": "vehicle_registry_empty",
+      "note": "No campaign-specific vehicles. Act 4 transit uses generic academy/freight craft; a chase or escort variant would need a registry pass."
+    },
+    {
+      "gap": "prologue_scene_sets",
+      "note": "Prologue seeds authored here but spine-level prologue_scenes await the Phase 18 psychometric prologue system."
+    },
+    {
+      "gap": "content_pack_loader",
+      "note": "Content packs are design contracts; runtime integration (loader wiring pack guidance into context assembly) remains unbuilt."
+    },
+    {
+      "gap": "turn_scale_unplaytested",
+      "note": "Expected turns rescaled to 58-74 total by design; calibration against real sessions pending first long playtest."
+    }
+  ]
+}

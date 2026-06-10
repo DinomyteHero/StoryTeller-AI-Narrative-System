@@ -1,0 +1,205 @@
+{
+    "specialization": "ambassador",
+    "career": "diplomat",
+    "game_line": "age_of_rebellion",
+    "talents": [
+        {
+            "id": "amba_t1_0",
+            "talent_ref": "natural_charmer",
+            "tier": 1,
+            "position": 0,
+            "xp_cost": 5,
+            "prerequisites": []
+        },
+        {
+            "id": "amba_t1_1",
+            "talent_ref": "nobody_s_fool",
+            "tier": 1,
+            "position": 1,
+            "xp_cost": 5,
+            "prerequisites": []
+        },
+        {
+            "id": "amba_t1_2",
+            "talent_ref": "grit",
+            "tier": 1,
+            "position": 2,
+            "xp_cost": 5,
+            "prerequisites": []
+        },
+        {
+            "id": "amba_t1_3",
+            "talent_ref": "street_smarts",
+            "tier": 1,
+            "position": 3,
+            "xp_cost": 5,
+            "prerequisites": []
+        },
+        {
+            "id": "amba_t2_0",
+            "talent_ref": "calming_aura",
+            "tier": 2,
+            "position": 0,
+            "xp_cost": 10,
+            "prerequisites": [
+                "amba_t1_0"
+            ]
+        },
+        {
+            "id": "amba_t2_1",
+            "talent_ref": "researcher",
+            "tier": 2,
+            "position": 1,
+            "xp_cost": 10,
+            "prerequisites": [
+                "amba_t1_1"
+            ]
+        },
+        {
+            "id": "amba_t2_2",
+            "talent_ref": "toughened",
+            "tier": 2,
+            "position": 2,
+            "xp_cost": 10,
+            "prerequisites": [
+                "amba_t1_2"
+            ]
+        },
+        {
+            "id": "amba_t2_3",
+            "talent_ref": "sleight_of_mind",
+            "tier": 2,
+            "position": 3,
+            "xp_cost": 10,
+            "prerequisites": [
+                "amba_t1_3"
+            ]
+        },
+        {
+            "id": "amba_t3_0",
+            "talent_ref": "convincing_demeanor",
+            "tier": 3,
+            "position": 0,
+            "xp_cost": 15,
+            "prerequisites": [
+                "amba_t2_0"
+            ]
+        },
+        {
+            "id": "amba_t3_1",
+            "talent_ref": "nobody_s_fool",
+            "tier": 3,
+            "position": 1,
+            "xp_cost": 15,
+            "prerequisites": [
+                "amba_t2_1"
+            ]
+        },
+        {
+            "id": "amba_t3_2",
+            "talent_ref": "grit",
+            "tier": 3,
+            "position": 2,
+            "xp_cost": 15,
+            "prerequisites": [
+                "amba_t2_2"
+            ]
+        },
+        {
+            "id": "amba_t3_3",
+            "talent_ref": "intimidating_presence",
+            "tier": 3,
+            "position": 3,
+            "xp_cost": 15,
+            "prerequisites": [
+                "amba_t2_3"
+            ]
+        },
+        {
+            "id": "amba_t4_0",
+            "talent_ref": "inspiring_rhetoric",
+            "tier": 4,
+            "position": 0,
+            "xp_cost": 20,
+            "prerequisites": [
+                "amba_t3_0"
+            ]
+        },
+        {
+            "id": "amba_t4_1",
+            "talent_ref": "knowledge_is_power",
+            "tier": 4,
+            "position": 1,
+            "xp_cost": 20,
+            "prerequisites": [
+                "amba_t3_1"
+            ]
+        },
+        {
+            "id": "amba_t4_2",
+            "talent_ref": "side_step",
+            "tier": 4,
+            "position": 2,
+            "xp_cost": 20,
+            "prerequisites": [
+                "amba_t3_2"
+            ]
+        },
+        {
+            "id": "amba_t4_3",
+            "talent_ref": "second_chances",
+            "tier": 4,
+            "position": 3,
+            "xp_cost": 20,
+            "prerequisites": [
+                "amba_t3_3"
+            ]
+        },
+        {
+            "id": "amba_t5_1",
+            "talent_ref": "dedication",
+            "tier": 5,
+            "position": 1,
+            "xp_cost": 25,
+            "prerequisites": [
+                "amba_t4_1"
+            ]
+        }
+    ],
+    "tree_paths": {
+        "grace_under_fire": {
+            "theme": "grace_under_fire",
+            "description": "The path of charm. Rooms warmed, tempers cooled, and sincerity performed until it becomes true.",
+            "talent_ids": [
+                "amba_t1_0",
+                "amba_t2_0",
+                "amba_t3_0",
+                "amba_t4_0"
+            ]
+        },
+        "the_dossier": {
+            "theme": "the_dossier",
+            "description": "The path of preparation. Knowing the counterparty's position, pressure points, and weaknesses before sitting down.",
+            "talent_ids": [
+                "amba_t1_1",
+                "amba_t2_1",
+                "amba_t3_1",
+                "amba_t4_1"
+            ]
+        },
+        "steel_courtesy": {
+            "theme": "steel_courtesy",
+            "description": "The path of leverage. The politest possible delivery of consequences nobody in the room wants.",
+            "talent_ids": [
+                "amba_t1_2",
+                "amba_t2_2",
+                "amba_t3_2",
+                "amba_t4_2",
+                "amba_t1_3",
+                "amba_t2_3",
+                "amba_t3_3",
+                "amba_t4_3"
+            ]
+        }
+    }
+}

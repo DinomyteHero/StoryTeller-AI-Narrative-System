@@ -1,0 +1,205 @@
+{
+    "specialization": "tactician",
+    "career": "commander",
+    "game_line": "age_of_rebellion",
+    "talents": [
+        {
+            "id": "tact_t1_0",
+            "talent_ref": "inspiring_rhetoric",
+            "tier": 1,
+            "position": 0,
+            "xp_cost": 5,
+            "prerequisites": []
+        },
+        {
+            "id": "tact_t1_1",
+            "talent_ref": "knowledge_is_power",
+            "tier": 1,
+            "position": 1,
+            "xp_cost": 5,
+            "prerequisites": []
+        },
+        {
+            "id": "tact_t1_2",
+            "talent_ref": "grit",
+            "tier": 1,
+            "position": 2,
+            "xp_cost": 5,
+            "prerequisites": []
+        },
+        {
+            "id": "tact_t1_3",
+            "talent_ref": "street_smarts",
+            "tier": 1,
+            "position": 3,
+            "xp_cost": 5,
+            "prerequisites": []
+        },
+        {
+            "id": "tact_t2_0",
+            "talent_ref": "tactical_mind",
+            "tier": 2,
+            "position": 0,
+            "xp_cost": 10,
+            "prerequisites": [
+                "tact_t1_0"
+            ]
+        },
+        {
+            "id": "tact_t2_1",
+            "talent_ref": "researcher",
+            "tier": 2,
+            "position": 1,
+            "xp_cost": 10,
+            "prerequisites": [
+                "tact_t1_1"
+            ]
+        },
+        {
+            "id": "tact_t2_2",
+            "talent_ref": "toughened",
+            "tier": 2,
+            "position": 2,
+            "xp_cost": 10,
+            "prerequisites": [
+                "tact_t1_2"
+            ]
+        },
+        {
+            "id": "tact_t2_3",
+            "talent_ref": "intimidating_presence",
+            "tier": 2,
+            "position": 3,
+            "xp_cost": 10,
+            "prerequisites": [
+                "tact_t1_3"
+            ]
+        },
+        {
+            "id": "tact_t3_0",
+            "talent_ref": "inspiring_rhetoric",
+            "tier": 3,
+            "position": 0,
+            "xp_cost": 15,
+            "prerequisites": [
+                "tact_t2_0"
+            ]
+        },
+        {
+            "id": "tact_t3_1",
+            "talent_ref": "nobody_s_fool",
+            "tier": 3,
+            "position": 1,
+            "xp_cost": 15,
+            "prerequisites": [
+                "tact_t2_1"
+            ]
+        },
+        {
+            "id": "tact_t3_2",
+            "talent_ref": "grit",
+            "tier": 3,
+            "position": 2,
+            "xp_cost": 15,
+            "prerequisites": [
+                "tact_t2_2"
+            ]
+        },
+        {
+            "id": "tact_t3_3",
+            "talent_ref": "side_step",
+            "tier": 3,
+            "position": 3,
+            "xp_cost": 15,
+            "prerequisites": [
+                "tact_t2_3"
+            ]
+        },
+        {
+            "id": "tact_t4_0",
+            "talent_ref": "field_commander",
+            "tier": 4,
+            "position": 0,
+            "xp_cost": 20,
+            "prerequisites": [
+                "tact_t3_0"
+            ]
+        },
+        {
+            "id": "tact_t4_1",
+            "talent_ref": "dead_to_rights",
+            "tier": 4,
+            "position": 1,
+            "xp_cost": 20,
+            "prerequisites": [
+                "tact_t3_1"
+            ]
+        },
+        {
+            "id": "tact_t4_2",
+            "talent_ref": "toughened",
+            "tier": 4,
+            "position": 2,
+            "xp_cost": 20,
+            "prerequisites": [
+                "tact_t3_2"
+            ]
+        },
+        {
+            "id": "tact_t4_3",
+            "talent_ref": "quick_strike",
+            "tier": 4,
+            "position": 3,
+            "xp_cost": 20,
+            "prerequisites": [
+                "tact_t3_3"
+            ]
+        },
+        {
+            "id": "tact_t5_1",
+            "talent_ref": "dedication",
+            "tier": 5,
+            "position": 1,
+            "xp_cost": 25,
+            "prerequisites": [
+                "tact_t4_1"
+            ]
+        }
+    ],
+    "tree_paths": {
+        "voice_of_command": {
+            "theme": "voice_of_command",
+            "description": "The path of leadership. The words that hold a line and the presence that makes retreat feel optional.",
+            "talent_ids": [
+                "tact_t1_0",
+                "tact_t2_0",
+                "tact_t3_0",
+                "tact_t4_0"
+            ]
+        },
+        "the_map_table": {
+            "theme": "the_map_table",
+            "description": "The path of analysis. Reading the engagement, the enemy, and the lie in the briefing document.",
+            "talent_ids": [
+                "tact_t1_1",
+                "tact_t2_1",
+                "tact_t3_1",
+                "tact_t4_1"
+            ]
+        },
+        "front_line_iron": {
+            "theme": "front_line_iron",
+            "description": "The path of shared risk. Commanders who lead from where the fire is earn soldiers who follow them into it.",
+            "talent_ids": [
+                "tact_t1_2",
+                "tact_t2_2",
+                "tact_t3_2",
+                "tact_t4_2",
+                "tact_t1_3",
+                "tact_t2_3",
+                "tact_t3_3",
+                "tact_t4_3"
+            ]
+        }
+    }
+}
