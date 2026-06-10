@@ -2,9 +2,9 @@
 
 > **Tier:** API Reference
 > **Status:** CURRENT
-> **Last updated:** 2026-04-08
+> **Last updated:** 2026-06-09
 > **Authoritative for:** Game Engine HTTP endpoints, request/response schemas
-> **Source file:** `api/game_routes.py`
+> **Source files:** `api/game_routes.py`, `api/character_routes.py`
 
 Base URL: `http://localhost:8000`
 
@@ -75,7 +75,10 @@ Create a new game session with opening narration.
 
 ### GET /session/{session_id}
 
-Load complete session state.
+Load complete session state. When the player has 3+ turns and the
+campaign is still live, this also generates (and caches per turn-count)
+an 80-150 word "story so far" `recap` for re-entry — fail-open, gated
+by `RESUME_RECAP_ENABLED`.
 
 **Response:**
 ```json
@@ -84,16 +87,42 @@ Load complete session state.
   "campaign_name": "nar_shaddaa_job",
   "turn_count": 5,
   "streaming_enabled": true,
+  "campaign_complete": false,
+  "epilogue": null,
+  "recap": "You came back to the docking bay with the manifest...",
+  "total_acts": 4,
+  "destiny": {"light_remaining": 2, "dark_remaining": 1},
   "session_state": {
-    "wounds": 0, "strain": 2, "turn_number": 5,
-    "act_progress": 0.4, "anchor_proximity": 0.6
+    "wounds": 0, "strain": 2,
+    "current_act": 2, "current_location": "..."
   },
   "arc_state": { "...": "..." },
+  "character": { "...": "full character object..." },
   "recent_turns": [ "..." ],
   "last_turn": {
     "narration": "...", "choices": ["..."],
-    "check_info": null, "roll_info": null
+    "check_skill": null, "roll_result": null
   }
+}
+```
+
+### POST /session/{session_id}/epilogue
+
+Generate (or return the cached) campaign epilogue. Only valid once the
+final act's anchor has resolved (`campaign_complete` is true) — returns
+400 otherwise. Generated once via the quality tier, then cached in
+arc_state; repeat calls return the cached payload. The model selects the
+best-matching authored ending from the spine's
+`story_architecture.ending_paths`.
+
+**Response:**
+```json
+{
+  "epilogue": "Three weeks later, the Praxeum kitchens still...",
+  "ending_name": "The Open Door",
+  "campaign_name": "shadows_of_the_custodian",
+  "character_name": "Clovis Beryl",
+  "turns_played": 104
 }
 ```
 
@@ -126,9 +155,15 @@ roll dice, generate narration, reconcile state.
   "roll_summary": "Success with Advantage",
   "session_state": {
     "wounds": 0, "strain": 3, "turn_number": 6,
-    "act_progress": 0.5
+    "act_progress": 0.5, "anchor_proximity": "approaching",
+    "current_act": 2, "total_acts": 4
   },
   "act_boundary": false,
+  "campaign_complete": false,
+  "destiny": {
+    "light_spent": false, "dark_spent": false,
+    "light_remaining": 2, "dark_remaining": 1
+  },
   "milestone": null,
   "force_power_milestone": null,
   "time_skip": null
@@ -137,7 +172,9 @@ roll dice, generate narration, reconcile state.
 
 `dice_result` and `roll_summary` are null when no check was required.
 `milestone`, `force_power_milestone`, and `time_skip` are present only
-at act boundaries when applicable.
+at act boundaries when applicable. When `campaign_complete` is true the
+story has ended — fetch the finale via `POST /epilogue`; further turn
+requests return **409**.
 
 ### POST /session/{session_id}/turn/stream
 
@@ -327,3 +364,57 @@ Handle a vignette choice during a time skip sequence.
   }
 }
 ```
+
+---
+
+## Character Creation (`api/character_routes.py`)
+
+The create-your-own-hero flow: prose pitch → editable draft →
+saved character → generated campaign → normal `POST /session`.
+
+### POST /character/draft
+
+LLM-draft a character stat block from a prose pitch (fast tier).
+
+**Request:** `{"pitch": "A jaded ex-Imperial slicer who defected..."}`
+(1-2000 chars)
+
+**Response:** `{"draft": {...}}` — name, species, archetype_concept,
+characteristics, skills, signature_talents, narrative_arc (lie / ghost /
+want / need), voice_notes, starting_loadout.
+
+### POST /character/save
+
+Validate and persist an (edited) draft to `data/characters/{slug}.json`.
+Deterministic assembly clamps characteristics/skills to bounds, derives
+wound/strain thresholds, and validates every signature talent.
+
+**Request:** `{"character_json": {...draft...}}`
+
+**Response:** `{"character_id": "slug"}` — 422 with an `errors` list on
+validation failure.
+
+### GET /character/{character_id}
+
+Load a saved character JSON.
+
+### POST /campaign/generate
+
+Generate a campaign spine on demand (Studio Mode 1/2), validate it
+through the four-gate suite, and write it to `data/campaigns/`. Play
+then starts via the existing `POST /session` with the returned
+`campaign_name` and the creator's `character_id`.
+
+**Request:**
+```json
+{
+  "premise": "optional hook",
+  "era": "optional era",
+  "location": "optional location",
+  "use_architect": false,
+  "character_id": "slug-from-character-save"
+}
+```
+
+**Response:** `{"campaign_name": "...", "display_name": "...",
+"seed": 1234, "warnings": ["..."]}`

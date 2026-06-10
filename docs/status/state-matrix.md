@@ -1,7 +1,7 @@
 # Storyteller V3 — Project State Matrix
 
-**Version:** 1.8
-**Date:** April 26, 2026
+**Version:** 1.9
+**Date:** June 9, 2026
 **Purpose:** Single-page snapshot of every major capability's status.
 This is a point-in-time view — for authoritative item-level status,
 see `backlog.md`. Prevents the most common review error: mistaking a
@@ -31,11 +31,23 @@ Depth & Enjoyment Pass** added memorable-moments ledger, multi-stage
 thread state, evolving voice, growth recognition, NPC counter-moves,
 emergent faction reactivity, side content + pivot points, tactical
 state for combat / negotiation / chase, and free-form player input.
+**June 9 2026 passes** (changelog has full detail): physics guardrails
+(world-registry validation gate for LLM-proposed locations/facts,
+dice-polarity Rule 4 enforcement, token usage accounting, narration
+prompt split for provider prefix caching, choices-only quality repair);
+experience shell (campaign completion + generated epilogue + finale UI,
+resume recap, mechanically real incapacitation with incoming damage,
+CoG-style stats panel / chapter indicator / destiny visibility /
+milestone ceremony); Studio enrichment generation (beat_roles,
+side_content, foreshadow registry, ending paths, thematic arguments,
+antagonistic relationship pressure — generated and gate-validated, not
+hand-authored); character creator flow (pitch → draft → save →
+on-demand campaign generation).
 
-**Codebase metrics:** ~19,000 lines application code, ~10,300 lines
-test code, 20 test files. 653 tests pass + 12 cleanly skip (campaign-
-specific fixtures for the removed Nar Shaddaa / Echoes spines).
-Documentation: 16 active files in `docs/` plus 6 in `docs/reference/`.
+**Codebase metrics:** ~29,200 lines application code, ~16,100 lines
+test code, 39 test files. 992 tests pass + 13 cleanly skip
+(RUN_LIVE_LLM-gated). Documentation: 23 active files in `docs/` plus
+6 in `docs/reference/`.
 
 ---
 
