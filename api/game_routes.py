@@ -119,6 +119,7 @@ from gm.fast_gm import (
     SKILL_ALIASES,
     VALID_SKILLS,
     annotate_choice,
+    classify_ending_branch,
     decide_check,
     run_prose_diagnostic,
     validate_scene_purpose,
@@ -4255,6 +4256,42 @@ async def get_session_route(session_id: str):
     }
 
 
+def _build_ending_state_block(
+    character: Character,
+    npc_states: list[NPCState],
+    arc_state: dict,
+) -> str:
+    """Final mechanical truth for the epilogue: where every relationship
+    actually landed, plus the protagonist's moral track. Grounds NPC
+    fates in play state instead of leaving them to the model's invention."""
+    lines = ["WHERE THINGS STAND AT THE END (mechanical truth — honor it):"]
+
+    ranked = sorted(
+        npc_states or [],
+        key=lambda n: abs(n.disposition - 0.5),
+        reverse=True,
+    )
+    for npc in ranked[:6]:
+        line = f"- {npc.name}: {npc.disposition_label()} ({npc.disposition:.2f})"
+        if npc.crystallized_memory:
+            line += (" — sharpest memory of the protagonist: "
+                     f"{npc.crystallized_memory}")
+        lines.append(line)
+
+    mot = getattr(character, "motivation", None)
+    if mot is not None:
+        if getattr(character, "force_rating", 0) > 0:
+            lines.append(
+                f"- Morality: {morality_label(mot.morality)} ({mot.morality})")
+        if mot.obligation_type:
+            lines.append(
+                f"- Obligation ({mot.obligation_type}): {mot.obligation_value}")
+        if mot.duty_type:
+            lines.append(f"- Duty ({mot.duty_type}): {mot.duty_value}")
+
+    return "\n".join(lines) if len(lines) > 1 else ""
+
+
 @router.post("/session/{session_id}/epilogue")
 async def handle_epilogue(session_id: str):
     """Generate (or return the cached) campaign epilogue.
@@ -4262,6 +4299,13 @@ async def handle_epilogue(session_id: str):
     Only valid once the final act's anchor has resolved
     (arc_state.campaign_complete). The epilogue is generated once and
     cached in arc_state; repeat calls return the cached payload.
+
+    Ending selection is engine-owned: the played story is classified
+    against the spine's climactic branch options once (FAST tier), the
+    branch is persisted in arc_state, and the authored ending it maps to
+    is handed to the epilogue model to WRITE — not to choose. Spines
+    without branch structure (or a failed classification) fall back to
+    the legacy menu-matching behavior.
     """
     session = get_session(session_id)
     if session is None:
@@ -4288,8 +4332,29 @@ async def handle_epilogue(session_id: str):
             story_summary += "\n\n"
         story_summary += "FINAL TURNS:\n" + "\n".join(closing_lines)
 
+    # ── Engine-owned ending resolution (classified once, persisted) ──
+    ending_branch = arc_state.get("ending_branch_id")
+    if not ending_branch:
+        ending_branch = classify_ending_branch(spine, story_summary)
+        if ending_branch:
+            arc_state["ending_branch_id"] = ending_branch
+    resolved_ending = None
+    if ending_branch:
+        for ep in (spine.get("story_architecture") or {}).get("ending_paths", []):
+            if isinstance(ep, dict) and ep.get("branch_id") == ending_branch:
+                resolved_ending = ep
+                break
+
+    ending_state_block = _build_ending_state_block(
+        character, load_npc_states(session_id, spine), arc_state,
+    )
+
     try:
-        result = generate_epilogue(character, spine, story_summary)
+        result = generate_epilogue(
+            character, spine, story_summary,
+            resolved_ending=resolved_ending,
+            ending_state_block=ending_state_block,
+        )
     except Exception as e:
         logging.error(f"Epilogue generation failed: {e}")
         raise HTTPException(503, "Epilogue generation failed — try again.")
@@ -4297,6 +4362,7 @@ async def handle_epilogue(session_id: str):
     payload = {
         "epilogue": result["epilogue"],
         "ending_name": result["ending_name"],
+        "ending_branch_id": ending_branch,
         "campaign_name": session["campaign_name"],
         "character_name": character.name,
         "turns_played": get_turn_count(session_id),

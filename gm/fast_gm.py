@@ -367,6 +367,87 @@ def _validate_annotation(data: dict) -> dict:
     return data
 
 
+# ── Ending branch classification (experience shell) ─────────────────
+
+ENDING_BRANCH_SCHEMA = {
+    "type": "object",
+    "properties": {
+        "branch_id":  {"type": "string"},
+        "reasoning":  {"type": "string"},
+    },
+    "required": ["branch_id", "reasoning"],
+}
+
+
+def classify_ending_branch(spine: dict, story_summary: str) -> Optional[str]:
+    """Identify which authored climax branch the played story took.
+
+    Runs once, at epilogue time. The spine's climactic variation point
+    options are the authored branches (each ending path's branch_id must
+    resolve to one — Gate 4b); this classifies the actually-played story
+    against them so the ENGINE selects the ending deterministically and
+    the epilogue model writes it, rather than choosing it.
+
+    Fail-open: returns None when the spine has no branch structure or
+    the model's answer doesn't resolve to a known option id — the
+    epilogue then falls back to LLM ending-matching (legacy behavior).
+    """
+    sa = spine.get("story_architecture") or {}
+    ending_branch_ids = {
+        ep.get("branch_id") for ep in sa.get("ending_paths", [])
+        if isinstance(ep, dict) and ep.get("branch_id")
+    }
+    if not ending_branch_ids:
+        return None
+
+    options = []
+    for vp in spine.get("variation_points", []) or []:
+        for opt in vp.get("options", []) or []:
+            if isinstance(opt, dict) and opt.get("id") in ending_branch_ids:
+                options.append(opt)
+    if not options:
+        return None
+
+    option_block = "\n".join(
+        f"- {opt['id']}: {opt.get('description', '')}" for opt in options
+    )
+    prompt = (
+        "A narrative RPG campaign has just been completed. Below are the "
+        "authored climactic branches, then a summary of the story that was "
+        "actually played.\n\n"
+        f"AUTHORED BRANCHES:\n{option_block}\n\n"
+        f"THE STORY THAT WAS PLAYED:\n{story_summary[:6000]}\n\n"
+        "Which branch did the played story actually take? Judge by what the "
+        "protagonist DID in the final stretch — not by which branch is most "
+        "dramatic. Respond ONLY with JSON: "
+        '{"branch_id": "<exact id from the list>", '
+        '"reasoning": "<one sentence>"}'
+    )
+
+    try:
+        data = call_chat_json(
+            tier=TIER_FAST,
+            purpose="ending_branch",
+            user=prompt,
+            schema=ENDING_BRANCH_SCHEMA,
+            temperature=0.0,
+            max_tokens=300,
+            timeout=30.0,
+            retries=2,
+        )
+        branch_id = str(data.get("branch_id", "")).strip()
+        if branch_id in ending_branch_ids:
+            logging.info("ending_branch classified: %s (%s)",
+                         branch_id, str(data.get("reasoning", ""))[:120])
+            return branch_id
+        logging.warning("ending_branch %r not in authored set; falling back",
+                        branch_id)
+        return None
+    except Exception as e:
+        logging.warning(f"Ending branch classification failed (non-critical): {e}")
+        return None
+
+
 # ── Phase 13: Prose Diagnostic Signal (§13) ──────────────────────────
 
 PROSE_DIAGNOSTIC_SCHEMA = {

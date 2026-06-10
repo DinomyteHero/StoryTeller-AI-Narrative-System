@@ -137,6 +137,187 @@ class TestEpilogueEndpoint:
         assert "epilogue" in res.json()["detail"].lower()
 
 
+# ── 2b. Engine-owned ending selection ─────────────────────────────────
+
+def _branching_spine() -> dict:
+    return {
+        "name": "Test Campaign",
+        "throughline_question": "Can they go home?",
+        "variation_points": [
+            {
+                "id": "climax",
+                "trigger_act": 4,
+                "description": "The decisive choice.",
+                "selection_method": "player_choice",
+                "options": [
+                    {"id": "walk_away", "description": "They walk away from it."},
+                    {"id": "stay_and_fight", "description": "They stay and hold."},
+                ],
+            },
+        ],
+        "story_architecture": {
+            "ending_paths": [
+                {"name": "The Long Road", "branch_id": "walk_away",
+                 "synopsis": "They walk away.", "thematic_payoff": "Freedom costs"},
+                {"name": "The Stand", "branch_id": "stay_and_fight",
+                 "synopsis": "They hold the line.", "thematic_payoff": "Roots cost"},
+            ],
+        },
+    }
+
+
+class TestEndingBranchClassification:
+    def test_classify_returns_valid_branch(self):
+        from gm import fast_gm
+        with patch.object(
+            fast_gm, "call_chat_json",
+            return_value={"branch_id": "stay_and_fight",
+                          "reasoning": "the final turns show them holding"},
+        ):
+            got = fast_gm.classify_ending_branch(
+                _branching_spine(), "They stayed and fought at the gate.")
+        assert got == "stay_and_fight"
+
+    def test_classify_rejects_unknown_branch(self):
+        from gm import fast_gm
+        with patch.object(
+            fast_gm, "call_chat_json",
+            return_value={"branch_id": "invented_branch", "reasoning": "?"},
+        ):
+            assert fast_gm.classify_ending_branch(
+                _branching_spine(), "summary") is None
+
+    def test_classify_without_branch_structure_skips_llm(self):
+        from gm import fast_gm
+        with patch.object(fast_gm, "call_chat_json") as mock_llm:
+            assert fast_gm.classify_ending_branch({"name": "X"}, "s") is None
+        mock_llm.assert_not_called()
+
+    def test_classify_fails_open_on_llm_error(self):
+        from gm import fast_gm
+        with patch.object(
+            fast_gm, "call_chat_json", side_effect=RuntimeError("provider down"),
+        ):
+            assert fast_gm.classify_ending_branch(
+                _branching_spine(), "summary") is None
+
+
+class TestResolvedEndingEpilogue:
+    def test_resolved_ending_owns_the_name(self):
+        from gm import cloud_gm
+        with patch.object(
+            cloud_gm, "_call_chat_for_epilogue",
+            return_value="ENDING: Wrong Name\n\nYou stay. The gate holds.",
+        ):
+            result = cloud_gm.generate_epilogue(
+                _make_character(), _branching_spine(), "summary",
+                resolved_ending={
+                    "name": "The Stand", "branch_id": "stay_and_fight",
+                    "synopsis": "They hold the line.",
+                    "thematic_payoff": "Roots cost",
+                },
+            )
+        assert result["ending_name"] == "The Stand"
+        assert result["epilogue"].startswith("You stay.")
+
+    def test_ending_state_block_appends_to_summary(self):
+        from gm import cloud_gm
+        captured = {}
+
+        def capture(prompt):
+            captured["prompt"] = prompt
+            return "ENDING: The Stand\n\nDone."
+
+        with patch.object(cloud_gm, "_call_chat_for_epilogue", side_effect=capture):
+            cloud_gm.generate_epilogue(
+                _make_character(), _branching_spine(), "summary",
+                ending_state_block="WHERE THINGS STAND AT THE END:\n- Tahl: loyal",
+            )
+        assert "WHERE THINGS STAND AT THE END" in captured["prompt"]
+        assert "- Tahl: loyal" in captured["prompt"]
+
+
+class TestEpilogueRouteEndingResolution:
+    def _client(self):
+        from fastapi.testclient import TestClient
+        from api.main import app
+        return TestClient(app)
+
+    def test_route_persists_branch_and_uses_resolved_name(self):
+        fake_session = {
+            "arc_state_json": json.dumps({"campaign_complete": True}),
+            "character_json": _make_character().model_dump_json(),
+            "campaign_name": "test_campaign",
+        }
+        captured = {}
+
+        def fake_update(session_id, character, arc_state):
+            captured["arc_state"] = arc_state
+
+        with patch("api.game_routes.get_session", return_value=fake_session), \
+             patch("api.game_routes.load_campaign_spine",
+                   return_value=_branching_spine()), \
+             patch("api.game_routes.get_act_summaries",
+                   return_value="They stayed and held the gate."), \
+             patch("api.game_routes.get_recent_turns", return_value=[]), \
+             patch("api.game_routes.format_turn_lines", return_value=[]), \
+             patch("api.game_routes.get_turn_count", return_value=42), \
+             patch("api.game_routes.load_npc_states", return_value=[]), \
+             patch("api.game_routes.classify_ending_branch",
+                   return_value="stay_and_fight"), \
+             patch("api.game_routes.update_session_state",
+                   side_effect=fake_update), \
+             patch("gm.cloud_gm._call_chat_for_epilogue",
+                   return_value="ENDING: Renamed By Model\n\nThe gate holds."):
+            res = self._client().post("/session/test-id/epilogue")
+
+        assert res.status_code == 200
+        body = res.json()
+        # Engine-resolved branch is persisted and the authored name wins.
+        assert body["ending_branch_id"] == "stay_and_fight"
+        assert body["ending_name"] == "The Stand"
+        assert captured["arc_state"]["ending_branch_id"] == "stay_and_fight"
+
+    def test_route_falls_back_when_classification_unresolved(self):
+        fake_session = {
+            "arc_state_json": json.dumps({"campaign_complete": True}),
+            "character_json": _make_character().model_dump_json(),
+            "campaign_name": "test_campaign",
+        }
+        with patch("api.game_routes.get_session", return_value=fake_session), \
+             patch("api.game_routes.load_campaign_spine",
+                   return_value=_branching_spine()), \
+             patch("api.game_routes.get_act_summaries", return_value="summary"), \
+             patch("api.game_routes.get_recent_turns", return_value=[]), \
+             patch("api.game_routes.format_turn_lines", return_value=[]), \
+             patch("api.game_routes.get_turn_count", return_value=7), \
+             patch("api.game_routes.load_npc_states", return_value=[]), \
+             patch("api.game_routes.classify_ending_branch", return_value=None), \
+             patch("api.game_routes.update_session_state"), \
+             patch("gm.cloud_gm._call_chat_for_epilogue",
+                   return_value="ENDING: The Long Road\n\nYou walk."):
+            res = self._client().post("/session/test-id/epilogue")
+
+        assert res.status_code == 200
+        body = res.json()
+        assert body["ending_branch_id"] is None
+        # Legacy behavior: the model's matched ending stands.
+        assert body["ending_name"] == "The Long Road"
+
+    def test_ending_state_block_formats_npc_truth(self):
+        from api.game_routes import _build_ending_state_block
+        from gm.context import NPCState
+        npcs = [
+            NPCState(name="Tahl Veris", disposition=0.9,
+                     crystallized_memory="Sat at the empty table first."),
+            NPCState(name="Background Extra", disposition=0.5),
+        ]
+        block = _build_ending_state_block(_make_character(), npcs, {})
+        assert "Tahl Veris" in block
+        assert "loyal" in block
+        assert "Sat at the empty table first." in block
+
+
 # ── 3. Resume recap ──────────────────────────────────────────────────
 
 class TestResumeRecap:

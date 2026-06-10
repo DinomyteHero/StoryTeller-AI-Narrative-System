@@ -1522,31 +1522,55 @@ def generate_epilogue(
     character,
     spine: dict,
     story_summary: str,
+    *,
+    resolved_ending: dict | None = None,
+    ending_state_block: str = "",
 ) -> dict:
     """Generate the campaign-closing epilogue after the final act resolves.
 
-    Selects the best-matching authored ending path (spine
-    story_architecture.ending_paths) from the story that was actually
-    played, then writes 300-550 words of closing prose. Returns
-    {"ending_name": str, "epilogue": str}.
+    When the engine has already resolved which authored ending the played
+    story took (`resolved_ending` — classified from the climax branch and
+    persisted in arc_state), the model WRITES that ending; it does not
+    choose. Without a resolved ending it falls back to offering the menu
+    and letting the model match (legacy sessions, spines without branch
+    structure).
 
-    Raises on provider failure — the API endpoint surfaces the error and
-    the player can retry; a campaign ending deserves better than a
-    silently degraded fallback (Rule 5).
+    `ending_state_block` carries the final mechanical truth — NPC
+    dispositions, morality, threads — so NPC fates in the epilogue are
+    grounded in play state, not invented.
+
+    Returns {"ending_name": str, "epilogue": str}. Raises on provider
+    failure — the API endpoint surfaces the error and the player can
+    retry; a campaign ending deserves better than a silently degraded
+    fallback (Rule 5).
     """
-    ending_paths = (spine.get("story_architecture") or {}).get("ending_paths", [])
-    if ending_paths:
-        path_lines = ["ENDING PATHS (choose the one the played story earned):"]
-        for path in ending_paths:
-            if not isinstance(path, dict):
-                continue
-            name = path.get("name", "")
-            synopsis = path.get("synopsis", "")
-            payoff = path.get("thematic_payoff", "") or path.get("branch_id", "")
-            path_lines.append(f"- {name}: {synopsis} [{payoff}]")
-        ending_paths_block = "\n".join(path_lines)
+    if resolved_ending:
+        name = resolved_ending.get("name", "What Comes After")
+        synopsis = resolved_ending.get("synopsis", "")
+        payoff = (resolved_ending.get("thematic_payoff", "")
+                  or resolved_ending.get("branch_id", ""))
+        ending_paths_block = (
+            "THE ENDING THE STORY REACHED (the climax branch is already "
+            "decided — write the epilogue as THIS ending, no other):\n"
+            f"- {name}: {synopsis} [{payoff}]"
+        )
     else:
-        ending_paths_block = ""
+        ending_paths = (spine.get("story_architecture") or {}).get("ending_paths", [])
+        if ending_paths:
+            path_lines = ["ENDING PATHS (choose the one the played story earned):"]
+            for path in ending_paths:
+                if not isinstance(path, dict):
+                    continue
+                name = path.get("name", "")
+                synopsis = path.get("synopsis", "")
+                payoff = path.get("thematic_payoff", "") or path.get("branch_id", "")
+                path_lines.append(f"- {name}: {synopsis} [{payoff}]")
+            ending_paths_block = "\n".join(path_lines)
+        else:
+            ending_paths_block = ""
+
+    if ending_state_block:
+        story_summary = (story_summary or "") + "\n\n" + ending_state_block
 
     arc = getattr(character, "narrative_arc", None)
     arc_block = ""
@@ -1580,6 +1604,11 @@ def generate_epilogue(
         ending_name = match.group(1).strip()
         passage = passage[match.end():].strip()
     passage = re.sub(r"\*{1,2}(.+?)\*{1,2}", r"\1", passage)
+
+    # When the engine resolved the branch, the engine owns the ending name —
+    # the model writes the ending; it does not get to rename or swap it.
+    if resolved_ending:
+        ending_name = resolved_ending.get("name", ending_name)
 
     return {"ending_name": ending_name, "epilogue": passage}
 
