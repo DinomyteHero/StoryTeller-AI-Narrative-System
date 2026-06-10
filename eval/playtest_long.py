@@ -258,13 +258,15 @@ def run(
     base: str = DEFAULT_BASE,
     turns: int = 35,
     log_path: Path = DEFAULT_LOG,
+    campaign_name: str = "shadows_of_the_custodian",
     character_id: str = "clovis_beryl",
 ) -> list[TurnSnapshot]:
     engine = Engine(base)
-    print(f"[playtest] base={base} turns={turns} character={character_id} log={log_path}")
+    print(f"[playtest] base={base} turns={turns} campaign={campaign_name} "
+          f"character={character_id} log={log_path}")
 
     sess = engine.post("/session", {
-        "campaign_name": "shadows_of_the_custodian",
+        "campaign_name": campaign_name,
         "character_id":  character_id,
     })
     sid = sess["session_id"]
@@ -577,9 +579,14 @@ def main() -> int:
     parser.add_argument("--turns", type=int, default=35)
     parser.add_argument("--log", type=Path, default=DEFAULT_LOG)
     parser.add_argument(
+        "--campaign",
+        default="shadows_of_the_custodian",
+        help="Campaign slug from data/campaigns/ to play",
+    )
+    parser.add_argument(
         "--character",
         default="clovis_beryl",
-        help="Character ID (clovis_beryl | praxeum_student | praxeum_mechanic)",
+        help="Character ID from data/characters/ to play as",
     )
     parser.add_argument(
         "--report", type=Path, default=None,
@@ -589,7 +596,7 @@ def main() -> int:
 
     snapshots = run(
         base=args.base, turns=args.turns, log_path=args.log,
-        character_id=args.character,
+        campaign_name=args.campaign, character_id=args.character,
     )
     if args.report:
         write_report(snapshots=snapshots, out_path=args.report)

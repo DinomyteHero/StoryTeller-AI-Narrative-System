@@ -17,12 +17,18 @@ project state changes; do not re-introduce duplicate content here.
 - **What this is:** LLM-powered Star Wars narrative RPG using FFG dice.
 - **Architecture:** Game Engine (runtime) + Campaign Studio (authoring tool),
   sharing the campaign spine JSON as the interface contract.
-- **Tech:** Python 3.11+, FastAPI, Ollama (local), OpenAI-compatible cloud
-  LLMs via OpenRouter or OpenAI, SQLite WAL, Pydantic v2.
+- **Tech:** Python 3.11+, FastAPI, OpenAI-compatible cloud LLMs via
+  OpenRouter or OpenAI (cloud-only — the local Ollama path was removed
+  May 2026), SQLite WAL, Pydantic v2.
 - **The rule that overrides everything:** Do not build the second thing
   until the first thing works.
-- **Canonical campaign:** `data/campaigns/shadows_of_the_custodian.json`.
-- **Canonical characters:** `data/characters/{praxeum_student,praxeum_mechanic,clovis_beryl}.json`.
+- **Canonical campaign:** `data/campaigns/ledger_of_ossel_minor.json`
+  (intended protagonist `kessa_rhane`). The prior canonical campaign
+  `shadows_of_the_custodian.json` is retired from the player funnel
+  (`player_facing: false`) but stays on disk as a test fixture.
+- **Starting character roster:** `data/characters/{kessa_rhane,dhara_vess,rix_calloran,saviin_talas,brin_ohmsa,yara_senn}.json`.
+  `clovis_beryl`, `praxeum_student`, and `praxeum_mechanic` remain as
+  test fixtures only — do not modify their stats.
 
 ## Critical rules (full text in CLAUDE.md)
 

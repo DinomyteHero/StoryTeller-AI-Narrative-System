@@ -2,6 +2,120 @@
 
 All notable changes to Storyteller V3 are documented here.
 
+## [Unreleased] — 2026-06-10 — Protagonist Centrality + Engine-Owned Endings
+
+### The player character is structurally the main character
+- **PROTAGONIST CENTRALITY contract** in
+  [gm/prompts/narration_system.txt](../../gm/prompts/narration_system.txt):
+  NPCs may start trouble, apply pressure, and react — but the hinge of
+  every scene belongs to the player. No mentor steps in to win the
+  moment (the specific risk of a campaign whose roster includes Luke
+  Skywalker); on failed checks the consequence still routes through the
+  protagonist; every passage must end on a situation only the player can
+  resolve. Choice rules now require every option to be an action of the
+  player character (delegation only as a deliberate, costed call).
+- **protagonist_mode** set on all four Ledger of Ossel Minor acts
+  (orphan → wanderer → warrior → martyr), feeding the existing
+  PROTAGONIST STANCE cue in turn context
+  ([gm/context.py](../../gm/context.py) `build_beat_role_block`).
+
+### Endings are now engine-owned (physics before imagination)
+- Previously the epilogue model was handed the full ending menu and
+  asked to guess which one the story earned — the only branch-detection
+  in the system. New: `classify_ending_branch`
+  ([gm/fast_gm.py](../../gm/fast_gm.py)) classifies the played story
+  against the spine's climactic variation options once (FAST tier,
+  fail-open), persists `arc_state.ending_branch_id`, and the epilogue
+  route resolves the authored ending via Gate 4b's branch_id mapping.
+  `generate_epilogue` then WRITES that ending — the engine owns the
+  ending name; the model cannot rename or swap it. Legacy
+  menu-matching survives as fallback for sessions/spines without branch
+  structure. Epilogue payload now includes `ending_branch_id`.
+- **Epilogue grounding** — `_build_ending_state_block`
+  ([api/game_routes.py](../../api/game_routes.py)) appends the final
+  mechanical truth to the epilogue context: top NPC dispositions with
+  crystallized memories, morality/obligation/duty state — so NPC fates
+  are drawn from play state instead of invented.
+
+### Branch depth in the canonical campaign
+- The Ledger of Ossel Minor climax now has **5 options ↔ 5 authored
+  endings** (added: *The Academy Comes* — the rescue inverted; *Hold
+  The Gate* — the siege refused), all with full synopses and thematic
+  payoffs; the original three were synopsis-empty. Gates re-validated
+  green (Gate 4b branch mapping intact).
+- Known limit, unchanged: mid-campaign variation_points remain
+  authoring-time structures (validation + difficulty calibration);
+  runtime consumption beyond the climax classification is future work.
+- 9 new tests in
+  [tests/test_experience_shell.py](../../tests/test_experience_shell.py)
+  (classification validity/fallback/fail-open, resolved-ending naming,
+  route persistence, ending-state block).
+
+## [Unreleased] — 2026-06-09 — Content Foundation: New Canonical Campaign, Full Talent Coverage, Starting Roster
+
+The "make the content worth the engine" pass: a new canonical campaign
+and protagonist replace the twice-iterated Praxeum mystery, every career
+now has a curated talent tree, the character creator reaches those trees,
+and the starting roster spans all three game lines.
+
+### New canonical campaign + protagonist
+- **The Ledger of Ossel Minor** (`data/campaigns/ledger_of_ossel_minor.json`)
+  — 4 acts, 11 NPCs (5 canon with full canon_voice), 6 foreshadow pairs,
+  4 factions, 2 allegiances, 3 authored endings behind a climactic
+  variation point. Generated via Mode 2 + architect tailored to the new
+  protagonist, then hand-polished (era_voice, lore_seeds, act openings,
+  turn scale 58-74). Passes all gates including Gate 4 LLM narrative eval.
+- **Kessa Rhane** (`data/characters/kessa_rhane.json`) — defector from
+  "the Catalogue," an Imperial child-acquisitions cell; guardian/protector,
+  Influence as her one practiced-and-feared power. Intended protagonist.
+- **Shadows of the Custodian retired** from the player funnel
+  (`player_facing: false`, already set); file and the three prior
+  characters remain as test fixtures.
+- Companion content pack (`data/content_packs/ledger_of_ossel_minor.json`)
+  with honest content_gaps; era pack `new_republic_praxeum` enriched
+  additively (16 ABY maturation band, Shadow Collection Cells faction
+  template, Defector at the Gate campaign template, 3 era terms).
+
+### Talent coverage is comprehensive
+- **14 new specialization trees** — every one of the 18 FFG careers now
+  has at least one curated tree (was 4): survivalist, doctor, scout,
+  bodyguard, mechanic, (ace) pilot, tactician, ambassador, saboteur,
+  commando, infiltrator, seer, pathfinder, shii_cho_knight.
+- **8 new library talents** (surgeon, stim_application, gearhead,
+  solid_repairs, inspiring_rhetoric, field_commander,
+  intimidating_presence, tactical_mind) — all through
+  `validate_talent_definition`; library at 52.
+
+### Character creator reaches the trees
+- Draft prompt now carries the canonical career/specialization catalog
+  and steers toward it when the concept fits (freeform still legal);
+  `assemble_character` maps `specializations` (new draft field) so
+  created characters get curated milestone branches instead of always
+  falling back to freeform choices. Signature special items get
+  story-weight guidance (bounded once-per-session/campaign hooks).
+
+### Starting roster
+- Five premades alongside Kessa, spanning all three game lines and six
+  trees, each with full lie/ghost/truth/want/need arcs and a signature
+  item: Dhara Vess (bounty_hunter/survivalist), Rix Calloran (ace/pilot),
+  Saviin Talas (spy/infiltrator), Brin Ohmsa (mystic/seer), Yara Senn
+  (colonist/doctor).
+
+### Generation pipeline fixes (latent production bugs)
+- **Spine truncation** — Mode 1/Mode 2 spine calls were capped at 8k
+  output tokens; enriched spines overflow that and died mid-JSON on
+  every retry. Now 16k ([studio/generate.py](../../studio/generate.py)),
+  architect 4k→6k ([studio/architect.py](../../studio/architect.py)).
+- **Architecture merge backfill** — `_merge_architecture_into_spine` now
+  backfills all required story_architecture scalars the generation model
+  omitted (previously only beat sheet/foreshadow/endings).
+- **Provider routing** — `.env` pinned OpenRouter to the DeepSeek-direct
+  endpoint, which currently returns HTTP 200 with empty content; the
+  "success" never triggered fallback, silently breaking every FAST and
+  QUALITY call. Pin cleared, endpoint excluded, documented in `.env`.
+- `eval/playtest_long.py` takes `--campaign` (was hardcoded to the old
+  canonical campaign).
+
 ## [Unreleased] — 2026-06-09 — Experience Shell + Studio Enrichment Generation
 
 The "can't finish, can't return, can't see yourself" pass: campaigns now

@@ -130,9 +130,11 @@ storyteller-v3/
 ├── studio/          # Campaign Studio — spine authoring, validation, saga pipeline
 ├── data/
 │   ├── campaigns/   # Campaign spine JSON files
-│   ├── characters/  # Character JSON files
-│   ├── talent_trees/ # 6 specialization trees + talent library
+│   ├── characters/  # 6-protagonist starting roster + test fixtures
+│   ├── talent_trees/ # 20 specialization trees + 52-talent library
 │   ├── force_powers/ # 5 Force power definitions
+│   ├── content_packs/ # Per-campaign design contracts
+│   ├── era_packs/   # Era anchoring templates
 │   └── personas/    # Writer's Room personas (55)
 ├── eval/            # Evaluation harness (quality metrics, golden scenarios)
 ├── tests/           # Test suite (31 test files)
@@ -141,11 +143,30 @@ storyteller-v3/
 
 ## Included Content
 
-- **Shadows of the Custodian** — the canonical campaign. A Jedi Praxeum mystery set in 16 ABY starring Clovis Beryl, a smuggler-raised Force-sensitive newly arrived at Luke Skywalker's academy. 5 acts, 26 NPCs, 53 bond events, 8 group scenes, 17 foreshadow threads, 5 distinct endings.
+- **The Ledger of Ossel Minor** — the canonical campaign. A defector
+  drama set at Luke Skywalker's Jedi Praxeum in 16 ABY starring Kessa
+  Rhane, a Force-sensitive deserter from a surviving Imperial
+  child-acquisitions cell, hunted by the bureaucracy that built her and
+  doubted by the academy sheltering her. 4 acts, 11 NPCs (5 canon
+  figures with full voice profiles), 6 foreshadow threads, 4 factions,
+  3 authored endings. Studio-generated via Mode 2 + architect, then
+  hand-polished; passes all validation gates including the Gate 4 LLM
+  narrative evaluation.
+- **A starting roster of six protagonists** spanning all three FFG game
+  lines, each with a full narrative arc (lie/ghost/truth/want/need),
+  voice notes, and a signature item with bounded mechanics: Kessa Rhane
+  (guardian), Dhara Vess (bounty hunter), Rix Calloran (ace), Saviin
+  Talas (spy), Brin Ohmsa (mystic), Yara Senn (colonist).
+- **Talent trees for all 18 careers** — 20 specialization trees plus a
+  52-talent shared library, all enforced by the engine's dice-safety
+  validator.
 
-This campaign's *structural skeleton* is complete and playable, but the **prose-level detail, scene texture, and NPC interiority all need substantially more authoring depth** before the experience reads like a finished novel-quality story. It is a working demonstration of the engine, not a polished narrative.
-
-Earlier campaigns (*The Nar Shaddaa Job*, *Echoes of the Force*) live in `data/campaigns/_archive/` for reference. They are not playable from the current build.
+The previous canonical campaign (*Shadows of the Custodian*, 5 acts /
+26 NPCs / 53 bond events) is retired from the player funnel
+(`player_facing: false`) but remains on disk as a test fixture and
+reference. Earlier campaigns (*The Nar Shaddaa Job*, *Echoes of the
+Force*) live in `data/campaigns/_archive/`. They are not playable from
+the current build.
 
 ## Milestone Status (last synced: 2026-05-03)
 
@@ -160,9 +181,9 @@ Earlier campaigns (*The Nar Shaddaa Job*, *Echoes of the Force*) live in `data/c
 
 ## Known Limitations
 
-- **Story content is thin.** The engine and authoring tools are far ahead of the actual narrative material. Expect to author or generate your own spines to see the system stretch.
+- **Story content is young.** *The Ledger of Ossel Minor* is gate-valid and hand-polished but has not yet accreted the bond-event and group-scene depth the previous campaign gained over two iterations (its content pack lists the gaps honestly). Expect to author or generate your own spines to see the system stretch.
 - **Cloud LLM only.** No local model fallback. Costs scale with play time.
-- **Single canonical campaign.** *Shadows of the Custodian* is the only fully wired campaign in the current build.
+- **Single player-facing campaign.** *The Ledger of Ossel Minor* is the only campaign in the picker; on-demand generation (`POST /campaign/generate`) covers everything else.
 - **No content moderation layer.** The system relies on the upstream model provider's safety. Star Wars themes can include violence; tune your provider settings accordingly.
 - **No accessibility audit.** The frontend is a single HTML file optimized for readability, not screen readers or assistive tech.
 

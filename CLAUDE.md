@@ -249,6 +249,28 @@ Campaign Studio (parallel track):
   → save → on-demand campaign generation (`api/character_routes.py`,
   `gm/character_creator.py`, `studio/persist.py`,
   `POST /campaign/generate`).
+- **Content foundation pass (2026-06-09)** — new canonical campaign
+  **The Ledger of Ossel Minor** (`ledger_of_ossel_minor`, intended
+  protagonist `kessa_rhane`); Custodian retired from the player funnel
+  (`player_facing: false`, retained as a test fixture — do not modify
+  fixture characters' stats). Six-protagonist starting roster across all
+  three game lines. Talent trees for all 18 careers (20 trees, 52-talent
+  library). Creator drafts map `specializations` so created characters
+  reach curated trees. Generation pipeline fixes: spine token cap
+  8k→16k, architect 4k→6k, architecture-merge scalar backfill, `.env`
+  OpenRouter provider pin removed (DeepSeek-direct returned empty 200s;
+  the pin suppressed fallback).
+- **Protagonist centrality + engine-owned endings (2026-06-10)** —
+  PROTAGONIST CENTRALITY contract in the narration system prompt (NPCs
+  never take the player's turn; consequences route through the
+  protagonist); `protagonist_mode` set per Ledger act. Ending selection
+  is engine-owned: `classify_ending_branch` (fast tier, fail-open)
+  persists `arc_state.ending_branch_id` once at epilogue time and the
+  resolved authored ending is handed to `generate_epilogue` to write —
+  the model no longer chooses or names the ending; legacy matching only
+  as fallback. Epilogue context now carries final NPC dispositions,
+  crystallized memories, and morality/obligation/duty. Ledger climax
+  expanded to 5 options ↔ 5 authored endings with full synopses.
 
 **Next work:** Phase 18 (Psychometric Prologue), CS-7 (Saga Depth), or
 the TurnContext refactor (collapse the four near-duplicate turn handlers
@@ -259,9 +281,10 @@ in `api/game_routes.py` around a shared context object).
 - ~29,200 lines of application code (Python + HTML)
 - ~16,100 lines of test code across 39 test files
 - 23 active documentation files in `docs/` + 6 archived in `docs/reference/`
-- 1 authored campaign spine (Shadows of the Custodian) plus on-demand
-  generated campaigns, 3 prebuilt characters plus player-created
-  characters, 7 talent files (6 trees + library), 5 Force powers
+- 1 player-facing campaign spine (The Ledger of Ossel Minor) plus the
+  retired Custodian fixture and on-demand generated campaigns; 6-character
+  starting roster plus 3 fixture characters and player-created characters;
+  21 talent files (20 trees + 52-talent library); 5 Force powers
 
 ## Repo Structure
 
@@ -394,10 +417,14 @@ storyteller-v3/
 │   ├── policies.py        # Automated choice selection strategies
 │   └── reporter.py        # Console + JSON report generation
 ├── data/
-│   ├── characters/        # praxeum_student.json, praxeum_mechanic.json, clovis_beryl.json
-│   ├── campaigns/         # shadows_of_the_custodian.json (canonical campaign)
-│   ├── talent_trees/      # 6 specialization trees + talent_library.json
+│   ├── characters/        # 6-protagonist roster (kessa_rhane = canonical intended
+│   │                      #   protagonist) + 3 fixture characters (do not modify stats)
+│   ├── campaigns/         # ledger_of_ossel_minor.json (canonical, player-facing)
+│   │                      #   + shadows_of_the_custodian.json (retired fixture)
+│   ├── talent_trees/      # 20 specialization trees (all 18 careers) + talent_library.json
 │   ├── force_powers/      # 5 powers (enhance, heal_harm, influence, move, sense)
+│   ├── content_packs/     # Per-campaign design contracts
+│   ├── era_packs/         # Era anchoring templates (2 eras)
 │   └── personas/          # writer_room_personas.json (55 personas)
 └── tests/                 # 39 test files (~16,100 lines)
     ├── __init__.py
