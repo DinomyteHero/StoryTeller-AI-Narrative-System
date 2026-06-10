@@ -1651,12 +1651,23 @@ class ContextPackage:
                 lines.append("")
                 lines.append(self.destiny_narrative_note)
             return "\n".join(lines)
+        # Verdict first — models weight early tokens, and the single most
+        # important fact about this turn is which quadrant to narrate.
+        quadrant_headlines = {
+            "success_advantage": 'YES, AND — the attempt succeeds and something extra is gained.',
+            "success_threat":    'YES, BUT — the attempt succeeds and a new problem emerges.',
+            "failure_advantage": 'NO, BUT — the attempt fails; something peripheral is gained.',
+            "failure_threat":    'NO, AND — the attempt fails and the situation worsens.',
+        }
+        headline = quadrant_headlines.get(self.roll_result.outcome_quadrant, "")
         lines = [
             "DICE CHECK RESULT:",
+            f"  NARRATE AS: {headline}" if headline else "",
             f"  Pool: {self.dice_pool.description() if self.dice_pool else 'unknown'}",
             f"  Result: {self.roll_result.narrative_label()}",
             f"  Outcome quadrant: {self.roll_result.outcome_quadrant}",
         ]
+        lines = [line for line in lines if line]
         if self.roll_result.triumphs:
             lines.append(
                 f"  TRIUMPH x{self.roll_result.triumphs}: "

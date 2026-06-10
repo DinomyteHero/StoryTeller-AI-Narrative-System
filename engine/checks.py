@@ -195,3 +195,49 @@ def describe_pool_for_display(pool: DicePool) -> dict:
         "dice": [d for d in all_dice if d["count"] > 0],
         "description": pool.description(),
     }
+
+
+# ── Incoming damage (Game Mechanics §2 — combat consequences) ─────────
+# The player's attacks deal weapon damage (§18); the opposition's
+# counterpressure lands here. Solo-play adaptation: there is no separate
+# enemy attack roll — a FAILED check in a dangerous scene IS the enemy's
+# opening, and the dice that failed it size the cost. Soak absorbs wounds
+# exactly as in tabletop FFG. This is what makes incapacitation (§2,
+# "a story beat, not a game-over") mechanically reachable.
+
+DANGEROUS_SCENE_TYPES = frozenset({"combat", "space_combat", "chase"})
+
+_INCOMING_BASE_WOUNDS = 2      # baseline hit on any dangerous-scene failure
+_INCOMING_DESPAIR_WOUNDS = 3   # each despair lands like a critical
+_INCOMING_STRAIN_CAP = 4       # threats wear you down, but bounded
+
+
+def compute_incoming_damage(
+    roll_result,
+    scene_type: str,
+    soak: int,
+) -> tuple[int, int]:
+    """(wounds, strain) the character suffers from this turn's outcome.
+
+    Pure function, data-driven (Rule 11a). Only failed checks in dangerous
+    scenes deal wounds: base 2 + net failures + 3 per despair, minus soak.
+    Net threats convert to strain (capped) on failures in dangerous scenes.
+    Success, safe scenes, and no-check turns cost nothing here — strain
+    from talents, dark pips, and obligation is charged elsewhere.
+    """
+    if roll_result is None:
+        return 0, 0
+    if (scene_type or "").strip().lower() not in DANGEROUS_SCENE_TYPES:
+        return 0, 0
+    if roll_result.succeeded:
+        return 0, 0
+
+    net_failures = max(0, -roll_result.net_successes)
+    despairs = max(0, roll_result.despairs)
+    raw_wounds = _INCOMING_BASE_WOUNDS + net_failures + _INCOMING_DESPAIR_WOUNDS * despairs
+    wounds = max(0, raw_wounds - max(0, soak))
+
+    net_threats = max(0, -roll_result.net_advantages)
+    strain = min(_INCOMING_STRAIN_CAP, net_threats)
+
+    return wounds, strain

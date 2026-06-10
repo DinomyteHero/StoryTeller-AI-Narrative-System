@@ -24,3 +24,4 @@ __codex_*.db
 codex_smoke_tmp/
 codex_pytest_tmp_*/
 logs/
+_srv.log

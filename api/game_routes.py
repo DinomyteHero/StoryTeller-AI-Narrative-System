@@ -24,6 +24,13 @@ from pydantic import BaseModel
 
 from engine.character import Character
 from engine.reconciliation import count_state_deltas
+from engine.world_registry import (
+    ground_facts,
+    match_location_from_text,
+    npc_location_domains,
+    record_location,
+    validate_proposed_location,
+)
 from state.telemetry import (
     emit_choice_made, emit_dice_resolved, emit_state_delta,
     emit_consequence_gap, emit_npc_disposition_shift, emit_thread_event,
@@ -39,6 +46,7 @@ from engine.checks import (
     DIFFICULTY_LABELS,
     build_pool,
     build_pure_force_pool,
+    compute_incoming_damage,
     describe_pool_for_display,
 )
 from engine.force import (
@@ -79,6 +87,7 @@ from engine.vehicle import (
 from gm.cloud_gm import (
     narrate_turn,
     narrate_turn_stream,
+    generate_epilogue,
     _parse_response,
     CloudGMError,
 )
@@ -115,11 +124,17 @@ from gm.fast_gm import (
     validate_scene_purpose,
 )
 from state.db import get_connection
-from state.memory import compress_if_needed, should_compress, compress_act_turns
+from state.memory import (
+    compress_act_turns,
+    compress_if_needed,
+    generate_resume_recap,
+    should_compress,
+)
 from state.session import (
     create_session,
     derive_behavioral_availability,
     detect_surfaced_echoes,
+    format_turn_lines,
     get_act_summaries,
     get_recent_narrations,
     get_recent_turns,
@@ -138,6 +153,7 @@ from state.session import (
 router = APIRouter()
 
 STREAMING_ENABLED = os.getenv("STREAMING_ENABLED", "true").lower() == "true"
+RESUME_RECAP_ENABLED = os.getenv("RESUME_RECAP_ENABLED", "true").lower() == "true"
 PROSE_DIAGNOSTIC_INLINE = os.getenv("PROSE_DIAGNOSTIC_INLINE", "false").lower() == "true"
 CHOICE_ANNOTATION_ENABLED = os.getenv("CHOICE_ANNOTATION_ENABLED", "false").lower() == "true"
 ANNOTATION_JOIN_TIMEOUT_SEC = float(os.getenv("ANNOTATION_JOIN_TIMEOUT_SEC", "0.2"))
@@ -495,17 +511,40 @@ _NPC_LOCATION_DOMAINS: dict[str, frozenset[str]] = {
 }
 
 
-def _npc_location_eligible(npc_name: str, current_location: str) -> bool:
+def _npc_domain_table_for_spine(spine: dict | None) -> dict[str, frozenset[str]]:
+    """NPC location-domain table for the loaded campaign.
+
+    Spine-authored domains (NPC.location_domains in studio/schema.py) are
+    the source of truth. The hardcoded `_NPC_LOCATION_DOMAINS` table predates
+    spine authoring and remains the fallback for the canonical campaign —
+    spine entries overlay it there. Other campaigns get only what they
+    author; unauthored NPCs stay unconstrained.
+    """
+    derived = npc_location_domains(spine)
+    if spine is None or "custodian" in str(spine.get("name") or "").lower():
+        table = dict(_NPC_LOCATION_DOMAINS)
+        table.update(derived)
+        return table
+    return derived
+
+
+def _npc_location_eligible(
+    npc_name: str,
+    current_location: str,
+    domain_table: dict[str, frozenset[str]] | None = None,
+) -> bool:
     """Return True if this NPC can plausibly be physically present at the
     given location.
 
     Prevents the cloud GM from importing Praxeum NPCs into Glass Wake scenes
     or off-world antagonists into a goodbye dinner. Falls back to permissive
     when the NPC is not in the domain table or the location is unknown — so
-    new campaigns are unaffected until they author their own table.
+    campaigns are unaffected until they author domains.
     """
+    if domain_table is None:
+        domain_table = _NPC_LOCATION_DOMAINS
     name_key = (npc_name or "").strip().lower()
-    domains = _NPC_LOCATION_DOMAINS.get(name_key)
+    domains = domain_table.get(name_key)
     if not domains:
         return True
     if "*" in domains:
@@ -519,11 +558,12 @@ def _npc_location_eligible(npc_name: str, current_location: str) -> bool:
 def _filter_npcs_by_location(
     names: list[str],
     current_location: str,
+    domain_table: dict[str, frozenset[str]] | None = None,
 ) -> list[str]:
     """Drop any names that fail the location-eligibility check."""
     if not current_location:
         return names
-    return [n for n in names if _npc_location_eligible(n, current_location)]
+    return [n for n in names if _npc_location_eligible(n, current_location, domain_table)]
 
 
 def _normalise_present_npcs(
@@ -531,6 +571,7 @@ def _normalise_present_npcs(
     npc_states: list[NPCState],
     *fallback_texts: str,
     current_location: str = "",
+    domain_table: dict[str, frozenset[str]] | None = None,
 ) -> list[str]:
     valid = {npc.name.lower(): npc.name for npc in npc_states or []}
     by_alias = {
@@ -547,7 +588,7 @@ def _normalise_present_npcs(
     for name in _referenced_npc_names_from_text(npc_states, *fallback_texts):
         if name not in names:
             names.append(name)
-    names = _filter_npcs_by_location(names, current_location)
+    names = _filter_npcs_by_location(names, current_location, domain_table)
     return names[:4]
 
 
@@ -679,8 +720,10 @@ def _select_active_scene_npcs(
     arc_state: dict,
     current_act: dict,
     *texts: str,
+    spine: dict | None = None,
 ) -> list[NPCState]:
     state = _initial_scene_state(arc_state, current_act)
+    domain_table = _npc_domain_table_for_spine(spine)
     current_location = str(
         state.get("current_location")
         or arc_state.get("current_location")
@@ -692,10 +735,11 @@ def _select_active_scene_npcs(
         npc_states,
         *texts,
         current_location=current_location,
+        domain_table=domain_table,
     )
     if not names:
         names = _referenced_npc_names_from_text(npc_states, *texts)
-        names = _filter_npcs_by_location(names, current_location)
+        names = _filter_npcs_by_location(names, current_location, domain_table)
     name_set = set(names)
     return [npc for npc in npc_states if npc.name in name_set]
 
@@ -704,7 +748,15 @@ def _infer_scene_location(
     text: str,
     previous_location: str,
     current_act: dict,
+    spine: dict | None = None,
 ) -> str:
+    # Spine-authored vocabulary first — works for any campaign. The
+    # keyword rules below predate per-act location_vocabulary and only
+    # ever fire on canonical-campaign text.
+    matched = match_location_from_text(text, spine, current_act)
+    if matched:
+        return matched
+
     lower = text.lower()
     if any(token in lower for token in (
         "sealed stairs", "stairwell", "lower massassi", "lower levels",
@@ -829,14 +881,42 @@ def _apply_narration_scene_state(
     turn_number: int,
     skill: str | None = None,
     ship_state: ShipState | None = None,
+    spine: dict | None = None,
 ) -> dict:
     prior = _initial_scene_state(arc_state, current_act)
     patch = getattr(narration_result, "state_patch", {}) or {}
     text = f"{player_action}\n{getattr(narration_result, 'passage', '')}"
+    domain_table = _npc_domain_table_for_spine(spine)
 
-    location = _clean_state_string(patch.get("current_location")) or _infer_scene_location(
-        text, prior.get("current_location", ""), current_act
-    )
+    # Narration-proposed locations pass through the world registry gate:
+    # grounded in spine geography, the visited ledger, the prior location,
+    # or the delivered passage — otherwise rejected in favor of inference.
+    location = ""
+    proposed_location = _clean_state_string(patch.get("current_location"))
+    if proposed_location:
+        accepted, loc_source = validate_proposed_location(
+            proposed_location,
+            spine=spine,
+            arc_state=arc_state,
+            prior_location=prior.get("current_location", ""),
+            passage_text=getattr(narration_result, "passage", ""),
+        )
+        if accepted:
+            location = proposed_location
+            record_location(
+                arc_state, location,
+                turn_number=turn_number, source=loc_source,
+            )
+        else:
+            logging.warning(
+                "Rejected narration-proposed location %r — no grounding in "
+                "spine, visited ledger, prior location, or passage.",
+                proposed_location,
+            )
+    if not location:
+        location = _infer_scene_location(
+            text, prior.get("current_location", ""), current_act, spine=spine,
+        )
     raw_present_npcs = patch.get("present_npcs", [])
     fallback_texts = (
         (text,)
@@ -848,10 +928,11 @@ def _apply_narration_scene_state(
         npc_states,
         *fallback_texts,
         current_location=location,
+        domain_table=domain_table,
     )
     if not present_npcs:
         carry = list(prior.get("present_npcs", []))
-        present_npcs = _filter_npcs_by_location(carry, location)
+        present_npcs = _filter_npcs_by_location(carry, location, domain_table)
 
     patch_scene = _clean_state_string(patch.get("scene_type"), max_len=40)
     final_scene_type = _sanitize_scene_type(
@@ -861,9 +942,16 @@ def _apply_narration_scene_state(
         ship_state=ship_state,
     )
 
+    # Patch-proposed facts must be grounded in the prose the player actually
+    # read — ungrounded claims are dropped before they reach persistent state.
+    grounded_patch_facts, _ = ground_facts(
+        _clean_state_list(patch.get("known_facts", [])),
+        text,
+        label="known_fact",
+    )
     known_facts = _clean_state_list(
         prior.get("known_facts", [])
-        + _clean_state_list(patch.get("known_facts", []))
+        + grounded_patch_facts
         + _detect_known_facts(text),
         max_items=12,
     )
@@ -911,6 +999,135 @@ def _apply_narration_scene_state(
         "threads_opened": patch.get("threads_opened", []),
     }
     return _merge_thread_updates(patch_updates, _deterministic_thread_updates(text))
+
+
+def _session_state_payload(
+    character: Character,
+    arc_state: dict,
+    spine: dict,
+    turn_number: int,
+) -> dict:
+    """The session_state block every turn response carries."""
+    return {
+        "turn_number": turn_number,
+        "wounds": character.current_wounds,
+        "strain": character.current_strain,
+        "act_progress": arc_state.get("act_progress", 0.0),
+        "anchor_proximity": arc_state.get("anchor_proximity", "distant"),
+        "scene_state": arc_state.get("scene_state", {}),
+        "current_act": arc_state.get("current_act", 1),
+        "total_acts": spine.get("total_acts", 0),
+    }
+
+
+def _persist_between_act_state(
+    session_id: str,
+    character: Character,
+    arc_state: dict,
+    pipeline_result,
+    *pending_payloads,
+) -> None:
+    """Post-pipeline bookkeeping shared by every turn handler.
+
+    Mirrors the pipeline's completion flag onto the in-memory arc_state
+    (so a later write can't clobber the DB state) and persists when the
+    boundary produced anything the next request must see.
+    """
+    if pipeline_result.campaign_complete:
+        arc_state["campaign_complete"] = True
+    if pipeline_result.campaign_complete or any(pending_payloads):
+        update_session_state(session_id, character, arc_state)
+
+
+# ── Incapacitation (Game Mechanics §2) ────────────────────────────────
+# "A story beat, not a game-over." Crossing the wound threshold costs the
+# player one turn of agency: the passage describes what happens TO them,
+# the immediate confrontation ends, and play resumes in the redirected
+# situation. A second collapse in the same act forces the scene to resolve
+# against the player — capture or forced retreat, not another reprieve.
+
+INCAPACITATION_RECOVERY_WOUNDS = 3   # wake below threshold, still hurt
+
+_INCAPACITATION_DIRECTIVE = (
+    "INCAPACITATION — MANDATORY: The character's wounds have reached their "
+    "threshold. They go down in this passage. Narrate what happens TO them, "
+    "not what they do: the world moves while they cannot. End the immediate "
+    "confrontation — captured, dragged clear by an ally, or left for dead as "
+    "the threat moves on. Impose one concrete cost (gear taken, position "
+    "lost, an NPC's trust shaken, time gone). Close the passage as they "
+    "regain awareness in the changed situation. Choices must be about what "
+    "they do NOW, diminished — not about continuing the fight they lost."
+)
+
+_INCAPACITATION_ESCALATION_DIRECTIVE = (
+    "SECOND INCAPACITATION THIS ACT — MANDATORY: The character has gone "
+    "down twice in this act. No more reprieves. The current objective is "
+    "lost: narrate capture or forced retreat that decisively ends this "
+    "line of approach. The situation must visibly resolve AGAINST the "
+    "character. Choices must be about living with the new reality, not "
+    "re-attempting the lost objective this scene."
+)
+
+
+def _apply_incoming_damage(
+    character: Character,
+    arc_state: dict,
+    roll_result,
+    scene_type: str,
+    effective_wound_threshold: int | None = None,
+) -> str:
+    """Apply this turn's incoming wounds/strain (engine.checks) and assess
+    incapacitation. Returns a narration directive when the character just
+    crossed the wound threshold, else "".
+    """
+    if roll_result is None:
+        return ""
+
+    wounds, strain = compute_incoming_damage(
+        roll_result, scene_type, character.effective_soak(),
+    )
+    threshold = effective_wound_threshold or character.wound_threshold
+
+    if strain:
+        character.current_strain = min(
+            character.current_strain + strain, character.strain_threshold,
+        )
+    if wounds:
+        character.current_wounds = min(
+            character.current_wounds + wounds, threshold,
+        )
+
+    was_incapacitated = bool(arc_state.get("incapacitated"))
+    now_incapacitated = character.current_wounds >= threshold
+
+    if now_incapacitated and not was_incapacitated:
+        arc_state["incapacitated"] = True
+        count = int(arc_state.get("incapacitations_this_act", 0) or 0) + 1
+        arc_state["incapacitations_this_act"] = count
+        logging.warning(
+            "Character incapacitated (wounds %d/%d, occurrence %d this act)",
+            character.current_wounds, threshold, count,
+        )
+        if count >= 2:
+            return _INCAPACITATION_ESCALATION_DIRECTIVE
+        return _INCAPACITATION_DIRECTIVE
+
+    if not now_incapacitated:
+        arc_state["incapacitated"] = False
+    return ""
+
+
+def _apply_incapacitation_recovery(
+    character: Character,
+    arc_state: dict,
+    effective_wound_threshold: int | None = None,
+) -> None:
+    """One turn of lost agency, then play resumes (§2): after the
+    incapacitation passage is narrated, wake the character below the
+    threshold — hurt, conscious, in the redirected situation."""
+    threshold = effective_wound_threshold or character.wound_threshold
+    character.current_wounds = max(0, threshold - INCAPACITATION_RECOVERY_WOUNDS)
+    arc_state["incapacitated"] = False
 
 
 def _thread_states_for_context(current_act: dict, arc_state: dict) -> list[ThreadState]:
@@ -1926,6 +2143,10 @@ async def list_campaigns():
     for path in sorted(campaigns_dir.glob("*.json")):
         with open(path, encoding="utf-8") as f:
             spine = json.load(f)
+        # Archived/reference campaigns are hidden from the picker but stay
+        # loadable for tests and direct session creation.
+        if not spine.get("player_facing", True):
+            continue
         sa = spine.get("story_architecture", {}) or {}
         ev = spine.get("era_voice", {}) or {}
         intended_protagonist_id = spine.get("intended_protagonist_id", "")
@@ -2094,6 +2315,130 @@ def _apply_emotion_from_check(
 class CreateSessionRequest(BaseModel):
     campaign_name: str
     character_id: str
+
+
+class GenerateCampaignRequest(BaseModel):
+    """Request to generate a playable campaign on demand (Phase 4)."""
+    premise: str = ""                  # rich concept -> Mode 2; sparse -> Mode 1
+    era: str = ""
+    location: str = ""
+    tone: str = "gritty"
+    moral_register: str = "morally gray"
+    throughline_question: str = ""
+    total_acts: int = 4
+    mode: str = "auto"                 # "auto" | "1" | "2"
+    use_architect: bool = False        # off by default for latency
+    character_id: str = ""             # tailor the spine to this created character
+    surprise_me: bool = False
+
+
+@router.post("/campaign/generate")
+async def generate_campaign_route(req: GenerateCampaignRequest):
+    """Generate a campaign spine on demand, validate it, write it to disk.
+
+    Returns {campaign_name, display_name, seed, warnings}. The caller then
+    starts play via the existing POST /session with the returned campaign_name
+    and their own character_id — the created character drops in directly; no
+    spine variant is required.
+    """
+    from studio.generate import (
+        generate_mode1, generate_from_brief, Mode1Input, ThematicBrief,
+    )
+    from studio.validate import validate_spine
+    from studio.persist import write_spine
+    from studio.schema import CampaignSpine
+
+    # Defaults for a "surprise me" run.
+    era = req.era or ("Galactic Civil War" if not req.surprise_me else "the Age of Rebellion")
+    location = req.location or ("the Outer Rim" if req.surprise_me else "a contested frontier world")
+
+    # Fold the created character's arc/identity into the brief so the generated
+    # campaign resonates with who the player made (thematic input only).
+    character_flavor = ""
+    if req.character_id:
+        try:
+            ch = load_character(req.character_id)
+            arc = ch.narrative_arc
+            bits = [f"The protagonist is {ch.name}, {ch.archetype_concept or ch.career}."]
+            if ch.background:
+                bits.append(f"Background: {ch.background[:400]}")
+            if arc:
+                if arc.want:
+                    bits.append(f"They want: {arc.want}")
+                if arc.need:
+                    bits.append(f"They need: {arc.need}")
+                if arc.lie:
+                    bits.append(f"The lie they believe: {arc.lie}")
+            character_flavor = " ".join(bits)
+        except HTTPException:
+            character_flavor = ""
+
+    # Decide mode: explicit, else rich premise -> Mode 2, else Mode 1.
+    use_mode2 = req.mode == "2" or (req.mode == "auto" and len(req.premise.strip()) > 40)
+
+    last_errors: list[str] = []
+    spine_data = None
+    seed = None
+    for attempt in range(3):
+        try:
+            if use_mode2:
+                brief = ThematicBrief(
+                    era=era,
+                    location=location,
+                    tone=req.tone,
+                    throughline_question=(
+                        req.throughline_question
+                        or "What does the protagonist owe the people they could become?"
+                    ),
+                    campaign_concept=" ".join(
+                        p for p in (req.premise.strip(), character_flavor) if p
+                    ) or "A morally complex frontier story.",
+                    moral_register=req.moral_register,
+                    total_acts=req.total_acts,
+                    constraints=character_flavor,
+                )
+                candidate, seed = generate_from_brief(
+                    brief, use_architect=req.use_architect, max_retries=3
+                )
+            else:
+                inputs = Mode1Input(
+                    era=era,
+                    location=location,
+                    tone=req.tone,
+                    moral_register=req.moral_register,
+                )
+                candidate, seed = generate_mode1(
+                    inputs, use_architect=req.use_architect, max_retries=3
+                )
+        except Exception as e:  # generation/parse failure
+            last_errors = [f"generation failed: {e}"]
+            continue
+
+        try:
+            report = validate_spine(CampaignSpine(**candidate), run_gate4_llm=False)
+        except Exception as e:
+            last_errors = [f"spine did not match schema: {e}"]
+            continue
+
+        if report.passed:
+            spine_data = candidate
+            last_errors = report.warnings
+            break
+        last_errors = report.errors
+
+    if spine_data is None:
+        raise HTTPException(
+            502,
+            {"error": "Could not generate a valid campaign", "details": last_errors[:8]},
+        )
+
+    slug = write_spine(spine_data)
+    return {
+        "campaign_name": slug,
+        "display_name": spine_data.get("name", slug),
+        "seed": seed,
+        "warnings": last_errors[:8],
+    }
 
 
 class TurnRequest(BaseModel):
@@ -2879,7 +3224,8 @@ async def create_session_route(
     npc_states = load_npc_states(session_id, spine)
     arc_state["scene_state"] = _initial_scene_state(arc_state, act_1)
     opening_npcs = _select_active_scene_npcs(
-        npc_states, arc_state, act_1, act_1.get("opening_situation", "")
+        npc_states, arc_state, act_1, act_1.get("opening_situation", ""),
+        spine=spine,
     )
 
     # Dynamic per-turn fields. Reputation/behavioral are no-ops on turn 0
@@ -2956,6 +3302,7 @@ async def create_session_route(
         scene_type="exploration",
         recent_turns=[],
         turn_number=0,
+        spine=spine,
     )
     apply_thread_updates(opening_thread_updates, arc_state, act_1)
     for npc in npc_states:
@@ -3034,6 +3381,15 @@ async def handle_turn(
 
     character = Character.model_validate_json(session["character_json"])
     arc_state = json.loads(session["arc_state_json"])
+
+    # The story has ended — no more turns. The finale lives at /epilogue.
+    if arc_state.get("campaign_complete"):
+        raise HTTPException(
+            409,
+            "Campaign is complete. Request the epilogue at "
+            f"POST /session/{session_id}/epilogue.",
+        )
+
     spine = load_campaign_spine(session["campaign_name"])
     current_act = spine["acts"][arc_state["current_act"] - 1]
 
@@ -3166,6 +3522,7 @@ async def handle_turn(
                     current_act,
                     scene_description,
                     player_action,
+                    spine=spine,
                 )
             )
 
@@ -3405,7 +3762,8 @@ async def handle_turn(
     turn_number = _next_turn_number(session_id)
     scene_state = _initial_scene_state(arc_state, current_act)
     scene_npcs = _select_active_scene_npcs(
-        npc_states, arc_state, current_act, scene_description, player_action
+        npc_states, arc_state, current_act, scene_description, player_action,
+        spine=spine,
     )
 
     # Phase 8.5: Decay emotions + set from dice results (§25)
@@ -3431,6 +3789,15 @@ async def handle_turn(
         session_id, turn_number, arc_state, current_act, scene_npcs, spine,
         character=character, roll_result=roll_result,
     )
+
+    # Game Mechanics §2: failed checks in dangerous scenes cost wounds and
+    # strain; crossing the wound threshold redirects the story for a turn.
+    incapacitation_directive = _apply_incoming_damage(
+        character, arc_state, roll_result,
+        check_decision.scene_type, effective_wound_threshold,
+    )
+    if incapacitation_directive:
+        scene_description = f"{scene_description}\n\n{incapacitation_directive}"
 
     ctx = ContextPackage(
         character=character,
@@ -3491,6 +3858,13 @@ async def handle_turn(
     # ── Step 6: Narrate (cloud model — one call) ─────────────────────
     narration_result = narrate_turn(ctx)
 
+    # §2: one turn of lost agency, then the character wakes hurt but
+    # conscious in the redirected situation the passage just established.
+    if incapacitation_directive:
+        _apply_incapacitation_recovery(
+            character, arc_state, effective_wound_threshold,
+        )
+
     _post_narration_reputation_hook(
         turn_number, arc_state,
         dyn_fields["reputation_entries"], narration_result.passage,
@@ -3518,6 +3892,7 @@ async def handle_turn(
         turn_number=turn_number,
         skill=check_decision.skill,
         ship_state=primary_ship,
+        spine=spine,
     )
 
     # ── Step 7: Reconciliation (local model, fast tier with escalation) ─
@@ -3746,8 +4121,10 @@ async def handle_turn(
             time_skip_data = pipeline_result.time_skip_data
             arc_state["pending_time_skip"] = time_skip_data
 
-        if milestone_data or force_power_milestone_data or time_skip_data:
-            update_session_state(session_id, character, arc_state)
+        _persist_between_act_state(
+            session_id, character, arc_state, pipeline_result,
+            milestone_data, force_power_milestone_data, time_skip_data,
+        )
 
     # ── Return ────────────────────────────────────────────────────────
     response = {
@@ -3755,15 +4132,11 @@ async def handle_turn(
         "choices": narration_result.choices,
         "dice_result": describe_pool_for_display(dice_pool) if dice_pool else None,
         "roll_summary": roll_result.narrative_label() if roll_result else None,
-        "session_state": {
-            "turn_number": turn_number,
-            "wounds": character.current_wounds,
-            "strain": character.current_strain,
-            "act_progress": arc_state.get("act_progress", 0.0),
-            "anchor_proximity": arc_state.get("anchor_proximity", "distant"),
-            "scene_state": arc_state.get("scene_state", {}),
-        },
+        "session_state": _session_state_payload(
+            character, arc_state, spine, turn_number,
+        ),
         "act_boundary": act_boundary_reached,
+        "campaign_complete": arc_state.get("campaign_complete", False),
         "destiny": {
             "light_spent": bool(destiny_result and destiny_result.light_spent),
             "dark_spent":  bool(destiny_result and destiny_result.dark_spent),
@@ -3801,6 +4174,28 @@ async def get_session_route(session_id: str):
     character = Character.model_validate_json(session["character_json"])
     recent_turns = get_recent_turns(session_id, limit=5)
     turn_count = get_turn_count(session_id)
+    spine = load_campaign_spine(session["campaign_name"])
+
+    # "Previously on" recap for returning players — generated once per
+    # turn-count and cached in arc_state. Fail-open: a missing recap must
+    # never block a resume.
+    recap = None
+    if (
+        RESUME_RECAP_ENABLED
+        and not arc_state.get("campaign_complete")
+        and turn_count >= 3
+        and (os.getenv("OPENROUTER_API_KEY") or os.getenv("OPENAI_API_KEY"))
+    ):
+        cache = arc_state.get("resume_recap") or {}
+        if cache.get("turn") == turn_count:
+            recap = cache.get("text")
+        else:
+            try:
+                recap = generate_resume_recap(session_id)
+                arc_state["resume_recap"] = {"turn": turn_count, "text": recap}
+                update_session_state(session_id, character, arc_state)
+            except Exception as e:
+                logging.warning(f"Resume recap failed (non-critical): {e}")
 
     # Get the most recent turn for current choices
     last_turn = None
@@ -3827,6 +4222,14 @@ async def get_session_route(session_id: str):
         "campaign_name": session["campaign_name"],
         "turn_count": turn_count,
         "streaming_enabled": STREAMING_ENABLED,
+        "campaign_complete": arc_state.get("campaign_complete", False),
+        "epilogue": arc_state.get("epilogue"),
+        "recap": recap,
+        "total_acts": spine.get("total_acts", arc_state.get("total_acts", 0)),
+        "destiny": {
+            "light_remaining": session["destiny_light"],
+            "dark_remaining": session["destiny_dark"],
+        },
         "session_state": {
             "wounds": character.current_wounds,
             "strain": character.current_strain,
@@ -3852,6 +4255,57 @@ async def get_session_route(session_id: str):
     }
 
 
+@router.post("/session/{session_id}/epilogue")
+async def handle_epilogue(session_id: str):
+    """Generate (or return the cached) campaign epilogue.
+
+    Only valid once the final act's anchor has resolved
+    (arc_state.campaign_complete). The epilogue is generated once and
+    cached in arc_state; repeat calls return the cached payload.
+    """
+    session = get_session(session_id)
+    if session is None:
+        raise HTTPException(404, "Session not found")
+
+    arc_state = json.loads(session["arc_state_json"])
+    if not arc_state.get("campaign_complete"):
+        raise HTTPException(400, "Campaign is not complete yet")
+
+    cached = arc_state.get("epilogue")
+    if isinstance(cached, dict) and cached.get("epilogue"):
+        return cached
+
+    character = Character.model_validate_json(session["character_json"])
+    spine = load_campaign_spine(session["campaign_name"])
+
+    # The story that was played: compressed act summaries + the closing turns.
+    story_summary = get_act_summaries(session_id)
+    closing_lines = format_turn_lines(
+        get_recent_turns(session_id, limit=5), include_checks=False,
+    )
+    if closing_lines:
+        if story_summary:
+            story_summary += "\n\n"
+        story_summary += "FINAL TURNS:\n" + "\n".join(closing_lines)
+
+    try:
+        result = generate_epilogue(character, spine, story_summary)
+    except Exception as e:
+        logging.error(f"Epilogue generation failed: {e}")
+        raise HTTPException(503, "Epilogue generation failed — try again.")
+
+    payload = {
+        "epilogue": result["epilogue"],
+        "ending_name": result["ending_name"],
+        "campaign_name": session["campaign_name"],
+        "character_name": character.name,
+        "turns_played": get_turn_count(session_id),
+    }
+    arc_state["epilogue"] = payload
+    update_session_state(session_id, character, arc_state)
+    return payload
+
+
 @router.post("/session/{session_id}/turn/stream")
 async def handle_turn_stream(
     session_id: str,
@@ -3872,6 +4326,15 @@ async def handle_turn_stream(
 
     character = Character.model_validate_json(session["character_json"])
     arc_state = json.loads(session["arc_state_json"])
+
+    # The story has ended — no more turns. The finale lives at /epilogue.
+    if arc_state.get("campaign_complete"):
+        raise HTTPException(
+            409,
+            "Campaign is complete. Request the epilogue at "
+            f"POST /session/{session_id}/epilogue.",
+        )
+
     spine = load_campaign_spine(session["campaign_name"])
     current_act = spine["acts"][arc_state["current_act"] - 1]
 
@@ -3992,6 +4455,7 @@ async def handle_turn_stream(
                     current_act,
                     scene_description,
                     player_action,
+                    spine=spine,
                 )
             )
 
@@ -4237,7 +4701,8 @@ async def handle_turn_stream(
     turn_number = _next_turn_number(session_id)
     scene_state_s = _initial_scene_state(arc_state, current_act)
     scene_npcs_s = _select_active_scene_npcs(
-        npc_states, arc_state, current_act, scene_description, player_action
+        npc_states, arc_state, current_act, scene_description, player_action,
+        spine=spine,
     )
 
     # Phase 8.5: Decay emotions + set from dice results (§25)
@@ -4261,6 +4726,15 @@ async def handle_turn_stream(
         session_id, turn_number, arc_state, current_act, scene_npcs_s, spine,
         character=character, roll_result=roll_result,
     )
+
+    # Game Mechanics §2: failed checks in dangerous scenes cost wounds and
+    # strain; crossing the wound threshold redirects the story for a turn.
+    incapacitation_directive = _apply_incoming_damage(
+        character, arc_state, roll_result,
+        check_decision.scene_type, effective_wound_threshold,
+    )
+    if incapacitation_directive:
+        scene_description = f"{scene_description}\n\n{incapacitation_directive}"
 
     ctx = ContextPackage(
         character=character,
@@ -4379,6 +4853,13 @@ async def handle_turn_stream(
                 )
                 return
 
+        # §2: one turn of lost agency, then the character wakes hurt but
+        # conscious in the redirected situation the passage established.
+        if incapacitation_directive:
+            _apply_incapacitation_recovery(
+                character, arc_state, effective_wound_threshold,
+            )
+
         _post_narration_reputation_hook(
             turn_number, arc_state,
             dyn_fields_s["reputation_entries"], narration_result.passage,
@@ -4406,6 +4887,7 @@ async def handle_turn_stream(
             turn_number=turn_number,
             skill=check_decision.skill,
             ship_state=primary_ship_s,
+            spine=spine,
         )
 
         # ── Step 7: Reconciliation (local model, fast tier with escalation) ─
@@ -4575,15 +5057,11 @@ async def handle_turn_stream(
                             if dice_pool else None),
             "roll_summary": (roll_result.narrative_label()
                              if roll_result else None),
-            "session_state": {
-                "turn_number": turn_number,
-                "wounds": character.current_wounds,
-                "strain": character.current_strain,
-                "act_progress": arc_state.get("act_progress", 0.0),
-                "anchor_proximity": arc_state.get("anchor_proximity", "distant"),
-                "scene_state": arc_state.get("scene_state", {}),
-            },
-                "act_boundary": act_boundary_reached,
+            "session_state": _session_state_payload(
+                character, arc_state, spine, turn_number,
+            ),
+            "act_boundary": act_boundary_reached,
+            "campaign_complete": arc_state.get("campaign_complete", False),
         }
         if milestone_data:
             payload["milestone"] = milestone_data
@@ -4728,7 +5206,8 @@ async def handle_temptation(
     )
     scene_state_t = _initial_scene_state(arc_state, current_act)
     scene_npcs_t = _select_active_scene_npcs(
-        npc_states, arc_state, current_act, scene_description, player_action
+        npc_states, arc_state, current_act, scene_description, player_action,
+        spine=spine,
     )
 
     anchor_inst = None
@@ -4824,6 +5303,7 @@ async def handle_temptation(
         turn_number=turn_number,
         skill=check_skill,
         ship_state=primary_ship_t,
+        spine=spine,
     )
 
     # Reconciliation (fast tier with escalation)
@@ -4950,8 +5430,10 @@ async def handle_temptation(
             time_skip_data = pipeline_result.time_skip_data
             arc_state["pending_time_skip"] = time_skip_data
 
-        if milestone_data or force_power_milestone_data or time_skip_data:
-            update_session_state(session_id, character, arc_state)
+        _persist_between_act_state(
+            session_id, character, arc_state, pipeline_result,
+            milestone_data, force_power_milestone_data, time_skip_data,
+        )
 
     response = {
         "narration": narration_result.passage,
@@ -4964,15 +5446,11 @@ async def handle_temptation(
             "conflict_earned": force_result.conflict_earned,
             "strain_charged": force_result.strain_charged,
         },
-        "session_state": {
-            "turn_number": turn_number,
-            "wounds": character.current_wounds,
-            "strain": character.current_strain,
-            "act_progress": arc_state.get("act_progress", 0.0),
-            "anchor_proximity": arc_state.get("anchor_proximity", "distant"),
-            "scene_state": arc_state.get("scene_state", {}),
-        },
+        "session_state": _session_state_payload(
+            character, arc_state, spine, turn_number,
+        ),
         "act_boundary": act_boundary_reached,
+        "campaign_complete": arc_state.get("campaign_complete", False),
     }
     if milestone_data:
         response["milestone"] = milestone_data
@@ -5092,7 +5570,8 @@ async def handle_intervention(
     )
     scene_state_iv = _initial_scene_state(arc_state, current_act)
     scene_npcs_iv = _select_active_scene_npcs(
-        npc_states, arc_state, current_act, scene_description, player_action
+        npc_states, arc_state, current_act, scene_description, player_action,
+        spine=spine,
     )
 
     anchor_inst = None
@@ -5182,6 +5661,7 @@ async def handle_intervention(
         turn_number=turn_number,
         skill=pending["check_skill"],
         ship_state=primary_ship_iv,
+        spine=spine,
     )
 
     # Reconciliation (fast tier with escalation)
@@ -5302,8 +5782,10 @@ async def handle_intervention(
             time_skip_data = pipeline_result.time_skip_data
             arc_state["pending_time_skip"] = time_skip_data
 
-        if milestone_data or force_power_milestone_data or time_skip_data:
-            update_session_state(session_id, character, arc_state)
+        _persist_between_act_state(
+            session_id, character, arc_state, pipeline_result,
+            milestone_data, force_power_milestone_data, time_skip_data,
+        )
 
     response = {
         "narration": narration_result.passage,
@@ -5311,15 +5793,11 @@ async def handle_intervention(
         "dice_result": describe_pool_for_display(dice_pool),
         "roll_summary": roll_result.narrative_label(),
         "intervention_used": req.accept,
-        "session_state": {
-            "turn_number": turn_number,
-            "wounds": character.current_wounds,
-            "strain": character.current_strain,
-            "act_progress": arc_state.get("act_progress", 0.0),
-            "anchor_proximity": arc_state.get("anchor_proximity", "distant"),
-            "scene_state": arc_state.get("scene_state", {}),
-        },
+        "session_state": _session_state_payload(
+            character, arc_state, spine, turn_number,
+        ),
         "act_boundary": act_boundary_reached,
+        "campaign_complete": arc_state.get("campaign_complete", False),
     }
     if milestone_data:
         response["milestone"] = milestone_data

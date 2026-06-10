@@ -211,6 +211,25 @@ def get_act_summaries(session_id: str) -> str:
     return "\n\n".join(f"Act {r['act_number']}: {r['summary']}" for r in rows)
 
 
+def format_turn_lines(
+    turns: list[TurnMemory],
+    *,
+    include_checks: bool = True,
+    include_narration: bool = True,
+) -> list[str]:
+    """Compact "Turn N: action [skill: result] / excerpt" lines for prompt
+    injection. Shared by the resume recap and the epilogue story summary."""
+    lines = []
+    for t in turns:
+        line = f"Turn {t.turn_number}: {t.player_action}"
+        if include_checks and t.check_made:
+            line += f" [{t.check_made}: {t.dice_result}]"
+        if include_narration and t.narration_excerpt:
+            line += f"\n  {t.narration_excerpt}"
+        lines.append(line)
+    return lines
+
+
 def get_session(session_id: str) -> sqlite3.Row | None:
     with get_connection() as conn:
         return conn.execute(

@@ -474,6 +474,39 @@ def finalize_spine(
     return spine, report
 
 
+# ── Architecture attachment (Modes 1 and 2) ─────────────────────────
+
+
+def _merge_architecture_into_spine(
+    spine_data: dict,
+    architecture_data: Optional[dict],
+) -> None:
+    """Attach/merge the architect's output into a generated spine dict.
+
+    The generation LLM is instructed to include story_architecture in
+    its output, but the architect remains the source of truth for the
+    planning fields it authored (milestone beat sheet, foreshadow
+    registry, ending paths) — these are backfilled when the generation
+    model dropped them. Planned foreshadow pairs are also surfaced to
+    the spine-level foreshadow_registry the Game Engine consumes.
+    """
+    if not architecture_data:
+        return
+
+    existing = spine_data.get("story_architecture")
+    if not isinstance(existing, dict):
+        spine_data["story_architecture"] = architecture_data
+        existing = architecture_data
+    else:
+        for key in ("milestone_beat_sheet", "foreshadow_registry", "ending_paths"):
+            if architecture_data.get(key) and not existing.get(key):
+                existing[key] = architecture_data[key]
+
+    planned_foreshadow = existing.get("foreshadow_registry") or []
+    if planned_foreshadow and not spine_data.get("foreshadow_registry"):
+        spine_data["foreshadow_registry"] = planned_foreshadow
+
+
 # ── Mode 2: Thematic Steering ────────────────────────────────────────
 
 
@@ -590,8 +623,7 @@ def generate_from_brief(
             )
 
             # Attach story architecture if generated
-            if architecture_data and "story_architecture" not in spine_data:
-                spine_data["story_architecture"] = architecture_data
+            _merge_architecture_into_spine(spine_data, architecture_data)
 
             return spine_data, master_seed
 
@@ -720,8 +752,7 @@ def generate_mode1(
             )
 
             # Attach story architecture if generated
-            if architecture_data and "story_architecture" not in spine_data:
-                spine_data["story_architecture"] = architecture_data
+            _merge_architecture_into_spine(spine_data, architecture_data)
 
             return spine_data, master_seed
 

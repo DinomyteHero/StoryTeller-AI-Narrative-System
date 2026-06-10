@@ -23,11 +23,13 @@ from gm.llm_client import (
     make_client as _make_unified_client,
     resolve_model,
     _prepare_kwargs,
+    log_llm_usage,
     TIER_QUALITY,
 )
 
 _PROMPTS_DIR = Path(__file__).parent / "prompts"
 PROMPT_PATH = _PROMPTS_DIR / "narration.txt"
+PROMPT_PATH_SYSTEM = _PROMPTS_DIR / "narration_system.txt"
 PROMPT_PATH_LITERARY = _PROMPTS_DIR / "narration_literary.txt"
 MAX_TOKENS  = int(os.getenv("MAX_COMPLETION_TOKENS", "16000"))
 NARRATION_MAX_TOKENS = int(os.getenv("NARRATION_MAX_TOKENS", "1200"))
@@ -41,6 +43,9 @@ NARRATION_FALLBACK_MODELS = [
     if model.strip()
 ]
 CHOICE_QUALITY_INLINE = os.getenv("CHOICE_QUALITY_INLINE", "true").lower() == "true"
+# Rule 4 enforcement — on failed checks, a fast-tier post-check verifies the
+# prose actually depicts failure. Mismatch triggers a narration retry.
+DICE_POLARITY_CHECK = os.getenv("DICE_POLARITY_CHECK", "true").lower() == "true"
 LLM_TIMING_LOG = os.getenv("LLM_TIMING_LOG", "true").lower() == "true"
 
 # Provider config. The unified client (gm/llm_client.py) is the authoritative
@@ -116,6 +121,10 @@ def _create_completion_with_retries(client: OpenAI, kwargs: dict, model: str):
         started = time.time()
         try:
             response = client.chat.completions.create(**kwargs)
+            log_llm_usage(
+                purpose="narration", tier=TIER_QUALITY,
+                model=model, response=response,
+            )
             if LLM_TIMING_LOG:
                 logging.info(
                     "LLM_TIMING kind=narration_completion model=%s ok=true "
@@ -586,6 +595,26 @@ class CloudGMError(Exception):
     pass
 
 
+def _build_prompts(ctx: ContextPackage) -> tuple[str, str]:
+    """Return (system_prompt, user_prompt) for narration.
+
+    The system prompt is byte-identical across every turn of every session
+    — style guide, task rules, dice interpretation. Providers with prefix
+    caching (DeepSeek caches automatically) only bill those tokens at the
+    cache-hit rate when the prefix is stable, so static instruction must
+    never be interleaved with per-turn context. The user prompt orders
+    per-act-stable blocks before per-turn-volatile ones for the same reason.
+
+    The literary voice variant predates the split and keeps its legacy
+    single-message structure: system_prompt is "" and the full template
+    is returned as the user prompt.
+    """
+    user = _build_prompt(ctx)
+    if PROSE_VOICE == "literary":
+        return "", user
+    return PROMPT_PATH_SYSTEM.read_text(encoding="utf-8"), user
+
+
 def _build_prompt(ctx: ContextPackage) -> str:
     from engine.talents import build_talent_capabilities, build_talent_activations_block
     from engine.force import build_force_capabilities_block
@@ -767,6 +796,43 @@ def _strip_wrapped_narration_quotes(passage: str) -> str:
     return "\n\n".join(cleaned)
 
 
+def _parse_choice_lines(choices_raw: str) -> tuple[list[str], list[str | None]]:
+    """Parse choice lines into (choices, skill_tags), max 4.
+
+    Strips numbering, bullets, markdown noise, and wrapping quotes, then
+    extracts and strips skill tags: "[Deception]", "[Force:Move]", or
+    "[Force:Sense -- why this is risky]".
+    """
+    raw_choices = []
+    for line in choices_raw.split("\n"):
+        line = line.strip()
+        if not line or re.match(r"^-{2,}$", line):
+            continue
+        line = re.sub(r"^\d+[\.\)]\s*", "", line)   # strip "1. " or "1) "
+        line = re.sub(r"^-\s+", "", line)            # strip "- "
+        line = re.sub(r"^[\s*#]+", "", line)         # strip leading whitespace, *, #
+        line = re.sub(r"[\s*]+$", "", line)          # strip trailing whitespace, *
+        line = line.strip('"').strip()               # strip wrapping quotes
+        if line:
+            raw_choices.append(line)
+
+    skill_tag_pattern = re.compile(r"\[([^\]]+)\]")
+    choices: list[str] = []
+    skill_tags: list[str | None] = []
+    for choice_text in raw_choices[:4]:
+        matches = list(skill_tag_pattern.finditer(choice_text))
+        match = matches[-1] if matches else None
+        tag = None
+        if match:
+            tag = _normalize_choice_tag(match.group(1))
+            choice_text = (
+                choice_text[:match.start()] + choice_text[match.end():]
+            ).strip()
+        choices.append(_clean_choice_text(choice_text))
+        skill_tags.append(tag)
+    return choices, skill_tags
+
+
 def _parse_response(raw: str) -> NarrationResult:
     """
     Split GM response into passage and choices.
@@ -844,41 +910,12 @@ def _parse_response(raw: str) -> NarrationResult:
             f"Passage too long ({word_count} words, maximum {NARRATION_MAX_WORDS}). Retrying."
         )
 
-    raw_choices = []
-    for line in choices_raw.split("\n"):
-        line = line.strip()
-        if not line or re.match(r"^-{2,}$", line):
-            continue
-        line = re.sub(r"^\d+[\.\)]\s*", "", line)   # strip "1. " or "1) "
-        line = re.sub(r"^-\s+", "", line)            # strip "- "
-        line = re.sub(r"^[\s*#]+", "", line)         # strip leading whitespace, *, #
-        line = re.sub(r"[\s*]+$", "", line)          # strip trailing whitespace, *
-        line = line.strip('"').strip()               # strip wrapping quotes
-        if line:
-            raw_choices.append(line)
+    choices, skill_tags = _parse_choice_lines(choices_raw)
 
-    if len(raw_choices) < 2:
+    if len(choices) < 2:
         raise CloudGMError(
-            f"GM returned {len(raw_choices)} choice(s). Minimum 2 required. Retrying."
+            f"GM returned {len(choices)} choice(s). Minimum 2 required. Retrying."
         )
-
-    # Extract and strip skill tags: "[Deception]", "[Force:Move]", or
-    # "[Force:Sense -- why this is risky]". The tag may be embedded inside
-    # a trailing explanatory parenthetical that is also stripped below.
-    skill_tag_pattern = re.compile(r"\[([^\]]+)\]")
-    choices = []
-    skill_tags = []
-    for choice_text in raw_choices[:4]:
-        matches = list(skill_tag_pattern.finditer(choice_text))
-        match = matches[-1] if matches else None
-        tag = None
-        if match:
-            tag = _normalize_choice_tag(match.group(1))
-            choice_text = (
-                choice_text[:match.start()] + choice_text[match.end():]
-            ).strip()
-        choices.append(_clean_choice_text(choice_text))
-        skill_tags.append(tag)
 
     return NarrationResult(
         passage=passage,
@@ -886,6 +923,78 @@ def _parse_response(raw: str) -> NarrationResult:
         skill_tags=skill_tags,
         raw_response=raw,
         state_patch=state_patch,
+    )
+
+
+def regenerate_choices(
+    ctx: ContextPackage,
+    result: NarrationResult,
+    quality,
+) -> Optional[NarrationResult]:
+    """Repair a rejected choice set without re-running full narration.
+
+    The passage already passed structural validation — rewriting 4 lines
+    of choices does not justify re-spending the full narration budget.
+    Returns a new NarrationResult with replacement choices, or None when
+    repair fails (caller accepts the original — fail-open).
+    """
+    from gm.choice_validator import build_quality_correction
+    from gm.llm_client import call_chat
+
+    words = result.passage.split()
+    passage_tail = " ".join(words[-150:]) if len(words) > 150 else result.passage
+    old_choices = "\n".join(f"{i+1}. {c}" for i, c in enumerate(result.choices))
+
+    prompt = (
+        "You wrote a story passage with player choices for a Star Wars "
+        "narrative RPG. The choices were rejected for quality issues; the "
+        "passage itself is fine and must not change.\n\n"
+        f"SCENE: {ctx.situation[:600]}\n\n"
+        f"CHARACTER: {ctx.character.name}, {ctx.character.career}\n\n"
+        f"END OF PASSAGE:\n...{passage_tail}\n\n"
+        f"REJECTED CHOICES:\n{old_choices}\n\n"
+        f"{build_quality_correction(quality)}\n\n"
+        "Write 2-4 replacement choices. Rules:\n"
+        "- Each choice must be specific to this scene and this character\n"
+        "- Each choice should reveal something different about who the "
+        "character is, not just accomplish a goal differently\n"
+        "- At least one lower-risk and one higher-risk option\n"
+        "- If a choice would require a dice check, append the skill tag at "
+        'the very end in square brackets, e.g. "Bluff your way past the '
+        'checkpoint [Deception]"\n'
+        "- Choices without a dice check have no tag\n"
+        "Return ONLY the numbered choices, one per line. No preamble, no "
+        "commentary."
+    )
+
+    try:
+        raw = call_chat(
+            tier=TIER_QUALITY,
+            purpose="choice_repair",
+            user=prompt,
+            temperature=0.7,
+            max_tokens=300,
+            timeout=30.0,
+            retries=2,
+        )
+        choices, skill_tags = _parse_choice_lines(raw)
+    except Exception as e:
+        logging.warning(f"Choice repair failed (keeping original choices): {e}")
+        return None
+
+    if len(choices) < 2:
+        logging.warning(
+            "Choice repair returned %d choice(s); keeping original choices.",
+            len(choices),
+        )
+        return None
+
+    return NarrationResult(
+        passage=result.passage,
+        choices=choices,
+        skill_tags=skill_tags,
+        raw_response=result.raw_response,
+        state_patch=result.state_patch,
     )
 
 
@@ -911,7 +1020,7 @@ def _narrate_with_backend(
 
     Includes post-parse choice quality validation (spec §5.2).
     """
-    from gm.choice_validator import validate_choice_quality, build_quality_correction
+    from gm.choice_validator import validate_choice_quality
 
     client, model = _make_client()
     fallback_models = [
@@ -919,12 +1028,15 @@ def _narrate_with_backend(
         for candidate in _narration_model_candidates(model)
         if candidate != model
     ]
-    prompt        = _build_prompt(ctx)
+    system_prompt, user_prompt = _build_prompts(ctx)
     last_error    = None
     best_result: NarrationResult | None = None  # best structurally valid result
 
     for attempt in range(max_retries + 1):
-        messages = [{"role": "user", "content": prompt}]
+        messages = []
+        if system_prompt:
+            messages.append({"role": "system", "content": system_prompt})
+        messages.append({"role": "user", "content": user_prompt})
         if attempt > 0 and last_error:
             messages.append({
                 "role": "user",
@@ -996,6 +1108,42 @@ def _narrate_with_backend(
         # Track best structurally valid result for fallback
         best_result = result
 
+        # Rule 4 enforcement — the dice are the truth. On failed checks,
+        # a cheap fast-tier post-check verifies the prose depicts failure.
+        # A mismatch is a real validation failure: retry the narration with
+        # a correction note, exactly like a word-count violation.
+        if (
+            DICE_POLARITY_CHECK
+            and ctx.roll_result is not None
+            and not ctx.roll_result.succeeded
+        ):
+            from gm.fast_gm import check_narration_polarity
+
+            verdict = check_narration_polarity(
+                result.passage,
+                ctx.situation,
+                outcome_label=ctx.roll_result.narrative_label(),
+            )
+            if verdict == "success":
+                last_error = (
+                    "The dice ruled this attempt a FAILURE, but your passage "
+                    "depicts the attempted action succeeding. Rewrite so the "
+                    "core attempted goal is denied. Advantage may soften the "
+                    "landing with a peripheral gain, but the attempted goal "
+                    "itself must visibly fail."
+                )
+                logging.warning(
+                    "Narration polarity mismatch (dice=failure, prose=success) "
+                    "attempt=%d/%d model=%s",
+                    attempt + 1, max_retries + 1, model,
+                )
+                if attempt < max_retries:
+                    continue
+                logging.warning(
+                    "Polarity retry budget exhausted — accepting narration "
+                    "despite dice/prose mismatch."
+                )
+
         # Choice quality validation
         if not CHOICE_QUALITY_INLINE:
             return result
@@ -1018,16 +1166,32 @@ def _narrate_with_backend(
             )
             return result
 
-        # 2+ dimensions failed — retry if budget remains
+        # 2+ dimensions failed — repair the choices in place. The passage
+        # is structurally valid; regenerating the full narration to fix
+        # 4 lines of choices burns the whole narration budget for nothing.
         logging.warning(
             f"Choice quality rejected ({quality.fail_count} dimensions failed: "
-            f"{quality.rejection_reason}). Attempt {attempt+1}/{max_retries+1}."
+            f"{quality.rejection_reason}). Regenerating choices only."
         )
-        last_error = build_quality_correction(quality)
-        if attempt == max_retries:
-            # Exhausted — accept best available (spec §5.4)
-            logging.warning("Retry budget exhausted. Accepting best available result.")
-            return best_result
+        repaired = regenerate_choices(ctx, result, quality)
+        if repaired is None:
+            return result  # repair failed — fail-open on the original
+
+        requality = validate_choice_quality(
+            situation=ctx.situation,
+            character_name=ctx.character.name,
+            character_career=ctx.character.career,
+            passage=repaired.passage,
+            choices=repaired.choices,
+        )
+        if requality.passed or requality.fail_count <= quality.fail_count:
+            return repaired
+        logging.warning(
+            "Choice repair did not improve quality "
+            f"({requality.fail_count} dimensions still failing). "
+            "Keeping original choices."
+        )
+        return result
 
     raise CloudGMError("Unreachable")
 
@@ -1090,11 +1254,16 @@ def narrate_turn_stream(ctx: ContextPackage) -> Iterator[str]:
         result = _parse_response(full_text)
     """
     client, model = _make_client()
-    prompt = _build_prompt(ctx)
+    system_prompt, user_prompt = _build_prompts(ctx)
+
+    messages = []
+    if system_prompt:
+        messages.append({"role": "system", "content": system_prompt})
+    messages.append({"role": "user", "content": user_prompt})
 
     kwargs = _make_completion_kwargs(
         model,
-        [{"role": "user", "content": prompt}],
+        messages,
         timeout=NARRATION_TIMEOUT_SEC,
         max_tokens=NARRATION_MAX_TOKENS,
         stream=True,
@@ -1341,6 +1510,91 @@ def _parse_force_power_milestone_response(
         passage=passage,
         choices=parsed_choices,
         skill_tags=force_tags,  # repurpose for "power_id:upgrade_id" compound keys
+    )
+
+
+# ── Campaign epilogue generation ──────────────────────────────────────
+
+EPILOGUE_PROMPT_PATH = Path(__file__).parent / "prompts" / "epilogue.txt"
+
+
+def generate_epilogue(
+    character,
+    spine: dict,
+    story_summary: str,
+) -> dict:
+    """Generate the campaign-closing epilogue after the final act resolves.
+
+    Selects the best-matching authored ending path (spine
+    story_architecture.ending_paths) from the story that was actually
+    played, then writes 300-550 words of closing prose. Returns
+    {"ending_name": str, "epilogue": str}.
+
+    Raises on provider failure — the API endpoint surfaces the error and
+    the player can retry; a campaign ending deserves better than a
+    silently degraded fallback (Rule 5).
+    """
+    ending_paths = (spine.get("story_architecture") or {}).get("ending_paths", [])
+    if ending_paths:
+        path_lines = ["ENDING PATHS (choose the one the played story earned):"]
+        for path in ending_paths:
+            if not isinstance(path, dict):
+                continue
+            name = path.get("name", "")
+            synopsis = path.get("synopsis", "")
+            payoff = path.get("thematic_payoff", "") or path.get("branch_id", "")
+            path_lines.append(f"- {name}: {synopsis} [{payoff}]")
+        ending_paths_block = "\n".join(path_lines)
+    else:
+        ending_paths_block = ""
+
+    arc = getattr(character, "narrative_arc", None)
+    arc_block = ""
+    if arc is not None:
+        lie = getattr(arc, "lie", "") or ""
+        need = getattr(arc, "need", "") or ""
+        if lie or need:
+            arc_block = (
+                "CHARACTER INNER STORY (resolve it honestly — transformed, "
+                f"resisted, or still gripping):\nThe lie they believed: {lie}\n"
+                f"What they needed: {need}"
+            )
+
+    template = EPILOGUE_PROMPT_PATH.read_text(encoding="utf-8")
+    prompt = template.format(
+        campaign_name=spine.get("name", "the campaign"),
+        throughline_question=spine.get("throughline_question", ""),
+        character_summary=character.narrative_status(),
+        character_voice=getattr(character, "voice_notes", ""),
+        story_summary=story_summary or "No summary available.",
+        ending_paths_block=ending_paths_block,
+        arc_block=arc_block,
+    )
+
+    raw = _call_chat_for_epilogue(prompt)
+
+    ending_name = "What Comes After"
+    passage = raw.strip()
+    match = re.match(r"^ENDING:\s*(.+?)\s*\n+", passage)
+    if match:
+        ending_name = match.group(1).strip()
+        passage = passage[match.end():].strip()
+    passage = re.sub(r"\*{1,2}(.+?)\*{1,2}", r"\1", passage)
+
+    return {"ending_name": ending_name, "epilogue": passage}
+
+
+def _call_chat_for_epilogue(prompt: str) -> str:
+    from gm.llm_client import call_chat
+
+    return call_chat(
+        tier=TIER_QUALITY,
+        purpose="epilogue",
+        user=prompt,
+        temperature=0.7,
+        max_tokens=1200,
+        timeout=NARRATION_TIMEOUT_SEC,
+        retries=3,
     )
 
 

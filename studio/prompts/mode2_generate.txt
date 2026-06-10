@@ -38,11 +38,23 @@ Generate a complete campaign spine JSON with the following structure. Every fiel
 
 Each act must include a **dramatic_function** field — the purpose of this act in the dramatic arc. Valid values: setup, destabilization, launch, midpoint_shift, escalation, confrontation, consequence, resolution. Act 1 should be setup or destabilization. The campaign must have a true launch point no later than Act 2.
 
-Each major NPC must include a **thematic_argument** field — what this NPC's existence argues about the campaign's theme. Different NPCs should embody competing answers to the throughline question.
+Each act must include **beat_roles** — 1-3 entries from: setup, inciting, response, false_progress, first_plot_point, pinch1, midpoint, pinch2, second_plot_point, attack, confrontation, climax, resolution, aftermath, consequence. Beat roles must be consistent with the act's dramatic_function (a "setup" act carries setup/inciting; a "confrontation" act carries attack/climax) and must progress in story order across acts.
+
+Each act must include **side_content** — 6 to 12 optional scene seeds the runtime samples for replay variety. Each entry needs: id (snake_case), title, hook (at least 20 characters of concrete, situation-specific text), keywords (1+), and where possible phase, scene_type, spotlight, rpg_function, player_choice, payoff_or_change, foreshadows. Side content must be specific to this campaign's people and places — never generic filler.
+
+EVERY major NPC (any NPC appearing in 2 or more acts) must include a **thematic_argument** field — 1-2 sentences arguing a position on the campaign's throughline question. Different NPCs must argue DIFFERENT, competing answers; at least two NPCs must directly contradict each other.
 
 Each character variant must include:
 - **protagonist_contradiction** — what the character believes vs. who they are
 - **pressure_revealed_identity** — who they become under maximum pressure
+
+At least one act anchor in Act 2 or later must directly test the protagonist_contradiction. Example: if the contradiction is "believes defection redeemed her — actually running from the scale of what she enabled," then an anchor must force her to face what she built ("The supply manifest she wrote is now routing weapons to her home sector — dismantling it means confessing her authorship").
+
+If the STORY ARCHITECTURE block includes a milestone beat sheet, act anchors must align with it: the first_plot_point act's anchor IS the point of no return, the midpoint act's anchor delivers the reversal that turns the protagonist proactive, and the second_plot_point act's anchor delivers the final piece of new information.
+
+If the STORY ARCHITECTURE block includes a foreshadow registry, include it as the top-level **foreshadow_registry** field and make each setup visible in its setup act (anchor, side_content, or open_threads).
+
+If the STORY ARCHITECTURE block includes ending paths, your **variation_points** and endings must connect: every ending's branch_id must exactly match an option id defined in one of your variation_points, and the ending_paths must be carried through in story_architecture.ending_paths.
 
 ## CONSTRAINTS
 
@@ -50,7 +62,7 @@ Each character variant must include:
 - NPCs have their OWN motivations. Not player-serving or player-opposing.
 - Dispositions are numeric (0.0 hostile → 1.0 allied). Avoid positivity bias.
 - Include at least one antagonistic NPC (disposition < 0.4).
-- NPC relationships must include at least one negative weight relationship.
+- NPC relationships must include at least 2 negative-weight relationships — conflict inside the cast is mandatory.
 - Galactic context must be specific to the era and location.
 - Voice notes describe HOW characters speak, not WHAT they say.
 - The throughline question must end with "?"

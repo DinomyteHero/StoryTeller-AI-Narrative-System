@@ -394,24 +394,18 @@ def test_parse_response_strips_wrapped_third_person_action_paragraph():
 
 
 def test_prompts_include_reveal_pacing_contract():
-    clean = open(
-        os.path.join(
-            os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
-            "gm",
-            "prompts",
-            "narration.txt",
-        ),
-        encoding="utf-8",
-    ).read()
-    literary = open(
-        os.path.join(
-            os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
-            "gm",
-            "prompts",
-            "narration_literary.txt",
-        ),
-        encoding="utf-8",
-    ).read()
+    prompts_dir = os.path.join(
+        os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+        "gm",
+        "prompts",
+    )
+    # Clean voice sends system + user templates; literary is single-file.
+    with open(os.path.join(prompts_dir, "narration_system.txt"), encoding="utf-8") as f:
+        clean = f.read()
+    with open(os.path.join(prompts_dir, "narration.txt"), encoding="utf-8") as f:
+        clean += f.read()
+    with open(os.path.join(prompts_dir, "narration_literary.txt"), encoding="utf-8") as f:
+        literary = f.read()
 
     assert "REVEAL PACING" in clean
     assert "On any failure, the core attempted goal remains denied" in clean

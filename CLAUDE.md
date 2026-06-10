@@ -224,14 +224,44 @@ Campaign Studio (parallel track):
   - Enhanced generation prompts with architectural vocabulary
   - Stage 5 LLM-based narrative quality scoring
 
-**Next work:** Phase 18 (Psychometric Prologue) or CS-7 (Saga Depth).
+**June 2026 passes (details in docs/status/changelog.md):**
+- **Physics guardrails + cost pass** — world registry validation gate
+  (`engine/world_registry.py`): LLM-proposed locations and facts must be
+  grounded in spine canon, the visited-location ledger, or the delivered
+  passage before entering persistent state; dice-polarity post-check
+  enforces Rule 4; per-call token usage accounting; narration prompt
+  split into a byte-stable system message for provider prefix caching;
+  choice-quality failures repair choices only instead of regenerating
+  full narration.
+- **Experience shell** — campaigns end: completion state, generated
+  epilogue keyed to `story_architecture.ending_paths`, finale UI;
+  "story so far" recap on resume; incapacitation is mechanically real
+  (incoming damage on failed dangerous-scene checks, §2 one-turn
+  redirect, per-act escalation); CoG-style UI (stats panel, chapter
+  indicator, destiny pool, milestone ceremony, always-visible freeform
+  input).
+- **Studio enrichment generation** — Mode 1/2 + architect now generate
+  what previously required manual passes: per-act beat_roles, 6-12
+  side_content seeds per act, foreshadow registry, ending paths,
+  thematic arguments on major NPCs, antagonistic relationship pressure;
+  all enforced by Gate 2/3/4 validation.
+- **Character creator flow** — prose pitch → LLM draft → editable stats
+  → save → on-demand campaign generation (`api/character_routes.py`,
+  `gm/character_creator.py`, `studio/persist.py`,
+  `POST /campaign/generate`).
 
-## Codebase Metrics (as of May 2, 2026)
+**Next work:** Phase 18 (Psychometric Prologue), CS-7 (Saga Depth), or
+the TurnContext refactor (collapse the four near-duplicate turn handlers
+in `api/game_routes.py` around a shared context object).
 
-- ~26,100 lines of application code (Python + HTML)
-- ~13,600 lines of test code across 31 test files
+## Codebase Metrics (as of June 9, 2026)
+
+- ~29,200 lines of application code (Python + HTML)
+- ~16,100 lines of test code across 39 test files
 - 23 active documentation files in `docs/` + 6 archived in `docs/reference/`
-- 1 campaign spine (Shadows of the Custodian), 3 characters, 7 talent files (6 trees + library), 5 Force powers
+- 1 authored campaign spine (Shadows of the Custodian) plus on-demand
+  generated campaigns, 3 prebuilt characters plus player-created
+  characters, 7 talent files (6 trees + library), 5 Force powers
 
 ## Repo Structure
 
@@ -277,55 +307,68 @@ storyteller-v3/
 │       ├── consolidation-report.md
 │       ├── claude-code-initial-prompt.md
 │       └── prose-quality-review-1.md
-├── engine/                # Pure Python — dice, character, checks (6,109 lines)
-│   ├── dice.py            # FFG dice system — 7 die types, symbol tables (270 lines)
-│   ├── character.py       # Character model — Pydantic, 33 skills (242 lines)
-│   ├── checks.py          # 6-stage pool pipeline (197 lines)
-│   ├── equipment.py       # Loadout system — weapons, armor, tools (309 lines)
-│   ├── advancement.py     # XP and behavioral inference (527 lines)
-│   ├── talents.py         # Talent tree engine — 5-type taxonomy (797 lines)
-│   ├── destiny.py         # Destiny Point pool — light/dark spending (281 lines)
-│   ├── reconciliation.py  # Post-turn reconciliation + 16-step pipeline (1,451 lines)
-│   ├── force.py           # Force dice, powers, temptation (741 lines)
-│   ├── vehicle.py         # Vehicle/starship system (303 lines)
-│   ├── time_skip.py       # Time skip vignettes (611 lines)
-│   ├── dramatic_mission.py # CS-6: Dramatic mission classification + voice modes (259 lines)
-│   └── scene_validator.py # CS-6: Scene purpose validation model (121 lines)
-├── gm/                    # LLM orchestration — fast + quality cloud tiers (4,853 lines)
-│   ├── llm_client.py      # Two-tier LLM routing, retry/backoff, provider abstraction (624 lines)
-│   ├── fast_gm.py         # Check decisions, annotations, diagnostics, scene validation (496 lines)
-│   ├── cloud_gm.py        # Narration, milestones, time skips (1,436 lines)
-│   ├── context.py         # Context package assembly (2,133 lines)
-│   ├── choice_validator.py # CS-6: Post-generation choice quality validator (164 lines)
-│   └── prompts/           # Prompt templates (8 files)
+├── engine/                # Pure Python — dice, character, checks
+│   ├── dice.py            # FFG dice system — 7 die types, symbol tables
+│   ├── character.py       # Character model — Pydantic, 33 skills
+│   ├── checks.py          # 6-stage pool pipeline + incoming damage (§2)
+│   ├── equipment.py       # Loadout system — weapons, armor, tools
+│   ├── advancement.py     # XP and behavioral inference
+│   ├── talents.py         # Talent tree engine — 5-type taxonomy + freeform talents
+│   ├── destiny.py         # Destiny Point pool — light/dark spending
+│   ├── reconciliation.py  # Post-turn reconciliation + 16-step pipeline + completion
+│   ├── force.py           # Force dice, powers, temptation
+│   ├── vehicle.py         # Vehicle/starship system
+│   ├── time_skip.py       # Time skip vignettes
+│   ├── world_registry.py  # Validation gate for LLM-proposed narrative state:
+│   │                      #   location grounding, visited-location ledger,
+│   │                      #   fact grounding, spine-derived NPC domains
+│   ├── dramatic_mission.py # CS-6: Dramatic mission classification + voice modes
+│   └── scene_validator.py # CS-6: Scene purpose validation model
+├── gm/                    # LLM orchestration — fast + quality cloud tiers
+│   ├── llm_client.py      # Two-tier routing, retry/backoff, token usage accounting
+│   ├── fast_gm.py         # Check decisions, annotations, diagnostics,
+│   │                      #   scene validation, dice-polarity post-check
+│   ├── cloud_gm.py        # Narration (system+user prompt split), milestones,
+│   │                      #   time skips, epilogue, choice repair
+│   ├── context.py         # Context package assembly
+│   ├── character_creator.py # Prose pitch → LLM draft → deterministic assembly
+│   ├── choice_validator.py # CS-6: Post-generation choice quality validator
+│   └── prompts/           # Prompt templates (13 files)
 │       ├── check_decision.txt
-│       ├── narration.txt
+│       ├── narration_system.txt   # Static narration system prompt (prefix-cacheable)
+│       ├── narration.txt          # Dynamic narration turn context
+│       ├── narration_literary.txt # Literary voice variant (single-message)
+│       ├── character_draft.txt
 │       ├── choice_annotation.txt
+│       ├── epilogue.txt
 │       ├── reconciliation.txt
 │       ├── milestone_reflection.txt
 │       ├── force_power_milestone.txt
 │       ├── time_skip_opening.txt
 │       └── time_skip_closing.txt
-├── state/                 # SQLite persistence + telemetry (1,013 lines)
-│   ├── db.py              # Database schema and connections (196 lines)
-│   ├── session.py         # Turn logging and state queries (540 lines)
-│   ├── memory.py          # Episodic compression (116 lines)
-│   └── telemetry.py       # Narrative event logging — JSON-lines per session (179 lines)
-├── api/                   # FastAPI routes (6,206 lines)
-│   ├── main.py            # App bootstrap and frontend serving (78 lines)
-│   ├── game_routes.py     # Game Engine routes (5,679 lines)
-│   └── studio_routes.py   # Campaign Studio routes (497 lines)
+├── state/                 # SQLite persistence + telemetry
+│   ├── db.py              # Database schema and connections
+│   ├── session.py         # Turn logging, state queries, turn-line formatting
+│   ├── memory.py          # Episodic compression + resume recap
+│   └── telemetry.py       # Narrative event logging — JSON-lines per session
+├── api/                   # FastAPI routes
+│   ├── main.py            # App bootstrap and frontend serving
+│   ├── game_routes.py     # Game Engine routes + /epilogue + /campaign/generate
+│   ├── character_routes.py # /character/draft, /character/save, /character/{id}
+│   └── studio_routes.py   # Campaign Studio routes
 ├── web/                   # Single-file frontend
-│   └── index.html         # Prose reader UI (1,038 lines)
-├── studio/                # Campaign Studio (5,283 lines)
-│   ├── schema.py          # Spine schema — interface contract (900 lines)
-│   ├── validate.py        # Four-gate validation suite (765 lines)
-│   ├── generate.py        # Modes 1, 2, 3 generation (749 lines)
-│   ├── architect.py       # Pre-generation story architecture (CS-5) (154 lines)
-│   ├── narrative_eval.py  # Gate 4 narrative evaluation (CS-5) (703 lines)
-│   ├── seeding.py         # Deterministic seed derivation (111 lines)
-│   ├── difficulty.py      # Spine difficulty calibration (353 lines)
-│   ├── import_interface.py # Cross-era character import (405 lines)
+│   └── index.html         # Prose reader UI + character creator + stats panel +
+│                          #   milestone ceremony + finale/epilogue + resume recap
+├── studio/                # Campaign Studio
+│   ├── schema.py          # Spine schema — interface contract
+│   ├── validate.py        # Four-gate validation + anti-positivity heuristics
+│   ├── generate.py        # Modes 1, 2, 3 generation + architecture merge
+│   ├── architect.py       # Pre-generation story architecture (CS-5/CS-6)
+│   ├── narrative_eval.py  # Gate 4 narrative evaluation + enrichment checks
+│   ├── persist.py         # Write generated spines to data/campaigns/
+│   ├── seeding.py         # Deterministic seed derivation
+│   ├── difficulty.py      # Spine difficulty calibration
+│   ├── import_interface.py # Cross-era character import
 │   ├── prompts/           # Studio prompt templates (7 files)
 │   │   ├── mode1_generate.txt
 │   │   ├── mode2_generate.txt
@@ -356,10 +399,12 @@ storyteller-v3/
 │   ├── talent_trees/      # 6 specialization trees + talent_library.json
 │   ├── force_powers/      # 5 powers (enhance, heal_harm, influence, move, sense)
 │   └── personas/          # writer_room_personas.json (55 personas)
-└── tests/                 # 31 test files (~13,650 lines)
+└── tests/                 # 39 test files (~16,100 lines)
     ├── __init__.py
     ├── dice_validation.py
     ├── studio_schema_test.py
+    ├── test_campaign_generate.py         # POST /campaign/generate flow
+    ├── test_character_creator.py         # Pitch → draft → assembly → save
     ├── test_content_packs.py             # Content pack loader + validation
     ├── test_cs2_mode3.py
     ├── test_cs3_mode2_import.py
@@ -369,7 +414,10 @@ storyteller-v3/
     ├── test_cs6_story_engineering.py     # CS-6: Campaign Studio tests
     ├── test_e2e_game_loop.py
     ├── test_era_packs.py                 # Era-specific pack composition
+    ├── test_experience_shell.py          # Completion, epilogue, recap, damage,
+    │                                     #   incapacitation, dice verdict headline
     ├── test_faction_reactivity.py        # NPC faction stance and reaction logic
+    ├── test_freeform_talents.py          # Custom signature-talent validation
     ├── test_identity_drift_introspection.py # Identity drift detection
     ├── test_latency_hot_path.py          # Hot-path latency budget enforcement
     ├── test_llm_client_backoff.py        # LLM retry/backoff (429 handling)
@@ -385,10 +433,15 @@ storyteller-v3/
     ├── test_phase15_force_powers.py
     ├── test_phase16_vehicles.py
     ├── test_phase17_time_skips.py
+    ├── test_physics_guardrails.py        # World registry, fact grounding,
+    │                                     #   polarity wiring, choice repair,
+    │                                     #   prompt split, usage accounting
     ├── test_reconciliation_escalation.py # Reconciliation escalation rules
     ├── test_scene_validator_wiring.py     # CS-6: scene validator runtime integration
+    ├── test_spine_world_derivation.py    # Spine-derived NPC domains + act vocabulary
     ├── test_story_coherence_state.py     # Cross-turn coherence checks
-    └── test_story_engineering.py         # CS-6: Game Engine story-engineering tests
+    ├── test_story_engineering.py         # CS-6: Game Engine story-engineering tests
+    └── test_studio_enrichment_generation.py # Studio enrichment generation + gates
 ```
 
 **Note:** `data/evaluation_pairs/` and `data/canon_profiles/` directories

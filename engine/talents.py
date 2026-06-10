@@ -85,6 +85,192 @@ def _get_library() -> dict:
     return _library_cache
 
 
+def resolve_talent_defn(character, talent_ref: str) -> Optional[dict]:
+    """Resolve a talent definition for a character.
+
+    Per-character ``custom_talents`` (freeform / LLM-authored "signature"
+    talents) shadow and extend the global library, so an archetype's bespoke
+    talents resolve through the same dispatch as canonical ones. Returns None
+    if the ref is unknown to both.
+    """
+    custom = getattr(character, "custom_talents", None) or {}
+    if talent_ref in custom:
+        return custom[talent_ref]
+    return _get_library().get(talent_ref)
+
+
+def _merged_library(character) -> dict:
+    """A library view where the character's custom_talents shadow the global
+    library. Used so every existing ``library.get(ref)`` lookup in this module
+    transparently resolves freeform talents without per-site changes.
+    """
+    base = _get_library()
+    custom = getattr(character, "custom_talents", None) or {}
+    if not custom:
+        return base
+    merged = dict(base)
+    merged.update(custom)
+    return merged
+
+
+# Valid talent_type values and the effect types each may carry.
+VALID_TALENT_TYPES: frozenset[str] = frozenset({
+    "passive", "conditional", "substitution", "narrative_enabler", "intervention",
+})
+VALID_EFFECT_TYPES: frozenset[str] = frozenset({
+    "modify_pool", "modify_threshold", "conditional", "substitution",
+    "narrative_enabler", "intervention", "force_rating_increase",
+})
+# Dice pool fields a modify_pool effect may legally touch (mirrors
+# engine.dice.DicePool). Anything outside this set is rejected so an
+# LLM-authored talent can never inject an unknown die type into the math.
+VALID_POOL_DICE: frozenset[str] = frozenset({
+    "proficiency", "ability", "boost", "difficulty", "challenge", "setback", "force",
+})
+# Which effect types are acceptable for each talent_type.
+_TYPE_EFFECTS: dict[str, frozenset[str]] = {
+    "passive": frozenset({"modify_pool", "modify_threshold",
+                          "narrative_enabler", "force_rating_increase"}),
+    "conditional": frozenset({"conditional"}),
+    "substitution": frozenset({"substitution"}),
+    "narrative_enabler": frozenset({"narrative_enabler"}),
+    "intervention": frozenset({"intervention"}),
+}
+_MAX_POOL_DELTA = 3  # magnitude cap on a single modify_pool adjustment
+
+
+def validate_talent_definition(defn: dict) -> tuple[bool, list[str]]:
+    """Validate a (possibly LLM-authored) talent definition.
+
+    Enforces shape, the 5-type taxonomy, talent_type<->effect-type
+    consistency, and dice-safety (modify_pool may only touch real DicePool
+    fields, magnitude capped; skill lists must be real skills). This is the
+    gate that protects the deterministic dice math from freeform content.
+
+    Returns (ok, errors). ok is True only when errors is empty.
+    """
+    from engine.character import SKILL_CHARACTERISTICS
+
+    errors: list[str] = []
+    if not isinstance(defn, dict):
+        return False, ["talent definition must be an object"]
+
+    name = defn.get("name")
+    if not isinstance(name, str) or not name.strip():
+        errors.append("missing non-empty 'name'")
+
+    ttype = defn.get("talent_type")
+    if ttype not in VALID_TALENT_TYPES:
+        errors.append(
+            f"talent_type must be one of {sorted(VALID_TALENT_TYPES)}, got {ttype!r}"
+        )
+
+    if "ranked" in defn and not isinstance(defn["ranked"], bool):
+        errors.append("'ranked' must be a boolean")
+    max_rank = defn.get("max_rank", 1)
+    if not isinstance(max_rank, int) or not (1 <= max_rank <= 5):
+        errors.append("'max_rank' must be an int in 1..5")
+
+    effects = defn.get("effects")
+    if not isinstance(effects, list) or not effects:
+        errors.append("'effects' must be a non-empty list")
+        return (len(errors) == 0), errors
+
+    allowed_effects = _TYPE_EFFECTS.get(ttype, frozenset())
+    saw_matching = False
+    valid_skills = set(SKILL_CHARACTERISTICS.keys())
+
+    for i, eff in enumerate(effects):
+        if not isinstance(eff, dict):
+            errors.append(f"effect[{i}] must be an object")
+            continue
+        etype = eff.get("type")
+        if etype not in VALID_EFFECT_TYPES:
+            errors.append(f"effect[{i}].type {etype!r} is not a known effect type")
+            continue
+        if ttype in _TYPE_EFFECTS and etype in allowed_effects:
+            saw_matching = True
+
+        if etype == "modify_pool":
+            modifier = eff.get("modifier", {})
+            if not isinstance(modifier, dict) or not modifier:
+                errors.append(f"effect[{i}] modify_pool needs a non-empty 'modifier'")
+            else:
+                for die, delta in modifier.items():
+                    if die not in VALID_POOL_DICE:
+                        errors.append(
+                            f"effect[{i}] modify_pool die {die!r} is not a valid "
+                            f"pool die {sorted(VALID_POOL_DICE)}"
+                        )
+                    if not isinstance(delta, int) or abs(delta) > _MAX_POOL_DELTA:
+                        errors.append(
+                            f"effect[{i}] modify_pool delta for {die!r} must be an "
+                            f"int with magnitude <= {_MAX_POOL_DELTA}"
+                        )
+            for sk in eff.get("target_skills", []) or []:
+                if sk not in valid_skills:
+                    errors.append(f"effect[{i}] unknown target_skill {sk!r}")
+
+        elif etype == "modify_threshold":
+            if eff.get("target") not in ("strain_threshold", "wound_threshold"):
+                errors.append(
+                    f"effect[{i}] modify_threshold target must be "
+                    f"strain_threshold or wound_threshold"
+                )
+            if not isinstance(eff.get("modifier", 0), int):
+                errors.append(f"effect[{i}] modify_threshold modifier must be int")
+
+        elif etype == "conditional":
+            if not isinstance(eff.get("modifier", {}), dict):
+                errors.append(f"effect[{i}] conditional needs a 'modifier' object")
+            for sk in (eff.get("condition", {}) or {}).get("check_skills", []) or []:
+                if sk not in valid_skills:
+                    errors.append(f"effect[{i}] unknown check_skill {sk!r}")
+            mod = eff.get("modifier", {})
+            if isinstance(mod, dict):
+                for die in mod:
+                    if die not in VALID_POOL_DICE:
+                        errors.append(
+                            f"effect[{i}] conditional die {die!r} is not a valid pool die"
+                        )
+
+        elif etype == "substitution":
+            if not eff.get("original_skills"):
+                errors.append(f"effect[{i}] substitution needs 'original_skills'")
+            for sk in eff.get("original_skills", []) or []:
+                if sk not in valid_skills:
+                    errors.append(f"effect[{i}] unknown original_skill {sk!r}")
+            if not eff.get("characteristic_override") and not eff.get("substitute_skill"):
+                errors.append(
+                    f"effect[{i}] substitution needs characteristic_override "
+                    f"or substitute_skill"
+                )
+
+        elif etype == "narrative_enabler":
+            if not (eff.get("description") or "").strip():
+                errors.append(f"effect[{i}] narrative_enabler needs a 'description'")
+
+        elif etype == "intervention":
+            if not eff.get("effect"):
+                errors.append(f"effect[{i}] intervention needs an 'effect'")
+            sc = eff.get("strain_cost", 0)
+            if not isinstance(sc, int) or sc < 0:
+                errors.append(f"effect[{i}] intervention strain_cost must be int >= 0")
+            if eff.get("scope", "session") not in ("session", "encounter"):
+                errors.append(f"effect[{i}] intervention scope must be session/encounter")
+            for sk in eff.get("applicable_skills", []) or []:
+                if sk not in valid_skills:
+                    errors.append(f"effect[{i}] unknown applicable_skill {sk!r}")
+
+    if ttype in _TYPE_EFFECTS and not saw_matching:
+        errors.append(
+            f"talent_type {ttype!r} requires at least one effect of "
+            f"{sorted(allowed_effects)}"
+        )
+
+    return (len(errors) == 0), errors
+
+
 def load_specialization_tree(name: str) -> SpecializationTree:
     """
     Load a specialization tree from JSON.
@@ -153,7 +339,7 @@ def apply_passive_modifiers(pool, character, skill: str) -> list[TalentActivatio
     Returns list of activations for narration context.
     Does NOT modify thresholds (those are applied at acquisition time).
     """
-    library = _get_library()
+    library = _merged_library(character)
     activations = []
 
     acquired_refs = get_acquired_refs(character)
@@ -220,7 +406,7 @@ def apply_conditional_modifiers(
     Applies Type 2 conditional talent modifiers based on scene context.
     Charges strain if triggered. Returns activations.
     """
-    library = _get_library()
+    library = _merged_library(character)
     activations = []
 
     acquired_refs = get_acquired_refs(character)
@@ -300,7 +486,7 @@ def get_characteristic_override(character, skill: str) -> str | None:
 
     Returns the override characteristic name, or None if no override applies.
     """
-    library = _get_library()
+    library = _merged_library(character)
     acquired_refs = get_acquired_refs(character)
 
     for talent_ref in acquired_refs:
@@ -325,7 +511,7 @@ def build_talent_check_effects(character) -> str:
     Includes Type 3 (substitution) and relevant Type 4 (narrative enabler)
     talents. Returns empty string if no relevant talents.
     """
-    library = _get_library()
+    library = _merged_library(character)
     acquired_refs = get_acquired_refs(character)
     if not acquired_refs:
         return ""
@@ -388,7 +574,7 @@ def build_talent_capabilities(character) -> str:
     Includes Type 3 (substitution) and Type 4 (narrative enabler) talents.
     Returns empty string if no relevant talents.
     """
-    library = _get_library()
+    library = _merged_library(character)
     acquired_refs = get_acquired_refs(character)
     if not acquired_refs:
         return ""
@@ -452,7 +638,7 @@ def apply_threshold_modifiers(character) -> None:
     Called when talents are first acquired or loaded.
     Idempotent — recalculates from base thresholds.
     """
-    library = _get_library()
+    library = _merged_library(character)
 
     # Base thresholds (from character data, before talent modifications)
     base_strain = getattr(character, "_base_strain_threshold",
@@ -534,7 +720,7 @@ def get_available_talents(
         if t.get("entry_id")
     }
     acquired_refs = get_acquired_refs(character)
-    library = _get_library()
+    library = _merged_library(character)
     available = []
 
     for tree_name in tree_names:
@@ -599,9 +785,15 @@ def build_milestone_choices(
 
     available = get_available_talents(character, tree_names)
     if not available:
+        # Freeform characters (no {career}_{spec} tree files) get a flat,
+        # concept-affinity ranked list drawn from custom_talents + the library.
+        if not _has_spec_trees(tree_names):
+            return build_freeform_milestone_choices(
+                character, reserved_xp, max_choices
+            )
         return []
 
-    library = _get_library()
+    library = _merged_library(character)
 
     # Build branch → available talents mapping
     branch_talents: dict[str, list[dict]] = {}
@@ -653,6 +845,127 @@ def build_milestone_choices(
     return choices[:max_choices]
 
 
+def _has_spec_trees(tree_names: list[str]) -> bool:
+    """True if any of the named specialization tree files exists on disk."""
+    for name in tree_names:
+        if (TALENT_TREES_DIR / f"{name}.json").exists():
+            return True
+    return False
+
+
+_FREEFORM_STOPWORDS: frozenset[str] = frozenset({
+    "the", "a", "an", "and", "or", "of", "to", "in", "on", "for", "with",
+    "ex", "former", "turned", "reluctant", "who", "was", "is", "from", "by",
+})
+
+
+def _concept_tokens(character) -> set[str]:
+    """Lowercase keyword tokens describing a character's identity, for matching
+    against talent prose_tags. Drawn from archetype_concept, career, and the
+    prose_tags of already-acquired talents."""
+    import re
+
+    text_parts = [
+        getattr(character, "archetype_concept", "") or "",
+        str(getattr(character, "career", "") or ""),
+    ]
+    for spec in getattr(character, "specializations", []) or []:
+        text_parts.append(str(spec))
+    raw = " ".join(text_parts).lower()
+    tokens = {
+        t for t in re.split(r"[^a-z0-9]+", raw)
+        if len(t) > 2 and t not in _FREEFORM_STOPWORDS
+    }
+    # Fold in prose tags from already-acquired talents (taste reinforcement).
+    for ref in get_acquired_refs(character):
+        defn = resolve_talent_defn(character, ref) or {}
+        for tag in defn.get("prose_tags", []) or []:
+            tokens.update(
+                t for t in str(tag).lower().replace("_", " ").split()
+                if len(t) > 2
+            )
+    return tokens
+
+
+def _freeform_xp_cost(defn: dict) -> int:
+    """Default XP cost for a freeform talent lacking an explicit cost:
+    scaled by max_rank (5/10/15...), capped, default 10."""
+    if isinstance(defn.get("xp_cost"), int):
+        return defn["xp_cost"]
+    max_rank = defn.get("max_rank", 1)
+    if isinstance(max_rank, int) and max_rank >= 1:
+        return min(5 * max_rank, 20)
+    return 10
+
+
+def build_freeform_milestone_choices(
+    character,
+    reserved_xp: int,
+    max_choices: int = 3,
+) -> list[MilestoneChoice]:
+    """Milestone choices for a freeform character with no specialization trees.
+
+    Candidates = the character's custom_talents + the global library, minus
+    already-acquired or at-max-rank talents. Ranked by affinity between each
+    talent's prose_tags and the character's concept tokens, then by XP cost.
+    Acquisition records use tree="freeform" / entry_id="freeform:<ref>" so the
+    existing acquire_talent() path works unchanged.
+    """
+    tokens = _concept_tokens(character)
+    acquired_refs = get_acquired_refs(character)
+
+    custom = getattr(character, "custom_talents", None) or {}
+    candidates: dict[str, dict] = dict(_get_library())
+    candidates.update(custom)  # custom shadows library
+
+    scored: list[tuple[int, int, str, dict]] = []
+    for ref, defn in candidates.items():
+        if not isinstance(defn, dict):
+            continue
+        # Skip at-or-over max rank.
+        max_rank = defn.get("max_rank", 1)
+        if get_talent_rank(character, ref) >= max_rank:
+            continue
+        # Unranked already-acquired talents are excluded.
+        if ref in acquired_refs and not defn.get("ranked", False):
+            continue
+        xp_cost = _freeform_xp_cost(defn)
+        if xp_cost > reserved_xp:
+            continue
+        tags = {
+            t
+            for tag in defn.get("prose_tags", []) or []
+            for t in str(tag).lower().replace("_", " ").split()
+        }
+        affinity = len(tokens & tags)
+        # Custom (signature) talents get a small affinity boost so an
+        # archetype's bespoke talents surface ahead of generic library ones.
+        if ref in custom:
+            affinity += 1
+        scored.append((affinity, xp_cost, ref, defn))
+
+    # Highest affinity first, then cheapest, then stable by ref.
+    scored.sort(key=lambda s: (-s[0], s[1], s[2]))
+
+    identity = (getattr(character, "archetype_concept", "") or
+                str(getattr(character, "career", "") or "").replace("_", " ").title())
+    choices: list[MilestoneChoice] = []
+    for affinity, xp_cost, ref, defn in scored[:max_choices]:
+        choices.append(MilestoneChoice(
+            branch_key="freeform",
+            branch_theme=identity,
+            branch_description=defn.get("narrative_identity", ""),
+            talent_ref=ref,
+            talent_name=defn.get("name", ref),
+            tree_name="freeform",
+            entry_id=f"freeform:{ref}",
+            xp_cost=xp_cost,
+            narrative_identity=defn.get("narrative_identity", ""),
+            prose_tags=defn.get("prose_tags", []),
+        ))
+    return choices
+
+
 def acquire_talent(character, choice: MilestoneChoice) -> None:
     """
     Apply a milestone talent acquisition to the character.
@@ -667,8 +980,7 @@ def acquire_talent(character, choice: MilestoneChoice) -> None:
     })
 
     # Apply threshold modifiers (Grit, Toughened) immediately
-    library = _get_library()
-    defn = library.get(choice.talent_ref, {})
+    defn = resolve_talent_defn(character, choice.talent_ref) or {}
     if defn.get("talent_type") == "passive":
         for eff in defn.get("effects", []):
             if eff.get("type") == "modify_threshold":
@@ -717,7 +1029,7 @@ def check_interventions(
     Returns an InterventionOffer if one is available, None otherwise.
     Only offers the first applicable intervention (most specific first).
     """
-    library = _get_library()
+    library = _merged_library(character)
     acquired_refs = get_acquired_refs(character)
     talent_uses = getattr(character, "talent_uses", {})
 

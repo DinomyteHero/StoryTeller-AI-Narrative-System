@@ -97,6 +97,54 @@ def compress_act_turns(session_id: str, act_number: int) -> None:
         conn.commit()
 
 
+RECAP_PROMPT = """
+You are writing a "Previously on..." recap for a player returning to a
+Star Wars narrative RPG mid-story.
+
+STORY SO FAR (compressed act summaries):
+{act_summaries}
+
+MOST RECENT TURNS:
+{recent_turns}
+
+THE PLAYER IS ABOUT TO DECIDE: the choices from the last passage are
+still open.
+
+Write an 80-150 word recap in second person present tense, in the voice
+of the story itself (not a TV announcer — no "previously on" phrase, no
+meta language). Cover: where you are, what just happened, what pressure
+or question is live right now. End at the current decision point so the
+last sentence hands the moment back to the player. No bullet points.
+No game terminology.
+"""
+
+
+def generate_resume_recap(session_id: str) -> str:
+    """Build the returning-player recap from compressed memory + recent turns.
+
+    One fast-tier call. Raises on failure — callers decide whether the
+    recap is optional (the API treats it as fail-open).
+    """
+    from state.session import format_turn_lines, get_act_summaries, get_recent_turns
+
+    summaries = get_act_summaries(session_id) or "The story has just begun."
+    turn_lines = format_turn_lines(get_recent_turns(session_id, limit=3))
+
+    recap = call_chat(
+        tier=TIER_FAST,
+        purpose="recap",
+        user=RECAP_PROMPT.format(
+            act_summaries=summaries,
+            recent_turns="\n".join(turn_lines) or "No turns played yet.",
+        ),
+        temperature=0.4,
+        max_tokens=300,
+        timeout=20.0,
+        retries=1,
+    )
+    return recap.strip()
+
+
 async def compress_if_needed(session_id: str, act_number: int) -> None:
     """
     Non-blocking wrapper. Always call via FastAPI BackgroundTasks — never await

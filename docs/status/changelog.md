@@ -2,6 +2,152 @@
 
 All notable changes to Storyteller V3 are documented here.
 
+## [Unreleased] — 2026-06-09 — Experience Shell + Studio Enrichment Generation
+
+The "can't finish, can't return, can't see yourself" pass: campaigns now
+end, returning players get a recap, and the mechanical depth is visible
+in the UI. In parallel, the Studio's generation pipeline learned the
+dramatic enrichment that previously required manual passes.
+
+### Campaigns can end
+- **Completion state** — when the final act's anchor resolves, the
+  between-act pipeline persists `arc_state.campaign_complete`
+  ([engine/reconciliation.py](../../engine/reconciliation.py) step 16);
+  further turns return 409.
+- **Epilogue** — `POST /session/{id}/epilogue` generates (once, then
+  cached) a 300-550 word closing passage via the quality tier
+  ([gm/cloud_gm.py](../../gm/cloud_gm.py) `generate_epilogue`,
+  [gm/prompts/epilogue.txt](../../gm/prompts/epilogue.txt)). The model
+  selects the best-matching authored ending from
+  `story_architecture.ending_paths` and answers the throughline question
+  in prose. UI shows a "The End" finale gate, the epilogue with its
+  ending name, and "Begin a new story."
+
+### Returning players get re-entry
+- **"The story so far" recap** — `GET /session/{id}` generates an 80-150
+  word second-person recap from compressed act summaries + recent turns
+  (`generate_resume_recap` in [state/memory.py](../../state/memory.py)),
+  cached per turn-count in arc_state, rendered as a card above the last
+  passage. Gated by `RESUME_RECAP_ENABLED`; fail-open.
+
+### Incapacitation is now real (Game Mechanics §2)
+- **Incoming damage** — `compute_incoming_damage` in
+  [engine/checks.py](../../engine/checks.py): failed checks in dangerous
+  scenes (combat/space_combat/chase) cost wounds (base 2 + net failures
+  + 3/despair, minus soak) and strain (net threats, capped 4). Previously
+  player wounds never accumulated, so the designed incapacitation beat
+  could never fire.
+- **The §2 redirect** — crossing the wound threshold injects a mandatory
+  narration directive (one turn of lost agency: capture/rescue/cost),
+  then the character wakes below threshold. A second collapse in the
+  same act forces the scene to resolve against the player. Counter
+  resets at act boundaries.
+
+### CoG-grade UI layer ([web/index.html](../../web/index.html))
+- **Stats panel** — header STATS button → characteristics, condition,
+  skills, destiny pool, XP, Force rating, morality, talents.
+- **Progress** — status bar shows "Chapter X of Y" (turn responses now
+  carry `current_act`/`total_acts`).
+- **Destiny visibility** — light/dark pool in the status bar.
+- **Advancement ceremony** — milestone passages render as a distinct
+  gold-bordered card with talent choices wired to `/milestone`
+  (previously the UI dropped milestone data entirely).
+- **Freeform input** promoted from a collapsed `<details>` to an
+  always-visible input.
+- **Dice verdict headline** — the dice result block now leads with
+  "NARRATE AS: YES-AND / YES-BUT / NO-BUT / NO-AND"
+  ([gm/context.py](../../gm/context.py)).
+
+### Studio: enrichment is generated, not hand-authored
+- Schema: new `EndingPath` model; `StoryArchitecture` gains
+  `foreshadow_registry` and `ending_paths`; `VALID_BEAT_ROLES` vocabulary
+  ([studio/schema.py](../../studio/schema.py)).
+- Architect plans foreshadow pairs (≥5, mixed payoff types), 2-4 ending
+  paths linked to variation options, and milestone pacing windows;
+  Mode 1/2 prompts now require per-act `beat_roles`, 6-12 `side_content`
+  seeds, `thematic_argument` on every major NPC, a contradiction-testing
+  anchor in acts 2+, ≥1 antagonistic NPC and ≥2 negative-weight
+  relationships ([studio/architect.py](../../studio/architect.py),
+  [studio/generate.py](../../studio/generate.py), prompts).
+- Gate 4b deterministic checks: missing/unknown beat_roles, sparse
+  side_content (<4/act), sparse foreshadow registry (<3) or monotonic
+  payoff types, sparse ending paths (<2), dangling ending branch_ids.
+  Gate 2/3: missing thematic_argument warning, anti-positivity-skew
+  heuristics ([studio/narrative_eval.py](../../studio/narrative_eval.py),
+  [studio/validate.py](../../studio/validate.py)).
+
+### Tests
+- [tests/test_experience_shell.py](../../tests/test_experience_shell.py)
+  (18) and [tests/test_studio_enrichment_generation.py](../../tests/test_studio_enrichment_generation.py)
+  (51). Full suite: 992 passed.
+
+## [Unreleased] — 2026-06-09 — Physics Guardrails + Cost Pass
+
+Closes the narrative-state gaps in the physics-before-imagination
+invariant and cuts narration input cost via prompt-prefix caching.
+
+### World registry — validation gate for LLM-proposed state
+- **New module [engine/world_registry.py](../../engine/world_registry.py)**
+  (pure Python, zero LLM deps). Locations proposed via the narration
+  state patch must be grounded in spine geography, the visited-location
+  ledger, the prior location, or the delivered passage — otherwise
+  rejected with fallback to code-side inference. Accepted locations are
+  recorded in `arc_state["visited_locations"]` with provenance
+  (turn, source), so the world grows by auditable append, never drift.
+- **Fact grounding** — state-patch `known_facts` and reconciliation
+  `knowledge_gained` are token-grounded against the narration the player
+  actually read; ungrounded facts are dropped and logged before reaching
+  persistent state. `knowledge_lost` can only mark facts the NPC
+  actually knew.
+
+### Rule 4 enforcement — dice-polarity post-check
+- On failed checks, a tiny fast-tier call (`DICE_POLARITY_CHECK=true`,
+  ~60 output tokens, failed-check turns only) verifies the passage
+  depicts failure. A mismatch retries narration with a correction note,
+  same flow as word-count violations. Fail-open.
+
+### Cost pass
+- **Token usage accounting** — every completion logs `LLM_USAGE` lines
+  (prompt/completion/cached tokens per purpose); running totals exposed
+  via `gm.llm_client.usage_totals()` and `describe_routing()`.
+- **Narration prompt split for prefix caching** — static instruction
+  (style guide, task rules, dice interpretation) moved to a byte-stable
+  system message ([gm/prompts/narration_system.txt](../../gm/prompts/narration_system.txt));
+  the user template reorders per-act-stable blocks before per-turn
+  volatile ones. DeepSeek's automatic prefix caching bills cache-hit
+  tokens at a fraction of the miss rate; `cached_prompt_tokens` in the
+  usage log verifies hits. Literary voice keeps its legacy single-message
+  path.
+- **Choices-only quality repair** — a failed choice-quality gate now
+  regenerates only the choices (~300 tokens) instead of re-running the
+  full narration call (`gm.cloud_gm.regenerate_choices`).
+
+### Tests
+- New [tests/test_physics_guardrails.py](../../tests/test_physics_guardrails.py)
+  (34 tests) covering registry validation, the visited ledger, fact
+  grounding, reconciliation grounding, the scene-patch gate, polarity
+  wiring, choice repair, the prompt split, and usage accounting.
+
+### Spine-derived world tables (follow-up)
+- **Schema**: optional `NPC.location_domains` (location tokens where an
+  NPC can plausibly appear; `"*"` = anywhere) and `Act.location_vocabulary`
+  (named places an act moves through beyond `opening_location`) in
+  [studio/schema.py](../../studio/schema.py). Both default empty — existing
+  spines validate unchanged.
+- **Runtime derivation**: the NPC location-eligibility table is now built
+  from the loaded spine (`npc_location_domains()` in
+  [engine/world_registry.py](../../engine/world_registry.py)); the
+  hardcoded `_NPC_LOCATION_DOMAINS` table remains as fallback for the
+  canonical campaign only (spine entries overlay it). New campaigns get
+  exactly the constraints they author — unauthored NPCs stay unconstrained.
+- **Scene-location inference** is spine-driven first: narration text is
+  matched against the act's authored location vocabulary
+  (`match_location_from_text()`) before the canonical-campaign keyword
+  rules run, so any campaign gets correct location tracking. Per-act
+  vocabulary also extends the location-validation gate's canon set.
+- New [tests/test_spine_world_derivation.py](../../tests/test_spine_world_derivation.py)
+  (23 tests).
+
 ## [Unreleased] — 2026-04-28 — Brooks/Weiland Pass II — Branching, Length, Edge
 
 A follow-up pass extending the Brooks/Weiland framework into:

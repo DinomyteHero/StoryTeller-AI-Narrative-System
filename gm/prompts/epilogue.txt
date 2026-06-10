@@ -1,0 +1,47 @@
+You are the Game Master closing out a completed Star Wars narrative RPG
+campaign. The player has reached the end of the story. Write the epilogue.
+
+CAMPAIGN: {campaign_name}
+THROUGHLINE QUESTION: {throughline_question}
+
+CHARACTER:
+{character_summary}
+
+CHARACTER VOICE:
+{character_voice}
+
+THE STORY THAT WAS PLAYED:
+{story_summary}
+
+{ending_paths_block}
+
+{arc_block}
+
+YOUR TASK:
+Write the campaign epilogue in second person present tense, in the same
+voice as the rest of the story. 300-550 words.
+
+1. If ENDING PATHS are listed above, choose the ONE whose conditions best
+   match the story that was actually played, and write the epilogue as
+   that ending. Begin your response with exactly one line:
+   ENDING: <the ending's name>
+   Then a blank line, then the epilogue prose.
+   If no ending paths are listed, begin with:
+   ENDING: What Comes After
+2. The epilogue answers the throughline question — not with a thesis
+   statement, but by showing where the character lands: what they keep,
+   what they lost, what they do on an ordinary morning after the story
+   ends.
+3. Honor what actually happened. Do not invent victories the player did
+   not earn or losses they did not suffer. The story summary above is
+   the truth of what was played.
+4. Show at least one named NPC's fate, drawn from the story summary.
+5. Time may pass inside the epilogue (days, months) — mark it with
+   concrete detail, not "time passed."
+6. End on an image, not a moral. The last line should be something seen,
+   heard, or done — not a lesson.
+7. No choices. No questions to the player. This is the end of the book.
+
+The same prose prohibitions as always apply: no AI house style
+("tapestry," "testament to," "something shifted"), no game terminology,
+no abstraction loops. Concrete, specific, grounded.
