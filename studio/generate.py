@@ -498,7 +498,15 @@ def _merge_architecture_into_spine(
         spine_data["story_architecture"] = architecture_data
         existing = architecture_data
     else:
-        for key in ("milestone_beat_sheet", "foreshadow_registry", "ending_paths"):
+        # The architect is the source of truth for every planning field it
+        # authored — including the required scalars. Generation models
+        # routinely emit partial story_architecture blocks; backfill all gaps.
+        for key in (
+            "milestone_beat_sheet", "foreshadow_registry", "ending_paths",
+            "dramatic_premise", "central_dramatic_question", "story_promise",
+            "protagonist_pressure_type", "antagonistic_force",
+            "thematic_throughline", "ending_payoff_sketch",
+        ):
             if architecture_data.get(key) and not existing.get(key):
                 existing[key] = architecture_data[key]
 
@@ -594,7 +602,9 @@ def generate_from_brief(
                 system_prompt,
                 "Generate the complete campaign spine JSON now.",
                 seed=seed,
-                max_tokens=8000,
+                # Enriched spines (beat_roles, side_content, foreshadow
+                # registry) overflow 8k tokens and truncate mid-JSON.
+                max_tokens=16000,
                 temperature=0.8,
             )
 
@@ -725,7 +735,9 @@ def generate_mode1(
                 system_prompt,
                 "Generate the complete campaign spine JSON now.",
                 seed=seed,
-                max_tokens=8000,
+                # Enriched spines (beat_roles, side_content, foreshadow
+                # registry) overflow 8k tokens and truncate mid-JSON.
+                max_tokens=16000,
                 temperature=0.85,
             )
 

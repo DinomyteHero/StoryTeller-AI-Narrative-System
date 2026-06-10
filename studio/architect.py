@@ -94,7 +94,9 @@ def generate_architecture(
                 system_prompt,
                 "Design the story architecture now.",
                 seed=seed,
-                max_tokens=4000,
+                # Reasoning-model output also counts against this budget;
+                # 4k left architectures truncating on slower providers.
+                max_tokens=6000,
                 temperature=0.7,
             )
 
