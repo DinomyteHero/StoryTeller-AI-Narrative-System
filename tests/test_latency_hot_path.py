@@ -23,13 +23,16 @@ from gm.llm_client import _prepare_kwargs
 
 def test_narration_prompts_require_concrete_terms_for_major_mysteries():
     repo_root = Path(__file__).resolve().parents[1]
+    prompts_dir = repo_root / "gm" / "prompts"
 
-    for prompt in [
-        repo_root / "gm" / "prompts" / "narration.txt",
-        repo_root / "gm" / "prompts" / "narration_literary.txt",
-    ]:
-        text = prompt.read_text(encoding="utf-8")
+    # Clean voice sends system + user templates; literary is single-file.
+    clean = (
+        (prompts_dir / "narration_system.txt").read_text(encoding="utf-8")
+        + (prompts_dir / "narration.txt").read_text(encoding="utf-8")
+    )
+    literary = (prompts_dir / "narration_literary.txt").read_text(encoding="utf-8")
 
+    for text in (clean, literary):
         assert "concrete referent" in text
         assert "lower dark" in text
         assert "dark-side vergence beneath the Great Temple" in text

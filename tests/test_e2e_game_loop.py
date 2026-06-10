@@ -451,8 +451,8 @@ class TestGameMechanics:
             char = Character.model_validate_json(f.read())
 
         assert char.name == "Clovis Beryl"
-        assert char.species.value == "human"
-        assert char.career.value == "sentinel"
+        assert char.species == "human"
+        assert char.career == "sentinel"
         assert char.characteristics.willpower == 3
         assert char.skills.discipline == 1
         assert char.wound_threshold >= 10
@@ -689,20 +689,17 @@ class TestAPIRoutes:
         assert res.status_code == 200
         assert "Storyteller V3" in res.text
 
-    def test_campaigns_endpoint_exposes_intended_protagonist_only(self, client):
-        """The active campaign funnel offers Clovis, not support-only variants."""
+    def test_campaigns_endpoint_hides_archived_campaigns(self, client):
+        """Archived campaigns (player_facing=False) are excluded from the
+        player-facing picker, though they remain loadable for direct session
+        creation (exercised by test_invalid_choice_index_returns_400)."""
         res = client.get("/campaigns")
         assert res.status_code == 200
         campaigns = res.json()
-
-        custodian = next(
-            c for c in campaigns
-            if c["campaign_name"] == "shadows_of_the_custodian"
-        )
-        assert custodian["intended_protagonist_id"] == "clovis_beryl"
-        character_ids = {c["id"] for c in custodian["characters"]}
-        assert character_ids == {"clovis_beryl"}
-        assert custodian["characters"][0]["intended_protagonist"] is True
+        names = {c["campaign_name"] for c in campaigns}
+        # Shadows of the Custodian is archived — it must not surface in the
+        # player-facing picker, but a session can still be created on it.
+        assert "shadows_of_the_custodian" not in names
 
     def test_invalid_session_returns_404(self, client):
         """Non-existent session returns 404."""

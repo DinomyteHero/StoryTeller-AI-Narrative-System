@@ -448,6 +448,69 @@ def run_prose_diagnostic(
         return None
 
 
+NARRATION_POLARITY_SCHEMA = {
+    "type": "object",
+    "properties": {
+        "depicted_outcome": {
+            "type": "string",
+            "enum": ["success", "failure", "mixed", "unclear"],
+        },
+    },
+    "required": ["depicted_outcome"],
+}
+
+
+def check_narration_polarity(
+    passage: str,
+    situation: str,
+    *,
+    outcome_label: str,
+) -> str:
+    """Rule 4 enforcement — the dice are the truth.
+
+    Asks the fast tier whether the passage, as written, depicts the
+    attempted action succeeding or failing. Called only on failed checks
+    (the case the narrator is tempted to soften). Returns one of
+    "success" / "failure" / "mixed" / "unclear".
+
+    Fail-open: any evaluator problem returns "unclear" so the turn is
+    never blocked by the validator itself.
+    """
+    prompt = (
+        "A player attempted an action in an interactive story. The game's "
+        f"dice ruled the attempt: {outcome_label}.\n\n"
+        f"SCENE AND ATTEMPTED ACTION:\n{situation[:600]}\n\n"
+        f"STORY PASSAGE:\n{passage[:4000]}\n\n"
+        "Question: judged only by what the passage shows, did the player's "
+        "attempted action achieve its goal?\n"
+        '- "success": the passage gives the player what the attempt sought\n'
+        '- "failure": the goal is denied, even if something peripheral was gained\n'
+        '- "mixed": genuinely ambiguous — partial achievement of the core goal\n'
+        '- "unclear": the passage does not show the outcome\n'
+        "Judge the attempted action's core goal only, not side effects."
+    )
+
+    try:
+        data = call_chat_json(
+            tier=TIER_FAST,
+            purpose="polarity",
+            user=prompt,
+            schema=NARRATION_POLARITY_SCHEMA,
+            schema_name="narration_polarity",
+            temperature=0.0,
+            max_tokens=60,
+            timeout=15.0,
+            retries=1,
+        )
+        verdict = str(data.get("depicted_outcome", "unclear")).strip().lower()
+        if verdict in {"success", "failure", "mixed", "unclear"}:
+            return verdict
+        return "unclear"
+    except Exception as e:
+        logging.warning(f"Narration polarity check failed (fail-open): {e}")
+        return "unclear"
+
+
 def validate_scene_purpose(
     *,
     selected_mission: str,

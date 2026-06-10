@@ -16,6 +16,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Optional
 
+from engine.world_registry import ground_facts
 from gm.context import ArcState, NPCState, ThreadState
 from gm.llm_client import TIER_FAST, TIER_QUALITY, call_chat, call_chat_json
 
@@ -157,6 +158,7 @@ class BetweenActResult:
     force_power_milestone_choices: list = field(default_factory=list)  # Phase 15: Force power upgrade choices
     behavioral_fingerprint: Optional[dict] = None            # Phase 13: aggregated choice annotations (§24)
     time_skip_data: Optional[dict] = None                    # Phase 17: time skip config for API (§19)
+    campaign_complete: bool = False                           # Final act's anchor resolved — no next act
     steps_completed: list[str] = field(default_factory=list)
 
 
@@ -536,7 +538,7 @@ def reconcile_turn(
             timeout=RECONCILIATION_TIMEOUT_SEC,
             retries=max(1, min(max_retries + 1, RECONCILIATION_RETRIES)),
         )
-        return _validate_result(data)
+        return _validate_result(data, narration=narration)
     except Exception as e:
         # Graceful degradation: state updates are non-critical (mechanical
         # outcomes are already resolved by code). Returning defaults lets the
@@ -635,8 +637,13 @@ def reconcile_turn_with_escalation(
     return result, new_count, False
 
 
-def _validate_result(data: dict) -> ReconciliationResult:
-    """Validate and normalize the reconciliation JSON."""
+def _validate_result(data: dict, narration: str = "") -> ReconciliationResult:
+    """Validate and normalize the reconciliation JSON.
+
+    When `narration` is provided, knowledge_gained facts are grounded
+    against it — facts the prose doesn't support are dropped before they
+    can become authoritative NPC memory.
+    """
     npc_updates = []
     for npc in data.get("npc_updates", []):
         if not isinstance(npc, dict) or "npc_name" not in npc:
@@ -644,9 +651,14 @@ def _validate_result(data: dict) -> ReconciliationResult:
         # Clamp disposition_shift to [-0.2, 0.2]
         shift = float(npc.get("disposition_shift", 0.0))
         shift = max(-0.2, min(0.2, shift))
+        knowledge_gained = npc.get("knowledge_gained", [])
+        if narration:
+            knowledge_gained, _ = ground_facts(
+                knowledge_gained, narration, label="npc_knowledge",
+            )
         npc_updates.append({
             "npc_name": npc["npc_name"],
-            "knowledge_gained": npc.get("knowledge_gained", []),
+            "knowledge_gained": knowledge_gained,
             "knowledge_lost": npc.get("knowledge_lost", []),
             "disposition_shift": shift,
         })
@@ -722,12 +734,13 @@ def apply_npc_updates(
             if fact and fact not in npc.knows:
                 npc.knows.append(fact)
 
-        # Knowledge lost (remove from knows, optionally add to doesnt_know)
+        # Knowledge lost — only facts the NPC actually knew can become
+        # unknown. An LLM-invented "lost" fact must not enter doesnt_know.
         for fact in update.get("knowledge_lost", []):
             if fact in npc.knows:
                 npc.knows.remove(fact)
-            if fact and fact not in npc.doesnt_know:
-                npc.doesnt_know.append(fact)
+                if fact not in npc.doesnt_know:
+                    npc.doesnt_know.append(fact)
 
         # Disposition shift — clamp to [0.0, 1.0]
         shift = update.get("disposition_shift", 0.0)
@@ -1355,6 +1368,9 @@ def run_between_act_pipeline(
                 arc_state["consecutive_no_check_turns"] = 0
                 arc_state["last_turn_pinch_fired"] = False
                 arc_state["last_turn_had_despair"] = False
+                # Incapacitation escalation is per-act (Game Mechanics §2)
+                arc_state["incapacitations_this_act"] = 0
+                arc_state["incapacitated"] = False
                 # Carry forward dynamic threads that weren't resolved
                 # (closed_threads and dynamic_threads persist as-is)
 
@@ -1374,6 +1390,30 @@ def run_between_act_pipeline(
         result.steps_completed.append("load_next_act")
         logging.info(f"Between-act step 16: loaded act {next_act_number}")
     else:
+        # The final act's anchor resolved — the campaign is over. Persist
+        # the completion state so the API can stop the turn loop and serve
+        # the epilogue instead of letting the story idle on a treadmill.
+        result.campaign_complete = True
+        with get_connection() as conn:
+            row = conn.execute(
+                "SELECT arc_state_json FROM sessions WHERE id = ?",
+                (session_id,),
+            ).fetchone()
+            if row:
+                arc_state = json.loads(row["arc_state_json"])
+                arc_state["campaign_complete"] = True
+                arc_state["anchors_completed"] = arc_state.get("anchors_completed", [])
+                arc_state["anchors_completed"].append(
+                    spine["acts"][completed_act_number - 1].get("anchor", "")
+                )
+                from datetime import datetime, timezone
+                now = datetime.now(timezone.utc).isoformat()
+                conn.execute(
+                    "UPDATE sessions SET arc_state_json = ?, updated_at = ? "
+                    "WHERE id = ?",
+                    (json.dumps(arc_state), now, session_id),
+                )
+                conn.commit()
         result.steps_completed.append("campaign_complete")
         logging.info("Between-act: campaign complete, no next act to load")
 

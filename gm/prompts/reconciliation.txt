@@ -24,8 +24,13 @@ INSTRUCTIONS:
 Analyze the narration and produce a JSON object with these sections:
 
 1. NPC UPDATES — For each NPC present in the scene:
-   - knowledge_gained: new facts the NPC learned from this turn
-   - knowledge_lost: facts the NPC previously believed that were contradicted
+   - knowledge_gained: new facts the NPC learned from this turn.
+     GROUNDING RULE: every fact must be directly supported by the
+     narration above — reuse its concrete nouns and names. Facts that
+     cannot be traced to the narration text will be discarded. Never
+     infer offstage events or supply backstory the narration did not show.
+   - knowledge_lost: facts the NPC previously believed that were contradicted.
+     Only list facts that appear in the NPC's current "knows" list above.
    - disposition_shift: a number between -0.2 and 0.2. Guidelines:
      * Most turns: 0.0 (disposition is sticky)
      * Positive interaction (helped, protected, showed respect): +0.03 to +0.08

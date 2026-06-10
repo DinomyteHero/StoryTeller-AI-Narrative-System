@@ -370,6 +370,140 @@ header {
   border-color: var(--accent-dim) !important;
   background: var(--border) !important;
 }
+
+/* ── Stats panel (CoG-style STATS button) ─────────────────────── */
+.stats-btn {
+  background: var(--surface-alt);
+  border: 1px solid var(--border);
+  color: var(--accent);
+  padding: 0.25rem 0.7rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-family: sans-serif;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-right: 0.6rem;
+}
+.stats-btn:hover { border-color: var(--accent-dim); }
+
+.stats-panel {
+  display: none;
+  background: var(--surface-alt);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 1rem 1.2rem;
+  margin-bottom: 1rem;
+  font-family: sans-serif;
+  font-size: 0.85rem;
+}
+.stats-panel.visible { display: block; }
+.stats-panel h3 {
+  color: var(--accent);
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  margin: 0.9rem 0 0.35rem;
+}
+.stats-panel h3:first-of-type { margin-top: 0; }
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.25rem 1rem;
+}
+.stats-kv { display: flex; justify-content: space-between; gap: 0.5rem; }
+.stats-kv .k { color: var(--text-dim); }
+
+/* ── Milestone ceremony ───────────────────────────────────────── */
+.milestone-card {
+  background: var(--surface);
+  border: 1px solid var(--accent);
+  border-radius: 6px;
+  padding: 1.2rem 1.4rem;
+  margin-bottom: 1rem;
+}
+.milestone-label {
+  color: var(--accent);
+  font-family: sans-serif;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  margin-bottom: 0.6rem;
+}
+.milestone-card .passage-text {
+  white-space: pre-wrap;
+  margin-bottom: 0.9rem;
+}
+.milestone-choice {
+  border-color: var(--accent-dim) !important;
+}
+.milestone-acquired {
+  color: var(--accent);
+  font-family: sans-serif;
+  font-size: 0.9rem;
+  padding: 0.4rem 0;
+}
+
+/* ── Finale / epilogue ────────────────────────────────────────── */
+.finale-card {
+  text-align: center;
+  background: var(--surface);
+  border: 1px solid var(--accent);
+  border-radius: 6px;
+  padding: 2rem 1.5rem;
+  margin: 1.2rem 0;
+}
+.finale-card .the-end {
+  font-size: 1.4rem;
+  color: var(--accent);
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  margin-bottom: 0.6rem;
+}
+.finale-card .finale-sub {
+  color: var(--text-dim);
+  font-size: 0.9rem;
+  margin-bottom: 1.2rem;
+}
+.ending-name {
+  text-align: center;
+  color: var(--accent);
+  font-size: 1.05rem;
+  letter-spacing: 0.08em;
+  margin-bottom: 1rem;
+}
+
+/* ── "Previously" recap card ──────────────────────────────────── */
+.recap-card {
+  background: var(--surface-alt);
+  border-left: 3px solid var(--accent);
+  border-radius: 0 6px 6px 0;
+  padding: 1rem 1.2rem;
+  margin-bottom: 1rem;
+  font-style: italic;
+  color: var(--text-dim);
+  font-size: 0.95rem;
+  white-space: pre-wrap;
+}
+.recap-label {
+  font-style: normal;
+  font-family: sans-serif;
+  color: var(--accent);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  margin-bottom: 0.4rem;
+}
+
+/* ── Always-visible freeform input ────────────────────────────── */
+.freeform-label {
+  color: var(--text-dim);
+  font-size: 0.8rem;
+  font-family: sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin: 0.8rem 0 0.4rem;
+}
 </style>
 </head>
 <body>
@@ -380,7 +514,20 @@ header {
     <h1>Storyteller V3</h1>
     <p>A Star Wars Narrative RPG</p>
 
-    <div id="campaign-picker" style="margin-top:1.5rem; text-align:left;">
+    <!-- Create-your-own entry point (Phase 5) -->
+    <div style="background:var(--surface); border:1px solid var(--accent); border-radius:6px; padding:1.1rem; margin-top:1.5rem; text-align:left;">
+      <div style="color:var(--accent); font-weight:bold; font-size:1.1rem; margin-bottom:0.35rem;">Create your own hero</div>
+      <div style="color:var(--text-dim); font-size:0.85rem; line-height:1.45; margin-bottom:0.8rem;">
+        Describe the character you want to play in a sentence or two. The
+        galaxy will be built around them.
+      </div>
+      <button class="start-btn" onclick="showCreator()" style="margin-top:0;">
+        ✦ Create a character &amp; adventure
+      </button>
+    </div>
+
+    <div style="color:var(--text-dim); font-size:0.8rem; text-transform:uppercase; letter-spacing:0.07em; margin:1.5rem 0 0.6rem; text-align:left;">Or pick a prebuilt campaign</div>
+    <div id="campaign-picker" style="margin-top:0.5rem; text-align:left;">
       <p style="color:var(--text-dim); font-size:0.9rem; text-align:center;">Loading campaigns...</p>
     </div>
 
@@ -389,14 +536,67 @@ header {
     </button>
   </div>
 
+  <!-- ╔══════════════════════════════════════════════════════════╗ -->
+  <!-- ║  CREATOR SCREEN  (Phase 5)                                ║ -->
+  <!-- ╚══════════════════════════════════════════════════════════╝ -->
+  <div id="creator-screen" class="start-screen" style="display:none; text-align:left;">
+    <button onclick="backToStart()" style="background:none; border:none; color:var(--text-dim); cursor:pointer; font-family:inherit; font-size:0.85rem; padding:0; margin-bottom:0.8rem;">← Back</button>
+    <h1 style="font-size:1.6rem;">Create a Character</h1>
+
+    <!-- Step 1: pitch -->
+    <div id="creator-pitch-step">
+      <p style="color:var(--text-dim); font-size:0.88rem; line-height:1.5; margin-bottom:0.6rem;">
+        Who do you want to be? A jaded ex-Imperial slicer? A Wookiee
+        frontier medic with a debt? Describe them.
+      </p>
+      <textarea id="pitch-input" rows="4" maxlength="2000"
+        style="width:100%; background:var(--surface); border:1px solid var(--border); color:var(--text); padding:0.7rem 0.8rem; border-radius:4px; font-family:Georgia,serif; font-size:0.95rem; resize:vertical; box-sizing:border-box;"
+        placeholder="e.g. A jaded ex-Imperial slicer who defected after a purge and now sells secrets she can't forget…"></textarea>
+      <button id="draft-btn" class="start-btn" onclick="draftCharacter()" style="margin-top:0.7rem;">
+        Draft my character
+      </button>
+    </div>
+
+    <!-- Step 2: editable draft (filled by renderDraftEditor) -->
+    <div id="draft-editor" style="display:none; margin-top:1.2rem;"></div>
+
+    <!-- Step 3: premise + generate (revealed after a draft exists) -->
+    <div id="premise-step" style="display:none; margin-top:1.4rem; border-top:1px dashed var(--border); padding-top:1.2rem;">
+      <div style="color:var(--accent); font-weight:bold; font-size:1.05rem; margin-bottom:0.5rem;">Shape the adventure</div>
+      <p style="color:var(--text-dim); font-size:0.85rem; margin-bottom:0.7rem;">
+        Optional. Leave blank to let the galaxy surprise you.
+      </p>
+      <input id="era-input" type="text" placeholder="Era (e.g. Galactic Civil War)"
+        style="width:100%; background:var(--surface); border:1px solid var(--border); color:var(--text); padding:0.55rem 0.7rem; border-radius:4px; font-family:inherit; font-size:0.9rem; box-sizing:border-box; margin-bottom:0.5rem;">
+      <input id="loc-input" type="text" placeholder="Location (e.g. Nar Shaddaa)"
+        style="width:100%; background:var(--surface); border:1px solid var(--border); color:var(--text); padding:0.55rem 0.7rem; border-radius:4px; font-family:inherit; font-size:0.9rem; box-sizing:border-box; margin-bottom:0.5rem;">
+      <textarea id="premise-input" rows="3" maxlength="1500" placeholder="A premise or hook (optional)…"
+        style="width:100%; background:var(--surface); border:1px solid var(--border); color:var(--text); padding:0.55rem 0.7rem; border-radius:4px; font-family:Georgia,serif; font-size:0.92rem; resize:vertical; box-sizing:border-box; margin-bottom:0.5rem;"></textarea>
+      <label style="display:flex; align-items:center; gap:0.4rem; color:var(--text-dim); font-size:0.82rem; margin-bottom:0.7rem; cursor:pointer;">
+        <input id="architect-toggle" type="checkbox"> Deeper story planning (slower)
+      </label>
+      <button id="generate-btn" class="start-btn" onclick="generateAndPlay()" style="margin-top:0;">
+        Generate adventure &amp; play
+      </button>
+    </div>
+
+    <div id="creator-status" style="display:none; color:var(--accent); font-size:0.88rem; margin-top:0.9rem; text-align:center;"></div>
+    <div id="creator-error" style="display:none; color:var(--danger); font-size:0.85rem; margin-top:0.7rem;"></div>
+  </div>
+
   <!-- ── Game Screen ───────────────────────────────────────────── -->
   <div id="game-screen" style="display:none">
     <header>
       <span class="campaign-name" id="campaign-name"></span>
-      <span class="session-info" id="session-info"></span>
+      <span>
+        <button class="stats-btn" id="stats-btn" onclick="toggleStats()">Stats</button>
+        <span class="session-info" id="session-info"></span>
+      </span>
     </header>
 
     <div class="error-msg" id="error-msg"></div>
+
+    <div class="stats-panel" id="stats-panel"></div>
 
     <div class="passage" id="passage"></div>
 
@@ -415,9 +615,11 @@ header {
     <div class="choices" id="choices"></div>
 
     <div class="status-bar" id="status-bar">
+      <span id="status-chapter"></span>
       <span id="status-turn">Turn 0</span>
       <span id="status-wounds"></span>
       <span id="status-strain"></span>
+      <span id="status-destiny" title="Destiny pool — the Force's give and take"></span>
     </div>
   </div>
 
@@ -430,6 +632,185 @@ let sessionId = null;
 let currentChoices = [];
 let streamingEnabled = false;
 let selectedCampaign = null;  // { campaign_name, display_name, character_id }
+
+/* ── Character creator state (Phase 5) ───────────────────────────── */
+let createdDraft = null;        // last LLM draft (with edits overlaid)
+let createdCharacterId = null;  // slug returned by /character/save
+
+function _esc2(s) { return (s == null ? '' : String(s)).replace(/[&<>"]/g, c => (
+  {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+
+function showCreator() {
+  document.getElementById('start-screen').style.display = 'none';
+  document.getElementById('game-screen').style.display = 'none';
+  document.getElementById('creator-screen').style.display = 'block';
+}
+function backToStart() {
+  document.getElementById('creator-screen').style.display = 'none';
+  document.getElementById('start-screen').style.display = 'block';
+}
+function _creatorStatus(msg) {
+  const el = document.getElementById('creator-status');
+  if (!msg) { el.style.display = 'none'; return; }
+  el.textContent = msg; el.style.display = 'block';
+}
+function _creatorError(msg) {
+  const el = document.getElementById('creator-error');
+  if (!msg) { el.style.display = 'none'; return; }
+  el.innerHTML = _esc2(msg); el.style.display = 'block';
+}
+
+async function draftCharacter() {
+  const pitch = document.getElementById('pitch-input').value.trim();
+  if (!pitch) { _creatorError('Describe your character first.'); return; }
+  _creatorError(''); _creatorStatus('Drafting your character…');
+  const btn = document.getElementById('draft-btn');
+  btn.disabled = true; btn.textContent = 'Drafting…';
+  try {
+    const res = await fetch(API + '/character/draft', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ pitch }),
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ detail: res.statusText }));
+      throw new Error(typeof err.detail === 'string' ? err.detail : 'Draft failed');
+    }
+    const data = await res.json();
+    createdDraft = data.draft;
+    renderDraftEditor(createdDraft);
+    document.getElementById('premise-step').style.display = 'block';
+    _creatorStatus('');
+  } catch (e) {
+    _creatorError(e.message);
+  } finally {
+    btn.disabled = false; btn.textContent = 'Re-draft from pitch';
+  }
+}
+
+function _numField(label, id, value, min, max) {
+  return '<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.35rem;">'
+    + '<span style="color:var(--text-dim); font-size:0.85rem;">' + _esc2(label) + '</span>'
+    + '<input id="' + id + '" type="number" min="' + min + '" max="' + max + '" value="' + value + '" '
+    + 'style="width:60px; background:var(--surface); border:1px solid var(--border); color:var(--text); padding:0.3rem; border-radius:4px; font-family:inherit; text-align:center;"></div>';
+}
+
+function renderDraftEditor(draft) {
+  const ed = document.getElementById('draft-editor');
+  const c = draft.characteristics || {};
+  const arc = draft.narrative_arc || {};
+  let html = '<div style="background:var(--surface); border:1px solid var(--border); border-radius:6px; padding:1rem 1.1rem;">';
+  html += '<div style="color:var(--accent); font-weight:bold; margin-bottom:0.6rem;">Your character — edit anything</div>';
+  html += '<label style="color:var(--text-dim); font-size:0.78rem;">Name</label>';
+  html += '<input id="ed-name" type="text" value="' + _esc2(draft.name || '') + '" style="width:100%; background:var(--surface); border:1px solid var(--border); color:var(--text); padding:0.45rem; border-radius:4px; font-family:inherit; box-sizing:border-box; margin-bottom:0.5rem;">';
+  html += '<label style="color:var(--text-dim); font-size:0.78rem;">Species</label>';
+  html += '<input id="ed-species" type="text" value="' + _esc2(draft.species || '') + '" style="width:100%; background:var(--surface); border:1px solid var(--border); color:var(--text); padding:0.45rem; border-radius:4px; font-family:inherit; box-sizing:border-box; margin-bottom:0.5rem;">';
+  html += '<label style="color:var(--text-dim); font-size:0.78rem;">Concept</label>';
+  html += '<input id="ed-archetype" type="text" value="' + _esc2(draft.archetype_concept || draft.career || '') + '" style="width:100%; background:var(--surface); border:1px solid var(--border); color:var(--text); padding:0.45rem; border-radius:4px; font-family:inherit; box-sizing:border-box; margin-bottom:0.7rem;">';
+  html += '<div style="color:var(--accent); font-size:0.82rem; margin-bottom:0.4rem;">Characteristics (1–5)</div>';
+  [['Brawn','brawn'],['Agility','agility'],['Intellect','intellect'],['Cunning','cunning'],['Willpower','willpower'],['Presence','presence']]
+    .forEach(function(pair){ html += _numField(pair[0], 'ed-char-' + pair[1], (c[pair[1]] != null ? c[pair[1]] : 2), 1, 5); });
+  const skills = draft.skills || {};
+  const skillKeys = Object.keys(skills);
+  if (skillKeys.length) {
+    html += '<div style="color:var(--accent); font-size:0.82rem; margin:0.6rem 0 0.4rem;">Skills (0–5)</div>';
+    skillKeys.forEach(function(k){ html += _numField(k.replace(/_/g,' '), 'ed-skill-' + k, skills[k], 0, 5); });
+  }
+  if (arc.lie || arc.ghost || arc.want || arc.need) {
+    html += '<div style="color:var(--accent); font-size:0.82rem; margin:0.7rem 0 0.4rem;">Inner story</div>';
+    [['The lie you believe','lie'],['The wound behind it','ghost'],['What you want','want'],['What you need','need']]
+      .forEach(function(pair){
+        html += '<label style="color:var(--text-dim); font-size:0.75rem;">' + pair[0] + '</label>';
+        html += '<textarea id="ed-arc-' + pair[1] + '" rows="2" style="width:100%; background:var(--surface); border:1px solid var(--border); color:var(--text); padding:0.4rem; border-radius:4px; font-family:Georgia,serif; font-size:0.85rem; resize:vertical; box-sizing:border-box; margin-bottom:0.4rem;">' + _esc2(arc[pair[1]] || '') + '</textarea>';
+      });
+  }
+  const tals = draft.signature_talents || [];
+  if (tals.length) {
+    html += '<div style="color:var(--accent); font-size:0.82rem; margin:0.6rem 0 0.3rem;">Signature talents</div>';
+    tals.forEach(function(t){
+      html += '<div style="color:var(--text-dim); font-size:0.82rem; margin-bottom:0.25rem;">• <strong style="color:var(--text);">'
+        + _esc2(t.name || '') + '</strong> — ' + _esc2(t.narrative_identity || t.talent_type || '') + '</div>';
+    });
+  }
+  html += '</div>';
+  ed.innerHTML = html;
+  ed.style.display = 'block';
+}
+
+function collectDraftEdits() {
+  // Overlay editable fields onto the original draft (keeps loadout,
+  // signature_talents, background, etc. intact).
+  const d = JSON.parse(JSON.stringify(createdDraft || {}));
+  const v = function(id){ const el = document.getElementById(id); return el ? el.value : undefined; };
+  if (v('ed-name') !== undefined) d.name = v('ed-name');
+  if (v('ed-species') !== undefined) d.species = v('ed-species');
+  if (v('ed-archetype') !== undefined) d.archetype_concept = v('ed-archetype');
+  d.characteristics = d.characteristics || {};
+  ['brawn','agility','intellect','cunning','willpower','presence'].forEach(function(k){
+    const val = v('ed-char-' + k); if (val !== undefined) d.characteristics[k] = parseInt(val, 10);
+  });
+  if (d.skills) Object.keys(d.skills).forEach(function(k){
+    const val = v('ed-skill-' + k); if (val !== undefined) d.skills[k] = parseInt(val, 10);
+  });
+  if (d.narrative_arc) ['lie','ghost','want','need'].forEach(function(k){
+    const val = v('ed-arc-' + k); if (val !== undefined) d.narrative_arc[k] = val;
+  });
+  return d;
+}
+
+async function generateAndPlay() {
+  _creatorError('');
+  const btn = document.getElementById('generate-btn');
+  btn.disabled = true;
+  try {
+    // 1. Save the (edited) character.
+    _creatorStatus('Saving your character…');
+    const draft = collectDraftEdits();
+    const saveRes = await fetch(API + '/character/save', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ character_json: draft }),
+    });
+    if (!saveRes.ok) {
+      const err = await saveRes.json().catch(() => ({}));
+      const detail = err.detail || {};
+      const msg = Array.isArray(detail.errors) ? detail.errors.join('; ')
+                 : (typeof detail === 'string' ? detail : 'Could not save character');
+      throw new Error(msg);
+    }
+    createdCharacterId = (await saveRes.json()).character_id;
+
+    // 2. Generate a campaign tailored to the character.
+    _creatorStatus('Building the galaxy around ' + _esc2(draft.name) + '… (this can take ~15s)');
+    const genRes = await fetch(API + '/campaign/generate', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        premise: document.getElementById('premise-input').value.trim(),
+        era: document.getElementById('era-input').value.trim(),
+        location: document.getElementById('loc-input').value.trim(),
+        use_architect: document.getElementById('architect-toggle').checked,
+        character_id: createdCharacterId,
+      }),
+    });
+    if (!genRes.ok) {
+      throw new Error('Could not generate a campaign. Try a different premise.');
+    }
+    const genData = await genRes.json();
+
+    // 3. Hand off to the existing session flow.
+    _creatorStatus('Entering the story…');
+    selectedCampaign = {
+      campaign_name: genData.campaign_name,
+      display_name: genData.display_name,
+      character_id: createdCharacterId,
+    };
+    document.getElementById('creator-screen').style.display = 'none';
+    _creatorStatus('');
+    startSession();
+  } catch (e) {
+    _creatorStatus('');
+    _creatorError(e.message);
+    btn.disabled = false;
+  }
+}
 
 /* ── Helpers ────────────────────────────────────────────────────── */
 function _esc(s) {
@@ -618,9 +999,17 @@ async function takeTurn(choiceIndex, freeFormText) {
       showStatus(
         data.session_state.turn_number,
         data.session_state.wounds,
-        data.session_state.strain
+        data.session_state.strain,
+        data.session_state,
+        data.destiny
       );
     }
+
+    // Advancement ceremony — a talent milestone fired at the act boundary.
+    if (data.milestone) renderMilestone(data.milestone);
+
+    // The final act's anchor resolved — the story is over.
+    if (data.campaign_complete) renderFinaleGate();
   } catch (e) {
     showError(e.message);
     enableChoices();
@@ -706,9 +1095,14 @@ async function takeTurnStream(choiceIndex, freeFormText) {
             showStatus(
               data.session_state.turn_number,
               data.session_state.wounds,
-              data.session_state.strain
+              data.session_state.strain,
+              data.session_state,
+              data.destiny
             );
           }
+
+          if (data.milestone) renderMilestone(data.milestone);
+          if (data.campaign_complete) renderFinaleGate();
         } else if (eventType === 'error') {
           throw new Error(data.error || 'Stream error');
         } else {
@@ -772,6 +1166,10 @@ function renderSessionIntro(intro) {
 
 /* ── Render prose ──────────────────────────────────────────────── */
 function renderPassage(text) {
+  // The resume recap and any spent milestone card belong to the previous
+  // moment — clear them when new prose arrives.
+  document.querySelectorAll('.recap-card').forEach(c => c.remove());
+  document.querySelectorAll('.milestone-card').forEach(c => c.remove());
   const el = document.getElementById('passage');
   // Split into paragraphs on double newlines. Append after any
   // session-intro card already rendered so the intro stays visible
@@ -802,22 +1200,21 @@ function renderChoices(choices) {
     el.appendChild(btn);
   });
 
-  // Free-form input affordance — let the player type their own action.
+  // Free-form input — always visible. Typing your own action is a core
+  // agency feature, not an easter egg behind a collapsed disclosure.
   const ffWrapper = document.createElement('div');
   ffWrapper.className = 'freeform-wrapper';
   ffWrapper.innerHTML = ''
-    + '<details class="freeform-details">'
-    + '  <summary>Speak or act in your own words</summary>'
-    + '  <div class="freeform-row">'
-    + '    <textarea id="freeform-input" rows="2" maxlength="600" '
-    + '      placeholder="Describe what your character does or says..."></textarea>'
-    + '    <button id="freeform-submit" class="choice-btn freeform-submit">Act</button>'
-    + '  </div>'
-    + '  <div class="freeform-hint">'
-    + '    The system will pick an appropriate skill and difficulty for what you describe. '
-    + '    Press <kbd>Ctrl</kbd>+<kbd>Enter</kbd> to send.'
-    + '  </div>'
-    + '</details>';
+    + '<div class="freeform-label">Or speak and act in your own words</div>'
+    + '<div class="freeform-row">'
+    + '  <textarea id="freeform-input" rows="2" maxlength="600" '
+    + '    placeholder="Describe what your character does or says..."></textarea>'
+    + '  <button id="freeform-submit" class="choice-btn freeform-submit">Act</button>'
+    + '</div>'
+    + '<div class="freeform-hint">'
+    + '  The story will judge how risky your action is. '
+    + '  Press <kbd>Ctrl</kbd>+<kbd>Enter</kbd> to send.'
+    + '</div>';
   el.appendChild(ffWrapper);
 
   const ffInput = document.getElementById('freeform-input');
@@ -910,12 +1307,21 @@ function hideDicePanel() {
 }
 
 /* ── Status bar ────────────────────────────────────────────────── */
-function showStatus(turn, wounds, strain) {
+function showStatus(turn, wounds, strain, sessionState, destiny) {
   const bar = document.getElementById('status-bar');
   bar.classList.add('visible');
   document.getElementById('status-turn').textContent = 'Turn ' + turn;
   document.getElementById('status-wounds').textContent = 'Wounds: ' + wounds;
   document.getElementById('status-strain').textContent = 'Strain: ' + strain;
+  if (sessionState && sessionState.current_act && sessionState.total_acts) {
+    document.getElementById('status-chapter').textContent =
+      'Chapter ' + sessionState.current_act + ' of ' + sessionState.total_acts;
+  }
+  if (destiny && destiny.light_remaining != null) {
+    document.getElementById('status-destiny').textContent =
+      '✦ Light ' + destiny.light_remaining
+      + ' · Dark ' + destiny.dark_remaining;
+  }
 }
 
 function updateSessionInfo(turn) {
@@ -941,6 +1347,194 @@ function clearError() {
   const el = document.getElementById('error-msg');
   el.textContent = '';
   el.classList.remove('visible');
+}
+
+/* ── Stats panel (CoG-style) ───────────────────────────────────── */
+let statsVisible = false;
+
+async function toggleStats() {
+  const panel = document.getElementById('stats-panel');
+  statsVisible = !statsVisible;
+  if (!statsVisible) { panel.classList.remove('visible'); return; }
+  panel.innerHTML = '<div style="color:var(--text-dim)">Loading…</div>';
+  panel.classList.add('visible');
+  try {
+    const res = await fetch(API + '/session/' + sessionId);
+    if (!res.ok) throw new Error('Could not load character');
+    renderStatsPanel(await res.json());
+  } catch (e) {
+    panel.innerHTML = '<div style="color:var(--danger)">' + escapeHtml(e.message) + '</div>';
+  }
+}
+
+function _kv(k, v) {
+  return '<div class="stats-kv"><span class="k">' + escapeHtml(k)
+    + '</span><span>' + escapeHtml(String(v)) + '</span></div>';
+}
+
+function renderStatsPanel(data) {
+  const ch = data.character || {};
+  const chars = ch.characteristics || {};
+  const skills = ch.skills || {};
+  const destiny = data.destiny || {};
+  let html = '<h3>' + escapeHtml(ch.name || 'Character')
+    + ' — ' + escapeHtml(ch.species || '') + ' ' + escapeHtml(ch.career || '') + '</h3>';
+  html += '<div class="stats-grid">';
+  [['Brawn','brawn'],['Agility','agility'],['Intellect','intellect'],
+   ['Cunning','cunning'],['Willpower','willpower'],['Presence','presence']]
+    .forEach(function(p){
+      html += _kv(p[0], chars[p[1]] != null ? chars[p[1]] : '—');
+    });
+  html += '</div>';
+
+  html += '<h3>Condition</h3><div class="stats-grid">';
+  html += _kv('Wounds', (ch.current_wounds != null ? ch.current_wounds : 0)
+    + ' / ' + (ch.wound_threshold != null ? ch.wound_threshold : '—'));
+  html += _kv('Strain', (ch.current_strain != null ? ch.current_strain : 0)
+    + ' / ' + (ch.strain_threshold != null ? ch.strain_threshold : '—'));
+  html += _kv('Soak', ch.soak != null ? ch.soak : '—');
+  html += '</div>';
+
+  const skillKeys = Object.keys(skills).filter(function(k){ return skills[k] > 0; }).sort();
+  if (skillKeys.length) {
+    html += '<h3>Skills</h3><div class="stats-grid">';
+    skillKeys.forEach(function(k){
+      html += _kv(k.replace(/_/g, ' '), skills[k]);
+    });
+    html += '</div>';
+  }
+
+  html += '<h3>Destiny &amp; advancement</h3><div class="stats-grid">';
+  html += _kv('Light destiny', destiny.light_remaining != null ? destiny.light_remaining : '—');
+  html += _kv('Dark destiny', destiny.dark_remaining != null ? destiny.dark_remaining : '—');
+  if (ch.total_xp != null) html += _kv('Total XP', ch.total_xp);
+  if (ch.available_xp != null) html += _kv('Available XP', ch.available_xp);
+  if (ch.force_rating) html += _kv('Force rating', ch.force_rating);
+  if (ch.morality != null) html += _kv('Morality', ch.morality);
+  html += '</div>';
+
+  const talents = ch.acquired_talents || [];
+  if (talents.length) {
+    html += '<h3>Talents</h3><div>'
+      + talents.map(function(t){
+          return escapeHtml(typeof t === 'string' ? t : (t.name || t.talent_ref || ''));
+        }).join(' · ')
+      + '</div>';
+  }
+  document.getElementById('stats-panel').innerHTML = html;
+}
+
+/* ── Milestone ceremony ────────────────────────────────────────── */
+function renderMilestone(milestone) {
+  const choicesEl = document.getElementById('choices');
+  const existing = document.getElementById('milestone-card');
+  if (existing) existing.remove();
+  const card = document.createElement('div');
+  card.className = 'milestone-card';
+  card.id = 'milestone-card';
+  let html = '<div class="milestone-label">✦ Milestone — your experience pays off</div>';
+  if (milestone.passage) {
+    html += '<div class="passage-text">' + escapeHtml(milestone.passage) + '</div>';
+  }
+  (milestone.choices || []).forEach(function(c, i){
+    html += '<button class="choice-btn milestone-choice" onclick="chooseMilestone(' + i + ')">'
+      + escapeHtml(c.display || c.talent_ref || ('Option ' + (i + 1)))
+      + (c.branch_theme
+          ? ' <span style="color:var(--text-dim); font-size:0.85em;">('
+            + escapeHtml(c.branch_theme) + ')</span>'
+          : '')
+      + '</button>';
+  });
+  card.innerHTML = html;
+  choicesEl.parentNode.insertBefore(card, choicesEl);
+  // The ceremony is modal in spirit: pick your growth, then play on.
+  document.querySelectorAll('#choices .choice-btn').forEach(function(b){ b.disabled = true; });
+  card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+async function chooseMilestone(i) {
+  const card = document.getElementById('milestone-card');
+  card.querySelectorAll('button').forEach(function(b){ b.disabled = true; });
+  try {
+    const res = await fetch(API + '/session/' + sessionId + '/milestone', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ choice_index: i }),
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(function(){ return {}; });
+      throw new Error(err.detail || 'Milestone selection failed');
+    }
+    const data = await res.json();
+    card.innerHTML = '<div class="milestone-label">✦ Milestone</div>'
+      + '<div class="milestone-acquired">'
+      + escapeHtml(data.acquired.talent_name || data.acquired.talent_ref)
+      + ' — learned.</div>';
+    document.querySelectorAll('#choices .choice-btn').forEach(function(b){ b.disabled = false; });
+  } catch (e) {
+    showError(e.message);
+    card.querySelectorAll('button').forEach(function(b){ b.disabled = false; });
+  }
+}
+
+/* ── Finale + epilogue ─────────────────────────────────────────── */
+function renderFinaleGate() {
+  const choicesEl = document.getElementById('choices');
+  choicesEl.innerHTML = '';
+  const card = document.createElement('div');
+  card.className = 'finale-card';
+  card.innerHTML = '<div class="the-end">The End</div>'
+    + '<div class="finale-sub">Your story is complete.</div>'
+    + '<button class="start-btn" onclick="loadEpilogue(this)">Read your epilogue</button>';
+  choicesEl.appendChild(card);
+  card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+async function loadEpilogue(btn) {
+  if (btn) { btn.disabled = true; btn.textContent = 'Writing the last page…'; }
+  clearError();
+  try {
+    const res = await fetch(API + '/session/' + sessionId + '/epilogue', { method: 'POST' });
+    if (!res.ok) {
+      const err = await res.json().catch(function(){ return {}; });
+      throw new Error(err.detail || 'Epilogue generation failed — try again.');
+    }
+    renderEpilogue(await res.json());
+  } catch (e) {
+    showError(e.message);
+    if (btn) { btn.disabled = false; btn.textContent = 'Read your epilogue'; }
+  }
+}
+
+function renderEpilogue(ep) {
+  const passageEl = document.getElementById('passage');
+  let html = '<div class="ending-name">' + escapeHtml(ep.ending_name || 'The End') + '</div>';
+  (ep.epilogue || '').split(/\n\n+/).filter(function(p){ return p.trim(); })
+    .forEach(function(p){ html += '<p>' + escapeHtml(p.trim()) + '</p>'; });
+  passageEl.innerHTML = html;
+
+  const choicesEl = document.getElementById('choices');
+  choicesEl.innerHTML = '';
+  const card = document.createElement('div');
+  card.className = 'finale-card';
+  card.innerHTML = '<div class="the-end">The End</div>'
+    + '<div class="finale-sub">'
+    + escapeHtml(ep.character_name || '')
+    + (ep.turns_played ? ' · ' + escapeHtml(String(ep.turns_played)) + ' turns' : '')
+    + '</div>'
+    + '<button class="start-btn" onclick="window.location = window.location.pathname">'
+    + 'Begin a new story</button>';
+  choicesEl.appendChild(card);
+  hideDicePanel();
+  passageEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+/* ── "The story so far" resume recap ───────────────────────────── */
+function renderRecapCard(text) {
+  const el = document.getElementById('passage');
+  const card = document.createElement('div');
+  card.className = 'recap-card';
+  card.innerHTML = '<div class="recap-label">The story so far</div>' + escapeHtml(text);
+  el.parentNode.insertBefore(card, el);
 }
 
 /* ── Utilities ─────────────────────────────────────────────────── */
@@ -975,6 +1569,17 @@ async function resumeSession(sid) {
       data.campaign_name || 'Campaign';
     updateSessionInfo(data.turn_count);
 
+    // Finished campaigns resume straight into the finale.
+    if (data.campaign_complete) {
+      if (data.epilogue && data.epilogue.epilogue) {
+        renderEpilogue(data.epilogue);
+      } else {
+        if (data.last_turn) renderPassage(data.last_turn.narration);
+        renderFinaleGate();
+      }
+      return;
+    }
+
     if (data.last_turn) {
       renderPassage(data.last_turn.narration);
       renderChoices(data.last_turn.choices);
@@ -991,11 +1596,24 @@ async function resumeSession(sid) {
       }
     }
 
+    // "The story so far" — rendered above the last passage.
+    if (data.recap) renderRecapCard(data.recap);
+
+    // A milestone the player hasn't resolved yet survives the resume.
+    if (data.arc_state && data.arc_state.pending_milestone) {
+      renderMilestone(data.arc_state.pending_milestone);
+    }
+
     if (data.session_state) {
       showStatus(
         data.turn_count,
         data.session_state.wounds,
-        data.session_state.strain
+        data.session_state.strain,
+        {
+          current_act: data.session_state.current_act,
+          total_acts: data.total_acts,
+        },
+        data.destiny
       );
     }
   } catch (e) {

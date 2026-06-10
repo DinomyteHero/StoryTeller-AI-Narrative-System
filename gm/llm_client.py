@@ -83,7 +83,11 @@ PURPOSE_OVERRIDES = {
     "studio":         os.getenv("STUDIO_MODEL",         ""),
     "memory":         os.getenv("MEMORY_MODEL",         ""),
     "choice_quality": os.getenv("CHOICE_QUALITY_MODEL", ""),
+    "choice_repair":  os.getenv("CHOICE_REPAIR_MODEL",  ""),
     "drift":          os.getenv("DRIFT_MODEL",          ""),
+    "polarity":       os.getenv("POLARITY_MODEL",       ""),
+    "epilogue":       os.getenv("EPILOGUE_MODEL",       ""),
+    "recap":          os.getenv("RECAP_MODEL",          ""),
 }
 
 
@@ -129,6 +133,78 @@ OPENROUTER_ALLOW_FALLBACKS = (
 
 MAX_NARRATION_TOKENS = int(os.getenv("NARRATION_MAX_TOKENS", "1200"))
 LLM_TIMING_LOG = os.getenv("LLM_TIMING_LOG", "true").lower() == "true"
+LLM_USAGE_LOG = os.getenv("LLM_USAGE_LOG", "true").lower() == "true"
+
+
+# ── Token usage accounting ───────────────────────────────────────────
+# Per-purpose running totals for the process lifetime. Cost optimization
+# is impossible to evaluate without knowing where the tokens actually go,
+# so every successful completion records its usage here and emits an
+# LLM_USAGE log line. `cached_prompt_tokens` surfaces provider prefix-cache
+# hits (OpenAI-style prompt_tokens_details.cached_tokens, or DeepSeek's
+# native prompt_cache_hit_tokens) — the signal that prompt restructuring
+# for cache stability is working.
+
+_USAGE_TOTALS: dict[str, dict] = {}
+
+
+def _extract_usage(response) -> Optional[dict]:
+    """Pull token counts off a chat completion response, defensively.
+
+    Providers disagree on where cached-prefix counts live; check the
+    OpenAI shape first, then DeepSeek's native field.
+    """
+    usage = getattr(response, "usage", None)
+    if usage is None:
+        return None
+
+    details = getattr(usage, "prompt_tokens_details", None)
+    cached = getattr(details, "cached_tokens", None) if details is not None else None
+    if cached is None:
+        cached = getattr(usage, "prompt_cache_hit_tokens", None)
+
+    return {
+        "prompt_tokens":         getattr(usage, "prompt_tokens", None),
+        "completion_tokens":     getattr(usage, "completion_tokens", None),
+        "total_tokens":          getattr(usage, "total_tokens", None),
+        "cached_prompt_tokens":  cached,
+    }
+
+
+def log_llm_usage(*, purpose: str, tier: str, model: str, response) -> None:
+    """Record and log token usage for a successful completion.
+
+    Safe to call with any response object — silently no-ops when the
+    provider didn't return usage data.
+    """
+    usage = _extract_usage(response)
+    if usage is None:
+        return
+
+    key = purpose or tier
+    bucket = _USAGE_TOTALS.setdefault(key, {
+        "calls": 0, "prompt_tokens": 0,
+        "completion_tokens": 0, "cached_prompt_tokens": 0,
+    })
+    bucket["calls"] += 1
+    for field in ("prompt_tokens", "completion_tokens", "cached_prompt_tokens"):
+        value = usage.get(field)
+        if isinstance(value, (int, float)):
+            bucket[field] += int(value)
+
+    if LLM_USAGE_LOG:
+        logging.info(
+            "LLM_USAGE purpose=%s tier=%s model=%s prompt_tokens=%s "
+            "completion_tokens=%s cached_prompt_tokens=%s",
+            purpose or "-", tier, model,
+            usage["prompt_tokens"], usage["completion_tokens"],
+            usage["cached_prompt_tokens"],
+        )
+
+
+def usage_totals() -> dict:
+    """Per-purpose token totals for this process. For /health and eval runs."""
+    return {key: dict(bucket) for key, bucket in _USAGE_TOTALS.items()}
 
 
 def _log_llm_timing(
@@ -432,6 +508,7 @@ def call_chat(
             content  = response.choices[0].message.content
             if content is None or not content.strip():
                 raise RuntimeError(f"Empty content from {model}")
+            log_llm_usage(purpose=purpose, tier=tier, model=model, response=response)
             _log_llm_timing(
                 purpose=purpose,
                 tier=tier,
@@ -621,4 +698,5 @@ def describe_routing() -> dict:
         "narration_model": resolve_model(tier=TIER_QUALITY, purpose="narration"),
         "narration_max_tokens": MAX_NARRATION_TOKENS,
         "overrides":     {k: v for k, v in PURPOSE_OVERRIDES.items() if v},
+        "usage_totals":  usage_totals(),
     }
