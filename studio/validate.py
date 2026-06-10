@@ -451,6 +451,21 @@ def _gate2_npc_coherence(spine: CampaignSpine, report: ValidationReport) -> None
         if not npc.per_act_state:
             continue
 
+        # Major NPCs (present across 2+ acts) should argue a position on
+        # the campaign's throughline. Without a thematic_argument the NPC
+        # is plot furniture, not a participant in the theme.
+        acts_covered = {s.act for s in npc.per_act_state}
+        if len(acts_covered) >= 2 and not (npc.thematic_argument or "").strip():
+            report.warnings.append(ValidationWarning(
+                gate=2, code="npc_missing_thematic_argument",
+                message=(
+                    f"NPC '{npc.name}' appears in {len(acts_covered)} acts "
+                    f"but has no thematic_argument — major NPCs should argue "
+                    f"a position on the campaign's throughline question"
+                ),
+                path=f"npc_roster[{i}].thematic_argument",
+            ))
+
         # Sort by act number
         sorted_states = sorted(npc.per_act_state, key=lambda s: s.act)
 
@@ -520,6 +535,32 @@ def _gate3_relationship_network(spine: CampaignSpine, report: ValidationReport) 
                 positive_count += 1
             elif rel.weight < 0:
                 negative_count += 1
+
+    # Anti-positivity-skew heuristics (Jun 2026) — a roster of any real
+    # size needs authored conflict, both inside the relationship graph
+    # and in at least one NPC the player starts at odds with. These run
+    # even when no relationships are defined (zero is fewer than two).
+    roster_size = len(spine.npc_roster)
+    if roster_size >= 4 and negative_count < 2:
+        report.warnings.append(ValidationWarning(
+            gate=3, code="insufficient_negative_relationships",
+            message=(
+                f"Only {negative_count} negative-weight NPC relationship(s) "
+                f"across {roster_size} NPCs. A campaign roster needs at "
+                f"least 2 antagonistic relationships for internal cast "
+                f"conflict."
+            ),
+        ))
+    if roster_size >= 4 and not any(
+        npc.disposition_start < 0.4 for npc in spine.npc_roster
+    ):
+        report.warnings.append(ValidationWarning(
+            gate=3, code="no_antagonistic_npc",
+            message=(
+                "No NPC has disposition_start below 0.4. At least one NPC "
+                "should start antagonistic toward the player."
+            ),
+        ))
 
     if not all_weights:
         # No relationships defined — not an error, just skip analysis

@@ -96,6 +96,37 @@ Also assign a PROTAGONIST MODE to each act:
 Modes must progress sequentially. No act should have a mode that
 precedes the previous act's mode.
 
+## FORESHADOW REGISTRY
+
+Author at least 5 deliberate setup → payoff pairs. A setup is a small,
+concrete detail planted in an early act (an unexplained line, an object,
+a habit, a debt). The payoff is the later moment where that detail
+detonates. Rules:
+
+- payoff_act must be strictly later than setup_act
+- payoff_type must be one of: revelation, reversal, callback, irony
+- MIX the payoff types — do not make every pair a revelation
+- Setups must be small enough to hide in plain sight; payoffs must
+  recontextualize, not merely repeat
+
+## ENDING PATHS
+
+Design 2-4 distinct endings. Each ending is reached through a climactic
+variation point — the spine generated from this architecture will define
+a variation_point whose option ids match your branch_ids exactly. For
+each ending provide:
+
+- name: short evocative title
+- branch_id: snake_case id of the variation option that leads here
+- synopsis: 1-3 sentences of what this ending looks like
+- thematic_payoff: what answer to the thematic throughline this ending
+  embodies (different endings argue different answers)
+- carries_forward: true if this ending leaves hooks for a sequel campaign
+
+Endings must be genuinely distinct — different costs, different
+survivors, different answers — not one good ending with cosmetic
+variants.
+
 ## OUTPUT FORMAT
 
 Return ONLY valid JSON with these fields:
@@ -106,7 +137,40 @@ Return ONLY valid JSON with these fields:
   "protagonist_pressure_type": "moral|identity|loyalty|survival|ideological",
   "antagonistic_force": "...",
   "thematic_throughline": "...",
-  "ending_payoff_sketch": "..."
+  "ending_payoff_sketch": "...",
+  "milestone_beat_sheet": {{
+    "concept_question": "What if ... ?",
+    "first_plot_point": "...",
+    "first_plot_point_act": 1,
+    "midpoint": "...",
+    "midpoint_act": 2,
+    "second_plot_point": "...",
+    "second_plot_point_act": 3,
+    "pre_resolution_lull": "..."
+  }},
+  "foreshadow_registry": [
+    {{
+      "id": "snake_case_id",
+      "setup_act": 1,
+      "setup_description": "...",
+      "payoff_act": 3,
+      "payoff_description": "...",
+      "payoff_type": "revelation|reversal|callback|irony"
+    }}
+  ],
+  "ending_paths": [
+    {{
+      "name": "...",
+      "branch_id": "snake_case_option_id",
+      "synopsis": "...",
+      "thematic_payoff": "...",
+      "carries_forward": false
+    }}
+  ]
 }}
+
+The milestone act numbers must respect the campaign's pacing: first
+plot point in the first 40% of acts, midpoint between 35% and 65%,
+second plot point between 60% and 85%.
 
 No markdown, no code fences, no explanation. Just the JSON.

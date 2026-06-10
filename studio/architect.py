@@ -94,7 +94,7 @@ def generate_architecture(
                 system_prompt,
                 "Design the story architecture now.",
                 seed=seed,
-                max_tokens=2000,
+                max_tokens=4000,
                 temperature=0.7,
             )
 
@@ -140,14 +140,64 @@ def architecture_to_prompt_block(arch: StoryArchitecture) -> str:
     if arch.ending_payoff_sketch:
         lines.append(f"Ending Payoff Sketch: {arch.ending_payoff_sketch}")
 
+    # Milestone beat sheet — act anchors must align with these (CS-6).
+    mbs = arch.milestone_beat_sheet
+    if mbs:
+        lines.extend([
+            "",
+            "### Milestone beat sheet (align act anchors with these):",
+            f"Concept Question: {mbs.concept_question}",
+            f"First Plot Point (act {mbs.first_plot_point_act}): {mbs.first_plot_point}",
+            f"Midpoint (act {mbs.midpoint_act}): {mbs.midpoint}",
+            f"Second Plot Point (act {mbs.second_plot_point_act}): {mbs.second_plot_point}",
+        ])
+        if mbs.pre_resolution_lull:
+            lines.append(f"Pre-Resolution Lull: {mbs.pre_resolution_lull}")
+        lines.append(
+            "The anchors of these acts ARE the milestones: the first plot "
+            "point anchor is the point of no return, the midpoint anchor "
+            "turns the protagonist proactive, and the second plot point "
+            "anchor delivers the last piece of new information."
+        )
+
+    # Planned foreshadowing — generated acts must respect these pairs.
+    if arch.foreshadow_registry:
+        lines.extend([
+            "",
+            "### Planned foreshadowing (setup → payoff; acts must honor these):",
+        ])
+        for link in arch.foreshadow_registry:
+            lines.append(
+                f"- [{link.id}] Act {link.setup_act} setup: "
+                f"{link.setup_description} → Act {link.payoff_act} "
+                f"{link.payoff_type or 'payoff'}: {link.payoff_description}"
+            )
+
+    # Planned endings — each must connect to a variation point option.
+    if arch.ending_paths:
+        lines.extend([
+            "",
+            "### Ending paths (each branch_id must match a variation_point option id):",
+        ])
+        for ep in arch.ending_paths:
+            line = f"- {ep.name} (branch_id: {ep.branch_id}): {ep.synopsis}"
+            if ep.thematic_payoff:
+                line += f" — thematic payoff: {ep.thematic_payoff}"
+            lines.append(line)
+
     lines.extend([
         "",
         "### Requirements from architecture:",
         "- Each major NPC must have a `thematic_argument` field stating what they argue about the thematic throughline",
         "- Each act must have a `dramatic_function` field (setup/destabilization/launch/midpoint_shift/escalation/confrontation/consequence/resolution)",
+        "- Each act must have `beat_roles` (1-3 structural beats consistent with its dramatic_function) and 6-12 `side_content` scene seeds",
         "- Each character variant must have `protagonist_contradiction` and `pressure_revealed_identity` fields",
+        "- At least one act anchor in Act 2 or later must directly test the protagonist_contradiction",
         "- The antagonistic force must be reflected in act galactic_context fields, not just stated",
         "- At least one variation_point must test the central dramatic question",
+        "- Include the planned foreshadow pairs as the top-level `foreshadow_registry` field",
+        "- Every ending path's branch_id must resolve to a variation_point option id you define",
+        "- Include at least one antagonistic NPC (disposition_start < 0.4) and at least 2 negative-weight npc_relationships",
         "- Include `story_architecture` in the top-level JSON with all fields from this block",
     ])
 

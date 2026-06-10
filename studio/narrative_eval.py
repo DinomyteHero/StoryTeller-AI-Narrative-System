@@ -17,7 +17,7 @@ import json
 from pathlib import Path
 from typing import Optional, Callable
 
-from studio.schema import CampaignSpine
+from studio.schema import CampaignSpine, VALID_BEAT_ROLES
 
 
 PROMPT_DIR = Path(__file__).parent / "prompts"
@@ -599,6 +599,129 @@ def _check_cs6_structural(spine: CampaignSpine) -> list[dict]:
                 ),
                 "path": "foreshadow_registry",
             })
+
+    # ── Studio enrichment checks (Jun 2026) ──────────────────────────
+    # These fire only for spines that opted into the enrichment layer:
+    # an architecture carrying a milestone beat sheet, or a spine the
+    # Studio pipeline generated (generation_metadata present). Legacy
+    # hand spines and pre-enrichment fixtures skip them.
+    mbs_present = (
+        has_architecture
+        and spine.story_architecture.milestone_beat_sheet is not None
+    )
+    is_generated = spine.generation_metadata is not None
+    enriched = has_architecture and (mbs_present or is_generated)
+
+    # Beat role values are validated whenever present, opted-in or not.
+    for act in acts:
+        for role in act.beat_roles:
+            if role not in VALID_BEAT_ROLES:
+                warnings.append({
+                    "gate": 4,
+                    "code": "cs6_beat_role_unknown",
+                    "message": (
+                        f"Act {act.number} has unknown beat role '{role}'. "
+                        f"Valid roles: {', '.join(VALID_BEAT_ROLES)}."
+                    ),
+                    "path": f"acts[{act.number - 1}].beat_roles",
+                })
+
+    if enriched:
+        # Every act should declare its structural beats.
+        for act in acts:
+            if not act.beat_roles:
+                warnings.append({
+                    "gate": 4,
+                    "code": "cs6_beat_roles_missing",
+                    "message": (
+                        f"Act {act.number} ({act.name}) has no beat_roles. "
+                        f"Enriched campaigns declare 1-3 structural beats "
+                        f"per act, consistent with its dramatic_function."
+                    ),
+                    "path": f"acts[{act.number - 1}].beat_roles",
+                })
+
+        # Every act needs enough side content for replay variety.
+        for act in acts:
+            if len(act.side_content) < 4:
+                warnings.append({
+                    "gate": 4,
+                    "code": "cs6_side_content_sparse",
+                    "message": (
+                        f"Act {act.number} ({act.name}) has only "
+                        f"{len(act.side_content)} side_content entries — "
+                        f"enriched acts need at least 4 (target 6-12) for "
+                        f"replay variety."
+                    ),
+                    "path": f"acts[{act.number - 1}].side_content",
+                })
+
+        # Foreshadow density and payoff-type diversity.
+        foreshadow_links = list(spine.foreshadow_registry)
+        if not foreshadow_links:
+            foreshadow_links = list(spine.story_architecture.foreshadow_registry)
+        if len(foreshadow_links) < 3:
+            warnings.append({
+                "gate": 4,
+                "code": "cs6_foreshadow_registry_sparse",
+                "message": (
+                    f"Only {len(foreshadow_links)} foreshadow pair(s) "
+                    f"present. Enriched campaigns plant at least 3 "
+                    f"setup → payoff pairs (target 5+)."
+                ),
+                "path": "foreshadow_registry",
+            })
+        else:
+            payoff_types = {
+                link.payoff_type for link in foreshadow_links
+                if link.payoff_type
+            }
+            if len(payoff_types) < 2:
+                warnings.append({
+                    "gate": 4,
+                    "code": "cs6_foreshadow_payoff_monotonic",
+                    "message": (
+                        f"All foreshadow payoffs are of the same type "
+                        f"({', '.join(sorted(payoff_types)) or 'untyped'}). "
+                        f"Mix payoff types: revelation, reversal, callback, "
+                        f"irony."
+                    ),
+                    "path": "foreshadow_registry",
+                })
+
+    # Ending paths — only checked when the architecture authored endings
+    # or the spine was machine-generated (hand spines may encode endings
+    # in ending_payoff_matrix instead).
+    ending_paths = (
+        list(spine.story_architecture.ending_paths) if has_architecture else []
+    )
+    if has_architecture and (ending_paths or is_generated):
+        if len(ending_paths) < 2:
+            warnings.append({
+                "gate": 4,
+                "code": "cs6_ending_paths_sparse",
+                "message": (
+                    f"Only {len(ending_paths)} ending path(s) defined in "
+                    f"story_architecture. Enriched campaigns design 2-4 "
+                    f"distinct endings."
+                ),
+                "path": "story_architecture.ending_paths",
+            })
+        valid_option_ids = {
+            opt.id for vp in spine.variation_points for opt in vp.options
+        }
+        for ep in ending_paths:
+            if ep.branch_id not in valid_option_ids:
+                warnings.append({
+                    "gate": 4,
+                    "code": "cs6_ending_path_dangling_branch",
+                    "message": (
+                        f"Ending path '{ep.name}' references branch_id "
+                        f"'{ep.branch_id}' which is not an option id of any "
+                        f"variation_point."
+                    ),
+                    "path": "story_architecture.ending_paths",
+                })
 
     return warnings
 

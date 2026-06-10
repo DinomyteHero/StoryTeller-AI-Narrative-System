@@ -278,6 +278,12 @@ class NPC(BaseModel):
     era_specific_notes: Optional[str] = None
     anti_stereotype_notes: Optional[str] = None
     act_overrides: dict[str, CanonActOverride] = {}
+    # ── World registry (engine/world_registry.py) ──
+    # Location tokens where this NPC can plausibly be physically present.
+    # Lowercase substrings matched against the current location ("praxeum",
+    # "yavin", "off-world"). "*" = anywhere. Empty = unconstrained — the
+    # runtime never blocks an NPC the spine doesn't constrain.
+    location_domains: list[str] = []
 
 
 # ── Variation points ──────────────────────────────────────────────────
@@ -449,6 +455,12 @@ class Act(BaseModel):
     protagonist_mode: str = ""  # Phase 3: "orphan"|"wanderer"|"warrior"|"martyr"
     beat_roles: list[str] = []
     side_content: list[ActSideContent] = []
+    # ── World registry (engine/world_registry.py) ──
+    # Named places this act moves through beyond opening_location
+    # ("the meditation hall", "sealed Massassi stairs"). Feeds location
+    # validation (proposed locations grounded against this vocabulary)
+    # and scene-location inference from narration text.
+    location_vocabulary: list[str] = []
 
 
 # ── Import interface (Game Mechanics §20) ─────────────────────────────
@@ -645,6 +657,22 @@ class ForeshadowLink(BaseModel):
     payoff_type: str = ""  # "revelation", "reversal", "callback", "irony"
 
 
+class EndingPath(BaseModel):
+    """
+    A planned distinct ending for the campaign.
+
+    branch_id must resolve to a variation_point option id so the
+    climactic branch the runtime takes maps onto an authored ending.
+    Authored by the architect (studio/architect.py), validated by
+    Gate 4b against the generated spine's variation points.
+    """
+    name: str = Field(min_length=1)
+    branch_id: str = Field(min_length=1)
+    synopsis: str = ""
+    thematic_payoff: str = ""
+    carries_forward: bool = False  # does this ending feed a sequel import?
+
+
 class CharacterDepthCard(BaseModel):
     """
     GM-facing character enrichment. Never shown to the player.
@@ -793,6 +821,15 @@ VALID_DRAMATIC_FUNCTIONS = (
     "escalation", "confrontation", "consequence", "resolution",
 )
 
+# Structural beat roles an act can carry (Act.beat_roles). Ordered by
+# typical story position — acts carry 1-3 roles consistent with their
+# dramatic_function.
+VALID_BEAT_ROLES = (
+    "setup", "inciting", "response", "false_progress", "first_plot_point",
+    "pinch1", "midpoint", "pinch2", "second_plot_point", "attack",
+    "confrontation", "climax", "resolution", "aftermath", "consequence",
+)
+
 
 class StoryArchitecture(BaseModel):
     """Pre-generation narrative design brief.
@@ -810,6 +847,13 @@ class StoryArchitecture(BaseModel):
     ending_payoff_sketch: str = ""
     # ── CS-6 Story Engineering fields ──
     milestone_beat_sheet: Optional[MilestoneBeatSheet] = None  # Phase 3
+    # ── Studio enrichment generation (Jun 2026) ──
+    # Planned setup → payoff pairs the generated acts must respect.
+    # Surfaced into the spine-level foreshadow_registry by generate.py.
+    foreshadow_registry: list[ForeshadowLink] = []
+    # 2-4 planned distinct endings; each branch_id must resolve to a
+    # variation_point option id in the generated spine (Gate 4b).
+    ending_paths: list[EndingPath] = []
 
     @field_validator("protagonist_pressure_type")
     @classmethod
@@ -888,6 +932,12 @@ class CampaignSpine(BaseModel):
     # ── Bond-event runtime (Trails-of-Cold-Steel pattern) ──
     bond_events: list[BondEvent] = []
     bond_event_system: Optional[BondEventSystem] = None
+    # ── Runtime visibility ──
+    # When False the campaign is hidden from the player-facing picker
+    # (GET /campaigns) but stays loadable for tests, reference, and direct
+    # session creation. Generated campaigns default True; archived
+    # hand-authored campaigns set this False.
+    player_facing: bool = True
 
     @field_validator("acts")
     @classmethod
