@@ -1,7 +1,7 @@
 # Storyteller V3 — Comprehensive Project Backlog
 
-**Document version:** 3.3
-**Last updated:** April 8, 2026
+**Document version:** 3.4
+**Last updated:** July 2, 2026
 **Purpose:** Single source of truth for every planned, in-progress,
 deferred, and tracked item across the entire project. Nothing should
 exist as a "we talked about that" item — it lives here or it doesn't
@@ -80,7 +80,7 @@ All 12 must pass:
 | # | Item | Status | Design Doc | Impl Doc | Detail |
 |---|------|--------|-----------|---------|--------|
 | 1.5 | Check decision prompt (`gm/prompts/check_decision.txt`) | **DONE** (Milestone 0) | GM §1, §10 | Impl §6.1 (full prompt) | Structured prompt template with character summary, story position, tension calibration, scene description, player action. Returns JSON with `requires_check`, skill, difficulty, `scene_type`, `moral_weight`, reasoning. |
-| 1.6 | Local GM module (`gm/fast_gm.py`) | **DONE** (Milestone 0) | — | Impl §6.2 (full code) | Ollama calls to Qwen3.5:9B. JSON schema enforcement via `format` parameter. Skill normalization. 3-retry with validation. Fallback: `requires_check=false` after all retries fail. |
+| 1.6 | Local GM module (`gm/fast_gm.py`) | **DONE** (Milestone 0) | — | Impl §6.2 (full code) | Ollama calls to Qwen3.5:9B. JSON schema enforcement via `format` parameter. Skill normalization. 3-retry with validation. Fallback: `requires_check=false` after all retries fail. May 2026: local backend removed, module now cloud FAST tier. July 2026 funnel pass: transport-failure deterministic fallback (scene_type→skill table, `requires_check=true`, reasoning tagged `DETERMINISTIC_FALLBACK`); malformed JSON after retries still raises (Rule 5). |
 | 1.7 | Check decision schema validation (Pydantic) | **DONE** (Milestone 0) | Research Cat. Source 1 | Impl §6.2 (note) | Production robustness upgrade: Pydantic model validation on local model output enforcing enum membership for skill, difficulty, scene_type. Same fallback behavior on failure. |
 | 1.8 | Scene type classification | **DONE** (Milestone 0) | GM §10 | Impl §6.1 | Six types: combat, chase, infiltration, social, exploration, introspection. Classified by local model as part of check decision. Default fallback: "social" on missing/invalid. |
 | 1.9 | `moral_weight` field | **DONE** (Milestone 0) | GM §9 | Impl §6.1 | Integer 0–3 in check decision response. Tracks Morality Conflict accumulation per turn. Column exists in `turns` table. |
@@ -201,10 +201,24 @@ or implementation can begin. Ordered by estimated dependency chain.
 | # | Item | Design Status | Design Doc | Dependencies | Detail |
 |---|------|--------------|-----------|-------------|--------|
 | 2.24 | Semantic memory / meaningful choice extraction | **DONE** (Milestone 1) | GM §24 (v1.6) | — | Per-turn choice annotation via local model extracting behavioral meaning: intent, sacrifice, priority revealed, NPC impact, throughline relevance. Feeds enriched data to behavioral inference, character drift, aspiration echoes, and cross-campaign identity. Graceful degradation to skill-tag-only on annotation failure. |
-| 2.25 | Character-centric campaign management | **DESIGNED** | Gap Analysis §Tier 2 | — | Character is the primary entity, campaigns are chapters in a character's story (aligns with Vision §8). Data model: `characters` table (character_id, display_name, variant_pitch, allegiance, era), `character_campaigns` table (character_id → campaign_spine, campaign_order, status, session_id). UI: character screen as app entry point showing character cards with name, variant pitch, current campaign, act progress, last played. Actions: Continue (active), Begin Next Chapter (completed → import flow), Create a Character (→ funnel). One active campaign per character. Character history shows ordered chapter list. |
+| 2.25 | Character-centric campaign management | **DESIGNED** | Gap Analysis §Tier 2 | — | Character is the primary entity, campaigns are chapters in a character's story (aligns with Vision §8). Data model: `characters` table (character_id, display_name, variant_pitch, allegiance, era), `character_campaigns` table (character_id → campaign_spine, campaign_order, status, session_id). UI: character screen as app entry point showing character cards with name, variant pitch, current campaign, act progress, last played. Actions: Continue (active), Begin Next Chapter (completed → import flow), Create a Character (→ funnel). One active campaign per character. Character history shows ordered chapter list. **Lite version shipped (funnel pass 2026-07-02):** localStorage Continue shelf (chapter progress / ending name), fixture-filtered `GET /sessions` listing, epilogue re-entry doors incl. `prior_session_id` sequel hook. Full character/chapter data model still unbuilt. |
 | 2.26 | Settings / API key management UI | **DESIGNED** | Gap Analysis §Tier 2 | — | Settings panel on campaign management screen: cloud LLM provider selection, model string, API key entry (encrypted at rest via Fernet, masked to last 4 chars in UI), local model config (Ollama endpoint, model name), narrative backend toggle. Settings persist in `settings` SQLite table, overridden by env vars. Changes take effect on next session start. "Test Connection" button for provider verification. New files: `state/settings.py`. Extend: `web/index.html`, `api/game_routes.py`. |
 | 2.27 | Multi-arc campaign structure | **DESIGNED** | GM §§19-20 (v1.5), Import Package Quality Spec v1.0 | — | Time skip mechanics with vignette system for intra-campaign gaps (§19). Cross-era character progression with import packages, specialization continuity/dormancy/evolution, era transition processing (§20). Large-scale NPC management with three-tier relevance routing (§21). Canon character voice fidelity profiles (§22). Narrative compression quality standards for import packages (relationship summaries, throughline history, voice notes, memory shards) specified in Import Package Quality Spec. |
 | 2.28 | Generative entity persistence | **DESIGNED** | Gap Analysis v2.0, Vision §6/§11/§12, GM §26 | Phase 7 (reconciliation), Phase 20 (NPC tiering) | Reconciliation prompt extension for entity detection (low/medium/high significance). Entity card generation prompt per type. SQLite `emergent_entities` table with per-act cap (max 3). Tier promotion logic (3→2→1 based on reference count). Reintroduction injection formats for NPCs, locations, and facts. Cross-campaign persistence for entities with reference_count ≥ 3 or tier ≤ 2. Enrichment layer — authored spine carries full load without it. Evaluate need after Milestone 1 playtesting. |
+
+### Player Experience Funnel (July 2026 pass)
+
+Shipped 2026-07-02 as a UX continuation of the June experience-shell
+work. Full detail in the changelog entry of the same date. No engine
+phases consumed; no turn-handler changes.
+
+| # | Item | Design Status | Design Doc | Dependencies | Detail |
+|---|------|--------------|-----------|-------------|--------|
+| 2.29 | Player funnel UX shell | **DONE** (2026-07-02) | Changelog 2026-07-02 | — | Entry hero (Play Now from `intended_protagonist`), character reveal card with stats behind disclosure, situation three-door (canonical drop-in default / surprise / steer with explicit mode), dossier wait screen with honest latency + dice primer, failure exits (generate 502→retry or canonical fallback; draft 422→fix-and-re-draft; provider-unreachable→actionable 503), incapacitation card, progressive dice disclosure, pending-decision banner, freeform ghost text + counter, stream-failure retry, sealed-endings finale, three re-entry doors, Continue shelf. All in `web/index.html` + payload additions in `api/game_routes.py`. |
+| 2.30 | Funnel randomization content | **DONE** (2026-07-02) | Changelog 2026-07-02 | — | `data/funnel/spark_tables.json` (template + 12 species, 18 careers with game lines, 30 hooks, 20 flaws) and `data/funnel/premise_seeds.json` (2 eras, 13 seeds each, tones, moral registers) served by `GET /funnel/seeds`; spark picks ride the `hints` dict on `POST /character/draft` (guidance section added to `character_draft.txt`). Perceived richness is bounded by table quality — budget writing time when adding era packs. |
+| 2.31 | Check-decision transport fallback | **DONE** (2026-07-02) | Changelog 2026-07-02 | — | See item 1.6 detail. 13 tests in `tests/test_check_decision_fallback.py`. |
+| 2.32 | Funnel guardrails: rate limiting + conversion telemetry | **DONE** (2026-07-02) | Changelog 2026-07-02 | — | `api/ratelimit.py` per-IP sliding windows on draft (30/hr) and generate (12/hr), env-tunable, 0 disables; never-raising `funnel_event()` in `state/telemetry.py` → `funnel_events.jsonl` (draft/save/generate/session-create/epilogue). 17 contract tests in `tests/test_funnel_payloads.py`. |
+| 2.33 | Funnel follow-ups | **FILED** | Changelog 2026-07-02 (known limits) | — | Pre-warm/pre-cache the canonical opening passage (true zero-wait Play Now); `duty_active` +1 threshold edge on the incapacitation banner (expose effective threshold or an `incapacitated` flag in turn payloads); add `pending_force_power_milestone` to the `pending` object; dedicated resume UI for temptation/intervention/time-skip pauses; Continue-shelf prune-on-404; SQL-side session-listing filter; `node --check` for `web/index.html` once Node is available; wire `eval/divergence.py` as a replay-divergence pre-ship check for the "1 of N endings" promise; `funnel_events.jsonl` rotation. |
 
 ---
 
@@ -489,11 +503,25 @@ Issues identified during the March 5, 2026 cross-document review:
 | Choice Quality Validation Spec | v1.0 | **CURRENT** | Post-generation choice quality validator. Activation contingent on calibration from initial playtesting. |
 | Prologue System Spec | v1.0 | **CURRENT** | Merged from Prologue Inference Spec + Phase 18 Implementation Plan. Design robustness + implementation roadmap. |
 | Import Package Quality Spec | v1.0 | **CURRENT** | Quality standards for narrative compression in cross-campaign import. Extends GM §20 and CS Impl §6. |
-| This Backlog | v3.2 | **CURRENT** | Documentation audit sync. Item 0.5 marked DONE. Document versions updated. Codebase-documentation discrepancies corrected. |
+| This Backlog | v3.4 | **CURRENT** | Player funnel pass sync (2026-07-02). Items 2.29–2.33 added, 1.6/2.25 annotated. |
 
 ---
 
 ## Revision History
+
+**v3.4 — Player funnel pass sync (July 2, 2026)**
+
+1. **New section: Player Experience Funnel (July 2026 pass).** Items
+   2.29–2.32 record the shipped funnel work (UX shell, randomization
+   content, check-decision transport fallback, guardrails); 2.33 files
+   the deliberate follow-ups from the pass.
+2. **Item 1.6 annotated** with the cloud-only migration and the July
+   2026 transport-failure fallback semantics.
+3. **Item 2.25 annotated** — lite character-centric management shipped
+   (Continue shelf, `GET /sessions`, re-entry doors); full data model
+   remains DESIGNED.
+4. Header/version drift corrected (v3.3 was never logged here; this
+   entry supersedes it).
 
 **v3.2 — Documentation audit sync (March 17, 2026)**
 

@@ -2,6 +2,142 @@
 
 All notable changes to Storyteller V3 are documented here.
 
+## [Unreleased] — 2026-07-02 — Player Funnel Pass: Instant Start, Randomize Everything, The Loop Back
+
+The UX continuation of the June experience-shell work: a person can now
+create their own character and situation — or randomize either — and
+play through to an ending without ever hitting a form-first screen, a
+lying wait label, or a dead end. No new engine phases; no turn-handler
+changes.
+
+### Entry: Play Now is the hero
+- The start screen leads with a hero card for the `player_facing`
+  campaign whose roster carries `intended_protagonist` (resolved from
+  `GET /campaigns`, never hardcoded): story promise, "4 chapters ·
+  about 3–5 hours · 5 possible endings" framing, one dominant **Play
+  now** button. Create / Surprise me / Choose your own path sit
+  beneath; the full picker survives collapsed.
+- `GET /campaigns` entries carry `ending_count` and `total_acts`.
+- A **Continue shelf** (localStorage, capped at 12, reconciled against
+  the new fixture-filtered `GET /sessions`) shows stories in progress
+  ("Chapter 2 of 4") and finished ones by their ending name, with the
+  honest "Stories live on this device." caption.
+
+### Identity and situation: create it or roll it
+- **Spark randomizer** in the creator: four slots (Species / Career /
+  Hook / Flaw), each rerollable and lockable, composing a visible,
+  editable pitch sentence from hand-authored tables
+  ([data/funnel/spark_tables.json](../../data/funnel/spark_tables.json)
+  — all 18 canonical careers, 12 species, 30 hooks, 20 flaws) served by
+  the new `GET /funnel/seeds`. Structured picks ride the
+  previously-latent `hints` dict on `POST /character/draft`
+  (prompt guidance added to
+  [gm/prompts/character_draft.txt](../../gm/prompts/character_draft.txt)).
+- Drafts land on a **reveal card** (name, species·career, concept,
+  want vs. need) with the stat editor folded behind "Tweak stats" —
+  the spreadsheet is never mandatory reading. Entry-screen "Surprise
+  me" = roll all → auto-draft → reveal.
+- **Situation three-door**: drop into the canonical campaign (default,
+  zero generation wait — the `intended_protagonist` soft link already
+  allowed any character in any campaign), "Surprise me" (random era +
+  premise seed from
+  [data/funnel/premise_seeds.json](../../data/funnel/premise_seeds.json),
+  13 per era, tone/moral_register sampled invisibly), or "Steer it"
+  (one premise box + era cards + a resonance chip showing the drafted
+  character's want/need). The UI sends `mode` explicitly — the 40-char
+  auto heuristic no longer decides for players. `use_architect` moved
+  behind an Advanced disclosure.
+
+### Honest waits, no dead ends
+- The generation wait is a **dossier screen**: character identity on
+  the left, elapsed-keyed staged progress + honest "usually under a
+  minute; retries can take up to three" on the right, and a dice/Rule-4
+  primer card that does onboarding work while the player waits.
+- Failure exits everywhere: generate 502/timeout → "Try again"
+  (character already saved) or "Take {name} into the Ledger instead";
+  draft/save 422 → per-talent errors with "Fix and re-draft" (the
+  randomize path silently re-drafts once before showing any error);
+  provider-unreachable at session creation (missing/blank API key) →
+  503 with an actionable message instead of a bare 500.
+- In-game ☰ menu: copyable `?session=` resume link + "Leave story"
+  (no reload, session stays resumable).
+
+### Core-loop legibility (no turn-handler changes)
+- **Freeform never hard-blocks**: `decide_check`
+  ([gm/fast_gm.py](../../gm/fast_gm.py)) gains a deterministic
+  transport-failure fallback (scene_type→skill table,
+  `difficulty=average`, reasoning tagged `DETERMINISTIC_FALLBACK` for
+  telemetry). Rule 5 boundary preserved: malformed JSON after retries
+  still raises — only transport failure falls back. Single call site;
+  all four turn handlers inherit it. 13 tests in
+  [tests/test_check_decision_fallback.py](../../tests/test_check_decision_fallback.py).
+- **Incapacitation is a moment, not a bug**: client-side threshold
+  detection renders "You go down." with the two-strike rule, then a
+  recovery note the following turn (backend mechanics were already
+  real; the UI acknowledged nothing).
+- **Progressive dice disclosure**: one-time explainers on first check /
+  Triumph / Despair / destiny spend (localStorage), no tutorial screen.
+- Pending milestone/intervention/temptation/time-skip states surface as
+  a "You have a decision waiting" banner on resume (new `pending`
+  object on `GET /session/{id}`).
+- Freeform teaches by example: rotating ghost-text suggestions for the
+  first 5 turns + a live N/600 counter. A dropped turn-stream keeps its
+  partial prose and offers a one-shot non-streaming retry of the same
+  action.
+
+### Finale and re-entry: the epilogue is the next funnel's front door
+- Epilogue reveals "You found: {ending} — 1 of N endings" with the
+  other authored endings as **sealed name-only cards** (payload gains
+  `ending_count` + names-only `ending_paths`; legacy cached epilogues
+  degrade gracefully).
+- Three doors replace the reload button: play again, **"Take
+  {character} somewhere new"** (new `prior_session_id` on
+  `POST /campaign/generate` folds "Previously: {ending_name} —
+  {epilogue excerpt}" into the generation brief — an honest facade for
+  Phase 19: "they carry their story, not yet their scars"), or create
+  someone new.
+- Session intro shows the ending count and, when the player steered,
+  their own premise words quoted back (persisted via a
+  `{slug}.meta.json` sidecar next to generated spines; sidecars are
+  excluded from every campaign glob).
+
+### Guardrails
+- **Rate limiting** ([api/ratelimit.py](../../api/ratelimit.py)):
+  per-IP sliding windows on `/character/draft` (30/hr) and
+  `/campaign/generate` (12/hr), env-tunable
+  (`FUNNEL_DRAFT_LIMIT_PER_HOUR` / `FUNNEL_GENERATE_LIMIT_PER_HOUR`,
+  0 disables) — one-click randomize is no longer an open token faucet.
+- **Funnel telemetry**: never-raising `funnel_event()`
+  ([state/telemetry.py](../../state/telemetry.py)) appends JSON lines
+  to `funnel_events.jsonl` from draft, save, generate (mode/attempts/
+  duration), session create, and epilogue — the funnel's conversion
+  instrumentation.
+- 17 contract tests in
+  [tests/test_funnel_payloads.py](../../tests/test_funnel_payloads.py);
+  full hermetic suite green (1,031 passed).
+
+### Fixed
+- **Test collection was broken on a clean checkout**:
+  `CharacterVariant.depth_card` in
+  [studio/schema.py](../../studio/schema.py) referenced
+  `CharacterDepthCard` 478 lines before its definition (NameError at
+  import, 8 test files uncollectable). Quoted forward reference +
+  explicit `model_rebuild()` so import fails loud, not at first
+  instantiation.
+- Spark "Roll all" raced the seeds fetch and silently did nothing if
+  clicked immediately; both roll paths now await the tables on demand.
+
+### Known limits (deliberate)
+- Pre-existing cached epilogues never carry `ending_count`/
+  `ending_paths` (frontend tolerates absence).
+- Incapacitation banner uses the base wound threshold; a `duty_active`
+  +1 could fire it one wound early.
+- The `pending` object omits `pending_force_power_milestone`.
+- Rate limiter is process-local and keyed by direct client IP.
+- Created characters enter generated campaigns as thematic seasoning
+  (`character_flavor`), not full integration-layer variants — copy
+  does not overpromise.
+
 ## [Unreleased] — 2026-06-10 — Protagonist Centrality + Engine-Owned Endings
 
 ### The player character is structurally the main character

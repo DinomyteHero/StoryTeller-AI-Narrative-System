@@ -272,14 +272,31 @@ Campaign Studio (parallel track):
   crystallized memories, and morality/obligation/duty. Ledger climax
   expanded to 5 options ↔ 5 authored endings with full synopses.
 
+**July 2026 pass (details in docs/status/changelog.md):**
+- **Player funnel pass (2026-07-02)** — instant start (Play Now hero
+  resolved from `intended_protagonist`), spark-slot character randomizer
+  + reveal-card creator riding the `hints` dict, situation three-door
+  (canonical drop-in default / surprise / steer, explicit Mode 1/2),
+  dossier wait screen with honest latency + dice primer, failure exits
+  everywhere (502→canonical fallback, 422→fix-and-re-draft,
+  provider-unreachable→actionable 503), core-loop legibility
+  (incapacitation card, progressive dice disclosure, pending banner,
+  ghost text, stream retry), sealed-endings finale + three re-entry
+  doors (`prior_session_id` sequel hook), Continue shelf, per-IP rate
+  limits (`api/ratelimit.py`), funnel telemetry, curated randomization
+  content in `data/funnel/`. `decide_check` gained a transport-failure
+  deterministic fallback (garbage JSON still raises — Rule 5). Also
+  fixed: `studio/schema.py` forward reference that broke test
+  collection on clean checkouts. No turn-handler changes.
+
 **Next work:** Phase 18 (Psychometric Prologue), CS-7 (Saga Depth), or
 the TurnContext refactor (collapse the four near-duplicate turn handlers
 in `api/game_routes.py` around a shared context object).
 
-## Codebase Metrics (as of June 9, 2026)
+## Codebase Metrics (as of July 2, 2026)
 
-- ~29,200 lines of application code (Python + HTML)
-- ~16,100 lines of test code across 39 test files
+- ~31,600 lines of application code (Python + HTML)
+- ~17,000 lines of test code across 41 test files
 - 23 active documentation files in `docs/` + 6 archived in `docs/reference/`
 - 1 player-facing campaign spine (The Ledger of Ossel Minor) plus the
   retired Custodian fixture and on-demand generated campaigns; 6-character
@@ -378,10 +395,13 @@ storyteller-v3/
 │   ├── main.py            # App bootstrap and frontend serving
 │   ├── game_routes.py     # Game Engine routes + /epilogue + /campaign/generate
 │   ├── character_routes.py # /character/draft, /character/save, /character/{id}
+│   ├── ratelimit.py       # Per-IP sliding-window limits on draft/generate
 │   └── studio_routes.py   # Campaign Studio routes
 ├── web/                   # Single-file frontend
-│   └── index.html         # Prose reader UI + character creator + stats panel +
-│                          #   milestone ceremony + finale/epilogue + resume recap
+│   └── index.html         # Prose reader UI + funnel (Play Now hero, spark
+│                          #   randomizer, situation doors, wait screen) +
+│                          #   character creator + stats panel + milestone
+│                          #   ceremony + finale/re-entry + Continue shelf
 ├── studio/                # Campaign Studio
 │   ├── schema.py          # Spine schema — interface contract
 │   ├── validate.py        # Four-gate validation + anti-positivity heuristics
@@ -425,13 +445,15 @@ storyteller-v3/
 │   ├── force_powers/      # 5 powers (enhance, heal_harm, influence, move, sense)
 │   ├── content_packs/     # Per-campaign design contracts
 │   ├── era_packs/         # Era anchoring templates (2 eras)
+│   ├── funnel/            # Spark tables + premise seeds (GET /funnel/seeds)
 │   └── personas/          # writer_room_personas.json (55 personas)
-└── tests/                 # 39 test files (~16,100 lines)
+└── tests/                 # 41 test files (~17,000 lines)
     ├── __init__.py
     ├── dice_validation.py
     ├── studio_schema_test.py
     ├── test_campaign_generate.py         # POST /campaign/generate flow
     ├── test_character_creator.py         # Pitch → draft → assembly → save
+    ├── test_check_decision_fallback.py   # decide_check transport fallback (Rule 5 boundary)
     ├── test_content_packs.py             # Content pack loader + validation
     ├── test_cs2_mode3.py
     ├── test_cs3_mode2_import.py
@@ -445,6 +467,8 @@ storyteller-v3/
     │                                     #   incapacitation, dice verdict headline
     ├── test_faction_reactivity.py        # NPC faction stance and reaction logic
     ├── test_freeform_talents.py          # Custom signature-talent validation
+    ├── test_funnel_payloads.py           # Funnel API contract (endings, pending,
+    │                                     #   sessions listing, seeds, rate limits)
     ├── test_identity_drift_introspection.py # Identity drift detection
     ├── test_latency_hot_path.py          # Hot-path latency budget enforcement
     ├── test_llm_client_backoff.py        # LLM retry/backoff (429 handling)
