@@ -14,14 +14,17 @@ import os
 import random
 import re
 import threading
+import time
 from dataclasses import asdict, fields
 from datetime import datetime, timezone
 from typing import Optional
 
-from fastapi import APIRouter, BackgroundTasks, HTTPException
+from fastapi import APIRouter, BackgroundTasks, HTTPException, Request
 from fastapi.responses import StreamingResponse
+from openai import APIConnectionError
 from pydantic import BaseModel
 
+from api.ratelimit import SlidingWindowLimiter, client_key, limit_from_env
 from engine.character import Character
 from engine.reconciliation import count_state_deltas
 from engine.world_registry import (
@@ -34,7 +37,7 @@ from engine.world_registry import (
 from state.telemetry import (
     emit_choice_made, emit_dice_resolved, emit_state_delta,
     emit_consequence_gap, emit_npc_disposition_shift, emit_thread_event,
-    emit_scene_validation,
+    emit_scene_validation, funnel_event,
 )
 from engine.equipment import (
     COMBAT_SKILLS,
@@ -141,6 +144,7 @@ from state.session import (
     get_recent_turns,
     get_session,
     get_turn_count,
+    list_recent_sessions,
     load_ship_state,
     load_ship_states,
     log_reputation_event,
@@ -165,6 +169,16 @@ TAGGED_CHOICE_DECISIONS = os.getenv("TAGGED_CHOICE_DECISIONS", "true").lower() =
 # delivery. Off by default to keep the hot path lean; opt in for eval
 # runs or when you want the telemetry stream.
 SCENE_VALIDATOR_ENABLED = os.getenv("SCENE_VALIDATOR_ENABLED", "false").lower() == "true"
+
+# Campaign generation is the most expensive route (30-60s of QUALITY-tier
+# LLM time) — sliding-window limit per client IP. 0 disables.
+GENERATE_LIMITER = SlidingWindowLimiter(
+    limit_from_env("FUNNEL_GENERATE_LIMIT_PER_HOUR", 12)
+)
+
+# Retired test-fixture characters (Custodian era) — never surfaced in the
+# player-facing session listing.
+FIXTURE_CHARACTER_IDS = {"clovis_beryl", "praxeum_student", "praxeum_mechanic"}
 
 
 SOCIAL_TAG_SKILLS = {"charm", "coercion", "deception", "leadership", "negotiation"}
@@ -2142,6 +2156,10 @@ async def list_campaigns():
 
     result = []
     for path in sorted(campaigns_dir.glob("*.json")):
+        # Generation sidecars ({slug}.meta.json) live beside spines — they
+        # are provenance metadata, never campaigns.
+        if path.name.endswith(".meta.json"):
+            continue
         with open(path, encoding="utf-8") as f:
             spine = json.load(f)
         # Archived/reference campaigns are hidden from the picker but stay
@@ -2225,6 +2243,8 @@ async def list_campaigns():
             "campaign_name": path.stem,
             "display_name":  spine.get("name", path.stem),
             "intended_protagonist_id": intended_protagonist_id,
+            "ending_count":  len(sa.get("ending_paths") or []),
+            "total_acts":    len(spine.get("acts") or []),
             "era":           spine.get("era", ""),
             "era_year":      ev.get("year", ""),
             "era_voice_notes": ev.get("voice_notes", ""),
@@ -2283,6 +2303,37 @@ async def list_characters():
     return out
 
 
+# Funnel inspiration data (data/funnel/*.json) — authored content for the
+# creation UI, loaded lazily and cached. Missing/invalid files degrade to {}
+# so the funnel never 500s on absent content.
+_funnel_seeds_cache: dict[str, dict] = {}
+
+
+def _load_funnel_file(name: str) -> dict:
+    from pathlib import Path
+
+    if name in _funnel_seeds_cache:
+        return _funnel_seeds_cache[name]
+    try:
+        with open(Path("data/funnel") / f"{name}.json", encoding="utf-8") as f:
+            data = json.load(f)
+    except (OSError, json.JSONDecodeError):
+        return {}
+    if not isinstance(data, dict):
+        return {}
+    _funnel_seeds_cache[name] = data
+    return data
+
+
+@router.get("/funnel/seeds")
+async def funnel_seeds():
+    """Spark tables + premise seeds for the character/campaign creation UI."""
+    return {
+        "spark_tables": _load_funnel_file("spark_tables"),
+        "premise_seeds": _load_funnel_file("premise_seeds"),
+    }
+
+
 # Phase 8.5: Social skill → NPC emotion mapping (§25.2)
 SOCIAL_EMOTION_MAP = {
     # skill: (emotion_on_failure, base_intensity)
@@ -2331,23 +2382,35 @@ class GenerateCampaignRequest(BaseModel):
     use_architect: bool = False        # off by default for latency
     character_id: str = ""             # tailor the spine to this created character
     surprise_me: bool = False
+    # Sequel hook: fold the prior session's resolved ending into the brief
+    # so the new campaign acknowledges where the last story landed.
+    prior_session_id: Optional[str] = None
 
 
 @router.post("/campaign/generate")
-async def generate_campaign_route(req: GenerateCampaignRequest):
+async def generate_campaign_route(req: GenerateCampaignRequest, request: Request):
     """Generate a campaign spine on demand, validate it, write it to disk.
 
-    Returns {campaign_name, display_name, seed, warnings}. The caller then
-    starts play via the existing POST /session with the returned campaign_name
-    and their own character_id — the created character drops in directly; no
-    spine variant is required.
+    Returns {campaign_name, display_name, seed, warnings, generation_mode}.
+    The caller then starts play via the existing POST /session with the
+    returned campaign_name and their own character_id — the created character
+    drops in directly; no spine variant is required. A {slug}.meta.json
+    sidecar records the generation inputs for later echo (steered_premise).
     """
     from studio.generate import (
         generate_mode1, generate_from_brief, Mode1Input, ThematicBrief,
     )
     from studio.validate import validate_spine
-    from studio.persist import write_spine
+    from studio import persist as spine_persist
     from studio.schema import CampaignSpine
+
+    if not GENERATE_LIMITER.allow(client_key(request)):
+        raise HTTPException(
+            429,
+            "You've generated several campaigns in the last hour — "
+            "let the galaxy catch its breath and try again in a while.",
+        )
+    generation_started = time.monotonic()
 
     # Defaults for a "surprise me" run.
     era = req.era or ("Galactic Civil War" if not req.surprise_me else "the Age of Rebellion")
@@ -2374,13 +2437,36 @@ async def generate_campaign_route(req: GenerateCampaignRequest):
         except HTTPException:
             character_flavor = ""
 
+    # Sequel continuity: echo the prior session's resolved ending into the
+    # brief so the generated campaign can acknowledge it.
+    if req.prior_session_id:
+        prior = get_session(req.prior_session_id)
+        if prior is not None:
+            try:
+                prior_epilogue = (
+                    json.loads(prior["arc_state_json"]).get("epilogue") or {}
+                )
+            except (json.JSONDecodeError, TypeError):
+                prior_epilogue = {}
+            if isinstance(prior_epilogue, dict) and prior_epilogue.get("ending_name"):
+                previously = (
+                    f"Previously: {prior_epilogue['ending_name']} — "
+                    f"{(prior_epilogue.get('epilogue') or '')[:300]}"
+                )
+                character_flavor = " ".join(
+                    p for p in (character_flavor, previously) if p
+                )
+
     # Decide mode: explicit, else rich premise -> Mode 2, else Mode 1.
     use_mode2 = req.mode == "2" or (req.mode == "auto" and len(req.premise.strip()) > 40)
+    generation_mode = "2" if use_mode2 else "1"
 
     last_errors: list[str] = []
     spine_data = None
     seed = None
+    attempts = 0
     for attempt in range(3):
+        attempts = attempt + 1
         try:
             if use_mode2:
                 brief = ThematicBrief(
@@ -2428,17 +2514,48 @@ async def generate_campaign_route(req: GenerateCampaignRequest):
         last_errors = report.errors
 
     if spine_data is None:
+        funnel_event(
+            "campaign_generate", mode=generation_mode, attempts=attempts,
+            duration_s=round(time.monotonic() - generation_started, 2),
+            ok=False,
+        )
         raise HTTPException(
             502,
             {"error": "Could not generate a valid campaign", "details": last_errors[:8]},
         )
 
-    slug = write_spine(spine_data)
+    slug = spine_persist.write_spine(spine_data)
+
+    # Provenance sidecar — read back by POST /session (steered_premise) and
+    # GET /sessions. Never a campaign: every data/campaigns glob skips
+    # *.meta.json. Auxiliary — a failed write must not fail the generation.
+    try:
+        meta_path = spine_persist.CAMPAIGNS_DIR / f"{slug}.meta.json"
+        meta_path.write_text(
+            json.dumps({
+                "premise": req.premise,
+                "mode": generation_mode,
+                "era": era,
+                "character_id": req.character_id,
+                "prior_session_id": req.prior_session_id,
+                "surprise_me": req.surprise_me,
+            }, indent=2, ensure_ascii=False),
+            encoding="utf-8",
+        )
+    except OSError as e:
+        logging.warning(f"Could not write campaign sidecar for '{slug}': {e}")
+
+    funnel_event(
+        "campaign_generate", mode=generation_mode, attempts=attempts,
+        duration_s=round(time.monotonic() - generation_started, 2),
+        ok=True, campaign_name=slug,
+    )
     return {
         "campaign_name": slug,
         "display_name": spine_data.get("name", slug),
         "seed": seed,
         "warnings": last_errors[:8],
+        "generation_mode": generation_mode,
     }
 
 
@@ -2502,6 +2619,37 @@ def load_campaign_spine(name: str) -> dict:
             logging.warning(f"Spine validation warning for '{name}': {e}")
 
     return spine_data
+
+
+def load_campaign_meta(name: str) -> dict:
+    """Read the generation sidecar (data/campaigns/{name}.meta.json).
+
+    Written by POST /campaign/generate for on-demand campaigns; authored
+    campaigns have none. Returns {} when absent or unreadable — the sidecar
+    is provenance, never required.
+    """
+    filename = name.lower().replace(" ", "_")
+    if filename.startswith("the_"):
+        filename = filename[4:]
+    try:
+        with open(f"data/campaigns/{filename}.meta.json", encoding="utf-8") as f:
+            data = json.load(f)
+    except (OSError, json.JSONDecodeError):
+        return {}
+    return data if isinstance(data, dict) else {}
+
+
+def _ending_paths_public(spine: dict) -> list[dict]:
+    """Names-only view of the authored endings — no synopses (spoilers)."""
+    paths = (spine.get("story_architecture") or {}).get("ending_paths") or []
+    return [
+        {"branch_id": ep.get("branch_id", ""), "name": ep.get("name", "")}
+        for ep in paths if isinstance(ep, dict)
+    ]
+
+
+def _ending_count(spine: dict) -> int:
+    return len((spine.get("story_architecture") or {}).get("ending_paths") or [])
 
 
 def load_character(character_id: str) -> Character:
@@ -3281,7 +3429,20 @@ async def create_session_route(
     )
 
     # ── Generate opening narration (one cloud call) ───────────────────
-    narration_result = narrate_turn(ctx)
+    # Provider-unreachable (bad/missing API key, network down) is the one
+    # failure a brand-new player can hit on their very first click — map
+    # it to an actionable 503 instead of a bare 500.
+    try:
+        narration_result = narrate_turn(ctx)
+    except APIConnectionError as exc:
+        raise HTTPException(
+            status_code=503,
+            detail=(
+                "The storyteller couldn't reach its language model provider. "
+                "Set OPENROUTER_API_KEY (or OPENAI_API_KEY) in .env, restart "
+                "the server, and try again."
+            ),
+        ) from exc
     _post_narration_reputation_hook(
         0, arc_state,
         dyn_fields_opening["reputation_entries"], narration_result.passage,
@@ -3338,6 +3499,7 @@ async def create_session_route(
             "arc_type": arc_obj.arc_type,
             "lie_grip": arc_obj.lie_grip,
         }
+    campaign_meta = load_campaign_meta(req.campaign_name)
     session_intro = {
         "campaign_display_name":     spine.get("name", req.campaign_name),
         "era":                       spine.get("era", ""),
@@ -3347,6 +3509,9 @@ async def create_session_route(
         "protagonist_pressure_type": sa.get("protagonist_pressure_type", ""),
         "antagonistic_force":        sa.get("antagonistic_force", ""),
         "throughline":               spine.get("throughline_question", ""),
+        "ending_count":              _ending_count(spine),
+        # The player's own premise, echoed back for generated campaigns.
+        "steered_premise":           campaign_meta.get("premise") or None,
         "character": {
             "name":               character.name,
             "voice_notes":        character.voice_notes,
@@ -3354,6 +3519,14 @@ async def create_session_route(
             "narrative_arc":      arc_summary,
         },
     }
+
+    funnel_event(
+        "session_create",
+        session_id=session_id,
+        campaign=req.campaign_name,
+        character_id=req.character_id,
+        generated=bool(campaign_meta),
+    )
 
     return {
         "session_id": session_id,
@@ -4226,6 +4399,13 @@ async def get_session_route(session_id: str):
         "campaign_complete": arc_state.get("campaign_complete", False),
         "epilogue": arc_state.get("epilogue"),
         "recap": recap,
+        # Unresolved interstitial states a resuming UI must re-present.
+        "pending": {
+            "milestone":    bool(arc_state.get("pending_milestone")),
+            "intervention": bool(arc_state.get("pending_intervention")),
+            "temptation":   bool(arc_state.get("pending_temptation")),
+            "time_skip":    bool(arc_state.get("pending_time_skip")),
+        },
         "total_acts": spine.get("total_acts", arc_state.get("total_acts", 0)),
         "destiny": {
             "light_remaining": session["destiny_light"],
@@ -4254,6 +4434,59 @@ async def get_session_route(session_id: str):
         ],
         "last_turn": last_turn,
     }
+
+
+@router.get("/sessions")
+async def list_sessions_route(limit: int = 20):
+    """Recent playable sessions, newest first — powers the resume picker.
+
+    Excludes fixture-character sessions and sessions on retired
+    (player_facing=False) or since-deleted campaigns; eval and test runs
+    stay out of the player funnel.
+    """
+    limit = max(1, min(limit, 100))
+    # Over-fetch so post-filtering still fills the page.
+    rows = list_recent_sessions(limit * 5)
+    spine_cache: dict[str, dict | None] = {}
+    out: list[dict] = []
+    for row in rows:
+        try:
+            arc_state = json.loads(row["arc_state_json"]) or {}
+        except (json.JSONDecodeError, TypeError):
+            arc_state = {}
+        try:
+            character_name = json.loads(row["character_json"]).get("name", "")
+        except (json.JSONDecodeError, TypeError, AttributeError):
+            character_name = ""
+        character_id = arc_state.get("variant_id", "")
+        name_slug = character_name.lower().replace(" ", "_")
+        if character_id in FIXTURE_CHARACTER_IDS or name_slug in FIXTURE_CHARACTER_IDS:
+            continue
+
+        campaign_name = row["campaign_name"]
+        if campaign_name not in spine_cache:
+            try:
+                spine_cache[campaign_name] = load_campaign_spine(campaign_name)
+            except HTTPException:
+                spine_cache[campaign_name] = None
+        spine = spine_cache[campaign_name]
+        if spine is None or not spine.get("player_facing", True):
+            continue
+
+        out.append({
+            "session_id": row["id"],
+            "campaign_name": campaign_name,
+            "campaign_display_name": spine.get("name", campaign_name),
+            "character_name": character_name,
+            "turn_count": row["turn_count"],
+            "current_act": arc_state.get("current_act", 1),
+            "total_acts": spine.get("total_acts", 0),
+            "campaign_complete": arc_state.get("campaign_complete", False),
+            "last_played": row["updated_at"],
+        })
+        if len(out) >= limit:
+            break
+    return out
 
 
 def _build_ending_state_block(
@@ -4366,9 +4599,16 @@ async def handle_epilogue(session_id: str):
         "campaign_name": session["campaign_name"],
         "character_name": character.name,
         "turns_played": get_turn_count(session_id),
+        # The authored ending space (names only — synopses stay spoilers)
+        # so the finale UI can show "1 of N endings".
+        "ending_count": _ending_count(spine),
+        "ending_paths": _ending_paths_public(spine),
     }
     arc_state["epilogue"] = payload
     update_session_state(session_id, character, arc_state)
+    funnel_event(
+        "epilogue", session_id=session_id, ending_branch_id=ending_branch,
+    )
     return payload
 
 

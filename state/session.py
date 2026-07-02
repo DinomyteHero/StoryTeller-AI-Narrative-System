@@ -237,6 +237,23 @@ def get_session(session_id: str) -> sqlite3.Row | None:
         ).fetchone()
 
 
+def list_recent_sessions(limit: int = 20) -> list[sqlite3.Row]:
+    """Most recently played sessions with their turn counts, newest first.
+
+    Lightweight listing for the resume picker — returns raw rows (id,
+    campaign_name, character_json, arc_state_json, updated_at, turn_count);
+    the caller decides what to surface.
+    """
+    with get_connection() as conn:
+        return conn.execute(
+            "SELECT s.id, s.campaign_name, s.character_json, s.arc_state_json, "
+            "s.updated_at, "
+            "(SELECT COUNT(*) FROM turns t WHERE t.session_id = s.id) AS turn_count "
+            "FROM sessions s ORDER BY s.updated_at DESC LIMIT ?",
+            (limit,),
+        ).fetchall()
+
+
 def get_turn_count(session_id: str) -> int:
     with get_connection() as conn:
         return conn.execute(

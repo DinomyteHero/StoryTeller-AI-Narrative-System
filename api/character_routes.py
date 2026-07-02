@@ -12,21 +12,28 @@ save time, not draft time.
 
 import json
 import logging
+import time
 from pathlib import Path
 from typing import Optional
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Request
 from pydantic import BaseModel, Field
 
+from api.ratelimit import SlidingWindowLimiter, client_key, limit_from_env
 from engine.character import Character
 from gm.character_creator import (
     draft_character, assemble_character, CharacterDraftError, _slugify,
 )
+from state.telemetry import funnel_event
 
 log = logging.getLogger(__name__)
 router = APIRouter()
 
 CHARACTERS_DIR = Path("data/characters")
+
+DRAFT_LIMITER = SlidingWindowLimiter(
+    limit_from_env("FUNNEL_DRAFT_LIMIT_PER_HOUR", 30)
+)
 
 
 class DraftRequest(BaseModel):
@@ -39,15 +46,34 @@ class SaveRequest(BaseModel):
 
 
 @router.post("/character/draft")
-async def draft_route(req: DraftRequest):
+async def draft_route(req: DraftRequest, request: Request):
     """Draft a character from a prose pitch. ~8-15s (one FAST-tier LLM call)."""
+    if not DRAFT_LIMITER.allow(client_key(request)):
+        raise HTTPException(
+            429,
+            "You've drafted a lot of characters in the last hour — "
+            "give the holotable a short rest and try again soon.",
+        )
+    started = time.monotonic()
     try:
         draft = draft_character(req.pitch, req.hints)
     except CharacterDraftError as e:
+        funnel_event(
+            "character_draft", ok=False,
+            duration_s=round(time.monotonic() - started, 2),
+        )
         raise HTTPException(422, {"errors": e.errors})
     except RuntimeError as e:
         # gm.llm_client raises RuntimeError on model/transport failure.
+        funnel_event(
+            "character_draft", ok=False,
+            duration_s=round(time.monotonic() - started, 2),
+        )
         raise HTTPException(502, f"Character draft failed: {e}")
+    funnel_event(
+        "character_draft", ok=True,
+        duration_s=round(time.monotonic() - started, 2),
+    )
     return {"draft": draft}
 
 
@@ -76,6 +102,7 @@ async def save_route(req: SaveRequest):
     path = CHARACTERS_DIR / f"{slug}.json"
     path.write_text(character.model_dump_json(indent=2), encoding="utf-8")
     log.info("character_creator: saved %s", slug)
+    funnel_event("character_save", character_id=slug)
     return {"character_id": slug, "name": character.name}
 
 

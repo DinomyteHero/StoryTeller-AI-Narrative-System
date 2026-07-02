@@ -52,6 +52,26 @@ def read_session_events(session_id: str) -> list[NarrativeEvent]:
     return events
 
 
+# ── Funnel events ────────────────────────────────────────────────────────
+
+def funnel_event(event: str, **fields) -> None:
+    """Append a player-funnel event to funnel_events.jsonl.
+
+    Cross-session by nature (draft/save/generate happen before a session
+    exists), so events go to one shared file rather than per-session logs.
+    Analytics only — must never break a player-facing route, so this
+    swallows every failure.
+    """
+    try:
+        TELEMETRY_DIR.mkdir(parents=True, exist_ok=True)
+        record = {"event": event, "timestamp": time.time(), **fields}
+        log_path = TELEMETRY_DIR / "funnel_events.jsonl"
+        with open(log_path, "a", encoding="utf-8") as f:
+            f.write(json.dumps(record, default=str) + "\n")
+    except Exception:
+        pass
+
+
 # ── Convenience emitters ─────────────────────────────────────────────────
 
 def emit_choice_made(
