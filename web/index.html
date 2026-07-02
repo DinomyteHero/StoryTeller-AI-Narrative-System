@@ -504,6 +504,443 @@ header {
   letter-spacing: 0.08em;
   margin: 0.8rem 0 0.4rem;
 }
+
+.ff-count {
+  text-align: right;
+  font-family: monospace;
+  font-size: 0.72rem;
+  color: var(--text-dim);
+  margin-top: 0.2rem;
+}
+
+/* ── Entry hero & quiet options ───────────────────────────────── */
+.hero-card {
+  background: var(--surface);
+  border: 1px solid var(--accent);
+  border-radius: 6px;
+  padding: 1.3rem 1.4rem;
+  margin-top: 1.5rem;
+  text-align: left;
+}
+.hero-title {
+  color: var(--accent);
+  font-weight: bold;
+  font-size: 1.3rem;
+  margin-bottom: 0.35rem;
+}
+.hero-promise {
+  color: var(--text);
+  font-size: 0.92rem;
+  line-height: 1.5;
+  margin-bottom: 0.45rem;
+}
+.hero-meta {
+  color: var(--text-dim);
+  font-size: 0.8rem;
+  font-family: sans-serif;
+  letter-spacing: 0.03em;
+  margin-bottom: 0.9rem;
+}
+.quiet-options {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-top: 1rem;
+}
+.quiet-btn {
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+  padding: 0.5rem 0.9rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-family: sans-serif;
+  font-size: 0.85rem;
+  min-height: 38px;
+}
+.quiet-btn:hover:not(:disabled) { color: var(--text); border-color: var(--accent-dim); }
+.quiet-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* ── Spark randomizer ─────────────────────────────────────────── */
+.spark-row {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 0.8rem 0.9rem;
+  margin-bottom: 0.8rem;
+}
+.spark-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+.spark-head span {
+  color: var(--text-dim);
+  font-size: 0.78rem;
+  font-family: sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+}
+.spark-slot {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin-bottom: 0.35rem;
+}
+.spark-kind {
+  flex: 0 0 62px;
+  color: var(--text-dim);
+  font-size: 0.72rem;
+  font-family: sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.spark-value {
+  flex: 1;
+  font-size: 0.86rem;
+  color: var(--text);
+  line-height: 1.35;
+}
+.spark-value.empty { color: var(--text-dim); font-style: italic; }
+.spark-btn {
+  flex: 0 0 auto;
+  background: var(--surface-alt);
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.8rem;
+  padding: 0.15rem 0.45rem;
+  min-height: 30px;
+}
+.spark-btn:hover { border-color: var(--accent-dim); color: var(--text); }
+.spark-btn.locked { color: var(--accent); border-color: var(--accent-dim); }
+
+/* ── Reveal card ──────────────────────────────────────────────── */
+.reveal-card {
+  background: var(--surface);
+  border: 1px solid var(--accent);
+  border-radius: 6px;
+  padding: 1.2rem 1.3rem;
+}
+.reveal-label {
+  color: var(--accent);
+  font-family: sans-serif;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  margin-bottom: 0.5rem;
+}
+.reveal-name { font-size: 1.35rem; font-weight: bold; color: var(--text); }
+.reveal-line { color: var(--text-dim); font-size: 0.88rem; margin-bottom: 0.6rem; }
+.reveal-concept { font-style: italic; color: var(--text); font-size: 0.95rem; margin-bottom: 0.6rem; }
+.reveal-arc {
+  border-top: 1px dashed var(--border);
+  padding-top: 0.6rem;
+  margin-top: 0.2rem;
+  font-size: 0.9rem;
+  line-height: 1.55;
+}
+.reveal-actions { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 1rem; }
+.talent-errors {
+  display: none;
+  background: #2a1010;
+  border: 1px solid var(--danger);
+  border-radius: 4px;
+  color: #f88;
+  font-family: sans-serif;
+  font-size: 0.82rem;
+  line-height: 1.5;
+  padding: 0.6rem 0.8rem;
+  margin-top: 0.7rem;
+}
+.talent-errors.visible { display: block; }
+
+/* ── Situation doors ──────────────────────────────────────────── */
+.door {
+  display: block;
+  width: 100%;
+  text-align: left;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 0.85rem 1rem;
+  margin-bottom: 0.6rem;
+  cursor: pointer;
+  color: var(--text);
+  font-family: inherit;
+  font-size: 0.95rem;
+}
+.door:hover:not(:disabled) { border-color: var(--accent-dim); }
+.door:disabled { opacity: 0.5; cursor: not-allowed; }
+.door-title { font-weight: bold; color: var(--accent); }
+.door-sub { color: var(--text-dim); font-size: 0.83rem; margin-top: 0.25rem; line-height: 1.4; }
+.door-badge {
+  display: inline-block;
+  font-family: sans-serif;
+  font-size: 0.66rem;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--accent);
+  border: 1px solid var(--accent-dim);
+  border-radius: 999px;
+  padding: 0.05rem 0.5rem;
+  margin-left: 0.4rem;
+  vertical-align: middle;
+}
+.steer-body { display: none; margin-top: 0.2rem; padding: 0.2rem 0.2rem 0.6rem; }
+.steer-body.open { display: block; }
+.resonance-chip {
+  display: inline-block;
+  background: rgba(200, 168, 78, 0.1);
+  border: 1px solid var(--accent-dim);
+  border-radius: 999px;
+  color: #d8c878;
+  font-size: 0.78rem;
+  font-family: sans-serif;
+  padding: 0.2rem 0.7rem;
+  margin-bottom: 0.6rem;
+}
+
+/* ── Generation wait screen ───────────────────────────────────── */
+.wait-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+@media (max-width: 560px) { .wait-grid { grid-template-columns: 1fr; } }
+.dossier {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 1rem 1.1rem;
+  font-size: 0.9rem;
+}
+.wait-progress {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 1rem 1.1rem;
+}
+.wait-stage { color: var(--accent); font-size: 0.95rem; margin-bottom: 0.4rem; }
+.wait-elapsed { font-family: monospace; color: var(--text-dim); font-size: 0.85rem; margin-bottom: 0.6rem; }
+.wait-honest { color: var(--text-dim); font-size: 0.8rem; font-style: italic; }
+.primer-card {
+  background: var(--surface-alt);
+  border-left: 3px solid var(--accent);
+  border-radius: 0 6px 6px 0;
+  padding: 0.9rem 1.1rem;
+  margin-top: 1rem;
+  font-size: 0.88rem;
+  line-height: 1.55;
+}
+.primer-card ul { margin-left: 1.1rem; }
+.fail-card {
+  background: #2a1010;
+  border: 1px solid var(--danger);
+  border-radius: 6px;
+  padding: 1rem 1.1rem;
+  margin-top: 1rem;
+  font-family: sans-serif;
+  font-size: 0.88rem;
+}
+.fail-actions { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 0.8rem; }
+
+/* ── In-game menu ─────────────────────────────────────────────── */
+.menu-wrap { position: relative; display: inline-block; }
+.menu-pop {
+  display: none;
+  position: absolute;
+  right: 0;
+  top: calc(100% + 4px);
+  background: var(--surface-alt);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  min-width: 175px;
+  z-index: 10;
+  text-align: left;
+}
+.menu-pop.open { display: block; }
+.menu-pop button {
+  display: block;
+  width: 100%;
+  background: none;
+  border: none;
+  color: var(--text);
+  padding: 0.55rem 0.8rem;
+  text-align: left;
+  cursor: pointer;
+  font-family: sans-serif;
+  font-size: 0.83rem;
+  min-height: 36px;
+}
+.menu-pop button:hover { background: var(--surface); color: var(--accent); }
+
+/* ── Incapacitation moment ────────────────────────────────────── */
+.incap-card {
+  background: var(--surface);
+  border: 1px solid var(--danger);
+  border-left-width: 4px;
+  border-radius: 6px;
+  padding: 1rem 1.2rem;
+  margin-bottom: 1rem;
+}
+.incap-title {
+  color: var(--danger);
+  font-weight: bold;
+  font-size: 1.05rem;
+  letter-spacing: 0.04em;
+  margin-bottom: 0.35rem;
+}
+.incap-line {
+  color: var(--text-dim);
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+.incap-note {
+  color: var(--text-dim);
+  font-style: italic;
+  font-size: 0.9rem;
+  border-left: 3px solid var(--border);
+  padding: 0.35rem 0.9rem;
+  margin-bottom: 1rem;
+}
+
+/* ── First-time mechanic explainers ───────────────────────────── */
+.mechanic-explainer {
+  color: var(--text-dim);
+  font-family: sans-serif;
+  font-style: italic;
+  font-size: 0.8rem;
+  padding: 0.4rem 0.2rem 0;
+}
+
+/* ── Pending-decision banner (resume) ─────────────────────────── */
+.pending-banner {
+  background: var(--surface);
+  border: 1px solid var(--accent-dim);
+  border-radius: 6px;
+  padding: 0.9rem 1.1rem;
+  margin-bottom: 1rem;
+  font-family: sans-serif;
+  font-size: 0.88rem;
+}
+.pending-banner .pending-label {
+  color: var(--accent);
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  margin-bottom: 0.4rem;
+}
+.pending-banner button { margin-top: 0.6rem; }
+
+/* ── Mid-stream failure retry ─────────────────────────────────── */
+.retry-card {
+  background: var(--surface);
+  border: 1px dashed var(--border);
+  border-radius: 6px;
+  padding: 0.8rem 1rem;
+  margin-bottom: 0.6rem;
+}
+.retry-card .retry-msg {
+  color: var(--text-dim);
+  font-size: 0.88rem;
+  margin-bottom: 0.6rem;
+}
+
+/* ── Endings reveal (finale) ──────────────────────────────────── */
+.endings-found {
+  text-align: center;
+  color: var(--text-dim);
+  font-family: sans-serif;
+  font-size: 0.85rem;
+  margin-top: 1.4rem;
+}
+.endings-found strong { color: var(--accent); }
+.sealed-endings {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  justify-content: center;
+  margin-top: 0.6rem;
+}
+.sealed-ending {
+  background: var(--surface-alt);
+  border: 1px dashed var(--border);
+  border-radius: 4px;
+  color: var(--text-dim);
+  font-family: sans-serif;
+  font-size: 0.8rem;
+  padding: 0.3rem 0.7rem;
+}
+.sealed-ending .sealed-lock { opacity: 0.65; margin-right: 0.3rem; }
+
+/* ── Finale re-entry actions ──────────────────────────────────── */
+.finale-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  justify-content: center;
+  margin-top: 0.8rem;
+}
+.finale-carry {
+  color: var(--text-dim);
+  font-style: italic;
+  font-size: 0.78rem;
+  margin-top: 0.55rem;
+}
+
+/* ── Continue shelf ───────────────────────────────────────────── */
+.shelf-head {
+  color: var(--text-dim);
+  font-family: sans-serif;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  margin-bottom: 0.5rem;
+}
+.shelf-entry {
+  display: block;
+  width: 100%;
+  text-align: left;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 0.7rem 0.9rem;
+  margin-bottom: 0.5rem;
+  cursor: pointer;
+  color: var(--text);
+  font-family: inherit;
+  font-size: 0.9rem;
+}
+.shelf-entry:hover { border-color: var(--accent-dim); }
+.shelf-title { font-weight: bold; color: var(--accent); }
+.shelf-sub {
+  color: var(--text-dim);
+  font-family: sans-serif;
+  font-size: 0.8rem;
+  margin-top: 0.2rem;
+}
+.shelf-caption {
+  color: var(--text-dim);
+  font-family: sans-serif;
+  font-style: italic;
+  font-size: 0.72rem;
+  margin-top: 0.2rem;
+}
+
+/* ── Sequel carry-over note (situation step) ──────────────────── */
+.carry-note {
+  color: var(--text-dim);
+  font-style: italic;
+  font-size: 0.85rem;
+  border-left: 3px solid var(--border);
+  padding: 0.3rem 0.8rem;
+  margin-bottom: 0.8rem;
+}
 </style>
 </head>
 <body>
@@ -514,26 +951,30 @@ header {
     <h1>Storyteller V3</h1>
     <p>A Star Wars Narrative RPG</p>
 
-    <!-- Create-your-own entry point (Phase 5) -->
-    <div style="background:var(--surface); border:1px solid var(--accent); border-radius:6px; padding:1.1rem; margin-top:1.5rem; text-align:left;">
-      <div style="color:var(--accent); font-weight:bold; font-size:1.1rem; margin-bottom:0.35rem;">Create your own hero</div>
-      <div style="color:var(--text-dim); font-size:0.85rem; line-height:1.45; margin-bottom:0.8rem;">
-        Describe the character you want to play in a sentence or two. The
-        galaxy will be built around them.
+    <!-- Continue shelf — resumable sessions (filled by a later pass) -->
+    <div id="continue-shelf" style="display:none; text-align:left; margin-top:1rem;"></div>
+
+    <!-- Entry hero — the canonical campaign, resolved from GET /campaigns -->
+    <div id="hero-card"></div>
+
+    <div class="quiet-options">
+      <button class="quiet-btn" onclick="showCreator()">Create your own character</button>
+      <button class="quiet-btn" id="surprise-btn" onclick="surpriseMe(this)">Surprise me</button>
+      <button class="quiet-btn" id="picker-toggle" aria-expanded="false" onclick="togglePicker()">Choose your own path</button>
+    </div>
+
+    <div id="start-error" style="display:none; color:var(--danger); font-size:0.85rem; margin-top:0.8rem;"></div>
+
+    <div id="picker-wrap" style="display:none;">
+      <div style="color:var(--text-dim); font-size:0.8rem; text-transform:uppercase; letter-spacing:0.07em; margin:1.5rem 0 0.6rem; text-align:left;">Every campaign, every character</div>
+      <div id="campaign-picker" style="margin-top:0.5rem; text-align:left;">
+        <p style="color:var(--text-dim); font-size:0.9rem; text-align:center;">Loading campaigns...</p>
       </div>
-      <button class="start-btn" onclick="showCreator()" style="margin-top:0;">
-        ✦ Create a character &amp; adventure
+
+      <button class="start-btn" id="start-btn" onclick="startSession()" disabled style="margin-top:1.5rem;">
+        Select a campaign to begin
       </button>
     </div>
-
-    <div style="color:var(--text-dim); font-size:0.8rem; text-transform:uppercase; letter-spacing:0.07em; margin:1.5rem 0 0.6rem; text-align:left;">Or pick a prebuilt campaign</div>
-    <div id="campaign-picker" style="margin-top:0.5rem; text-align:left;">
-      <p style="color:var(--text-dim); font-size:0.9rem; text-align:center;">Loading campaigns...</p>
-    </div>
-
-    <button class="start-btn" id="start-btn" onclick="startSession()" disabled style="margin-top:1.5rem;">
-      Select a campaign to begin
-    </button>
   </div>
 
   <!-- ╔══════════════════════════════════════════════════════════╗ -->
@@ -549,6 +990,16 @@ header {
         Who do you want to be? A jaded ex-Imperial slicer? A Wookiee
         frontier medic with a debt? Describe them.
       </p>
+
+      <!-- Spark randomizer — curated tables from GET /funnel/seeds -->
+      <div id="spark-row" class="spark-row" style="display:none;">
+        <div class="spark-head">
+          <span>Need a spark?</span>
+          <button type="button" class="quiet-btn" style="padding:0.25rem 0.6rem; font-size:0.78rem; min-height:30px;" onclick="rollAllSparks()">Roll all</button>
+        </div>
+        <div id="spark-slots"></div>
+      </div>
+
       <textarea id="pitch-input" rows="4" maxlength="2000"
         style="width:100%; background:var(--surface); border:1px solid var(--border); color:var(--text); padding:0.7rem 0.8rem; border-radius:4px; font-family:Georgia,serif; font-size:0.95rem; resize:vertical; box-sizing:border-box;"
         placeholder="e.g. A jaded ex-Imperial slicer who defected after a purge and now sells secrets she can't forget…"></textarea>
@@ -557,40 +1008,91 @@ header {
       </button>
     </div>
 
-    <!-- Step 2: editable draft (filled by renderDraftEditor) -->
+    <!-- Step 2a: the reveal card (filled by renderRevealCard) -->
+    <div id="reveal-card" class="reveal-card" style="display:none; margin-top:1.2rem;"></div>
+
+    <!-- Step 2b: editable draft (filled by renderDraftEditor; expanded via "Tweak stats") -->
     <div id="draft-editor" style="display:none; margin-top:1.2rem;"></div>
 
-    <!-- Step 3: premise + generate (revealed after a draft exists) -->
+    <!-- Step 3: situation — three doors (revealed by "Choose their story") -->
     <div id="premise-step" style="display:none; margin-top:1.4rem; border-top:1px dashed var(--border); padding-top:1.2rem;">
-      <div style="color:var(--accent); font-weight:bold; font-size:1.05rem; margin-bottom:0.5rem;">Shape the adventure</div>
-      <p style="color:var(--text-dim); font-size:0.85rem; margin-bottom:0.7rem;">
-        Optional. Leave blank to let the galaxy surprise you.
-      </p>
-      <input id="era-input" type="text" placeholder="Era (e.g. Galactic Civil War)"
-        style="width:100%; background:var(--surface); border:1px solid var(--border); color:var(--text); padding:0.55rem 0.7rem; border-radius:4px; font-family:inherit; font-size:0.9rem; box-sizing:border-box; margin-bottom:0.5rem;">
-      <input id="loc-input" type="text" placeholder="Location (e.g. Nar Shaddaa)"
-        style="width:100%; background:var(--surface); border:1px solid var(--border); color:var(--text); padding:0.55rem 0.7rem; border-radius:4px; font-family:inherit; font-size:0.9rem; box-sizing:border-box; margin-bottom:0.5rem;">
-      <textarea id="premise-input" rows="3" maxlength="1500" placeholder="A premise or hook (optional)…"
-        style="width:100%; background:var(--surface); border:1px solid var(--border); color:var(--text); padding:0.55rem 0.7rem; border-radius:4px; font-family:Georgia,serif; font-size:0.92rem; resize:vertical; box-sizing:border-box; margin-bottom:0.5rem;"></textarea>
-      <label style="display:flex; align-items:center; gap:0.4rem; color:var(--text-dim); font-size:0.82rem; margin-bottom:0.7rem; cursor:pointer;">
-        <input id="architect-toggle" type="checkbox"> Deeper story planning (slower)
-      </label>
-      <button id="generate-btn" class="start-btn" onclick="generateAndPlay()" style="margin-top:0;">
-        Generate adventure &amp; play
+      <div style="color:var(--accent); font-weight:bold; font-size:1.05rem; margin-bottom:0.7rem;">Where does their story begin?</div>
+
+      <!-- Sequel entry: a completed character carried into a new story -->
+      <div id="carryover-note" class="carry-note" style="display:none;"></div>
+
+      <button type="button" class="door" id="door-dropin" onclick="doorDropIn(this)">
+        <span class="door-title">Drop into <span id="door-hero-name"></span></span><span class="door-badge">ready now</span>
+        <div class="door-sub" id="door-hero-sub"></div>
       </button>
+
+      <button type="button" class="door" id="door-surprise" onclick="doorSurprise(this)">
+        <span class="door-title">Surprise me</span>
+        <div class="door-sub">A galaxy generated around them — era, trouble, and stakes drawn for you.</div>
+      </button>
+
+      <button type="button" class="door" id="door-steer" onclick="openSteer()">
+        <span class="door-title">Steer it</span>
+        <div class="door-sub">Tell the galaxy what kind of story to build around them.</div>
+      </button>
+      <div class="steer-body" id="steer-body">
+        <div class="resonance-chip" id="resonance-chip" style="display:none;"></div>
+        <textarea id="premise-input" rows="3" maxlength="1500" placeholder="A premise or hook — the back-cover blurb of the story you want…"
+          style="width:100%; background:var(--surface); border:1px solid var(--border); color:var(--text); padding:0.55rem 0.7rem; border-radius:4px; font-family:Georgia,serif; font-size:0.92rem; resize:vertical; box-sizing:border-box; margin-bottom:0.3rem;"></textarea>
+        <div id="steer-eras"></div>
+        <button id="generate-btn" class="start-btn" onclick="steerGenerate()" style="margin-top:0.7rem;">
+          Generate &amp; play
+        </button>
+      </div>
+
+      <details style="margin-top:0.5rem; text-align:left;">
+        <summary style="color:var(--text-dim); font-size:0.8rem; cursor:pointer; user-select:none;">Advanced</summary>
+        <label style="display:flex; align-items:center; gap:0.4rem; color:var(--text-dim); font-size:0.82rem; margin-top:0.5rem; cursor:pointer;">
+          <input id="architect-toggle" type="checkbox"> Deeper story planning (slower)
+        </label>
+      </details>
     </div>
 
     <div id="creator-status" style="display:none; color:var(--accent); font-size:0.88rem; margin-top:0.9rem; text-align:center;"></div>
     <div id="creator-error" style="display:none; color:var(--danger); font-size:0.85rem; margin-top:0.7rem;"></div>
   </div>
 
+  <!-- ╔══════════════════════════════════════════════════════════╗ -->
+  <!-- ║  WAIT SCREEN  (campaign generation)                       ║ -->
+  <!-- ╚══════════════════════════════════════════════════════════╝ -->
+  <div id="wait-screen" class="start-screen" style="display:none; text-align:left;">
+    <h1 style="font-size:1.6rem;">Building their story</h1>
+    <div class="wait-grid">
+      <div class="dossier" id="wait-dossier"></div>
+      <div class="wait-progress">
+        <div class="wait-stage" id="wait-stage">Saving your character…</div>
+        <div class="wait-elapsed" id="wait-elapsed">0s</div>
+        <div class="wait-honest">Usually under a minute; retries can take up to three.</div>
+      </div>
+    </div>
+    <div class="primer-card">
+      <div style="color:var(--accent); font-family:sans-serif; font-size:0.72rem; text-transform:uppercase; letter-spacing:0.12em; margin-bottom:0.4rem;">While you wait — how this game works</div>
+      <ul>
+        <li>The dice are real, and failure is narrated as failure — that is what makes victory mean something.</li>
+        <li>You can always type your own action instead of picking a choice.</li>
+        <li>Wounds and strain are tracked for you.</li>
+      </ul>
+    </div>
+    <div id="wait-fail"></div>
+  </div>
+
   <!-- ── Game Screen ───────────────────────────────────────────── -->
   <div id="game-screen" style="display:none">
     <header>
       <span class="campaign-name" id="campaign-name"></span>
-      <span>
+      <span class="menu-wrap">
         <button class="stats-btn" id="stats-btn" onclick="toggleStats()">Stats</button>
+        <button class="stats-btn" id="menu-btn" onclick="toggleGameMenu()" aria-haspopup="true" aria-expanded="false" title="Menu">☰</button>
         <span class="session-info" id="session-info"></span>
+        <div class="menu-pop" id="game-menu">
+          <button onclick="copyResumeLink(this)">Copy resume link</button>
+          <button onclick="leaveStory()">Leave story</button>
+        </div>
       </span>
     </header>
 
@@ -637,16 +1139,65 @@ let selectedCampaign = null;  // { campaign_name, display_name, character_id }
 let createdDraft = null;        // last LLM draft (with edits overlaid)
 let createdCharacterId = null;  // slug returned by /character/save
 
+/* ── Funnel state ──────────────────────────────────────────────── */
+let heroCampaign = null;        // { campaign, character } — resolved from GET /campaigns
+let funnelSeedsPromise = null;  // cached GET /funnel/seeds
+let sparkTables = null;         // resolved spark_tables (null = unavailable)
+let sparkPicks = {};            // slot key -> table entry
+let sparkLocks = {};            // slot key -> locked?
+let sparkHints = null;          // structured hints sent with POST /character/draft
+let lastPitch = '';             // pitch behind the current draft (for re-drafts)
+let lastGenOpts = null;         // last /campaign/generate options (for "Try again")
+let redraftAttempted = false;   // one silent corrective re-draft per user draft
+let waitTimer = null;           // wait-screen elapsed/stage interval
+let priorSessionId = null;      // sequel hook — sent with /campaign/generate
+let lastCompleted = null;       // { session_id, campaign_name, character_name }
+
+/* ── Core-loop legibility state ─────────────────────────────────── */
+let woundThreshold = null;      // turn responses carry wounds only — fetched once per session
+let prevWounds = 0;
+let wasIncapacitated = false;   // last applied state had wounds at/over the threshold
+let lastTurnNumber = 0;
+let retryInFlight = false;      // one non-streaming retry of a dropped stream
+
+const GHOST_ACTIONS = [
+  'Try: lie to him about the manifest',
+  "Try: ask her what she isn't saying",
+  "Try: draw your blaster but don't fire",
+  'Try: search the room before anyone returns',
+  "Try: offer to pay double — in credits you don't have",
+  'Try: stall for time and watch the exits',
+  'Try: tell the truth, all of it, and watch their face',
+  'Try: follow him at a distance',
+  'Try: comm your contact and call in the favor',
+];
+const NEUTRAL_PLACEHOLDER = 'Describe what your character does or says...';
+
+const MECHANIC_EXPLAINERS = {
+  first_check:   'The dice are real: successes beat failures, and Advantage/Threat shade how it happens.',
+  first_triumph: 'A Triumph is a critical stroke of fortune — something extra goes your way.',
+  first_despair: 'A Despair is fortune turning — the cost is real, and the story keeps it.',
+  first_destiny: 'Destiny points tilt a single roll — light side for you, dark side against.',
+};
+
 function _esc2(s) { return (s == null ? '' : String(s)).replace(/[&<>"]/g, c => (
   {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
 
 function showCreator() {
   document.getElementById('start-screen').style.display = 'none';
   document.getElementById('game-screen').style.display = 'none';
+  document.getElementById('wait-screen').style.display = 'none';
   document.getElementById('creator-screen').style.display = 'block';
+  // A fresh creator entry is not a sequel — undo any sequel-flow furniture.
+  priorSessionId = null;
+  document.getElementById('creator-pitch-step').style.display = 'block';
+  document.getElementById('carryover-note').style.display = 'none';
+  initSparkRow();
 }
 function backToStart() {
   document.getElementById('creator-screen').style.display = 'none';
+  document.getElementById('wait-screen').style.display = 'none';
+  renderContinueShelf();
   document.getElementById('start-screen').style.display = 'block';
 }
 function _creatorStatus(msg) {
@@ -660,6 +1211,131 @@ function _creatorError(msg) {
   el.innerHTML = _esc2(msg); el.style.display = 'block';
 }
 
+/* ── Funnel seeds (spark tables + premise seeds) ─────────────────── */
+function loadFunnelSeeds() {
+  if (!funnelSeedsPromise) {
+    funnelSeedsPromise = fetch(API + '/funnel/seeds')
+      .then(function(r){ return r.ok ? r.json() : {}; })
+      .catch(function(){ return {}; });
+  }
+  return funnelSeedsPromise;
+}
+
+/* ── Spark randomizer ─────────────────────────────────────────────── */
+const SPARK_SLOTS = [
+  { key: 'species', label: 'Species', table: 'species' },
+  { key: 'career',  label: 'Career',  table: 'careers' },
+  { key: 'hook',    label: 'Hook',    table: 'hooks' },
+  { key: 'flaw',    label: 'Flaw',    table: 'flaws' },
+];
+
+async function initSparkRow() {
+  const row = document.getElementById('spark-row');
+  const seeds = await loadFunnelSeeds();
+  const st = (seeds && seeds.spark_tables) || {};
+  const usable = st.template && SPARK_SLOTS.every(function(s){
+    return Array.isArray(st[s.table]) && st[s.table].length;
+  });
+  if (!usable) { sparkTables = null; row.style.display = 'none'; return null; }
+  sparkTables = st;
+  if (!document.getElementById('spark-slot-species')) {
+    document.getElementById('spark-slots').innerHTML = SPARK_SLOTS.map(function(s){
+      return '<div class="spark-slot">'
+        + '<span class="spark-kind">' + s.label + '</span>'
+        + '<span class="spark-value empty" id="spark-slot-' + s.key + '">—</span>'
+        + '<button type="button" class="spark-btn" title="Reroll ' + s.label.toLowerCase()
+          + '" onclick="rollSpark(\'' + s.key + '\')">⟳</button>'
+        + '<button type="button" class="spark-btn" id="spark-lock-' + s.key
+          + '" title="Lock ' + s.label.toLowerCase()
+          + '" aria-pressed="false" onclick="toggleSparkLock(\'' + s.key + '\')">🔓</button>'
+        + '</div>';
+    }).join('');
+  }
+  row.style.display = 'block';
+  return st;
+}
+
+function _pickSpark(arr, current) {
+  if (arr.length > 1 && current) {
+    const others = arr.filter(function(e){ return e !== current; });
+    return others[Math.floor(Math.random() * others.length)];
+  }
+  return arr[Math.floor(Math.random() * arr.length)];
+}
+
+function _renderSparkSlot(key) {
+  const el = document.getElementById('spark-slot-' + key);
+  const entry = sparkPicks[key];
+  if (!el || !entry) return;
+  el.classList.remove('empty');
+  el.textContent = entry.label || entry.text || '';
+}
+
+async function rollSpark(key) {
+  if (!sparkTables && !(await initSparkRow())) return;
+  const slot = SPARK_SLOTS.find(function(s){ return s.key === key; });
+  sparkPicks[key] = _pickSpark(sparkTables[slot.table], sparkPicks[key]);
+  _renderSparkSlot(key);
+  composeSparkPitch();
+}
+
+async function rollAllSparks(ignoreLocks) {
+  if (!sparkTables && !(await initSparkRow())) return;
+  SPARK_SLOTS.forEach(function(s){
+    if (!ignoreLocks && sparkLocks[s.key] && sparkPicks[s.key]) return;
+    sparkPicks[s.key] = _pickSpark(sparkTables[s.table], sparkPicks[s.key]);
+    _renderSparkSlot(s.key);
+  });
+  composeSparkPitch();
+}
+
+function toggleSparkLock(key) {
+  sparkLocks[key] = !sparkLocks[key];
+  const btn = document.getElementById('spark-lock-' + key);
+  btn.classList.toggle('locked', !!sparkLocks[key]);
+  btn.setAttribute('aria-pressed', sparkLocks[key] ? 'true' : 'false');
+  btn.textContent = sparkLocks[key] ? '🔒' : '🔓';
+}
+
+function composeSparkPitch() {
+  const p = sparkPicks;
+  if (!p.species || !p.career || !p.hook || !p.flaw) return;
+  const pitch = String(sparkTables.template)
+    .replace('{species_fragment}', p.species.fragment || p.species.label || '')
+    .replace('{career_fragment}',  p.career.fragment || p.career.label || '')
+    .replace('{hook}', p.hook.text || '')
+    .replace('{flaw}', p.flaw.text || '');
+  document.getElementById('pitch-input').value = pitch;
+  sparkHints = {
+    species:   p.species.id,
+    career:    p.career.id,
+    game_line: p.career.game_line || '',
+    hook:      p.hook.text || '',
+    flaw:      p.flaw.text || '',
+  };
+}
+
+/* ── Draft + reveal card ─────────────────────────────────────────── */
+async function _requestDraft(pitch, hints) {
+  const body = { pitch: pitch };
+  if (hints) body.hints = hints;
+  const res = await fetch(API + '/character/draft', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(function(){ return { detail: res.statusText }; });
+    const detail = err.detail;
+    const msg = (detail && Array.isArray(detail.errors)) ? detail.errors.join('; ')
+              : (typeof detail === 'string' ? detail : 'Draft failed');
+    throw new Error(msg);
+  }
+  const data = await res.json();
+  createdDraft = data.draft;
+  createdCharacterId = null;   // a fresh draft has not been saved yet
+  return createdDraft;
+}
+
 async function draftCharacter() {
   const pitch = document.getElementById('pitch-input').value.trim();
   if (!pitch) { _creatorError('Describe your character first.'); return; }
@@ -667,23 +1343,133 @@ async function draftCharacter() {
   const btn = document.getElementById('draft-btn');
   btn.disabled = true; btn.textContent = 'Drafting…';
   try {
-    const res = await fetch(API + '/character/draft', {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ pitch }),
-    });
-    if (!res.ok) {
-      const err = await res.json().catch(() => ({ detail: res.statusText }));
-      throw new Error(typeof err.detail === 'string' ? err.detail : 'Draft failed');
-    }
-    const data = await res.json();
-    createdDraft = data.draft;
-    renderDraftEditor(createdDraft);
-    document.getElementById('premise-step').style.display = 'block';
+    lastPitch = pitch;
+    redraftAttempted = false;
+    await _requestDraft(pitch, sparkHints);
+    renderRevealCard(createdDraft);
     _creatorStatus('');
   } catch (e) {
+    _creatorStatus('');
     _creatorError(e.message);
   } finally {
     btn.disabled = false; btn.textContent = 'Re-draft from pitch';
+  }
+}
+
+function _prettySlug(s) { return String(s || '').replace(/_/g, ' '); }
+
+function renderRevealCard(draft) {
+  const card = document.getElementById('reveal-card');
+  const arc = draft.narrative_arc || {};
+  let html = '<div class="reveal-label">Your character</div>';
+  html += '<div class="reveal-name">' + _esc2(draft.name || 'Unnamed') + '</div>';
+  html += '<div class="reveal-line">' + _esc2(_prettySlug(draft.species))
+    + ' · ' + _esc2(_prettySlug(draft.career)) + '</div>';
+  if (draft.archetype_concept) {
+    html += '<div class="reveal-concept">' + _esc2(draft.archetype_concept) + '</div>';
+  }
+  if (arc.want || arc.need) {
+    html += '<div class="reveal-arc">';
+    if (arc.want && arc.need) {
+      html += 'They want <strong>' + _esc2(arc.want) + '</strong> — but they need <strong>'
+        + _esc2(arc.need) + '</strong>';
+    } else {
+      html += 'They ' + (arc.want ? 'want' : 'need') + ' <strong>'
+        + _esc2(arc.want || arc.need) + '</strong>';
+    }
+    html += '</div>';
+  }
+  const tals = draft.signature_talents || [];
+  if (tals.length) {
+    html += '<div style="color:var(--text-dim); font-size:0.82rem; margin-top:0.6rem;">Signature: '
+      + tals.map(function(t){ return _esc2(t.name || ''); }).filter(Boolean).join(' · ')
+      + '</div>';
+  }
+  html += '<div class="talent-errors" id="talent-errors"></div>';
+  html += '<div class="reveal-actions">'
+    + '<button class="start-btn" style="font-size:0.95rem;" onclick="revealPlayNow(this)">Play now</button>'
+    + '<button class="quiet-btn" onclick="revealChooseStory()">Choose their story</button>'
+    + '<button class="quiet-btn" id="tweak-stats-btn" onclick="revealTweakStats(this)">Tweak stats</button>'
+    + '</div>';
+  if (heroCampaign) {
+    html += '<div style="color:var(--text-dim); font-size:0.78rem; margin-top:0.5rem;">Play now drops '
+      + _esc2(draft.name || 'them') + ' straight into '
+      + _esc2(heroCampaign.campaign.display_name) + '.</div>';
+  }
+  card.innerHTML = html;
+  card.style.display = 'block';
+  document.getElementById('draft-editor').style.display = 'none';
+  document.getElementById('premise-step').style.display = 'none';
+  card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+function revealTweakStats(btn) {
+  renderDraftEditor(createdDraft);   // existing editor markup, expanded in place
+  btn.disabled = true;
+}
+
+/* ── Save + validation-error exits ───────────────────────────────── */
+async function saveCreatedCharacter() {
+  if (createdCharacterId) return true;
+  const draft = collectDraftEdits();
+  const res = await fetch(API + '/character/save', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ character_json: draft }),
+  });
+  if (res.ok) {
+    createdCharacterId = (await res.json()).character_id;
+    createdDraft = draft;    // the saved edits become the draft of record
+    return true;
+  }
+  const err = await res.json().catch(function(){ return {}; });
+  const detail = err.detail || {};
+  const errors = Array.isArray(detail.errors) ? detail.errors
+    : [typeof detail === 'string' ? detail : 'Could not save character'];
+  if (res.status === 422 && sparkHints && !redraftAttempted) {
+    // Spark/surprise path: one silent corrective re-draft before any error UI.
+    redraftAttempted = true;
+    try {
+      await _redraftWithCorrection(errors);
+      renderRevealCard(createdDraft);
+      return await saveCreatedCharacter();
+    } catch (e2) { /* fall through to the error UI */ }
+  }
+  if (res.status === 422) { renderTalentErrors(errors); return false; }
+  throw new Error(errors.join('; '));
+}
+
+function renderTalentErrors(errors) {
+  const box = document.getElementById('talent-errors');
+  if (!box) { _creatorError(errors.join('; ')); return; }
+  box.innerHTML = '<div style="margin-bottom:0.4rem;">The draft did not pass the mechanical check:</div>'
+    + errors.map(function(e){ return '<div>• ' + _esc2(e) + '</div>'; }).join('')
+    + '<button class="quiet-btn" style="margin-top:0.6rem;" onclick="fixAndRedraft(this)">Fix and re-draft</button>';
+  box.dataset.errors = JSON.stringify(errors);
+  box.classList.add('visible');
+  box.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+async function _redraftWithCorrection(errors) {
+  const pitch = lastPitch || document.getElementById('pitch-input').value.trim();
+  const correction = '\n\nCORRECTION — a previous draft of this character failed '
+    + 'validation with these errors; produce a draft that fixes them: '
+    + errors.join('; ');
+  return _requestDraft(pitch + correction, sparkHints);
+}
+
+async function fixAndRedraft(btn) {
+  const box = document.getElementById('talent-errors');
+  const errors = JSON.parse(box.dataset.errors || '[]');
+  btn.disabled = true; btn.textContent = 'Re-drafting…';
+  _creatorError(''); _creatorStatus('Re-drafting your character…');
+  try {
+    await _redraftWithCorrection(errors);
+    renderRevealCard(createdDraft);
+    _creatorStatus('');
+  } catch (e) {
+    _creatorStatus('');
+    _creatorError(e.message);
+    btn.disabled = false; btn.textContent = 'Fix and re-draft';
   }
 }
 
@@ -757,57 +1543,359 @@ function collectDraftEdits() {
   return d;
 }
 
-async function generateAndPlay() {
+/* ── Situation: three doors ──────────────────────────────────────── */
+async function revealChooseStory() {
+  const step = document.getElementById('premise-step');
+  step.style.display = 'block';
+  // Door (a): canonical drop-in — hidden if no hero campaign resolved.
+  const dropBtn = document.getElementById('door-dropin');
+  if (heroCampaign) {
+    document.getElementById('door-hero-name').textContent = heroCampaign.campaign.display_name;
+    document.getElementById('door-hero-sub').textContent =
+      heroCampaign.campaign.story_promise || heroCampaign.campaign.dramatic_premise || '';
+    dropBtn.style.display = 'block';
+  } else {
+    dropBtn.style.display = 'none';
+  }
+  // Resonance chip — the drafted character's want shapes the generation.
+  const arc = (createdDraft && createdDraft.narrative_arc) || {};
+  const chip = document.getElementById('resonance-chip');
+  if (arc.want) {
+    chip.textContent = '✦ Their want will shape this galaxy: ' + arc.want;
+    chip.style.display = 'inline-block';
+  } else {
+    chip.style.display = 'none';
+  }
+  // Era choices for the steer door, with their blurbs.
+  const seeds = await loadFunnelSeeds();
+  const eras = (seeds.premise_seeds && seeds.premise_seeds.eras) || [];
+  document.getElementById('steer-eras').innerHTML = eras.map(function(e, i){
+    return '<label style="display:block; background:var(--surface); border:1px solid var(--border); border-radius:4px; padding:0.5rem 0.7rem; margin-top:0.45rem; cursor:pointer; font-size:0.85rem;">'
+      + '<input type="radio" name="steer-era" value="' + _esc2(e.id)
+      + '" data-label="' + _esc2(e.label) + '"' + (i === 0 ? ' checked' : '') + '> '
+      + '<strong>' + _esc2(e.label) + '</strong>'
+      + '<div style="color:var(--text-dim); font-size:0.78rem; margin-top:0.2rem; line-height:1.4;">'
+      + _esc2(e.blurb || '') + '</div>'
+      + '</label>';
+  }).join('');
+  step.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function openSteer() {
+  document.getElementById('steer-body').classList.add('open');
+  document.getElementById('premise-input').focus();
+}
+
+async function revealPlayNow(btn) { return _dropIntoHero(btn); }
+async function doorDropIn(btn) { return _dropIntoHero(btn); }
+
+async function _dropIntoHero(btn) {
+  if (!heroCampaign) {
+    _creatorError('No ready campaign is available — choose "Surprise me" or "Steer it" instead.');
+    return;
+  }
   _creatorError('');
-  const btn = document.getElementById('generate-btn');
   btn.disabled = true;
+  _creatorStatus('Saving your character…');
   try {
-    // 1. Save the (edited) character.
-    _creatorStatus('Saving your character…');
-    const draft = collectDraftEdits();
-    const saveRes = await fetch(API + '/character/save', {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ character_json: draft }),
-    });
-    if (!saveRes.ok) {
-      const err = await saveRes.json().catch(() => ({}));
-      const detail = err.detail || {};
-      const msg = Array.isArray(detail.errors) ? detail.errors.join('; ')
-                 : (typeof detail === 'string' ? detail : 'Could not save character');
-      throw new Error(msg);
-    }
-    createdCharacterId = (await saveRes.json()).character_id;
-
-    // 2. Generate a campaign tailored to the character.
-    _creatorStatus('Building the galaxy around ' + _esc2(draft.name) + '… (this can take ~15s)');
-    const genRes = await fetch(API + '/campaign/generate', {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        premise: document.getElementById('premise-input').value.trim(),
-        era: document.getElementById('era-input').value.trim(),
-        location: document.getElementById('loc-input').value.trim(),
-        use_architect: document.getElementById('architect-toggle').checked,
-        character_id: createdCharacterId,
-      }),
-    });
-    if (!genRes.ok) {
-      throw new Error('Could not generate a campaign. Try a different premise.');
-    }
-    const genData = await genRes.json();
-
-    // 3. Hand off to the existing session flow.
+    const ok = await saveCreatedCharacter();
+    if (!ok) { _creatorStatus(''); return; }   // errors shown by the talents block
     _creatorStatus('Entering the story…');
     selectedCampaign = {
-      campaign_name: genData.campaign_name,
-      display_name: genData.display_name,
-      character_id: createdCharacterId,
+      campaign_name: heroCampaign.campaign.campaign_name,
+      display_name:  heroCampaign.campaign.display_name,
+      character_id:  createdCharacterId,
     };
     document.getElementById('creator-screen').style.display = 'none';
     _creatorStatus('');
-    startSession();
+    await startSession();
+    if (document.getElementById('game-screen').style.display === 'none') {
+      document.getElementById('creator-screen').style.display = 'block';
+      _creatorError(document.getElementById('error-msg').textContent
+        || 'Could not start the session — try again.');
+    }
   } catch (e) {
     _creatorStatus('');
     _creatorError(e.message);
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+async function doorSurprise(btn) {
+  btn.disabled = true;
+  try {
+    const seeds = await loadFunnelSeeds();
+    const ps = (seeds && seeds.premise_seeds) || {};
+    const eras = ps.eras || [];
+    const era = eras.length ? eras[Math.floor(Math.random() * eras.length)] : null;
+    const pool = (era && ps.seeds && ps.seeds[era.id]) || [];
+    const tones = ps.tones || [];
+    const registers = ps.moral_registers || [];
+    lastGenOpts = {
+      premise: pool.length ? pool[Math.floor(Math.random() * pool.length)] : '',
+      era: era ? era.label : '',
+      tone: tones.length ? tones[Math.floor(Math.random() * tones.length)] : '',
+      moral_register: registers.length
+        ? registers[Math.floor(Math.random() * registers.length)] : '',
+      mode: '2',
+      surprise_me: true,
+    };
+    await generateAndPlay(lastGenOpts);
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+function steerGenerate() {
+  const premise = document.getElementById('premise-input').value.trim();
+  const sel = document.querySelector('input[name="steer-era"]:checked');
+  lastGenOpts = {
+    premise: premise,
+    era: sel ? sel.dataset.label : '',
+    mode: premise ? '2' : '1',
+    surprise_me: false,
+  };
+  generateAndPlay(lastGenOpts);
+}
+
+/* ── The wait — generation with an honest clock ──────────────────── */
+const WAIT_STAGES = [
+  [0,  'Saving your character…'],
+  [4,  'Drafting the galaxy…'],
+  [25, 'Auditioning the cast…'],
+  [55, 'Stress-testing the story…'],
+];
+
+function _startWaitProgress() {
+  const started = Date.now();
+  const stageEl = document.getElementById('wait-stage');
+  const elapsedEl = document.getElementById('wait-elapsed');
+  stageEl.textContent = WAIT_STAGES[0][1];
+  elapsedEl.textContent = '0s';
+  if (waitTimer) clearInterval(waitTimer);
+  waitTimer = setInterval(function(){
+    const s = Math.floor((Date.now() - started) / 1000);
+    elapsedEl.textContent = s + 's';
+    for (let i = WAIT_STAGES.length - 1; i >= 0; i--) {
+      if (s >= WAIT_STAGES[i][0]) { stageEl.textContent = WAIT_STAGES[i][1]; break; }
+    }
+  }, 1000);
+}
+
+function showWaitScreen() {
+  document.getElementById('creator-screen').style.display = 'none';
+  document.getElementById('start-screen').style.display = 'none';
+  document.getElementById('wait-fail').innerHTML = '';
+  renderWaitDossier(createdDraft || {});
+  document.getElementById('wait-screen').style.display = 'block';
+  _startWaitProgress();
+}
+
+function hideWaitScreen() {
+  if (waitTimer) { clearInterval(waitTimer); waitTimer = null; }
+  document.getElementById('wait-screen').style.display = 'none';
+}
+
+function renderWaitDossier(draft) {
+  const arc = draft.narrative_arc || {};
+  const lo = draft.starting_loadout || {};
+  let html = '<div style="color:var(--accent); font-family:sans-serif; font-size:0.72rem; text-transform:uppercase; letter-spacing:0.12em; margin-bottom:0.5rem;">Dossier</div>';
+  html += '<div style="font-weight:bold; font-size:1.1rem;">' + _esc2(draft.name || '') + '</div>';
+  html += '<div style="color:var(--text-dim); font-size:0.82rem; margin-bottom:0.5rem;">'
+    + _esc2(_prettySlug(draft.species)) + ' · ' + _esc2(_prettySlug(draft.career)) + '</div>';
+  if (draft.archetype_concept) {
+    html += '<div style="font-style:italic; margin-bottom:0.5rem;">' + _esc2(draft.archetype_concept) + '</div>';
+  }
+  if (arc.want || arc.need) {
+    html += '<div style="font-size:0.85rem; line-height:1.5; margin-bottom:0.5rem;">';
+    if (arc.want) html += '<div><span style="color:var(--text-dim);">Want:</span> ' + _esc2(arc.want) + '</div>';
+    if (arc.need) html += '<div><span style="color:var(--text-dim);">Need:</span> ' + _esc2(arc.need) + '</div>';
+    html += '</div>';
+  }
+  if (draft.background) {
+    const bg = String(draft.background);
+    html += '<div style="color:var(--text-dim); font-size:0.82rem; line-height:1.5; margin-bottom:0.5rem;">'
+      + _esc2(bg.slice(0, 280)) + (bg.length > 280 ? '…' : '') + '</div>';
+  }
+  const gear = []
+    .concat((lo.weapons || []).map(function(w){ return w && w.name; }))
+    .concat(lo.armor && lo.armor.name ? [lo.armor.name] : [])
+    .concat((lo.tools || []).map(function(t){ return t && t.name; }))
+    .concat((lo.special_items || []).map(function(s){
+      return typeof s === 'string' ? s : (s && s.name);
+    }))
+    .filter(Boolean);
+  if (gear.length) {
+    html += '<div style="font-size:0.82rem;"><span style="color:var(--text-dim);">Carrying:</span> '
+      + gear.map(_esc2).join(' · ') + '</div>';
+  }
+  document.getElementById('wait-dossier').innerHTML = html;
+}
+
+async function generateAndPlay(opts) {
+  opts = opts || {};
+  _creatorError('');
+  showWaitScreen();
+  try {
+    // 1. Save the (edited) character — no-op if already saved.
+    const ok = await saveCreatedCharacter();
+    if (!ok) {
+      // Validation errors are rendered next to the talents block.
+      hideWaitScreen();
+      document.getElementById('creator-screen').style.display = 'block';
+      return;
+    }
+    // 2. Generate a campaign tailored to the character, then start play.
+    await _generateOnly(opts);
+  } catch (e) {
+    renderGenFailure([e.message], opts);
+  }
+}
+
+async function _generateOnly(opts) {
+  const body = {
+    premise: opts.premise || '',
+    era: opts.era || '',
+    mode: opts.mode || 'auto',
+    surprise_me: !!opts.surprise_me,
+    use_architect: document.getElementById('architect-toggle').checked,
+    character_id: createdCharacterId,
+  };
+  if (opts.tone) body.tone = opts.tone;
+  if (opts.moral_register) body.moral_register = opts.moral_register;
+  // Sequel hook — the backend folds "Previously: {ending}" into the brief.
+  if (priorSessionId) body.prior_session_id = priorSessionId;
+
+  const controller = new AbortController();
+  const timeout = setTimeout(function(){ controller.abort(); }, 240000);
+  let genRes;
+  try {
+    genRes = await fetch(API + '/campaign/generate', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+      signal: controller.signal,
+    });
+  } catch (e) {
+    renderGenFailure([e.name === 'AbortError'
+      ? 'Generation timed out after four minutes.'
+      : ('Network error: ' + e.message)], opts);
+    return;
+  } finally {
+    clearTimeout(timeout);
+  }
+
+  if (!genRes.ok) {
+    const err = await genRes.json().catch(function(){ return {}; });
+    const detail = err.detail || {};
+    const details = Array.isArray(detail.details) && detail.details.length
+      ? detail.details
+      : [typeof detail === 'string' ? detail
+         : (detail.error || 'Could not generate a valid campaign.')];
+    renderGenFailure(details, opts);
+    return;
+  }
+
+  const genData = await genRes.json();
+  hideWaitScreen();
+  selectedCampaign = {
+    campaign_name: genData.campaign_name,
+    display_name:  genData.display_name,
+    character_id:  createdCharacterId,
+  };
+  await startSession();
+  if (document.getElementById('game-screen').style.display === 'none') {
+    document.getElementById('wait-screen').style.display = 'block';
+    renderGenFailure([document.getElementById('error-msg').textContent
+      || 'Could not start the session.'], opts);
+  }
+}
+
+function renderGenFailure(details, opts) {
+  if (waitTimer) { clearInterval(waitTimer); waitTimer = null; }
+  document.getElementById('wait-screen').style.display = 'block';
+  document.getElementById('wait-stage').textContent = 'Generation failed.';
+  const name = (createdDraft && createdDraft.name) || 'your character';
+  let html = '<div class="fail-card">';
+  html += '<div style="color:#f88; font-weight:bold; margin-bottom:0.4rem;">The galaxy would not settle</div>';
+  html += '<div style="color:var(--text-dim);">'
+    + _esc2(String((details && details[0]) || 'Generation failed.')) + '</div>';
+  html += '<div class="fail-actions">';
+  html += '<button class="start-btn" style="font-size:0.9rem;" onclick="retryGenerate(this)">Try again</button>';
+  if (heroCampaign) {
+    html += '<button class="quiet-btn" onclick="failDropIn(this)">Take ' + _esc2(name)
+      + ' into ' + _esc2(heroCampaign.campaign.display_name) + ' instead</button>';
+  }
+  html += '</div></div>';
+  document.getElementById('wait-fail').innerHTML = html;
+}
+
+async function retryGenerate(btn) {
+  btn.disabled = true;
+  document.getElementById('wait-fail').innerHTML = '';
+  _startWaitProgress();
+  try {
+    // The character is normally already saved — re-POST generate only.
+    if (!createdCharacterId && !(await saveCreatedCharacter())) {
+      hideWaitScreen();
+      document.getElementById('creator-screen').style.display = 'block';
+      return;
+    }
+    await _generateOnly(lastGenOpts || {});
+  } catch (e) {
+    renderGenFailure([e.message], lastGenOpts || {});
+  }
+}
+
+async function failDropIn(btn) {
+  if (!heroCampaign) return;
+  btn.disabled = true;
+  if (!createdCharacterId) {
+    try {
+      if (!(await saveCreatedCharacter())) {
+        hideWaitScreen();
+        document.getElementById('creator-screen').style.display = 'block';
+        return;
+      }
+    } catch (e) {
+      renderGenFailure([e.message], lastGenOpts || {});
+      return;
+    }
+  }
+  selectedCampaign = {
+    campaign_name: heroCampaign.campaign.campaign_name,
+    display_name:  heroCampaign.campaign.display_name,
+    character_id:  createdCharacterId,
+  };
+  hideWaitScreen();
+  await startSession();
+  if (document.getElementById('game-screen').style.display === 'none') {
+    document.getElementById('wait-screen').style.display = 'block';
+    btn.disabled = false;
+  }
+}
+
+/* ── Entry-screen "Surprise me": roll, auto-draft, reveal ────────── */
+async function surpriseMe(btn) {
+  btn.disabled = true;
+  try {
+    showCreator();
+    const st = await initSparkRow();
+    if (!st) return;   // no spark tables — the creator is open for a typed pitch
+    rollAllSparks(true);
+    _creatorError('');
+    _creatorStatus('Drafting your character…');
+    lastPitch = document.getElementById('pitch-input').value.trim();
+    redraftAttempted = false;
+    try {
+      await _requestDraft(lastPitch, sparkHints);
+      renderRevealCard(createdDraft);
+      _creatorStatus('');
+    } catch (e) {
+      _creatorStatus('');
+      _creatorError(e.message);
+    }
+  } finally {
     btn.disabled = false;
   }
 }
@@ -830,7 +1918,7 @@ async function loadCampaigns() {
 
     let html = '';
     for (const c of campaigns) {
-      html += `<div style="background:var(--surface); border:1px solid var(--border); border-radius:6px; padding:1.1rem; margin-bottom:0.9rem;">`;
+      html += `<div data-campaign-name="${_esc(c.campaign_name)}" style="background:var(--surface); border:1px solid var(--border); border-radius:6px; padding:1.1rem; margin-bottom:0.9rem;">`;
       html += `<div style="color:var(--accent); font-weight:bold; font-size:1.15rem;">${_esc(c.display_name)}</div>`;
       if (c.era_year) {
         html += `<div style="color:var(--text-dim); font-size:0.75rem;">${_esc(c.era)} · ${_esc(c.era_year)}</div>`;
@@ -890,9 +1978,77 @@ async function loadCampaigns() {
       html += `</div>`;
     }
     picker.innerHTML = html;
+
+    // Resolve the entry hero: the campaign whose roster carries the
+    // intended protagonist (flag comes from the spine — never hardcoded).
+    heroCampaign = null;
+    for (const c of campaigns) {
+      const hero = (c.characters || []).find(ch => ch.intended_protagonist);
+      if (hero) { heroCampaign = { campaign: c, character: hero }; break; }
+    }
+    renderHeroCard();
   } catch (e) {
     picker.innerHTML = `<p style="color:var(--danger);">Could not load campaigns: ${_esc(e.message)}</p>`;
   }
+}
+
+function renderHeroCard() {
+  const el = document.getElementById('hero-card');
+  if (!heroCampaign) {
+    // No canonical campaign — open the full picker so nobody is stranded.
+    el.innerHTML = '';
+    document.getElementById('picker-wrap').style.display = 'block';
+    document.getElementById('picker-toggle').setAttribute('aria-expanded', 'true');
+    return;
+  }
+  const c = heroCampaign.campaign;
+  const ch = heroCampaign.character;
+  const promise = c.story_promise || c.dramatic_premise || c.throughline || '';
+  let html = '<div class="hero-card">';
+  html += '<div class="hero-title">' + _esc(c.display_name) + '</div>';
+  if (promise) html += '<div class="hero-promise">' + _esc(promise) + '</div>';
+  html += '<div class="hero-meta">' + c.total_acts + ' chapters · about 3–5 hours · '
+    + c.ending_count + ' possible endings</div>';
+  html += '<button class="start-btn" id="hero-play-btn" onclick="playHero(this)">Play now</button>';
+  html += '<div style="color:var(--text-dim); font-size:0.8rem; margin-top:0.6rem;">You play '
+    + _esc(ch.name) + ' — ' + _esc(ch.species) + ' ' + _esc(ch.career) + '.</div>';
+  html += '</div>';
+  el.innerHTML = html;
+}
+
+async function playHero(btn) {
+  if (!heroCampaign) return;
+  _startError('');
+  selectedCampaign = {
+    campaign_name: heroCampaign.campaign.campaign_name,
+    display_name:  heroCampaign.campaign.display_name,
+    character_id:  heroCampaign.character.id,
+  };
+  btn.disabled = true; btn.textContent = 'Starting…';
+  await startSession();
+  if (document.getElementById('game-screen').style.display === 'none') {
+    btn.disabled = false; btn.textContent = 'Play now';
+    let msg = document.getElementById('error-msg').textContent
+      || 'Could not start the session — try again.';
+    if (/^internal server error$/i.test(msg.trim())) {
+      msg = 'The storyteller hit an unexpected error — check the server logs, then try again.';
+    }
+    _startError(msg);
+  }
+}
+
+function _startError(msg) {
+  const el = document.getElementById('start-error');
+  if (!msg) { el.style.display = 'none'; return; }
+  el.textContent = msg; el.style.display = 'block';
+}
+
+function togglePicker() {
+  const wrap = document.getElementById('picker-wrap');
+  const open = wrap.style.display !== 'none';
+  wrap.style.display = open ? 'none' : 'block';
+  document.getElementById('picker-toggle')
+    .setAttribute('aria-expanded', open ? 'false' : 'true');
 }
 
 function selectCampaign(campaignName, displayName, characterId) {
@@ -934,6 +2090,25 @@ async function startSession() {
     const data = await res.json();
     sessionId = data.session_id;
     streamingEnabled = data.streaming_enabled || false;
+    priorSessionId = null;   // the sequel hook is spent once play begins
+
+    // Fresh session — reset the legibility trackers and fetch the wound
+    // threshold (turn responses only carry current wounds).
+    woundThreshold = null;
+    prevWounds = 0;
+    wasIncapacitated = false;
+    lastTurnNumber = 0;
+    syncWoundThreshold();
+
+    shelfUpsert({
+      session_id: sessionId,
+      character_name: (data.session_intro && data.session_intro.character
+        && data.session_intro.character.name) || '',
+      campaign_name: selectedCampaign.campaign_name,
+      campaign_display_name: selectedCampaign.display_name,
+      current_act: 1,
+      completed: false,
+    });
 
     // Switch to game screen
     document.getElementById('start-screen').style.display = 'none';
@@ -955,12 +2130,16 @@ async function startSession() {
   }
 }
 
-// Load campaigns on page load
-document.addEventListener('DOMContentLoaded', loadCampaigns);
+// Load campaigns + the local continue shelf on page load
+document.addEventListener('DOMContentLoaded', function () {
+  loadCampaigns();
+  renderContinueShelf();
+  reconcileShelf();
+});
 
 /* ── Take a turn ───────────────────────────────────────────────── */
-async function takeTurn(choiceIndex, freeFormText) {
-  if (streamingEnabled) {
+async function takeTurn(choiceIndex, freeFormText, forceNonStreaming) {
+  if (streamingEnabled && !forceNonStreaming) {
     return takeTurnStream(choiceIndex, freeFormText);
   }
   disableChoices();
@@ -1003,6 +2182,13 @@ async function takeTurn(choiceIndex, freeFormText) {
         data.session_state,
         data.destiny
       );
+      applyWoundTransition(data.session_state.wounds);
+      shelfUpsert({
+        session_id: sessionId,
+        current_act: data.session_state.current_act,
+        total_acts: data.session_state.total_acts,
+        completed: !!data.campaign_complete,
+      });
     }
 
     // Advancement ceremony — a talent milestone fired at the act boundary.
@@ -1099,6 +2285,13 @@ async function takeTurnStream(choiceIndex, freeFormText) {
               data.session_state,
               data.destiny
             );
+            applyWoundTransition(data.session_state.wounds);
+            shelfUpsert({
+              session_id: sessionId,
+              current_act: data.session_state.current_act,
+              total_acts: data.session_state.total_acts,
+              completed: !!data.campaign_complete,
+            });
           }
 
           if (data.milestone) renderMilestone(data.milestone);
@@ -1121,11 +2314,34 @@ async function takeTurnStream(choiceIndex, freeFormText) {
       throw new Error('Stream ended without completion');
     }
   } catch (e) {
-    showError(e.message);
+    // Keep whatever prose already streamed and offer one non-streaming
+    // retry of the same action; a second failure surfaces the normal
+    // error state via takeTurn's own catch.
     renderChoices(currentChoices);
+    renderStreamRetryCard(choiceIndex, freeFormText);
     enableChoices();
     showLoading(false);
   }
+}
+
+function renderStreamRetryCard(choiceIndex, freeFormText) {
+  document.querySelectorAll('.retry-card').forEach(c => c.remove());
+  const el = document.getElementById('choices');
+  const card = document.createElement('div');
+  card.className = 'retry-card';
+  card.innerHTML = '<div class="retry-msg">The connection dropped mid-scene.</div>'
+    + '<button class="choice-btn">Retry this turn</button>';
+  const btn = card.querySelector('button');
+  btn.onclick = function () {
+    if (retryInFlight) return;
+    retryInFlight = true;
+    btn.disabled = true;
+    card.remove();
+    takeTurn(choiceIndex, freeFormText, true).finally(function () {
+      retryInFlight = false;
+    });
+  };
+  el.insertBefore(card, el.firstChild);
 }
 
 /* ── Render streamed prose (progressive) ───────────────────────── */
@@ -1141,7 +2357,9 @@ function renderSessionIntro(intro) {
   const passageEl = document.getElementById('passage');
   if (!passageEl) return;
   const ch = intro.character || {};
-  const arc = ch.narrative_arc || null;
+  // Deliberately trimmed: name, premise, question, ending count, and the
+  // player's own premise. The lie/ghost inner story lives in the stats
+  // panel — it is discovery, not a cover blurb.
   let html = '';
   html += '<div style="background:var(--surface); border:1px solid var(--accent); border-radius:6px; padding:1rem 1.25rem; margin-bottom:1.25rem;">';
   html += '<div style="color:var(--accent); font-size:0.75rem; text-transform:uppercase; letter-spacing:0.08em; margin-bottom:0.4rem;">YOU ARE ABOUT TO PLAY</div>';
@@ -1152,13 +2370,13 @@ function renderSessionIntro(intro) {
   if (intro.central_dramatic_question) {
     html += '<div style="color:var(--text-dim); font-style:italic; font-size:0.88rem; margin-bottom:0.6rem;">' + _esc(intro.central_dramatic_question) + '</div>';
   }
-  if (arc && (arc.lie || arc.ghost || arc.want || arc.need)) {
-    html += '<div style="margin-top:0.6rem; padding-top:0.6rem; border-top:1px dashed var(--border); font-size:0.83rem; line-height:1.45;">';
-    if (arc.lie)   html += '<div><span style="color:var(--text-dim); font-size:0.7rem;">What you believe (wrongly):</span> <span style="font-style:italic;">' + _esc(arc.lie) + '</span></div>';
-    if (arc.ghost) html += '<div style="margin-top:0.3rem;"><span style="color:var(--text-dim); font-size:0.7rem;">The wound behind it:</span> ' + _esc(arc.ghost) + '</div>';
-    if (arc.want)  html += '<div style="margin-top:0.3rem;"><span style="color:var(--text-dim); font-size:0.7rem;">What you want:</span> ' + _esc(arc.want) + '</div>';
-    if (arc.need)  html += '<div style="margin-top:0.3rem;"><span style="color:var(--text-dim); font-size:0.7rem;">What you need:</span> ' + _esc(arc.need) + '</div>';
-    html += '</div>';
+  if (intro.ending_count) {
+    html += '<div style="color:var(--text-dim); font-size:0.8rem; margin-top:0.6rem;">This story has '
+      + intro.ending_count + ' possible endings.</div>';
+  }
+  if (intro.steered_premise) {
+    html += '<div style="color:var(--text-dim); font-style:italic; font-size:0.8rem; margin-top:0.35rem;">Your words: &quot;'
+      + _esc(intro.steered_premise) + '&quot;</div>';
   }
   html += '</div>';
   passageEl.innerHTML = html;
@@ -1170,6 +2388,7 @@ function renderPassage(text) {
   // moment — clear them when new prose arrives.
   document.querySelectorAll('.recap-card').forEach(c => c.remove());
   document.querySelectorAll('.milestone-card').forEach(c => c.remove());
+  document.querySelectorAll('.pending-banner, .incap-card, .incap-note').forEach(c => c.remove());
   const el = document.getElementById('passage');
   // Split into paragraphs on double newlines. Append after any
   // session-intro card already rendered so the intro stays visible
@@ -1202,15 +2421,20 @@ function renderChoices(choices) {
 
   // Free-form input — always visible. Typing your own action is a core
   // agency feature, not an easter egg behind a collapsed disclosure.
+  // Ghost text rotates worked examples for the first five turns only.
+  const ghost = lastTurnNumber < 5
+    ? GHOST_ACTIONS[lastTurnNumber % GHOST_ACTIONS.length]
+    : NEUTRAL_PLACEHOLDER;
   const ffWrapper = document.createElement('div');
   ffWrapper.className = 'freeform-wrapper';
   ffWrapper.innerHTML = ''
     + '<div class="freeform-label">Or speak and act in your own words</div>'
     + '<div class="freeform-row">'
     + '  <textarea id="freeform-input" rows="2" maxlength="600" '
-    + '    placeholder="Describe what your character does or says..."></textarea>'
+    + '    placeholder="' + _esc(ghost) + '"></textarea>'
     + '  <button id="freeform-submit" class="choice-btn freeform-submit">Act</button>'
     + '</div>'
+    + '<div class="ff-count" id="freeform-count">0/600</div>'
     + '<div class="freeform-hint">'
     + '  The story will judge how risky your action is. '
     + '  Press <kbd>Ctrl</kbd>+<kbd>Enter</kbd> to send.'
@@ -1219,6 +2443,10 @@ function renderChoices(choices) {
 
   const ffInput = document.getElementById('freeform-input');
   const ffSubmit = document.getElementById('freeform-submit');
+  const ffCount = document.getElementById('freeform-count');
+  ffInput.addEventListener('input', () => {
+    ffCount.textContent = ffInput.value.length + '/600';
+  });
   const submitFreeform = () => {
     const text = (ffInput.value || '').trim();
     if (!text) return;
@@ -1291,6 +2519,36 @@ function renderDicePanel(diceResult, rollSummary, destiny) {
   }
 
   details.innerHTML = html;
+  renderMechanicExplainer(rollSummary, destiny);
+}
+
+/* One-time teaching lines: the first check, Triumph, Despair, and destiny
+   spend each earn a single muted explainer, then never again. */
+function renderMechanicExplainer(rollSummary, destiny) {
+  const old = document.getElementById('mechanic-explainer');
+  if (old) old.remove();
+  let seen;
+  try { seen = JSON.parse(localStorage.getItem('st_seen_mechanics')) || {}; }
+  catch (e) { seen = {}; }
+  const summary = rollSummary || '';
+  let key = null;
+  if (!seen.first_check) {
+    key = 'first_check';
+  } else if (summary.indexOf('TRIUMPH') !== -1 && !seen.first_triumph) {
+    key = 'first_triumph';
+  } else if (summary.indexOf('DESPAIR') !== -1 && !seen.first_despair) {
+    key = 'first_despair';
+  } else if (destiny && (destiny.light_spent || destiny.dark_spent) && !seen.first_destiny) {
+    key = 'first_destiny';
+  }
+  if (!key) return;
+  seen[key] = true;
+  try { localStorage.setItem('st_seen_mechanics', JSON.stringify(seen)); } catch (e) {}
+  const div = document.createElement('div');
+  div.className = 'mechanic-explainer';
+  div.id = 'mechanic-explainer';
+  div.textContent = MECHANIC_EXPLAINERS[key];
+  document.getElementById('dice-panel').appendChild(div);
 }
 
 function toggleDice() {
@@ -1304,10 +2562,13 @@ function hideDicePanel() {
   document.getElementById('dice-panel').classList.remove('visible');
   document.getElementById('dice-details').classList.remove('expanded');
   document.getElementById('dice-toggle').textContent = 'Show dice result';
+  const explainer = document.getElementById('mechanic-explainer');
+  if (explainer) explainer.remove();
 }
 
 /* ── Status bar ────────────────────────────────────────────────── */
 function showStatus(turn, wounds, strain, sessionState, destiny) {
+  lastTurnNumber = turn || 0;
   const bar = document.getElementById('status-bar');
   bar.classList.add('visible');
   document.getElementById('status-turn').textContent = 'Turn ' + turn;
@@ -1347,6 +2608,36 @@ function clearError() {
   const el = document.getElementById('error-msg');
   el.textContent = '';
   el.classList.remove('visible');
+}
+
+/* ── In-game menu (☰) ──────────────────────────────────────────── */
+function toggleGameMenu(force) {
+  const pop = document.getElementById('game-menu');
+  const open = force !== undefined ? force : !pop.classList.contains('open');
+  pop.classList.toggle('open', open);
+  document.getElementById('menu-btn')
+    .setAttribute('aria-expanded', open ? 'true' : 'false');
+}
+
+async function copyResumeLink(btn) {
+  const link = window.location.origin + window.location.pathname
+    + '?session=' + sessionId;
+  try {
+    await navigator.clipboard.writeText(link);
+    btn.textContent = 'Copied ✓';
+  } catch (e) {
+    btn.textContent = link;   // clipboard blocked — surface the link itself
+  }
+  setTimeout(function(){
+    btn.textContent = 'Copy resume link';
+    toggleGameMenu(false);
+  }, 1600);
+}
+
+function leaveStory() {
+  _exitGameScreen();
+  renderContinueShelf();
+  document.getElementById('start-screen').style.display = 'block';
 }
 
 /* ── Stats panel (CoG-style) ───────────────────────────────────── */
@@ -1420,6 +2711,17 @@ function renderStatsPanel(data) {
           return escapeHtml(typeof t === 'string' ? t : (t.name || t.talent_ref || ''));
         }).join(' · ')
       + '</div>';
+  }
+
+  // Inner story — the lie/ghost arc lives here now, not in the intro card.
+  const arc = ch.narrative_arc || {};
+  if (arc.lie || arc.ghost || arc.want || arc.need) {
+    html += '<h3>Inner story</h3><div style="line-height:1.5;">';
+    if (arc.lie)   html += '<div><span style="color:var(--text-dim)">Believes (wrongly): </span><em>' + escapeHtml(arc.lie) + '</em></div>';
+    if (arc.ghost) html += '<div><span style="color:var(--text-dim)">The wound behind it: </span>' + escapeHtml(arc.ghost) + '</div>';
+    if (arc.want)  html += '<div><span style="color:var(--text-dim)">Wants: </span>' + escapeHtml(arc.want) + '</div>';
+    if (arc.need)  html += '<div><span style="color:var(--text-dim)">Needs: </span>' + escapeHtml(arc.need) + '</div>';
+    html += '</div>';
   }
   document.getElementById('stats-panel').innerHTML = html;
 }
@@ -1510,7 +2812,22 @@ function renderEpilogue(ep) {
   let html = '<div class="ending-name">' + escapeHtml(ep.ending_name || 'The End') + '</div>';
   (ep.epilogue || '').split(/\n\n+/).filter(function(p){ return p.trim(); })
     .forEach(function(p){ html += '<p>' + escapeHtml(p.trim()) + '</p>'; });
+  html += renderEndingsReveal(ep);
   passageEl.innerHTML = html;
+
+  lastCompleted = {
+    session_id: sessionId,
+    campaign_name: ep.campaign_name
+      || (selectedCampaign && selectedCampaign.campaign_name) || null,
+    character_name: ep.character_name || '',
+  };
+  shelfUpsert({
+    session_id: sessionId,
+    character_name: ep.character_name,
+    campaign_name: lastCompleted.campaign_name,
+    completed: true,
+    ending_name: ep.ending_name,
+  });
 
   const choicesEl = document.getElementById('choices');
   choicesEl.innerHTML = '';
@@ -1521,11 +2838,142 @@ function renderEpilogue(ep) {
     + escapeHtml(ep.character_name || '')
     + (ep.turns_played ? ' · ' + escapeHtml(String(ep.turns_played)) + ' turns' : '')
     + '</div>'
-    + '<button class="start-btn" onclick="window.location = window.location.pathname">'
-    + 'Begin a new story</button>';
+    + '<button class="start-btn" onclick="playAgainFromEpilogue(this)">'
+    + 'Play again — find another ending</button>'
+    + '<div class="finale-actions">'
+    + '<button class="quiet-btn" onclick="takeCharacterOnward(this)">Take '
+    + escapeHtml(ep.character_name || 'them') + ' somewhere new</button>'
+    + '<button class="quiet-btn" onclick="createSomeoneNew()">Create someone new</button>'
+    + '</div>'
+    + '<div class="finale-carry">They carry their story — not yet their scars.</div>';
   choicesEl.appendChild(card);
   hideDicePanel();
   passageEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+/* The authored ending space: what you found, and what stays sealed.
+   Names only — the synopses never leave the server. */
+function renderEndingsReveal(ep) {
+  const paths = Array.isArray(ep.ending_paths) ? ep.ending_paths : [];
+  const count = ep.ending_count || paths.length || 0;
+  if (!count || !ep.ending_name) return '';   // legacy payload — omit gracefully
+  let html = '<div class="endings-found">You found: <strong>'
+    + escapeHtml(ep.ending_name) + '</strong> — 1 of ' + count + ' endings</div>';
+  const others = paths.filter(function(p){
+    if (!p || !p.name) return false;
+    if (ep.ending_branch_id) return p.branch_id !== ep.ending_branch_id;
+    return p.name !== ep.ending_name;   // legacy fallback — match by name
+  });
+  if (others.length) {
+    html += '<div class="sealed-endings">'
+      + others.map(function(p){
+          return '<span class="sealed-ending"><span class="sealed-lock">🔒</span>'
+            + escapeHtml(p.name) + '</span>';
+        }).join('')
+      + '</div>';
+  }
+  return html;
+}
+
+/* ── Re-entry from the finale — all client-side, no reloads ─────── */
+function _exitGameScreen() {
+  // The session stays resumable server-side — this only leaves the screen.
+  toggleGameMenu(false);
+  document.getElementById('game-screen').style.display = 'none';
+  document.getElementById('status-bar').classList.remove('visible');
+  document.getElementById('stats-panel').classList.remove('visible');
+  statsVisible = false;
+  hideDicePanel();
+  clearError();
+  if (window.history && window.history.replaceState) {
+    window.history.replaceState(null, '', window.location.pathname);
+  }
+  sessionId = null;
+}
+
+async function playAgainFromEpilogue(btn) {
+  btn.disabled = true;
+  const campaignName = (lastCompleted && lastCompleted.campaign_name)
+    || (selectedCampaign && selectedCampaign.campaign_name) || null;
+  _exitGameScreen();
+  selectedCampaign = null;   // a fresh run wants a fresh character pick
+  const startBtn = document.getElementById('start-btn');
+  startBtn.disabled = true;
+  startBtn.textContent = 'Select a campaign to begin';
+  document.getElementById('start-screen').style.display = 'block';
+  renderContinueShelf();
+  // Refresh so just-generated campaigns appear, then open the picker on
+  // the campaign that was just finished.
+  await loadCampaigns();
+  document.getElementById('picker-wrap').style.display = 'block';
+  document.getElementById('picker-toggle').setAttribute('aria-expanded', 'true');
+  if (campaignName) {
+    const block = document.querySelector(
+      '#campaign-picker [data-campaign-name="' + campaignName.replace(/"/g, '\\"') + '"]');
+    if (block) {
+      block.style.borderColor = 'var(--accent-dim)';
+      block.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }
+}
+
+async function takeCharacterOnward(btn) {
+  btn.disabled = true;
+  const sid = sessionId;
+  try {
+    const res = await fetch(API + '/session/' + sid);
+    if (!res.ok) throw new Error('Could not load your character from this session.');
+    const data = await res.json();
+    const charId = (data.arc_state && data.arc_state.variant_id)
+      || (selectedCampaign && selectedCampaign.character_id);
+    if (!charId) throw new Error('This session has no reusable character.');
+    _exitGameScreen();
+    showCreator();                 // resets sequel state — re-arm it below
+    createdDraft = data.character || createdDraft;
+    createdCharacterId = charId;   // already saved — no re-save needed
+    priorSessionId = sid;
+    lastGenOpts = null;
+    _creatorError(''); _creatorStatus('');
+    // Sequel entry: the character exists — skip straight to the situation.
+    document.getElementById('creator-pitch-step').style.display = 'none';
+    document.getElementById('reveal-card').style.display = 'none';
+    document.getElementById('draft-editor').style.display = 'none';
+    const note = document.getElementById('carryover-note');
+    const charName = data.character && data.character.name;
+    note.textContent = charName
+      ? charName + ' carries their story — not yet their scars.'
+      : 'They carry their story — not yet their scars.';
+    note.style.display = 'block';
+    await revealChooseStory();
+  } catch (e) {
+    showError(e.message);
+    btn.disabled = false;
+  }
+}
+
+function createSomeoneNew() {
+  _exitGameScreen();
+  createdDraft = null;
+  createdCharacterId = null;
+  sparkHints = null;
+  sparkPicks = {};
+  sparkLocks = {};
+  lastPitch = '';
+  lastGenOpts = null;
+  redraftAttempted = false;
+  document.getElementById('pitch-input').value = '';
+  document.getElementById('spark-slots').innerHTML = '';   // rebuilt on entry
+  const reveal = document.getElementById('reveal-card');
+  reveal.style.display = 'none'; reveal.innerHTML = '';
+  const editor = document.getElementById('draft-editor');
+  editor.style.display = 'none'; editor.innerHTML = '';
+  document.getElementById('premise-step').style.display = 'none';
+  document.getElementById('steer-body').classList.remove('open');
+  document.getElementById('premise-input').value = '';
+  const draftBtn = document.getElementById('draft-btn');
+  draftBtn.disabled = false; draftBtn.textContent = 'Draft my character';
+  _creatorError(''); _creatorStatus('');
+  showCreator();
 }
 
 /* ── "The story so far" resume recap ───────────────────────────── */
@@ -1537,11 +2985,176 @@ function renderRecapCard(text) {
   el.parentNode.insertBefore(card, el);
 }
 
+/* ── Incapacitation moment (§2 — mechanically real) ────────────── */
+async function syncWoundThreshold() {
+  // Turn responses carry current wounds but not the threshold; fetch it
+  // once so the "you go down" banner knows where down is.
+  try {
+    const res = await fetch(API + '/session/' + sessionId);
+    if (!res.ok) return;
+    const data = await res.json();
+    if (data.character && data.character.wound_threshold != null) {
+      woundThreshold = data.character.wound_threshold;
+    }
+    // Same payload knows the act count — fill the shelf entry before turn 1.
+    if (data.total_acts) {
+      shelfUpsert({ session_id: data.session_id, total_acts: data.total_acts });
+    }
+  } catch (e) {
+    // Threshold unknown — the banner simply stays quiet.
+  }
+}
+
+function applyWoundTransition(wounds) {
+  document.querySelectorAll('.incap-card, .incap-note').forEach(c => c.remove());
+  if (woundThreshold == null) { prevWounds = wounds; return; }
+  const passageEl = document.getElementById('passage');
+  if (!wasIncapacitated && prevWounds < woundThreshold && wounds >= woundThreshold) {
+    wasIncapacitated = true;
+    const card = document.createElement('div');
+    card.className = 'incap-card';
+    card.innerHTML = '<div class="incap-title">You go down.</div>'
+      + '<div class="incap-line">You&#39;ll wake hurt. Go down again this act '
+      + 'and the scene resolves against you.</div>';
+    passageEl.parentNode.insertBefore(card, passageEl);
+    card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  } else if (wasIncapacitated && wounds < woundThreshold) {
+    // Recovery turn — the backend woke the character below the threshold.
+    wasIncapacitated = false;
+    const note = document.createElement('div');
+    note.className = 'incap-note';
+    note.textContent = 'You’re back on your feet — barely.';
+    passageEl.parentNode.insertBefore(note, passageEl);
+  }
+  prevWounds = wounds;
+}
+
+/* ── Pending-decision banner (resume) ──────────────────────────── */
+function renderPendingBanner(pending) {
+  const labels = [];
+  if (pending.milestone)    labels.push('a milestone choice');
+  if (pending.intervention) labels.push('a talent intervention');
+  if (pending.temptation)   labels.push('a temptation');
+  if (pending.time_skip)    labels.push('a time skip');
+  if (!labels.length) return;
+  const passageEl = document.getElementById('passage');
+  const card = document.createElement('div');
+  card.className = 'pending-banner';
+  let html = '<div class="pending-label">You have a decision waiting</div>';
+  if (pending.milestone) {
+    html += '<div>Your milestone choice is still open — your experience is ready to pay off.</div>'
+      + '<button class="choice-btn" onclick="scrollToMilestone()">Go to the choice</button>';
+  } else {
+    html += '<div>The story is waiting on a choice from you — it paused on '
+      + labels.join(' and ') + '.</div>';
+  }
+  card.innerHTML = html;
+  passageEl.parentNode.insertBefore(card, document.querySelector('.recap-card') || passageEl);
+}
+
+function scrollToMilestone() {
+  const card = document.getElementById('milestone-card');
+  if (card) card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
 /* ── Utilities ─────────────────────────────────────────────────── */
 function escapeHtml(text) {
   const div = document.createElement('div');
   div.textContent = text;
   return div.innerHTML;
+}
+
+/* ── Continue shelf — stories live on this device ───────────────── */
+function shelfLoad() {
+  try {
+    const arr = JSON.parse(localStorage.getItem('st_shelf'));
+    return Array.isArray(arr) ? arr : [];
+  } catch (e) { return []; }
+}
+
+function shelfSave(entries) {
+  try { localStorage.setItem('st_shelf', JSON.stringify(entries.slice(0, 12))); }
+  catch (e) { /* storage blocked — the shelf simply stays empty */ }
+}
+
+function shelfUpsert(partial) {
+  if (!partial || !partial.session_id) return;
+  const entries = shelfLoad();
+  const idx = entries.findIndex(function(e){ return e.session_id === partial.session_id; });
+  const merged = idx >= 0 ? entries[idx] : {};
+  Object.keys(partial).forEach(function(k){
+    if (partial[k] !== undefined && partial[k] !== null) merged[k] = partial[k];
+  });
+  merged.last_played = new Date().toISOString();
+  if (idx >= 0) entries.splice(idx, 1);
+  entries.unshift(merged);
+  shelfSave(entries);
+}
+
+function renderContinueShelf() {
+  const el = document.getElementById('continue-shelf');
+  if (!el) return;
+  const entries = shelfLoad();
+  if (!entries.length) { el.style.display = 'none'; el.innerHTML = ''; return; }
+  let html = '<div class="shelf-head">Your stories</div>';
+  entries.forEach(function(e){
+    const title = _esc(e.character_name || 'Unnamed')
+      + ' — ' + _esc(e.campaign_display_name || _prettySlug(e.campaign_name) || 'Untitled story');
+    let sub;
+    if (e.completed) {
+      sub = 'Ended: ' + _esc(e.ending_name || 'story complete');
+    } else if (e.current_act && e.total_acts) {
+      sub = 'Chapter ' + e.current_act + ' of ' + e.total_acts + ' · Continue';
+    } else {
+      sub = 'Continue';
+    }
+    html += '<button class="shelf-entry" onclick="shelfResume(\'' + _esc(e.session_id) + '\')">'
+      + '<div class="shelf-title">' + title + '</div>'
+      + '<div class="shelf-sub">' + sub + '</div>'
+      + '</button>';
+  });
+  html += '<div class="shelf-caption">Stories live on this device.</div>';
+  el.innerHTML = html;
+  el.style.display = 'block';
+}
+
+function shelfResume(sid) {
+  if (window.history && window.history.replaceState) {
+    window.history.replaceState(null, '', window.location.pathname + '?session=' + sid);
+  }
+  resumeSession(sid);
+}
+
+/* Reconcile the local shelf against GET /sessions — server wins on the
+   fields it knows; a failed fetch leaves the shelf as-is. */
+async function reconcileShelf() {
+  try {
+    const res = await fetch(API + '/sessions?limit=20');
+    if (!res.ok) return;
+    const rows = await res.json();
+    if (!Array.isArray(rows) || !rows.length) return;
+    const byId = {};
+    rows.forEach(function(r){ byId[r.session_id] = r; });
+    const entries = shelfLoad();
+    let changed = false;
+    entries.forEach(function(e){
+      const r = byId[e.session_id];
+      if (!r) return;
+      if (r.character_name) e.character_name = r.character_name;
+      if (r.campaign_name) e.campaign_name = r.campaign_name;
+      if (r.campaign_display_name) e.campaign_display_name = r.campaign_display_name;
+      if (r.current_act) e.current_act = r.current_act;
+      if (r.total_acts) e.total_acts = r.total_acts;
+      e.completed = !!r.campaign_complete;
+      changed = true;
+    });
+    if (changed) {
+      shelfSave(entries);
+      renderContinueShelf();
+    }
+  } catch (e) {
+    // The shelf is local-first — a dead endpoint changes nothing.
+  }
 }
 
 /* ── Session resume (check URL or localStorage) ────────────────── */
@@ -1562,6 +3175,32 @@ async function resumeSession(sid) {
     const data = await res.json();
     sessionId = data.session_id;
     streamingEnabled = data.streaming_enabled || false;
+
+    // The re-entry CTAs and the shelf need to know what was resumed.
+    if (!selectedCampaign) {
+      selectedCampaign = {
+        campaign_name: data.campaign_name,
+        display_name:  _prettySlug(data.campaign_name) || 'Campaign',
+        character_id:  (data.arc_state && data.arc_state.variant_id) || null,
+      };
+    }
+    shelfUpsert({
+      session_id: sessionId,
+      character_name: data.character && data.character.name,
+      campaign_name: data.campaign_name,
+      current_act: data.session_state && data.session_state.current_act,
+      total_acts: data.total_acts,
+      completed: !!data.campaign_complete,
+    });
+
+    // Seed the incapacitation trackers from the full character payload.
+    if (data.character && data.character.wound_threshold != null) {
+      woundThreshold = data.character.wound_threshold;
+    }
+    if (data.session_state) {
+      prevWounds = data.session_state.wounds || 0;
+      wasIncapacitated = woundThreshold != null && prevWounds >= woundThreshold;
+    }
 
     document.getElementById('start-screen').style.display = 'none';
     document.getElementById('game-screen').style.display = 'block';
@@ -1602,6 +3241,12 @@ async function resumeSession(sid) {
     // A milestone the player hasn't resolved yet survives the resume.
     if (data.arc_state && data.arc_state.pending_milestone) {
       renderMilestone(data.arc_state.pending_milestone);
+    }
+
+    // Any unresolved interstitial state gets an honest banner up top.
+    if (data.pending && (data.pending.milestone || data.pending.intervention
+        || data.pending.temptation || data.pending.time_skip)) {
+      renderPendingBanner(data.pending);
     }
 
     if (data.session_state) {
