@@ -195,7 +195,7 @@ class CharacterVariant(BaseModel):
     pressure_revealed_identity: str = ""  # who they become under max pressure
     # ── CS-6 Story Engineering fields ──
     contradiction_origin: str = ""  # Phase 6: WHY the contradiction exists
-    depth_card: Optional[CharacterDepthCard] = None  # Phase 9: GM-facing enrichment
+    depth_card: Optional["CharacterDepthCard"] = None  # Phase 9: GM-facing enrichment (class defined below)
     # ── Brooks/Weiland fields (Apr 2026 pass) ──
     narrative_arc: Optional[NarrativeArcSpec] = None
     party_dossier: Optional[PartyDossier] = None
@@ -686,6 +686,12 @@ class CharacterDepthCard(BaseModel):
     under_pressure: str = ""
     worldview: str = ""
     moral_line: str = ""
+
+
+# CharacterVariant.depth_card forward-references CharacterDepthCard;
+# resolve it now that the class exists so import fails loud, not at
+# first instantiation.
+CharacterVariant.model_rebuild()
 
 
 # ── Bond Events (Trails-of-Cold-Steel-style relationship deepening) ──
