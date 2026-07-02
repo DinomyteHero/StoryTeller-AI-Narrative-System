@@ -184,9 +184,20 @@ def decide_check(
         )
         return _validate_decision(data)
     except RuntimeError as e:
-        raise LocalGMError(
-            f"Check decision failed after {max_retries} attempts: {e}"
+        # Rule 5 boundary: garbage JSON after retries must still raise —
+        # the model answered and its answer is malformed, which is a bug
+        # to surface, not paper over. Only TRANSPORT failure (timeout,
+        # connection error, provider outage — the call never produced
+        # JSON to judge) falls back to a deterministic decision so a
+        # freeform action can't hard-block the turn.
+        if _is_json_decode_failure(e):
+            raise LocalGMError(
+                f"Check decision failed after {max_retries} attempts: {e}"
+            )
+        logging.warning(
+            "decide_check transport failure — deterministic fallback engaged: %s", e
         )
+        return _transport_fallback_decision(arc_state, e)
     except (ValueError, KeyError) as e:
         raise LocalGMError(f"Check decision validation failed: {e}")
 
@@ -195,6 +206,85 @@ VALID_SCENE_TYPES = {
     "combat", "chase", "infiltration", "social", "exploration", "introspection",
     "space_combat",
 }
+
+
+# ── Transport-failure fallback for check decisions ───────────────────
+# Conservative scene_type → skill mapping used ONLY when the fast tier is
+# unreachable. Skill names verified against engine.character.SKILL_CHARACTERISTICS.
+# "introspection" is intentionally absent — reflective beats need no dice.
+
+FALLBACK_SCENE_SKILLS = {
+    "combat":       "ranged_light",
+    "chase":        "coordination",
+    "infiltration": "stealth",
+    "social":       "charm",
+    "exploration":  "perception",
+    "space_combat": "piloting_space",
+}
+
+
+def _is_json_decode_failure(error: BaseException) -> bool:
+    """True when the failure is malformed JSON, not transport.
+
+    call_chat_json chains its last attempt's error as __cause__: a
+    JSONDecodeError anywhere in the chain means the provider answered
+    with garbage (Rule 5 — must raise). Any other chain means the call
+    never yielded JSON at all (timeout / connection / provider error).
+    """
+    seen: set[int] = set()
+    current: Optional[BaseException] = error
+    while current is not None and id(current) not in seen:
+        seen.add(id(current))
+        if isinstance(current, json.JSONDecodeError):
+            return True
+        current = current.__cause__ or current.__context__
+    return False
+
+
+def _transport_fallback_decision(arc_state: dict, error: Exception) -> CheckDecision:
+    """Deterministic check decision when the fast tier is unreachable.
+
+    Shape-identical to the LLM path (a CheckDecision), conservative on
+    every axis: average difficulty, no boost/setback, no moral weight,
+    no Force. The reasoning string is tagged DETERMINISTIC_FALLBACK with
+    the root error class so telemetry can measure fallback rate.
+    """
+    scene_state = arc_state.get("scene_state") or {}
+    raw_scene = str(
+        scene_state.get("scene_type")
+        or arc_state.get("last_scene_type")
+        or "exploration"
+    ).lower().strip()
+    scene_type = raw_scene if raw_scene in VALID_SCENE_TYPES else "exploration"
+
+    root: BaseException = error
+    seen: set[int] = {id(root)}
+    while root.__cause__ is not None and id(root.__cause__) not in seen:
+        root = root.__cause__
+        seen.add(id(root))
+    reasoning = (
+        f"DETERMINISTIC_FALLBACK ({type(root).__name__}): fast tier "
+        f"unreachable; conservative decision mapped from scene_type={scene_type}"
+    )
+
+    skill = FALLBACK_SCENE_SKILLS.get(scene_type)
+    if skill is None:
+        return CheckDecision(
+            requires_check=False,
+            scene_type=scene_type,
+            moral_weight=0,
+            force_use=False,
+            reasoning=reasoning,
+        )
+    return CheckDecision(
+        requires_check=True,
+        skill=skill,
+        difficulty="average",
+        scene_type=scene_type,
+        moral_weight=0,
+        force_use=False,
+        reasoning=reasoning,
+    )
 
 
 def _validate_decision(data: dict) -> CheckDecision:
