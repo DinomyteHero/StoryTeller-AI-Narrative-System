@@ -1,0 +1,49 @@
+{
+  "schema_version": "premise_seeds.v0.1",
+  "eras": [
+    {
+      "id": "new_republic_praxeum",
+      "label": "New Republic / Jedi Praxeum Era",
+      "blurb": "The Empire has fallen, the New Republic governs unevenly, and Luke Skywalker's young Praxeum rebuilds the Jedi from fragments while disciplined survivors and old debts press in (roughly 5-24 ABY)."
+    },
+    {
+      "id": "new_jedi_order",
+      "label": "New Jedi Order Era",
+      "blurb": "The Yuuzhan Vong invasion breaks the peace the Rebellion won — refugee convoys, straining institutions, and a young Jedi Order tested at personal scale before galactic scale (roughly 25-30 ABY)."
+    }
+  ],
+  "tones": ["gritty", "hopeful", "dark", "bureaucratic", "intimate"],
+  "moral_registers": ["gray", "heroic", "tragic"],
+  "seeds": {
+    "new_republic_praxeum": [
+      "The Massassi ruins beneath the Praxeum have started answering questions nobody asked. Luke Skywalker needs someone the students trust and the ruins don't recognize — before the answers start arriving on their own.",
+      "A New Republic census team vanished on a moon that officially has no population. The relief flight has one crew berth left to fill, and everyone qualified keeps finding reasons to be elsewhere.",
+      "An Imperial Remnant captain wants to defect with her whole crew — and a cargo manifest the New Republic would rather sink than read. Somebody has to decide which of the two is the real prize.",
+      "A dead warlord's estate went to auction, and one lot — an unlabeled navigation core — sold for more than the palace. Three buyers are dead. The fourth is looking to hire.",
+      "A Senate oversight committee arrives at Yavin 4 with subpoenas, holorecorders, and one auditor who is not what her credentials say. The Praxeum needs the audit to pass and the auditor to fail.",
+      "A mining consortium cracked open a sealed temple on a leased moon, and productivity has never been better. The workers don't sleep anymore. Someone has to go down the shaft and learn what is doing the digging.",
+      "A recovered holocron teaches perfectly, patiently, and slightly wrong. Its students are getting stronger by the week, and it will take an outsider to see what the curriculum is actually building.",
+      "The Reconstruction Authority resettled forty thousand veterans on a world that, according to a pre-Endor survey nobody read, is already spoken for. The claimants have finally arrived to collect.",
+      "A dying Imperial archivist mailed thirty years of evidence to random addresses across the Mid Rim. One package is still moving, and every faction that survived the war is following it.",
+      "Freight captains on the Ossel routes are paying protection to a fleet nobody has ever seen. The one captain who refused is still flying — untouched, unhelpful, and very afraid.",
+      "A Praxeum student swears her missing bunkmate is still writing to her. The handwriting checks out. The postmark is a system that burned nine years ago.",
+      "A border moon voted to rejoin the Imperial Remnant, freely and by a wide margin. The New Republic needs to know why before its fleet arrives to ask less politely.",
+      "An old Alliance safehouse network is being visited, in order, by someone carrying the recognition codes of an agent buried at Endor. Whoever inherits the list inherits the visitor."
+    ],
+    "new_jedi_order": [
+      "The refugee convoy is eleven ships, one escort, and a hold full of people who have each already lost a homeworld. The escort just lost its captain. The job pays in gratitude and fuel.",
+      "A Peace Brigade cell is selling Jedi locations to the Yuuzhan Vong — and their newest list came from inside a refugee registry only four people can access. All four are beyond suspicion. One of them is lying.",
+      "An occupied world's resistance has found a way to hurt the invaders — grown, not built, from captured Yuuzhan Vong biotech. Half the cell calls it victory. The other half calls it becoming them.",
+      "A Jedi field triage station is one bad night from collapse, and its healers have started making choices no code covers. They need hands, ships, and someone who can still tell mercy from arithmetic.",
+      "Somewhere in the silence of a fallen system, a beacon is repeating a single word: alive. The New Republic wrote the system off weeks ago. The Jedi haven't.",
+      "A shaper defector claims she can unmake what her caste has grown — for a price the Jedi cannot ethically pay and cannot morally refuse. Someone has to sit across the table from her.",
+      "A senator's evacuation list for a doomed world holds ten thousand names and berths for six hundred. The list is leaking, the docks are arming, and the last transport lifts at dawn.",
+      "The Imperial Remnant is offering safe corridors to refugee traffic — efficient, disciplined, and papered with conditions nobody has read to the end. The convoys need an advocate who will.",
+      "An old smuggler haunt in the Corporate Sector has become the war's black market: fuel, berths, forged idents, and a quiet trade in things pulled off dead Vong. Everything is for sale. Somebody should learn who is buying.",
+      "A young Jedi cell has stopped answering the Order and started answering prayers on an occupied world. The locals call them saints. The reports call it a dark-side spiral. Both could be true.",
+      "The dovin basal minefield around a captured shipyard has exactly one flaw, and the analyst who found it defected to a collaborator government the same week. Retrieval is possible. Trust is another matter.",
+      "After the fall of Coruscant, a wrecked archive ship keeps broadcasting the Jedi Temple's evacuation manifest — including names that never appeared on any official list. Someone has to reach it before the Peace Brigade does.",
+      "The war is over on this world, and the collaborators' trials begin at week's end. The chief magistrate has asked for an outside witness with clean hands, and everyone knows there is no such thing."
+    ]
+  }
+}

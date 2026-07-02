@@ -116,5 +116,25 @@ OUTPUT — a single JSON object with EXACTLY these fields:
   outcome not"). It should embody the character's unresolved history, not
   just be useful.
 
+HINTS — when the OPTIONAL HINTS block above is non-empty, it holds selections
+the player locked in before writing the pitch. Any subset of these keys may
+appear:
+
+- "species": a species slug (e.g. "bothan") — use it as the draft's species
+  unless the pitch explicitly names a different one.
+- "career": a career slug (e.g. "smuggler") — same rule as species.
+- "game_line": one of edge_of_empire, age_of_rebellion, force_and_destiny —
+  let it color the skills, gear, and texture of the concept.
+- "era": a campaign-era id (e.g. "new_republic_praxeum", "new_jedi_order") —
+  ground the background in that period of galactic history.
+- "hook": a one-line dramatic hook — weave it into the background and
+  narrative_arc rather than quoting it verbatim.
+- "flaw": a one-line character flaw — let it shape the Lie, the voice_notes,
+  or a deliberate skill gap. Do not sand it off.
+
+Treat provided hints as constraints to honor. The pitch remains the primary
+source: where a hint and the pitch conflict, follow the pitch and preserve
+the hint's spirit where it still fits.
+
 DO NOT output wound_threshold, strain_threshold, soak, or any XP fields — the
 engine computes those. Output ONLY the JSON object, no commentary.
